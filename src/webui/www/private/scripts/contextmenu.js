@@ -261,13 +261,13 @@ window.qBittorrent.ContextMenu ??= (() => {
 
         // hide an item
         hideItem(item) {
-            this.menu.querySelector(`a[href$="${item}"]`).parentNode.classList.add("invisible");
+            this.menu.querySelector(`a[href$="${item}"]`).parentElement.classList.add("invisible");
             return this;
         }
 
         // show an item
         showItem(item) {
-            this.menu.querySelector(`a[href$="${item}"]`).parentNode.classList.remove("invisible");
+            this.menu.querySelector(`a[href$="${item}"]`).parentElement.classList.remove("invisible");
             return this;
         }
 
@@ -295,6 +295,15 @@ window.qBittorrent.ContextMenu ??= (() => {
                 this.options.actions[action](element, this, action);
             return this;
         }
+
+        setTooltip(item, text) {
+            const element = this.menu.querySelector(`a[href$="${item}"]`).parentElement;
+            if (text.length > 0)
+                element.title = text;
+            else
+                element.removeAttribute("title");
+            return this;
+        }
     }
 
     class FilterListContextMenu extends ContextMenu {
@@ -316,6 +325,7 @@ window.qBittorrent.ContextMenu ??= (() => {
         updateTorrentActions() {
             const torrentsVisible = torrentsTable.tableBody.children.length > 0;
             this.setEnabled("startTorrents", torrentsVisible)
+                .setEnabled("forceStartTorrents", torrentsVisible)
                 .setEnabled("stopTorrents", torrentsVisible)
                 .setEnabled("deleteTorrents", torrentsVisible);
         }
@@ -630,7 +640,7 @@ window.qBittorrent.ContextMenu ??= (() => {
 
     class SearchPluginsTableContextMenu extends ContextMenu {
         updateMenuItems() {
-            const enabledColumnIndex = (text) => {
+            const enabledColumnIndex = () => {
                 const columns = document.querySelectorAll("#searchPluginsTableFixedHeaderRow th");
                 return Array.prototype.findIndex.call(columns, (column => column.textContent === "Enabled"));
             };
@@ -719,18 +729,19 @@ window.qBittorrent.ContextMenu ??= (() => {
 
     class RssDownloaderRuleContextMenu extends ContextMenu {
         adjustMenuPosition(e) {
+            const rssDownloaderPage = document.getElementById("rssdownloaderpage");
             this.updateMenuItems();
 
             // draw the menu off-screen to know the menu dimensions
             this.menu.style.left = "-999em";
             this.menu.style.top = "-999em";
             // position the menu
-            let xPosMenu = e.pageX + this.options.offsets.x - document.getElementById("rssdownloaderpage").offsetLeft;
-            let yPosMenu = e.pageY + this.options.offsets.y - document.getElementById("rssdownloaderpage").offsetTop;
-            if ((xPosMenu + this.menu.offsetWidth) > document.documentElement.clientWidth)
+            let xPosMenu = e.pageX + this.options.offsets.x - rssDownloaderPage.offsetLeft;
+            let yPosMenu = e.pageY + this.options.offsets.y - rssDownloaderPage.offsetTop;
+            if ((xPosMenu + this.menu.offsetWidth) > rssDownloaderPage.clientWidth)
                 xPosMenu -= this.menu.offsetWidth;
-            if ((yPosMenu + this.menu.offsetHeight) > document.documentElement.clientHeight)
-                yPosMenu = document.documentElement.clientHeight - this.menu.offsetHeight;
+            if ((yPosMenu + this.menu.offsetHeight) > rssDownloaderPage.clientHeight)
+                yPosMenu = rssDownloaderPage.clientHeight - this.menu.offsetHeight;
             xPosMenu = Math.max(xPosMenu, 0);
             yPosMenu = Math.max(yPosMenu, 0);
 
@@ -747,18 +758,21 @@ window.qBittorrent.ContextMenu ??= (() => {
                     // menu when nothing selected
                     this.hideItem("deleteRule");
                     this.hideItem("renameRule");
+                    this.hideItem("cloneRule");
                     this.hideItem("clearDownloadedEpisodes");
                     break;
                 case 1:
                     // menu when single item selected
                     this.showItem("deleteRule");
                     this.showItem("renameRule");
+                    this.showItem("cloneRule");
                     this.showItem("clearDownloadedEpisodes");
                     break;
                 default:
                     // menu when multiple items selected
                     this.showItem("deleteRule");
                     this.hideItem("renameRule");
+                    this.hideItem("cloneRule");
                     this.showItem("clearDownloadedEpisodes");
                     break;
             }
