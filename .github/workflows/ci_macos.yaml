@@ -23,7 +23,9 @@ jobs:
             boost_major_version: "1"
             boost_minor_version: "91"
             boost_patch_version: "0"
-            libt_build_flags: ""
+            # Homebrew nettle's digest API no longer matches the libjuice
+            # copy vendored by libtorrent 2.1.1. Skip that optional stack.
+            libt_build_flags: "-Dwebtorrent=OFF"
           - version: "2.0.14"
             boost_major_version: "1"
             boost_minor_version: "91"
@@ -112,6 +114,7 @@ jobs:
             -DCMAKE_CXX_STANDARD=20 \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DBOOST_ROOT="${{ env.boost_path }}/lib/cmake" \
+            -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3 \
             -Ddeprecated-functions=OFF \
             ${{ matrix.libtorrent.libt_build_flags }}
           cmake --build build
@@ -127,6 +130,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DBOOST_ROOT="${{ env.boost_path }}/lib/cmake" \
+            -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3 \
             -DTESTING=ON \
             -DVERBOSE_CONFIGURE=ON \
             -D${{ matrix.qbt_gui }}
