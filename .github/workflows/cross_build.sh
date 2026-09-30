@@ -50,6 +50,7 @@ apt install -y \
   g++ \
   unzip \
   zip \
+  bzip2 \
   pkg-config \
   pipx \
   python3-pip \
