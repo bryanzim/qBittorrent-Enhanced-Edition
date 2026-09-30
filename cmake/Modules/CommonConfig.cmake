@@ -89,18 +89,12 @@ if (MINGW)
 endif()
 
 if (MSVC)
-    # clang-cl does not emit the .chks64 longjmp targets that /GUARD:CF checks.
-    # With that check enabled, the first setjmp (Qt's gray raster) aborts with
-    # FAST_FAIL_INVALID_LONGJMP_TARGET (0xC0000409, code 0x26).
-    set(qbt_cfguard_compile_options "")
-    set(qbt_cfguard_link_options "")
-    if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(qbt_cfguard_compile_options /guard:cf)
-        set(qbt_cfguard_link_options /GUARD:CF)
-    endif()
-
+    # Static Qt built by clang-cl has no CFG longjmp records. Linking with
+    # /GUARD:CF then rejects those longjmps (FAST_FAIL_INVALID_LONGJMP_TARGET).
+    # Clang builds still compile and link with CFG. A post-build step clears
+    # only IMAGE_GUARD_CF_LONGJUMP_TABLE_PRESENT so indirect-call checks remain.
     target_compile_options(qbt_common_cfg INTERFACE
-        ${qbt_cfguard_compile_options}
+        /guard:cf
         /permissive-
         /utf-8
         # https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
@@ -108,7 +102,7 @@ if (MSVC)
     )
     target_link_options(qbt_common_cfg INTERFACE
         $<$<AND:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},AMD64>,$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>>:/CETCOMPAT>
-        ${qbt_cfguard_link_options}
+        /GUARD:CF
         $<$<NOT:$<CONFIG:Debug>>:/OPT:REF /OPT:ICF>
         # suppress linking warning due to /INCREMENTAL and /OPT:ICF being both ON
         $<$<CONFIG:RelWithDebInfo>:/INCREMENTAL:NO>

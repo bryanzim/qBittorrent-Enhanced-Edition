@@ -155,8 +155,11 @@ private slots:
     void allTorrentsFinished();
     void cleanup();
 
-#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN) && !defined(QT_NO_SESSIONMANAGER))
+#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN))
+    void shutdownCleanup();
+#if !defined(QT_NO_SESSIONMANAGER)
     void shutdownCleanup(QSessionManager &manager);
+#endif
 #endif
 
 private:

@@ -36,6 +36,7 @@
 #endif
 
 #ifdef Q_OS_WIN
+#include <functional>
 #include <memory>
 #include <windows.h>
 #include <shellapi.h>
@@ -142,6 +143,37 @@ namespace
     const QString PARAM_SEQUENTIAL = u"@sequential"_s;
     const QString PARAM_SEEDMODE = u"@seedMode"_s;
     const QString PARAM_SKIPDIALOG = u"@skipDialog"_s;
+
+#if !defined(DISABLE_GUI) && defined(Q_OS_WIN) && defined(QT_NO_SESSIONMANAGER)
+    class EndSessionEventFilter final : public QAbstractNativeEventFilter
+    {
+    public:
+        explicit EndSessionEventFilter(std::function<void()> shutdown)
+            : m_shutdown {std::move(shutdown)}
+        {
+        }
+
+        bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override
+        {
+            if (eventType != "windows_generic_MSG")
+                return false;
+
+            const auto *msg = static_cast<const MSG *>(message);
+            const bool sessionEnding = (msg->message == WM_QUERYENDSESSION)
+                || ((msg->message == WM_ENDSESSION) && (msg->wParam != FALSE));
+            if (!sessionEnding)
+                return false;
+
+            m_shutdown();
+            if ((msg->message == WM_QUERYENDSESSION) && result)
+                *result = TRUE;
+            return false;
+        }
+
+    private:
+        std::function<void()> m_shutdown;
+    };
+#endif
 
 #if !defined(DISABLE_GUI) && defined(Q_OS_WIN)
     class NativeEventFilter final : public QAbstractNativeEventFilter
@@ -357,7 +389,9 @@ Application::Application(int &argc, char **argv)
     connect(this, &QCoreApplication::aboutToQuit, this, &Application::cleanup);
     connect(m_instanceManager, &ApplicationInstanceManager::messageReceived, this, &Application::processMessage);
 #if defined(Q_OS_WIN) && !defined(DISABLE_GUI) && !defined(QT_NO_SESSIONMANAGER)
-    connect(this, &QGuiApplication::commitDataRequest, this, &Application::shutdownCleanup, Qt::DirectConnection);
+    connect(this, &QGuiApplication::commitDataRequest, this, qOverload<QSessionManager &>(&Application::shutdownCleanup), Qt::DirectConnection);
+#elif defined(Q_OS_WIN) && !defined(DISABLE_GUI)
+    installNativeEventFilter(new EndSessionEventFilter([this] { shutdownCleanup(); }));
 #endif
 
     LogMsg(tr("qBittorrent %1 started. Process ID: %2", "qBittorrent v3.2.0alpha started")
@@ -1220,30 +1254,26 @@ void Application::initializeTranslation()
 #endif
 }
 
-#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN) && !defined(QT_NO_SESSIONMANAGER))
-void Application::shutdownCleanup([[maybe_unused]] QSessionManager &manager)
+#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN))
+void Application::shutdownCleanup()
 {
-    // This is only needed for a special case on Windows XP.
-    // (but is called for every Windows version)
-    // If a process takes too much time to exit during OS
-    // shutdown, the OS presents a dialog to the user.
-    // That dialog tells the user that qbt is blocking the
-    // shutdown, it shows a progress bar and it offers
-    // a "Terminate Now" button for the user. However,
-    // after the progress bar has reached 100% another button
-    // is offered to the user reading "Cancel". With this the
-    // user can cancel the **OS** shutdown. If we don't do
-    // the cleanup by handling the commitDataRequest() signal
-    // and the user clicks "Cancel", it will result in qbt being
-    // killed and the shutdown proceeding instead. Apparently
-    // aboutToQuit() is emitted too late in the shutdown process.
+    // Windows can kill the process during logoff before aboutToQuit() runs.
+    // Saving here, from commitDataRequest or WM_QUERYENDSESSION, still lets
+    // resume data hit disk. cleanup() ignores a second call.
     cleanup();
 
     // According to the qt docs we shouldn't call quit() inside a slot.
     // aboutToQuit() is never emitted if the user hits "Cancel" in
-    // the above dialog.
+    // the shutdown dialog.
     QMetaObject::invokeMethod(qApp, &QCoreApplication::quit, Qt::QueuedConnection);
 }
+
+#if !defined(QT_NO_SESSIONMANAGER)
+void Application::shutdownCleanup([[maybe_unused]] QSessionManager &manager)
+{
+    shutdownCleanup();
+}
+#endif
 #endif
 
 #if defined(QBT_USES_LIBTORRENT2) && !defined(Q_OS_LINUX) && !defined(Q_OS_MACOS)

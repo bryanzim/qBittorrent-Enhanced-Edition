@@ -188,6 +188,15 @@ if (STACKTRACE)
     endif()
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Static Qt has no CFG longjmp records. Keep the CFG call table and drop
+    # only the longjmp check, which would abort in the gray rasterizer.
+    add_custom_command(TARGET qbt_app POST_BUILD
+        COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_SOURCE_DIR}/cmake/clear_cfg_longjmp.ps1" "$<TARGET_FILE:qbt_app>"
+        VERBATIM
+    )
+endif()
+
 if (WEBUI)
     target_sources(qbt_app PRIVATE
         ${QBT_WEBUI_QM_FILES}
