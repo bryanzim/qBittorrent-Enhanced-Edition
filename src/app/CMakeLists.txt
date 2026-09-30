@@ -136,6 +136,25 @@ if (GUI)
     if ((CMAKE_SYSTEM_NAME STREQUAL "Windows") OR (CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
         qt_import_plugins(qbt_app INCLUDE Qt::QSvgIconPlugin Qt::QSvgPlugin)
     endif()
+    # Static Qt does not load plugins from disk. Pull in the Windows platform,
+    # style, SQLite, Schannel, and image-format plugins that the shared build
+    # shipped as DLLs. OpenSSL stays a separate system DLL via libtorrent.
+    get_target_property(_qbtQtCoreType Qt6::Core TYPE)
+    if (_qbtQtCoreType STREQUAL "STATIC_LIBRARY")
+        qt_import_plugins(qbt_app INCLUDE
+            Qt::QWindowsIntegrationPlugin
+            Qt::QModernWindowsStylePlugin
+            Qt::QSQLiteDriverPlugin
+            Qt::QSchannelBackendPlugin
+            Qt::QGifPlugin
+            Qt::QICOPlugin
+            Qt::QJpegPlugin
+            Qt::QTgaPlugin
+            Qt::QTiffPlugin
+            Qt::QWbmpPlugin
+            Qt::QWebpPlugin
+        )
+    endif()
 endif()
 
 if (STACKTRACE)

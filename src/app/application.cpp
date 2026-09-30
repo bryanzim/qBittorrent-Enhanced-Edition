@@ -58,7 +58,9 @@
 #include <QProgressDialog>
 #ifdef Q_OS_WIN
 #include <QAbstractNativeEventFilter>
+#ifndef QT_NO_SESSIONMANAGER
 #include <QSessionManager>
+#endif
 #endif // Q_OS_WIN
 #ifdef Q_OS_MACOS
 #include <QAccessible>
@@ -354,7 +356,7 @@ Application::Application(int &argc, char **argv)
 
     connect(this, &QCoreApplication::aboutToQuit, this, &Application::cleanup);
     connect(m_instanceManager, &ApplicationInstanceManager::messageReceived, this, &Application::processMessage);
-#if defined(Q_OS_WIN) && !defined(DISABLE_GUI)
+#if defined(Q_OS_WIN) && !defined(DISABLE_GUI) && !defined(QT_NO_SESSIONMANAGER)
     connect(this, &QGuiApplication::commitDataRequest, this, &Application::shutdownCleanup, Qt::DirectConnection);
 #endif
 
@@ -1218,7 +1220,7 @@ void Application::initializeTranslation()
 #endif
 }
 
-#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN))
+#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN) && !defined(QT_NO_SESSIONMANAGER))
 void Application::shutdownCleanup([[maybe_unused]] QSessionManager &manager)
 {
     // This is only needed for a special case on Windows XP.

@@ -76,7 +76,7 @@ using AddTorrentManagerImpl = GUIAddTorrentManager;
 using BaseApplication = QApplication;
 using BaseIApplication = IGUIApplication;
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) && !defined(QT_NO_SESSIONMANAGER)
 class QSessionManager;
 #endif
 #else // DISABLE_GUI
@@ -155,7 +155,7 @@ private slots:
     void allTorrentsFinished();
     void cleanup();
 
-#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN))
+#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN) && !defined(QT_NO_SESSIONMANAGER))
     void shutdownCleanup(QSessionManager &manager);
 #endif
 
