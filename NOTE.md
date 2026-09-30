@@ -1,6 +1,6 @@
-Important Note
-------------------------------------------
-### To user:
+# Important Note
+
+## To user
 
 Please do not use this modified BitTorrent client on Private Trackers,
 
@@ -10,7 +10,7 @@ Otherwise, you will get banned.
 
 You should ask a tracker operator to whitelist this client rather than asking a developer to change the Client Peer ID or User Agent.
 
-### To tracker operators:
+## To tracker operators
 
 qBittorrent Enhanced is based on qBittorrent, it's aimed at blocking leeching clients automatically.
 
@@ -21,8 +21,10 @@ Also, qBittorrent Enhanced has a different ID announce to trackers.
 User agent: `qBittorrent Enhanced/LATEST_RELEASE_VERSION`, example: `qBittorrent Enhanced/5.2.0.10`
 
 PeerID: `-qB520[A-Z]-`, example: `-qB460A-`
-********************************
-### Multiple instances tutorial
+
+---
+
+## Multiple instances tutorial
 
 If you're an advanced(or private tracker) user and you want to open 2 qBittorrent instances at the same time.
 
@@ -35,9 +37,7 @@ You can open Official qBittorrent or qBittorrent Enhanced first, as you like.
 _**AppImage does not support this method, please use method 2.**_
 
 1. Create profile directory under qBittorrent executable directory.
-
 2. Open executable.
-
 3. (Optional) Create a shortcut to the desktop.
 
 qBittorrent should enter to Portable mode now.
@@ -45,7 +45,6 @@ qBittorrent should enter to Portable mode now.
 `Method 2:` `configuration` command (Most suitable for *nix user)
 
 1. Go to qBittorrent executable directory
-
 2. Open command line, and type it in cmd
 
 Windows:
@@ -64,7 +63,8 @@ If you're using _qbittorrent-nox_linux_x64_static_build_
 
 If you're using AppImage
 
-`./qBittorrent-Enhanced-Edition.AppImage
- --configuration="new_instance_profile_name"`
+```shell
+./qBittorrent-Enhanced-Edition.AppImage --configuration="new_instance_profile_name"
+```
 
 qBittorrent should create a new configuration and use it for the new instance.
