@@ -15,15 +15,23 @@ qBittorrent Enhanced Edition
 qBittorrent is a bittorrent client programmed in C++ / Qt that uses
 libtorrent (sometimes called libtorrent-rasterbar) by Arvid Norberg.
 
-It aims to be a good alternative to all other bittorrent clients
-out there. qBittorrent is fast, stable and provides unicode
+qBittorrent is a [BitTorrent] client programmed in C++ / Qt that uses
+[libtorrent] (sometimes called libtorrent-rasterbar) by Arvid Norberg.
+
+It aims to be a good alternative to all other BitTorrent clients
+out there. qBittorrent is fast, stable and provides Unicode
 support as well as many features.
 
-The free [IP to Country Lite database](https://db-ip.com/db/download/ip-to-country-lite) by [DB-IP](https://db-ip.com/) is used for resolving the countries of peers. The database is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
+The free [IP to Country Lite database] by [DB-IP] is used for resolving the countries of peers.
+The database is licensed under the [Creative Commons Attribution 4.0 International License].
 
-### Installation:
+[BitTorrent]: https://en.wikipedia.org/wiki/BitTorrent
+[Creative Commons Attribution 4.0 International License]: https://creativecommons.org/licenses/by/4.0/
+[DB-IP]: https://db-ip.com/
+[IP to Country Lite database]: https://db-ip.com/db/download/ip-to-country-lite
+[libtorrent]: https://libtorrent.org/
 
-Refer to the [INSTALL](INSTALL) file.
+## Installation
 
 ## Repository
 
@@ -81,18 +89,17 @@ scoop bucket add extras
 scoop install qbittorrent-enhanced
 ```
 
-### Misc:
 For more information please visit:
-https://www.qbittorrent.org
+<https://www.qbittorrent.org>
 
-or our wiki here:
-https://wiki.qbittorrent.org
+Check out our wiki at:
+<https://wiki.qbittorrent.org>
 
 Use the forum for troubleshooting before reporting bugs:
-https://forum.qbittorrent.org
+<https://forum.qbittorrent.org>
 
 Please report any bug (or feature request) to:
-https://bugs.qbittorrent.org
+<https://bugs.qbittorrent.org>
 
 For enhanced features bug(such as Auto Ban, API, Auto Update Tracker lists...), please report to:
 https://github.com/c0re100/qBittorrent-Enhanced-Edition/issues

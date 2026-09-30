@@ -39,7 +39,7 @@ target_sources(qbt_app PRIVATE
     cmdoptions.h
     filelogger.h
     legalnotice.h
-    qtlocalpeer/qtlocalpeer.h
+    localpeer.h
     signalhandler.h
     upgrade.h
 
@@ -49,8 +49,8 @@ target_sources(qbt_app PRIVATE
     cmdoptions.cpp
     filelogger.cpp
     legalnotice.cpp
+    localpeer.cpp
     main.cpp
-    qtlocalpeer/qtlocalpeer.cpp
     signalhandler.cpp
     upgrade.cpp
 
@@ -82,8 +82,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set_source_files_properties(
         "${qBittorrent_SOURCE_DIR}/dist/mac/qt.conf"
         "${qBittorrent_SOURCE_DIR}/dist/mac/qBitTorrentDocument.icns"
-		"${qBittorrent_SOURCE_DIR}/dist/mac/qBitTorrentIncompleteData.icns"
+        "${qBittorrent_SOURCE_DIR}/dist/mac/qBitTorrentIncompleteData.icns"
         "${qBittorrent_SOURCE_DIR}/dist/mac/qbittorrent_mac.icns"
+        "${qBittorrent_SOURCE_DIR}/src/icons/qbittorrent-tray-light.svg"
             PROPERTIES
                 MACOSX_PACKAGE_LOCATION Resources
     )
@@ -113,8 +114,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${QT_TRANSLATIONS}
         ${qBittorrent_SOURCE_DIR}/dist/mac/qt.conf
         ${qBittorrent_SOURCE_DIR}/dist/mac/qBitTorrentDocument.icns
-		${qBittorrent_SOURCE_DIR}/dist/mac/qBitTorrentIncompleteData.icns
+        ${qBittorrent_SOURCE_DIR}/dist/mac/qBitTorrentIncompleteData.icns
         ${qBittorrent_SOURCE_DIR}/dist/mac/qbittorrent_mac.icns
+        ${qBittorrent_SOURCE_DIR}/src/icons/qbittorrent-tray-light.svg
     )
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(qbt_app PROPERTIES WIN32_EXECUTABLE ON)
@@ -133,6 +135,25 @@ if (GUI)
     target_link_libraries(qbt_app PRIVATE qbt_gui)
     if ((CMAKE_SYSTEM_NAME STREQUAL "Windows") OR (CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
         qt_import_plugins(qbt_app INCLUDE Qt::QSvgIconPlugin Qt::QSvgPlugin)
+    endif()
+    # Static Qt does not load plugins from disk. Pull in the Windows platform,
+    # style, SQLite, Schannel, and image-format plugins that the shared build
+    # shipped as DLLs. OpenSSL stays a separate system DLL via libtorrent.
+    get_target_property(_qbtQtCoreType Qt6::Core TYPE)
+    if (_qbtQtCoreType STREQUAL "STATIC_LIBRARY")
+        qt_import_plugins(qbt_app INCLUDE
+            Qt::QWindowsIntegrationPlugin
+            Qt::QModernWindowsStylePlugin
+            Qt::QSQLiteDriverPlugin
+            Qt::QSchannelBackendPlugin
+            Qt::QGifPlugin
+            Qt::QICOPlugin
+            Qt::QJpegPlugin
+            Qt::QTgaPlugin
+            Qt::QTiffPlugin
+            Qt::QWbmpPlugin
+            Qt::QWebpPlugin
+        )
     endif()
 endif()
 
@@ -165,6 +186,15 @@ if (STACKTRACE)
             endif()
         endif()
     endif()
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Static Qt has no CFG longjmp records. Keep the CFG call table and drop
+    # only the longjmp check, which would abort in the gray rasterizer.
+    add_custom_command(TARGET qbt_app POST_BUILD
+        COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_SOURCE_DIR}/cmake/clear_cfg_longjmp.ps1" "$<TARGET_FILE:qbt_app>"
+        VERBATIM
+    )
 endif()
 
 if (WEBUI)
