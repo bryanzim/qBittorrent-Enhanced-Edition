@@ -130,9 +130,35 @@ struct TrackerListModel::Item final
 
     std::weak_ptr<Item> parentItem {};
 
-    using ChildItems = multi_index_container<std::shared_ptr<Item>, indexed_by<
-        random_access<tag<struct ByIndex>>,
-        hashed_unique<tag<struct ByID>, key<&Item::name, &Item::btVersion>>>>;
+    // A nested Boost.MultiIndex container with a composite key is miscompiled
+    // by Clang on Windows: its constructor writes through a bad pointer, so
+    // selecting a torrent crashes while the DHT/PeX/LSD rows are created.
+    // Endpoint lists are tiny, so a linear lookup is enough.
+    struct ChildItems
+    {
+        QList<std::shared_ptr<Item>> items;
+
+        qsizetype size() const
+        {
+            return items.size();
+        }
+
+        const std::shared_ptr<Item> &at(const qsizetype row) const
+        {
+            return items.at(row);
+        }
+
+        std::shared_ptr<Item> find(const QString &endpointName, const int version) const
+        {
+            for (const std::shared_ptr<Item> &child : items)
+            {
+                if ((child->name == endpointName) && (child->btVersion == version))
+                    return child;
+            }
+            return {};
+        }
+    };
+
     ChildItems childItems {};
 
     Item(QStringView name, QStringView message);
@@ -379,10 +405,9 @@ void TrackerListModel::populate()
 std::shared_ptr<TrackerListModel::Item> TrackerListModel::createTrackerItem(const BitTorrent::TrackerEntryStatus &trackerEntryStatus)
 {
     const auto item = std::make_shared<Item>(trackerEntryStatus);
-    item->childItems.get<ByIndex>().reserve(trackerEntryStatus.endpoints.size());
-    item->childItems.get<ByID>().reserve(trackerEntryStatus.endpoints.size());
+    item->childItems.items.reserve(trackerEntryStatus.endpoints.size());
     for (const auto &[id, endpointStatus] : trackerEntryStatus.endpoints.asKeyValueRange())
-        item->childItems.get<ByIndex>().emplace_back(std::make_shared<Item>(item, endpointStatus));
+        item->childItems.items.emplace_back(std::make_shared<Item>(item, endpointStatus));
 
     return item;
 }
@@ -401,21 +426,16 @@ void TrackerListModel::updateTrackerItem(const std::shared_ptr<Item> &item, cons
     {
         endpointItemIDs.insert(id);
 
-        auto &itemsByID = item->childItems.get<ByID>();
-        if (const auto iter = itemsByID.find(std::make_tuple(id.first, id.second)); iter != itemsByID.end())
-        {
-            (*iter)->fillFrom(endpointStatus);
-        }
+        if (const std::shared_ptr<Item> existing = item->childItems.find(id.first, id.second))
+            existing->fillFrom(endpointStatus);
         else
-        {
             newEndpointItems.emplace_back(std::make_shared<Item>(item, endpointStatus));
-        }
     }
 
     const auto trackerRow = std::distance(m_items->get<ByIndex>().begin(), m_items->get<ByIndex>().iterator_to(item));
     const auto trackerIndex = index(trackerRow, 0);
 
-    auto &childItemsByPos = item->childItems.get<ByIndex>();
+    QList<std::shared_ptr<Item>> &childItemsByPos = item->childItems.items;
     auto it = childItemsByPos.begin();
     while (it != childItemsByPos.end())
     {
@@ -439,8 +459,7 @@ void TrackerListModel::updateTrackerItem(const std::shared_ptr<Item> &item, cons
     if (!newEndpointItems.isEmpty())
     {
         beginInsertRows(trackerIndex, numRows, (numRows + newEndpointItems.size() - 1));
-        item->childItems.get<ByIndex>().reserve(newEndpointItems.size());
-        item->childItems.get<ByID>().reserve(newEndpointItems.size());
+        childItemsByPos.reserve(childItemsByPos.size() + newEndpointItems.size());
         for (const auto &newEndpointItem : asConst(newEndpointItems))
             childItemsByPos.push_back(newEndpointItem);
         endInsertRows();
