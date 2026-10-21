@@ -270,6 +270,9 @@ prepare_boost() {
   fi
   mkdir -p "/usr/src/boost-${boost_ver}/"
   tar -jxf "${DOWNLOADS_DIR}/boost-${boost_ver}.tar.bz2" --strip-components=1 -C "/usr/src/boost-${boost_ver}/"
+  if grep -q 'domain->data' "/usr/src/boost-${boost_ver}/boost/asio/ssl/impl/rfc2818_verification.ipp"; then
+    patch -d "/usr/src/boost-${boost_ver}" -p1 < "${SELF_DIR}/patches/boost-1.86-openssl-4.patch"
+  fi
   cp -rf "/usr/src/boost-${boost_ver}/boost" "${CROSS_PREFIX}/include/"
 }
 

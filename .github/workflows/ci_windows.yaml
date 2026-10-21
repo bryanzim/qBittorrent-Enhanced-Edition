@@ -115,6 +115,10 @@ jobs:
           }
           move "${{ github.workspace }}/../boost_*" "${{ env.boost_path }}"
           cd "${{ env.boost_path }}"
+          if ("${{ matrix.libtorrent.version }}" -eq "1.2.20") {
+            git apply "${{ github.workspace }}/.github/workflows/patches/boost-1.86-openssl-4.patch"
+            if ($LastExitCode -ne 0) { throw "OpenSSL 4 patch for Boost 1.86 failed" }
+          }
           #.\bootstrap.bat
           ${{ env.vcpkg_path }}/installed/${{ matrix.config.arch }}-windows-static-md-release/tools/boost-build/b2.exe `
             stage `
@@ -129,6 +133,9 @@ jobs:
           arch: ${{ matrix.config.qt_arch }}
           archives: qtbase qtsvg qttools
           modules: qtimageformats
+          # aqtinstall 3.3.0 cannot read the Qt 6.11+ Windows package index.
+          # https://github.com/jurplel/install-qt-action/issues/374
+          aqtsource: git+https://github.com/miurahr/aqtinstall.git@076e1659807d0b362a3ed684d54c2e9c775eb9c7
           cache: true
 
       - name: Install libtorrent

@@ -84,6 +84,9 @@ jobs:
           fi
           mv "${{ github.workspace }}/.."/boost_* "${{ env.boost_path }}"
           cd "${{ env.boost_path }}"
+          if [ "${{ matrix.libtorrent.version }}" = "1.2.20" ]; then
+            git apply "${{ github.workspace }}/.github/workflows/patches/boost-1.86-openssl-4.patch"
+          fi
           ./bootstrap.sh
           ./b2 stage --stagedir=./ --with-headers
 
