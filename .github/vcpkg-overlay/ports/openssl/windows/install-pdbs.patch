@@ -1,0 +1,35 @@
+diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makefile.tmpl
+--- a/Configurations/windows-makefile.tmpl
++++ b/Configurations/windows-makefile.tmpl
+@@ -546,6 +546,7 @@ install_dev: install_runtime_libs
+ 	@"$(PERL)" "$(SRCDIR)\util\mkdir-p.pl" "$(libdir)"
+ 	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_LIBS) "$(libdir)"
+ 	@if "$(SHLIBS)"=="" \
++	 @if "$(INSTALL_PDBS)"=="ON" \
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" ossl_static.pdb "$(libdir)"
+ 	@"$(PERL)" "$(SRCDIR)\util\mkdir-p.pl" "$(CMAKECONFIGDIR)"
+ 	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_EXPORTERS_CMAKE) "$(CMAKECONFIGDIR)"
+@@ -561,6 +562,7 @@ install_modules: _install_modules_deps
+ 	@if not "$(INSTALL_MODULES)"=="" \
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_MODULES) "$(MODULESDIR)"
+ 	@if not "$(INSTALL_MODULES)"=="" \
++	 @if "$(INSTALL_PDBS)"=="ON" \
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_MODULEPDBS) "$(MODULESDIR)"
+ 
+ uninstall_modules:
+@@ -574,6 +576,7 @@ install_runtime_libs: build_libs
+ 	@if not "$(SHLIBS)"=="" \
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_SHLIBS) "$(INSTALLTOP)\bin"
+ 	@if not "$(SHLIBS)"=="" \
++	 @if "$(INSTALL_PDBS)"=="ON" \
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_SHLIBPDBS) \
+                                         "$(INSTALLTOP)\bin"
+ 
+@@ -586,6 +589,7 @@ install_programs: install_runtime_libs build_inst_programs
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_PROGRAMS) \
+                                         "$(INSTALLTOP)\bin"
+ 	@if not "$(INSTALL_PROGRAMPDBS)"=="" \
++	 @if "$(INSTALL_PDBS)"=="ON" \
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_PROGRAMPDBS) \
+                                         "$(INSTALLTOP)\bin"
+ 	@if not "$(BIN_SCRIPTS)"=="" \

@@ -19,16 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         libtorrent:
-          - version: "2.1.1"
+          - version: "2.1.2"
             boost_major_version: "1"
-            boost_minor_version: "91"
+            boost_minor_version: "92"
             boost_patch_version: "0"
-            # Homebrew nettle's digest API no longer matches the libjuice
-            # copy vendored by libtorrent 2.1.1. Skip that optional stack.
-            libt_build_flags: "-Dwebtorrent=OFF"
-          - version: "2.0.14"
+            libt_build_flags: ""
+          - version: "2.0.15"
             boost_major_version: "1"
-            boost_minor_version: "91"
+            boost_minor_version: "92"
             boost_patch_version: "0"
             libt_build_flags: ""
           - version: "1.2.20"
@@ -37,7 +35,7 @@ jobs:
             boost_patch_version: "0"
             libt_build_flags: ""
         qbt_gui: ["GUI=ON", "GUI=OFF"]
-        qt_version: ["6.10.3"]
+        qt_version: ["6.12.0"]
 
     env:
       boost_path: "${{ github.workspace }}/../boost"
@@ -60,9 +58,10 @@ jobs:
           max_attempts: 6
           command: |
             brew update > /dev/null
+            # already preinstalled on the image: cmake ninja
             brew install \
-              openssl@3 zlib
-            # preinstalled on the image: cmake ninja
+              openssl@4 zlib
+            echo "CMAKE_PREFIX_PATH=/opt/homebrew/opt/openssl@4" >> "$GITHUB_ENV"
 
       - name: Setup ccache
         uses: Chocobo1/setup-ccache-action@v1
@@ -106,6 +105,9 @@ jobs:
             https://github.com/arvidn/libtorrent.git \
             ${{ env.libtorrent_path }}
           cd ${{ env.libtorrent_path }}
+          if [ "${{ matrix.libtorrent.version }}" = "1.2.20" ]; then
+            git apply "${{ github.workspace }}/.github/workflows/patches/libtorrent-1.2-openssl-4.patch"
+          fi
           cmake \
             -B build \
             -G "Ninja" \
@@ -114,7 +116,7 @@ jobs:
             -DCMAKE_CXX_STANDARD=20 \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DBOOST_ROOT="${{ env.boost_path }}/lib/cmake" \
-            -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3 \
+            -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 \
             -Ddeprecated-functions=OFF \
             ${{ matrix.libtorrent.libt_build_flags }}
           cmake --build build
@@ -130,7 +132,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DBOOST_ROOT="${{ env.boost_path }}/lib/cmake" \
-            -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3 \
+            -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 \
             -DTESTING=ON \
             -DVERBOSE_CONFIGURE=ON \
             -D${{ matrix.qbt_gui }}

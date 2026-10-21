@@ -176,11 +176,15 @@ namespace
 #endif
 
 #if !defined(DISABLE_GUI) && defined(Q_OS_WIN)
-    class NativeEventFilter final : public QAbstractNativeEventFilter
+    class NativeEventFilter final : public QObject, public QAbstractNativeEventFilter
     {
+        Q_OBJECT
+        Q_DISABLE_COPY_MOVE(NativeEventFilter)
+
     public:
-        explicit NativeEventFilter(UIThemeManager *uiThemeManager)
-            : m_uiThemeManager {uiThemeManager}
+        explicit NativeEventFilter(UIThemeManager *uiThemeManager, QObject *parent = nullptr)
+            : QObject(parent)
+            , m_uiThemeManager {uiThemeManager}
         {
         }
 
@@ -941,11 +945,12 @@ int Application::exec()
     Net::DownloadManager::initInstance();
 
     BitTorrent::Session::initInstance();
+
 #ifndef DISABLE_GUI
     UIThemeManager::initInstance();
 
 #ifdef Q_OS_WIN
-    installNativeEventFilter(new NativeEventFilter(UIThemeManager::instance()));
+    installNativeEventFilter(new NativeEventFilter(UIThemeManager::instance(), this));
 #endif
 
     m_desktopIntegration = new DesktopIntegration;
@@ -1562,4 +1567,8 @@ WebUI *Application::webUI() const
 {
     return m_webui;
 }
+#endif
+
+#if !defined(DISABLE_GUI) && defined(Q_OS_WIN)
+#include "application.moc"
 #endif
