@@ -19,14 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         libtorrent:
-          - version: "2.1.1"
+          - version: "2.1.2"
             boost_major_version: "1"
-            boost_minor_version: "91"
+            boost_minor_version: "92"
             boost_patch_version: "0"
             libt_build_flags: ""
-          - version: "2.0.14"
+          - version: "2.0.15"
             boost_major_version: "1"
-            boost_minor_version: "91"
+            boost_minor_version: "92"
             boost_patch_version: "0"
             libt_build_flags: ""
           - version: "1.2.20"
@@ -93,10 +93,12 @@ jobs:
             "zlib:${{ matrix.config.arch }}-windows-static-md-release"
           ${{ env.vcpkg_path }}/vcpkg.exe upgrade `
             --no-dry-run `
+            --overlay-ports="${{ github.workspace }}/.github/vcpkg-overlay/ports" `
             --overlay-triplets="${{ env.vcpkg_path }}/triplets_overlay"
           ${{ env.vcpkg_path }}/vcpkg.exe install `
             --binarysource="clear;x-gha,readwrite" `
             --clean-after-build `
+            --overlay-ports="${{ github.workspace }}/.github/vcpkg-overlay/ports" `
             --overlay-triplets="${{ env.vcpkg_path }}/triplets_overlay" `
             $packages
 
@@ -123,7 +125,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.10.3"
+          version: "6.12.0"
           arch: ${{ matrix.config.qt_arch }}
           archives: qtbase qtsvg qttools
           modules: qtimageformats
@@ -138,6 +140,10 @@ jobs:
             https://github.com/arvidn/libtorrent.git `
             ${{ env.libtorrent_path }}
           cd ${{ env.libtorrent_path }}
+          if ("${{ matrix.libtorrent.version }}" -eq "1.2.20") {
+            git apply "${{ github.workspace }}/.github/workflows/patches/libtorrent-1.2-openssl-4.patch"
+            if ($LastExitCode -ne 0) { throw "OpenSSL 4 patch for libtorrent 1.2.20 failed" }
+          }
           $env:CFLAGS+=" /guard:cf"
           $env:CXXFLAGS+=" /guard:cf"
           $env:LDFLAGS+=" /GUARD:CF"

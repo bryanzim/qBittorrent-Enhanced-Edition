@@ -233,7 +233,7 @@ prepare_zlib() {
 }
 
 prepare_ssl() {
-  openssl_filename="$(retry curl -ksSL --compressed https://openssl-library.org/source/ \| grep -o "'>openssl-3\(\.[0-9]*\)*tar.gz<'" \| grep -o "'[^>]*.tar.gz'" \| sort -nr \| head -1)"
+  openssl_filename="$(retry curl -ksSL --compressed https://openssl-library.org/source/ \| grep -o "'>openssl-4\.0\(\.[0-9]*\)*tar.gz<'" \| grep -o "'[^>]*.tar.gz'" \| sort -nr \| head -1)"
   openssl_ver="$(echo "${openssl_filename}" | sed -r 's/openssl-(.+)\.tar\.gz/\1/')"
   echo "OpenSSL version ${openssl_ver}"
   if [ ! -f "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz" ]; then
@@ -363,6 +363,10 @@ prepare_libtorrent() {
       "${libtorrent_git_url}" \
       "/usr/src/libtorrent-rasterbar-${LIBTORRENT_BRANCH}/"
     cd "/usr/src/libtorrent-rasterbar-${LIBTORRENT_BRANCH}/"
+  fi
+  # libtorrent 1.2 reads ASN1_STRING fields that OpenSSL 4 made opaque.
+  if grep -q 'domain->data' src/torrent.cpp; then
+    patch -p1 < "${SELF_DIR}/patches/libtorrent-1.2-openssl-4.patch"
   fi
   rm -fr build/CMakeCache.txt
   # TODO: solve mingw build
