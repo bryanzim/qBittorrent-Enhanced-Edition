@@ -33,7 +33,7 @@
 
 #ifdef Q_OS_WIN
 #include <objbase.h>
-#include <shlobj.h>
+#include <ShlObj.h>
 
 #include <shellapi.h>
 #endif

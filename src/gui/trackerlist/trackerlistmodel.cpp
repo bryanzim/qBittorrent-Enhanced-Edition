@@ -160,9 +160,9 @@ struct TrackerListModel::Item final
 
     ChildItems childItems{};
 
-    Item(QStringView name, QStringView message);
+    Item(QStringView trackerName, QStringView statusMessage);
     explicit Item(const BitTorrent::TrackerEntryStatus& trackerEntryStatus);
-    Item(const std::shared_ptr<Item>& parentItem, const BitTorrent::TrackerEndpointStatus& endpointStatus);
+    Item(const std::shared_ptr<Item>& parent, const BitTorrent::TrackerEndpointStatus& endpointStatus);
 
     void fillFrom(const BitTorrent::TrackerEntryStatus& trackerEntryStatus);
     void fillFrom(const BitTorrent::TrackerEndpointStatus& endpointStatus);
@@ -178,8 +178,8 @@ class TrackerListModel::Items final : public multi_index_container<
 {
 };
 
-TrackerListModel::Item::Item(const QStringView name, const QStringView message)
-    : name{ name.toString() }, message{ message.toString() }
+TrackerListModel::Item::Item(const QStringView trackerName, const QStringView statusMessage)
+    : name{ trackerName.toString() }, message{ statusMessage.toString() }
 {
 }
 
@@ -189,8 +189,8 @@ TrackerListModel::Item::Item(const BitTorrent::TrackerEntryStatus& trackerEntryS
     fillFrom(trackerEntryStatus);
 }
 
-TrackerListModel::Item::Item(const std::shared_ptr<Item>& parentItem, const BitTorrent::TrackerEndpointStatus& endpointStatus)
-    : name{ endpointStatus.name }, btVersion{ endpointStatus.btVersion }, parentItem{ parentItem }
+TrackerListModel::Item::Item(const std::shared_ptr<Item>& parent, const BitTorrent::TrackerEndpointStatus& endpointStatus)
+    : name{ endpointStatus.name }, btVersion{ endpointStatus.btVersion }, parentItem{ parent }
 {
     fillFrom(endpointStatus);
 }

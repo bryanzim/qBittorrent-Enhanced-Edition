@@ -85,9 +85,9 @@ nonstd::expected<void, QString> ClientDataStorage::storeData(const QJsonObject& 
 
         if (value.isNull())
         {
-            if (auto it = clientData.find(key); it != clientData.end())
+            if (auto existing = clientData.find(key); existing != clientData.end())
             {
-                clientData.erase(it);
+                clientData.erase(existing);
                 dataModified = true;
             }
         }

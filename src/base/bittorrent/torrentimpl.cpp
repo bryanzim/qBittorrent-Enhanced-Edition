@@ -33,7 +33,7 @@
 #include <memory>
 
 #ifdef Q_OS_WIN
-#include <windows.h>
+#include <Windows.h>
 #endif
 
 #include <libtorrent/address.hpp>

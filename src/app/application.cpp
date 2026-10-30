@@ -36,7 +36,7 @@
 #endif
 
 #ifdef Q_OS_WIN
-#include <windows.h>
+#include <Windows.h>
 
 #include <shellapi.h>
 
@@ -703,25 +703,25 @@ void Application::runExternalProgram(const QString& programTemplate, const BitTo
     QProcess proc;
     proc.setProgram(QString::fromWCharArray(args[0]));
     proc.setArguments(argList);
-    proc.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* args) {
+    proc.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* processArgs) {
         if (Preferences::instance()->isAutoRunConsoleEnabled())
         {
-            args->flags |= CREATE_NEW_CONSOLE;
-            args->flags &= ~(CREATE_NO_WINDOW | DETACHED_PROCESS);
+            processArgs->flags |= CREATE_NEW_CONSOLE;
+            processArgs->flags &= ~(CREATE_NO_WINDOW | DETACHED_PROCESS);
         }
         else
         {
-            args->flags |= CREATE_NO_WINDOW;
-            args->flags &= ~(CREATE_NEW_CONSOLE | DETACHED_PROCESS);
+            processArgs->flags |= CREATE_NO_WINDOW;
+            processArgs->flags &= ~(CREATE_NEW_CONSOLE | DETACHED_PROCESS);
         }
-        args->inheritHandles = false;
-        args->startupInfo->dwFlags &= ~STARTF_USESTDHANDLES;
-        ::CloseHandle(args->startupInfo->hStdInput);
-        ::CloseHandle(args->startupInfo->hStdOutput);
-        ::CloseHandle(args->startupInfo->hStdError);
-        args->startupInfo->hStdInput = nullptr;
-        args->startupInfo->hStdOutput = nullptr;
-        args->startupInfo->hStdError = nullptr;
+        processArgs->inheritHandles = false;
+        processArgs->startupInfo->dwFlags &= ~STARTF_USESTDHANDLES;
+        ::CloseHandle(processArgs->startupInfo->hStdInput);
+        ::CloseHandle(processArgs->startupInfo->hStdOutput);
+        ::CloseHandle(processArgs->startupInfo->hStdError);
+        processArgs->startupInfo->hStdInput = nullptr;
+        processArgs->startupInfo->hStdOutput = nullptr;
+        processArgs->startupInfo->hStdError = nullptr;
     });
 
     if (proc.startDetached())

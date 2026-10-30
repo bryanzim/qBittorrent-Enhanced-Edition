@@ -232,7 +232,7 @@ QColor PiecesBar::pieceColor() const
 QColor PiecesBar::highlightedPieceColor() const
 {
     QColor col = palette().color(QPalette::Highlight).darker();
-    col.setAlphaF(0.35);
+    col.setAlphaF(static_cast<float>(0.35));
     return col;
 }
 

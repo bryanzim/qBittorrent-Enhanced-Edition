@@ -58,12 +58,16 @@ IncludeCategories:
     Priority: 4
     CaseSensitive: true
   # Other OS headers.
-  - Regex: '^<([Oo]bjbase\.h|[Ss]hlwapi\.h|[Ss]hlobj\.h|processthreadsapi\.h|synchapi\.h|fileapi\.h|handleapi\.h|errhandlingapi\.h|sysinfoapi\.h|timezoneapi\.h|wincrypt\.h|iphlpapi\.h|mstcpip\.h|mmsystem\.h|timeapi\.h|winioctl\.h|winbase\.h|winuser\.h|wingdi\.h|winnt\.h|winsvc\.h|tlhelp32\.h|psapi\.h|dbghelp\.h|direct\.h|fcntl\.h|io\.h|process\.h|pthread\.h|unistd\.h|netdb\.h|arpa/.+|linux/.+|net/.+|netinet/.+|sys/.+)>$'
+  - Regex: '^<([Oo]bjbase\.h|[Ss]hlwapi\.h|processthreadsapi\.h|synchapi\.h|fileapi\.h|handleapi\.h|errhandlingapi\.h|sysinfoapi\.h|timezoneapi\.h|wincrypt\.h|iphlpapi\.h|mstcpip\.h|mmsystem\.h|timeapi\.h|winioctl\.h|winbase\.h|winuser\.h|wingdi\.h|winnt\.h|winsvc\.h|tlhelp32\.h|psapi\.h|dbghelp\.h|direct\.h|fcntl\.h|io\.h|process\.h|pthread\.h|unistd\.h|netdb\.h|arpa/.+|linux/.+|net/.+|netinet/.+|sys/.+)>$'
     Priority: 5
     CaseSensitive: true
-  # shellapi.h needs Windows.h, which shlobj.h provides when windows.h is not included directly.
-  - Regex: '^<shellapi\.h>$'
+  # ShlObj.h includes Windows.h. Keep it after objbase.h regardless of case.
+  - Regex: '^<[Ss]hlobj\.h>$'
     Priority: 6
+    CaseSensitive: true
+  # shellapi.h needs Windows.h, which ShlObj.h provides when Windows.h is not included directly.
+  - Regex: '^<[Ss]hellapi\.h>$'
+    Priority: 7
     CaseSensitive: true
   # Lua headers must be included before LuaBridge.
   - Regex: '^<lua/.+>$'

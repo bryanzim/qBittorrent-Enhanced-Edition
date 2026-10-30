@@ -33,9 +33,9 @@
 #ifdef Q_OS_WIN
 #include <powrprof.h>
 
-#include <windows.h>
+#include <Windows.h>
 
-#include <shlobj.h>
+#include <ShlObj.h>
 
 #include <algorithm>
 #endif // Q_OS_WIN

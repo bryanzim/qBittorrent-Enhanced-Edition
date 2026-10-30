@@ -613,8 +613,6 @@ QString SearchWidget::generateTabID() const
         if (!m_tabWidgets.contains(tabID))
             return tabID;
     }
-
-    return {};
 }
 
 int SearchWidget::addTab(const QString& tabID, SearchJobWidget* searchJobWdget)

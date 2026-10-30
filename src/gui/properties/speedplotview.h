@@ -121,7 +121,7 @@ private:
     struct GraphProperties
     {
         GraphProperties();
-        GraphProperties(const QString& name, const QPen& pen, bool enable = false);
+        GraphProperties(const QString& graphName, const QPen& graphPen, bool graphEnabled = false);
 
         QString name;
         QPen pen;

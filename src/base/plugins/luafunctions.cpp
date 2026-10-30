@@ -30,7 +30,7 @@
 
 #include <QtSystemDetection>
 #if defined(Q_OS_WIN)
-#include <windows.h>
+#include <Windows.h>
 
 #include <shellapi.h>
 #endif

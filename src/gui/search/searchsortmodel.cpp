@@ -179,7 +179,6 @@ bool SearchSortModel::lessThan(const QModelIndex& left, const QModelIndex& right
         const QString strR = right.data().toString();
         return m_naturalLessThan(strL, strR);
     }
-    break;
     default:
         return base::lessThan(left, right);
     };

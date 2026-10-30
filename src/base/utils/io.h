@@ -56,6 +56,7 @@ namespace Utils::IO
 
         explicit FileDeviceOutputIterator(QFileDevice& device, int bufferSize = (4 * 1024));
         FileDeviceOutputIterator(const FileDeviceOutputIterator& other) = default;
+        FileDeviceOutputIterator& operator=(const FileDeviceOutputIterator&) = default;
         ~FileDeviceOutputIterator();
 
         // mimic std::ostream_iterator behavior

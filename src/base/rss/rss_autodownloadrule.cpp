@@ -306,19 +306,19 @@ bool AutoDownloadRule::matchesEpisodeFilterExpression(const QString& articleTitl
             const QString partialPattern2{ u"\\b(\\d{1,4})x(0?\\d{1,4})(?:\\D|\\b)"_s };
 
             // Extract partial match from article and compare as digits
-            QRegularExpressionMatch matcher = cachedRegex(partialPattern1).match(articleTitle);
-            bool matched = matcher.hasMatch();
+            QRegularExpressionMatch articleMatcher = cachedRegex(partialPattern1).match(articleTitle);
+            bool matched = articleMatcher.hasMatch();
 
             if (!matched)
             {
-                matcher = cachedRegex(partialPattern2).match(articleTitle);
-                matched = matcher.hasMatch();
+                articleMatcher = cachedRegex(partialPattern2).match(articleTitle);
+                matched = articleMatcher.hasMatch();
             }
 
             if (matched)
             {
-                const int seasonTheirs{ matcher.capturedView(1).toInt() };
-                const int episodeTheirs{ matcher.capturedView(2).toInt() };
+                const int seasonTheirs{ articleMatcher.capturedView(1).toInt() };
+                const int episodeTheirs{ articleMatcher.capturedView(2).toInt() };
 
                 if (episode.endsWith(u'-'))
                 { // Infinite range

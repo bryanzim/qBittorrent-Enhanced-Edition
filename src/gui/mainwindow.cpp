@@ -1972,7 +1972,7 @@ void MainWindow::pythonDownloadFinished(const Net::DownloadResult& result)
 
     // launch installer
     auto* installer = new QProcess(this);
-    installer->connect(installer, &QProcess::finished, this, [this, exePath, installer, restoreWidgetsGuard = std::move(restoreWidgetsGuard)](const int exitCode, const QProcess::ExitStatus exitStatus) {
+    installer->connect(installer, &QProcess::finished, this, [this, exePath, installer, widgetsGuard = std::move(restoreWidgetsGuard)](const int exitCode, const QProcess::ExitStatus exitStatus) {
         installer->deleteLater();
 
         if ((exitStatus == QProcess::NormalExit) && (exitCode == 0))

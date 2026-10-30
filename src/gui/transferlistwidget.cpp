@@ -350,8 +350,8 @@ void TransferListWidget::setSelectedTorrentsLocation()
     fileDialog->setFileMode(QFileDialog::Directory);
     fileDialog->setOptions(QFileDialog::DontConfirmOverwrite | QFileDialog::ShowDirsOnly | QFileDialog::HideNameFilterDetails);
     connect(fileDialog, &QDialog::accepted, this, [this, fileDialog]() {
-        const QList<BitTorrent::Torrent*> torrents = getSelectedTorrents();
-        if (torrents.isEmpty())
+        const QList<BitTorrent::Torrent*> selectedTorrents = getSelectedTorrents();
+        if (selectedTorrents.isEmpty())
             return;
 
         const Path newLocation{ fileDialog->selectedFiles().constFirst() };
@@ -359,7 +359,7 @@ void TransferListWidget::setSelectedTorrentsLocation()
             return;
 
         // Actually move storage
-        for (BitTorrent::Torrent* const torrent : torrents)
+        for (BitTorrent::Torrent* const torrent : selectedTorrents)
         {
             torrent->setAutoTMMEnabled(false);
             torrent->setSavePath(newLocation);
@@ -1400,7 +1400,7 @@ bool TransferListWidget::loadSettings()
 
 void TransferListWidget::dragEnterEvent(QDragEnterEvent* event)
 {
-    if (const QMimeData* data = event->mimeData(); data->hasText() || data->hasUrls())
+    if (const QMimeData* mimeData = event->mimeData(); mimeData->hasText() || mimeData->hasUrls())
     {
         event->setDropAction(Qt::CopyAction);
         event->accept();
@@ -1417,9 +1417,9 @@ void TransferListWidget::dropEvent(QDropEvent* event)
     event->acceptProposedAction();
     // remove scheme
     QStringList files;
-    if (const QMimeData* data = event->mimeData(); data->hasUrls())
+    if (const QMimeData* mimeData = event->mimeData(); mimeData->hasUrls())
     {
-        const QList<QUrl> urls = data->urls();
+        const QList<QUrl> urls = mimeData->urls();
         files.reserve(urls.size());
 
         for (const QUrl& url : urls)
@@ -1434,7 +1434,7 @@ void TransferListWidget::dropEvent(QDropEvent* event)
     }
     else
     {
-        files = data->text().split(u'\n', Qt::SkipEmptyParts);
+        files = mimeData->text().split(u'\n', Qt::SkipEmptyParts);
     }
 
     // differentiate ".torrent" files/links & magnet links from others

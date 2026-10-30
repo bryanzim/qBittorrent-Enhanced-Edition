@@ -31,7 +31,7 @@
 
 #include <QtLogging>
 
-#include <windows.h>
+#include <Windows.h>
 
 #include <limits>
 

@@ -157,10 +157,10 @@ TrackersFilterWidget::TrackersFilterWidget(QWidget* parent, TransferListWidget* 
     if (useSeparateTrackerStatusFilter == m_handleTrackerStatuses)
         enableTrackerStatusItems(!useSeparateTrackerStatusFilter);
     connect(pref, &Preferences::changed, this, [this, pref] {
-        const bool useSeparateTrackerStatusFilter = pref->useSeparateTrackerStatusFilter();
-        if (useSeparateTrackerStatusFilter == m_handleTrackerStatuses)
+        const bool separateTrackerStatusFilter = pref->useSeparateTrackerStatusFilter();
+        if (separateTrackerStatusFilter == m_handleTrackerStatuses)
         {
-            enableTrackerStatusItems(!useSeparateTrackerStatusFilter);
+            enableTrackerStatusItems(!separateTrackerStatusFilter);
             updateGeometry();
             if (m_handleTrackerStatuses)
                 applyFilter(currentRow());

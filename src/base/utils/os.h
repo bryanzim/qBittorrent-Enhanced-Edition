@@ -35,7 +35,7 @@
 #ifdef Q_OS_WIN
 #include <QString>
 
-#include <windows.h>
+#include <Windows.h>
 
 #include <string>
 #endif

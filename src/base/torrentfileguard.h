@@ -39,6 +39,10 @@ class FileGuard
 public:
     explicit FileGuard(const Path& path = {});
     ~FileGuard();
+    FileGuard(const FileGuard&) = delete;
+    FileGuard& operator=(const FileGuard&) = delete;
+    FileGuard(FileGuard&&) = delete;
+    FileGuard& operator=(FileGuard&&) = delete;
 
     /// Cancels or re-enables deferred file deletion
     void setAutoRemove(bool remove) noexcept;
@@ -57,6 +61,10 @@ class TorrentFileGuard : private FileGuard
 public:
     explicit TorrentFileGuard(const Path& path = {});
     ~TorrentFileGuard();
+    TorrentFileGuard(const TorrentFileGuard&) = delete;
+    TorrentFileGuard& operator=(const TorrentFileGuard&) = delete;
+    TorrentFileGuard(TorrentFileGuard&&) = delete;
+    TorrentFileGuard& operator=(TorrentFileGuard&&) = delete;
 
     /// marks the torrent file as loaded (added) into the BitTorrent::Session
     void markAsAddedToSession();

@@ -34,7 +34,7 @@
 #include <QDebug>
 #include <QSharedMemory>
 
-#include <windows.h>
+#include <Windows.h>
 #endif
 
 #include "base/path.h"

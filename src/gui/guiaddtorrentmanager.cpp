@@ -147,8 +147,6 @@ bool GUIAddTorrentManager::addTorrent(const QString& source, const BitTorrent::A
         handleAddTorrentFailed(decodedPath.toString(), loadResult.error());
         return false;
     }
-
-    return false;
 }
 
 void GUIAddTorrentManager::onDownloadFinished(const Net::DownloadResult& result)
@@ -262,14 +260,14 @@ bool GUIAddTorrentManager::processTorrent(const QString& source, const BitTorren
 
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     m_dialogs[infoHash] = dlg;
-    connect(dlg, &AddNewTorrentDialog::torrentAccepted, this, [this, source, dlg](const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& addTorrentParams) {
+    connect(dlg, &AddNewTorrentDialog::torrentAccepted, this, [this, source, dlg](const BitTorrent::TorrentDescriptor& acceptedTorrent, const BitTorrent::AddTorrentParams& acceptedParams) {
         if (dlg->isDoNotDeleteTorrentChecked())
         {
             if (auto torrentFileGuard = releaseTorrentFileGuard(source))
                 torrentFileGuard->setAutoRemove(false);
         }
 
-        addTorrentToSession(source, torrentDescr, addTorrentParams);
+        addTorrentToSession(source, acceptedTorrent, acceptedParams);
     });
     connect(dlg, &AddNewTorrentDialog::torrentRejected, this, [this, source] {
         releaseTorrentFileGuard(source);

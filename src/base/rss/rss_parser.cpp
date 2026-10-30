@@ -502,8 +502,8 @@ namespace
                     {
                         // Check for any other alphabetic time zone
                         bool nonalpha = false;
-                        for (qsizetype i = 0, end = zone.size(); (i < end) && !nonalpha; ++i)
-                            nonalpha = !isalpha(zone[i]);
+                        for (qsizetype charIndex = 0, zoneEnd = zone.size(); (charIndex < zoneEnd) && !nonalpha; ++charIndex)
+                            nonalpha = !isalpha(zone[charIndex]);
                         if (nonalpha)
                             return {};
                         // TODO: Attempt to recognize the time zone abbreviation?

@@ -33,7 +33,7 @@
 #include <QString>
 #include <QtContainerFwd>
 
-#include <windows.h>
+#include <Windows.h>
 
 namespace Utils::Reg
 {

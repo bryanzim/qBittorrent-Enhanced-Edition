@@ -31,7 +31,7 @@
 #include "foreignapps.h"
 
 #if defined(Q_OS_WIN)
-#include <windows.h>
+#include <Windows.h>
 
 #include <algorithm>
 #endif

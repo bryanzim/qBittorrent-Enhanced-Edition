@@ -40,7 +40,7 @@
 #include <sys/types.h>
 
 #if defined(Q_OS_WIN)
-#include <windows.h>
+#include <Windows.h>
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 #include <sys/param.h>
 

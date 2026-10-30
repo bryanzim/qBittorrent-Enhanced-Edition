@@ -365,10 +365,10 @@ void PeerListWidget::banSelectedPeers()
     if (btn != QMessageBox::Yes)
         return;
 
-    for (const peerData& data : selectedPeers)
+    for (const peerData& peer : selectedPeers)
     {
-        BitTorrent::Session::instance()->banIP(data.ip);
-        LogMsg(tr("Peer \"%1\" is manually banned. PeerID: '%2' Client: '%3' Country: '%4'").arg(data.ip, data.peerId, data.client, data.country));
+        BitTorrent::Session::instance()->banIP(peer.ip);
+        LogMsg(tr("Peer \"%1\" is manually banned. PeerID: '%2' Client: '%3' Country: '%4'").arg(peer.ip, peer.peerId, peer.client, peer.country));
     }
     // Refresh list
     loadPeers(m_properties->getCurrentTorrent());
@@ -409,10 +409,10 @@ void PeerListWidget::shadowbanSelectedPeers()
     if (btn != QMessageBox::Yes)
         return;
 
-    for (const peerData& data : selectedPeers)
+    for (const peerData& peer : selectedPeers)
     {
-        BitTorrent::Session::instance()->shadowbanIP(data.ip);
-        LogMsg(tr("Peer \"%1\" is manually shadowbanned. PeerID: '%2' Client: '%3' Country: '%4'").arg(data.ip, data.peerId, data.client, data.country));
+        BitTorrent::Session::instance()->shadowbanIP(peer.ip);
+        LogMsg(tr("Peer \"%1\" is manually shadowbanned. PeerID: '%2' Client: '%3' Country: '%4'").arg(peer.ip, peer.peerId, peer.client, peer.country));
     }
     // Refresh list
     loadPeers(m_properties->getCurrentTorrent());
@@ -463,9 +463,9 @@ void PeerListWidget::loadPeers(const BitTorrent::Torrent* torrent)
     if (!torrent)
         return;
 
-    torrent->fetchPeerInfo().then(this, [this, torrent = QPointer(torrent)](const QList<BitTorrent::PeerInfo>& peers) {
+    torrent->fetchPeerInfo().then(this, [this, requestedTorrent = QPointer(torrent)](const QList<BitTorrent::PeerInfo>& peers) {
         if (const BitTorrent::Torrent* currentTorrent = m_properties->getCurrentTorrent();
-            !currentTorrent || (currentTorrent != torrent))
+            !currentTorrent || (currentTorrent != requestedTorrent))
         {
             return;
         }
@@ -520,7 +520,7 @@ void PeerListWidget::loadPeers(const BitTorrent::Torrent* torrent)
                 existingPeers.remove(peerEndpoint);
             }
 
-            updatePeer(row, torrent, peer, hideZeroValues);
+            updatePeer(row, requestedTorrent, peer, hideZeroValues);
         }
 
         // Remove peers that are gone

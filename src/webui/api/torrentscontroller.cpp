@@ -1508,15 +1508,15 @@ void TorrentsController::filePrioAction()
     for (const QString& fileID : params()[u"id"_s].split(u'|'))
     {
         bool ok = false;
-        const int id = fileID.toInt(&ok);
+        const int fileId = fileID.toInt(&ok);
         if (!ok)
             throw APIError(APIErrorType::BadParams, tr("File IDs must be integers"));
-        if ((id < 0) || (id >= filesCount))
+        if ((fileId < 0) || (fileId >= filesCount))
             throw APIError(APIErrorType::Conflict, tr("File ID is not valid"));
 
-        if (priorities[id] != priority)
+        if (priorities[fileId] != priority)
         {
-            priorities[id] = priority;
+            priorities[fileId] = priority;
             priorityChanged = true;
         }
     }
@@ -2452,8 +2452,8 @@ void TorrentsController::onMetadataDownloaded(const BitTorrent::TorrentInfo& inf
         // hybrid torrents use the v2 hash for their torrentID, but the torrent may have previously been stored
         // in m_torrentMetadataCache using the v1 hash, before the v2 hash was known/available
         const BitTorrent::TorrentID v1TorrentID = BitTorrent::TorrentID::fromSHA1Hash(info.infoHash().v1());
-        if (auto iter = m_torrentMetadataCache.find(v1TorrentID); iter != m_torrentMetadataCache.end())
-            iter.value().setTorrentInfo(info);
+        if (auto v1Iter = m_torrentMetadataCache.find(v1TorrentID); v1Iter != m_torrentMetadataCache.end())
+            v1Iter.value().setTorrentInfo(info);
     }
 }
 

@@ -333,7 +333,6 @@ bool TorrentContentModel::setData(const QModelIndex& index, const QVariant& valu
             const auto newPrio = static_cast<BitTorrent::DownloadPriority>(value.toInt());
             return setItemPriority(index, newPrio);
         }
-        break;
 
         default:
             break;

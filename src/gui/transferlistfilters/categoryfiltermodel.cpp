@@ -444,8 +444,8 @@ void CategoryFilterModel::populate()
             const QString subcatName = shortName(subcat);
             if (!parent->hasChild(subcatName))
             {
-                const int torrentsCount = std::ranges::count_if(torrents, [&subcat](const Torrent* torrent) { return torrent->category() == subcat; });
-                new CategoryModelItem(parent, subcatName, torrentsCount);
+                const int subcategoryTorrentCount = std::ranges::count_if(torrents, [&subcat](const Torrent* torrent) { return torrent->category() == subcat; });
+                new CategoryModelItem(parent, subcatName, subcategoryTorrentCount);
             }
             parent = parent->child(subcatName);
         }

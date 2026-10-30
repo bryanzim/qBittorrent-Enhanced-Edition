@@ -37,7 +37,7 @@
 #include <string>
 
 #ifdef Q_OS_WIN
-#include <windows.h>
+#include <Windows.h>
 
 #include <iphlpapi.h>
 #include <wincrypt.h>
@@ -2163,15 +2163,15 @@ void SessionImpl::applyNetworkInterfacesSettings(lt::settings_pack& settingsPack
         if (!addr.isNull())
         {
             const bool isIPv6 = (addr.protocol() == QAbstractSocket::IPv6Protocol);
-            const QString ip = isIPv6
-                                   ? Utils::Net::canonicalIPv6Addr(addr).toString()
-                                   : addr.toString();
+            const QString address = isIPv6
+                                        ? Utils::Net::canonicalIPv6Addr(addr).toString()
+                                        : addr.toString();
 
             for (const QString& portString : asConst(portStrings))
-                endpoints << ((isIPv6 ? (u'[' + ip + u']') : ip) + portString);
+                endpoints << ((isIPv6 ? (u'[' + address + u']') : address) + portString);
 
-            if ((ip != u"0.0.0.0") && (ip != u"::"))
-                outgoingInterfaces << ip;
+            if ((address != u"0.0.0.0") && (address != u"::"))
+                outgoingInterfaces << address;
         }
         else
         {

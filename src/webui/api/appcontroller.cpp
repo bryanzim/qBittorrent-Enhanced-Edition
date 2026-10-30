@@ -1315,12 +1315,12 @@ void AppController::getDirectoryContentAction()
 
     const QString visibility = params().value(u"mode"_s, u"all"_s);
 
-    const auto parseDirectoryContentMode = [](const QString& visibility) -> QDir::Filters {
-        if (visibility == u"dirs")
+    const auto parseDirectoryContentMode = [](const QString& mode) -> QDir::Filters {
+        if (mode == u"dirs")
             return QDir::Dirs;
-        if (visibility == u"files")
+        if (mode == u"files")
             return QDir::Files;
-        if (visibility == u"all")
+        if (mode == u"all")
             return (QDir::Dirs | QDir::Files);
         throw APIError(APIErrorType::BadParams, tr("Invalid mode, allowed values: %1").arg(u"all, dirs, files"_s));
     };

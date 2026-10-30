@@ -62,9 +62,9 @@ DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget* parent, const in
     const bool removeTorrentContent = defaultDeleteFiles || Preferences::instance()->removeTorrentContent();
     m_ui->checkRemoveContent->setChecked(removeTorrentContent);
     connect(m_ui->checkRemoveContent, &QCheckBox::clicked, this, [this] {
-        const bool removeTorrentContent = m_ui->checkRemoveContent->isChecked();
-        m_ui->rememberBtn->setEnabled(removeTorrentContent != Preferences::instance()->removeTorrentContent());
-        m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(removeTorrentContent ? tr("Remove torrent and content") : tr("Remove torrent"));
+        const bool removeContent = m_ui->checkRemoveContent->isChecked();
+        m_ui->rememberBtn->setEnabled(removeContent != Preferences::instance()->removeTorrentContent());
+        m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(removeContent ? tr("Remove torrent and content") : tr("Remove torrent"));
     });
     m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(removeTorrentContent ? tr("Remove torrent and content") : tr("Remove torrent"));
     m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setFocus();

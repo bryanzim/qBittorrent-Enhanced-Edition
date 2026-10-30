@@ -327,9 +327,9 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
     painter.drawLine(fullRect.left(), rect.bottom(), rect.right(), rect.bottom());
 
     const int TIME_AXIS_DIVISIONS = 6;
-    for (int i = 0; i < TIME_AXIS_DIVISIONS; ++i)
+    for (int division = 0; division < TIME_AXIS_DIVISIONS; ++division)
     {
-        const int x = rect.left() + (i * rect.width()) / TIME_AXIS_DIVISIONS;
+        const int x = rect.left() + (division * rect.width()) / TIME_AXIS_DIVISIONS;
         painter.drawLine(x, fullRect.top(), x, fullRect.bottom());
     }
 
@@ -356,13 +356,13 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
         QList<QPoint> points;
         milliseconds duration{ 0 };
 
-        for (int i = static_cast<int>(queue.size()) - 1; i >= 0; --i)
+        for (int pointIndex = static_cast<int>(queue.size()) - 1; pointIndex >= 0; --pointIndex)
         {
             const int newX = rect.right() - (duration.count() * xTickSize);
-            const int newY = rect.bottom() - (queue[i].data[id] * yMultiplier);
+            const int newY = rect.bottom() - (queue[pointIndex].data[id] * yMultiplier);
             points.push_back(QPoint(newX, newY));
 
-            duration += queue[i].duration;
+            duration += queue[pointIndex].duration;
             if (duration >= m_currentMaxDuration)
                 break;
         }
@@ -414,7 +414,7 @@ SpeedPlotView::GraphProperties::GraphProperties()
 {
 }
 
-SpeedPlotView::GraphProperties::GraphProperties(const QString& name, const QPen& pen, bool enable)
-    : name(name), pen(pen), enable(enable)
+SpeedPlotView::GraphProperties::GraphProperties(const QString& graphName, const QPen& graphPen, const bool graphEnabled)
+    : name(graphName), pen(graphPen), enable(graphEnabled)
 {
 }
