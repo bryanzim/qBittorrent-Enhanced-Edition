@@ -29,8 +29,12 @@
 
 #include "preferences.h"
 
-#include <algorithm>
-#include <chrono>
+#include "algorithm.h"
+#include "global.h"
+#include "path.h"
+#include "profile.h"
+#include "settingsstorage.h"
+#include "utils/fs.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -41,42 +45,38 @@
 #include <QSettings>
 #include <QTime>
 
-#include "algorithm.h"
-#include "global.h"
-#include "path.h"
-#include "profile.h"
-#include "settingsstorage.h"
-#include "utils/fs.h"
+#include <algorithm>
+#include <chrono>
 
 namespace
 {
     template <typename T>
-    T value(const QString &key, const T &defaultValue = {})
+    T value(const QString& key, const T& defaultValue = {})
     {
         return SettingsStorage::instance()->loadValue(key, defaultValue);
     }
 
     template <typename T>
-    void setValue(const QString &key, const T &value)
+    void setValue(const QString& key, const T& value)
     {
         SettingsStorage::instance()->storeValue(key, value);
     }
 
 #ifdef Q_OS_WIN
-    QString makeProfileID(const Path &profilePath, const QString &profileName)
+    QString makeProfileID(const Path& profilePath, const QString& profileName)
     {
         return profilePath.isEmpty()
-                ? profileName
-                : profileName + u'@' + Utils::Fs::toValidFileName(profilePath.data(), {});
+                   ? profileName
+                   : profileName + u'@' + Utils::Fs::toValidFileName(profilePath.data(), {});
     }
 #endif
 }
 
-Preferences *Preferences::m_instance = nullptr;
+Preferences* Preferences::m_instance = nullptr;
 
 Preferences::Preferences() = default;
 
-Preferences *Preferences::instance()
+Preferences* Preferences::instance()
 {
     return m_instance;
 }
@@ -100,7 +100,7 @@ QString Preferences::getLocale() const
     return (localeName.isEmpty() ? QLocale::system().name() : localeName);
 }
 
-void Preferences::setLocale(const QString &locale)
+void Preferences::setLocale(const QString& locale)
 {
     if (locale == getLocale())
         return;
@@ -126,7 +126,7 @@ Path Preferences::customUIThemePath() const
     return value<Path>(u"Preferences/General/CustomUIThemePath"_s);
 }
 
-void Preferences::setCustomUIThemePath(const Path &path)
+void Preferences::setCustomUIThemePath(const Path& path)
 {
     if (path == customUIThemePath())
         return;
@@ -470,7 +470,7 @@ bool Preferences::WinStartup() const
     const QString profileName = Profile::instance()->profileName();
     const Path profilePath = Profile::instance()->rootPath();
     const QString profileID = makeProfileID(profilePath, profileName);
-    const QSettings settings {u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"_s, QSettings::NativeFormat};
+    const QSettings settings{ u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"_s, QSettings::NativeFormat };
 
     return settings.contains(profileID);
 }
@@ -480,13 +480,13 @@ void Preferences::setWinStartup(const bool b)
     const QString profileName = Profile::instance()->profileName();
     const Path profilePath = Profile::instance()->rootPath();
     const QString profileID = makeProfileID(profilePath, profileName);
-    QSettings settings {u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"_s, QSettings::NativeFormat};
+    QSettings settings{ u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"_s, QSettings::NativeFormat };
     if (b)
     {
         const QString configuration = Profile::instance()->configurationName();
 
         const auto cmd = uR"("%1" "--profile=%2" "--configuration=%3")"_s
-                .arg(Path(qApp->applicationFilePath()).toString(), profilePath.toString(), configuration);
+                             .arg(Path(qApp->applicationFilePath()).toString(), profilePath.toString(), configuration);
         settings.setValue(profileID, cmd);
     }
     else
@@ -507,7 +507,7 @@ QString Preferences::getStyle() const
     return styleName.isEmpty() ? defaultStyleName : styleName;
 }
 
-void Preferences::setStyle(const QString &styleName)
+void Preferences::setStyle(const QString& styleName)
 {
     if (styleName == getStyle())
         return;
@@ -521,7 +521,7 @@ Path Preferences::getScanDirsLastPath() const
     return value<Path>(u"Preferences/Downloads/ScanDirsLastPath"_s);
 }
 
-void Preferences::setScanDirsLastPath(const Path &path)
+void Preferences::setScanDirsLastPath(const Path& path)
 {
     if (path == getScanDirsLastPath())
         return;
@@ -547,7 +547,7 @@ QString Preferences::getMailNotificationSender() const
     return value<QString>(u"Preferences/MailNotification/sender"_s);
 }
 
-void Preferences::setMailNotificationSender(const QString &mail)
+void Preferences::setMailNotificationSender(const QString& mail)
 {
     if (mail == getMailNotificationSender())
         return;
@@ -560,7 +560,7 @@ QString Preferences::getMailNotificationEmail() const
     return value<QString>(u"Preferences/MailNotification/email"_s);
 }
 
-void Preferences::setMailNotificationEmail(const QString &mail)
+void Preferences::setMailNotificationEmail(const QString& mail)
 {
     if (mail == getMailNotificationEmail())
         return;
@@ -573,7 +573,7 @@ QString Preferences::getMailNotificationSMTP() const
     return value<QString>(u"Preferences/MailNotification/smtp_server"_s);
 }
 
-void Preferences::setMailNotificationSMTP(const QString &smtpServer)
+void Preferences::setMailNotificationSMTP(const QString& smtpServer)
 {
     if (smtpServer == getMailNotificationSMTP())
         return;
@@ -612,7 +612,7 @@ QString Preferences::getMailNotificationSMTPUsername() const
     return value<QString>(u"Preferences/MailNotification/username"_s);
 }
 
-void Preferences::setMailNotificationSMTPUsername(const QString &username)
+void Preferences::setMailNotificationSMTPUsername(const QString& username)
 {
     if (username == getMailNotificationSMTPUsername())
         return;
@@ -625,7 +625,7 @@ QString Preferences::getMailNotificationSMTPPassword() const
     return value<QString>(u"Preferences/MailNotification/password"_s);
 }
 
-void Preferences::setMailNotificationSMTPPassword(const QString &password)
+void Preferences::setMailNotificationSMTPPassword(const QString& password)
 {
     if (password == getMailNotificationSMTPPassword())
         return;
@@ -664,7 +664,7 @@ QTime Preferences::getSchedulerStartTime() const
     return value(u"Preferences/Scheduler/start_time"_s, QTime(8, 0));
 }
 
-void Preferences::setSchedulerStartTime(const QTime &time)
+void Preferences::setSchedulerStartTime(const QTime& time)
 {
     if (time == getSchedulerStartTime())
         return;
@@ -677,7 +677,7 @@ QTime Preferences::getSchedulerEndTime() const
     return value(u"Preferences/Scheduler/end_time"_s, QTime(20, 0));
 }
 
-void Preferences::setSchedulerEndTime(const QTime &time)
+void Preferences::setSchedulerEndTime(const QTime& time)
 {
     if (time == getSchedulerEndTime())
         return;
@@ -817,7 +817,7 @@ QList<Utils::Net::Subnet> Preferences::getWebUIAuthSubnetWhitelist() const
     QList<Utils::Net::Subnet> ret;
     ret.reserve(subnets.size());
 
-    for (const QString &rawSubnet : subnets)
+    for (const QString& rawSubnet : subnets)
     {
         const std::optional<Utils::Net::Subnet> subnet = Utils::Net::parseSubnet(rawSubnet.trimmed());
         if (subnet)
@@ -829,8 +829,7 @@ QList<Utils::Net::Subnet> Preferences::getWebUIAuthSubnetWhitelist() const
 
 void Preferences::setWebUIAuthSubnetWhitelist(QStringList subnets)
 {
-    subnets.removeIf([](const QString &subnet)
-    {
+    subnets.removeIf([](const QString& subnet) {
         return !Utils::Net::parseSubnet(subnet.trimmed()).has_value();
     });
 
@@ -842,7 +841,7 @@ QString Preferences::getServerDomains() const
     return value<QString>(u"WebUI/ServerDomains"_s, u"*"_s);
 }
 
-void Preferences::setServerDomains(const QString &str)
+void Preferences::setServerDomains(const QString& str)
 {
     if (str == getServerDomains())
         return;
@@ -855,7 +854,7 @@ QString Preferences::getWebUIAddress() const
     return value<QString>(u"WebUI/Address"_s, u"*"_s).trimmed();
 }
 
-void Preferences::setWebUIAddress(const QString &addr)
+void Preferences::setWebUIAddress(const QString& addr)
 {
     if (addr == getWebUIAddress())
         return;
@@ -895,7 +894,7 @@ QString Preferences::getWebUIUsername() const
     return value<QString>(u"WebUI/Username"_s, u"admin"_s);
 }
 
-void Preferences::setWebUIUsername(const QString &username)
+void Preferences::setWebUIUsername(const QString& username)
 {
     if (username == getWebUIUsername())
         return;
@@ -908,7 +907,7 @@ QByteArray Preferences::getWebUIPassword() const
     return value<QByteArray>(u"WebUI/Password_PBKDF2"_s);
 }
 
-void Preferences::setWebUIPassword(const QByteArray &password)
+void Preferences::setWebUIPassword(const QByteArray& password)
 {
     if (password == getWebUIPassword())
         return;
@@ -921,7 +920,7 @@ QString Preferences::getWebUIApiKey() const
     return value<QString>(u"WebUI/APIKey"_s);
 }
 
-void Preferences::setWebUIApiKey(const QString &apiKey)
+void Preferences::setWebUIApiKey(const QString& apiKey)
 {
     if (apiKey == getWebUIApiKey())
         return;
@@ -1051,7 +1050,7 @@ Path Preferences::getWebUIHttpsCertificatePath() const
     return value<Path>(u"WebUI/HTTPS/CertificatePath"_s);
 }
 
-void Preferences::setWebUIHttpsCertificatePath(const Path &path)
+void Preferences::setWebUIHttpsCertificatePath(const Path& path)
 {
     if (path == getWebUIHttpsCertificatePath())
         return;
@@ -1064,7 +1063,7 @@ Path Preferences::getWebUIHttpsKeyPath() const
     return value<Path>(u"WebUI/HTTPS/KeyPath"_s);
 }
 
-void Preferences::setWebUIHttpsKeyPath(const Path &path)
+void Preferences::setWebUIHttpsKeyPath(const Path& path)
 {
     if (path == getWebUIHttpsKeyPath())
         return;
@@ -1090,7 +1089,7 @@ Path Preferences::getWebUIRootFolder() const
     return value<Path>(u"WebUI/RootFolder"_s);
 }
 
-void Preferences::setWebUIRootFolder(const Path &path)
+void Preferences::setWebUIRootFolder(const Path& path)
 {
     if (path == getWebUIRootFolder())
         return;
@@ -1116,7 +1115,7 @@ QString Preferences::getWebUICustomHTTPHeaders() const
     return value<QString>(u"WebUI/CustomHTTPHeaders"_s);
 }
 
-void Preferences::setWebUICustomHTTPHeaders(const QString &headers)
+void Preferences::setWebUICustomHTTPHeaders(const QString& headers)
 {
     if (headers == getWebUICustomHTTPHeaders())
         return;
@@ -1142,7 +1141,7 @@ QString Preferences::getWebUITrustedReverseProxiesList() const
     return value<QString>(u"WebUI/TrustedReverseProxiesList"_s);
 }
 
-void Preferences::setWebUITrustedReverseProxiesList(const QString &addr)
+void Preferences::setWebUITrustedReverseProxiesList(const QString& addr)
 {
     if (addr == getWebUITrustedReverseProxiesList())
         return;
@@ -1181,7 +1180,7 @@ QString Preferences::getDynDomainName() const
     return value<QString>(u"Preferences/DynDNS/DomainName"_s, u"changeme.dyndns.org"_s);
 }
 
-void Preferences::setDynDomainName(const QString &name)
+void Preferences::setDynDomainName(const QString& name)
 {
     if (name == getDynDomainName())
         return;
@@ -1194,7 +1193,7 @@ QString Preferences::getDynDNSUsername() const
     return value<QString>(u"Preferences/DynDNS/Username"_s);
 }
 
-void Preferences::setDynDNSUsername(const QString &username)
+void Preferences::setDynDNSUsername(const QString& username)
 {
     if (username == getDynDNSUsername())
         return;
@@ -1207,7 +1206,7 @@ QString Preferences::getDynDNSPassword() const
     return value<QString>(u"Preferences/DynDNS/Password"_s);
 }
 
-void Preferences::setDynDNSPassword(const QString &password)
+void Preferences::setDynDNSPassword(const QString& password)
 {
     if (password == getDynDNSPassword())
         return;
@@ -1221,7 +1220,7 @@ QByteArray Preferences::getUILockPassword() const
     return value<QByteArray>(u"Locking/password_PBKDF2"_s);
 }
 
-void Preferences::setUILockPassword(const QByteArray &password)
+void Preferences::setUILockPassword(const QByteArray& password)
 {
     if (password == getUILockPassword())
         return;
@@ -1260,7 +1259,7 @@ QString Preferences::getAutoRunOnTorrentAddedProgram() const
     return value<QString>(u"AutoRun/OnTorrentAdded/Program"_s);
 }
 
-void Preferences::setAutoRunOnTorrentAddedProgram(const QString &program)
+void Preferences::setAutoRunOnTorrentAddedProgram(const QString& program)
 {
     if (program == getAutoRunOnTorrentAddedProgram())
         return;
@@ -1286,7 +1285,7 @@ QString Preferences::getAutoRunOnTorrentFinishedProgram() const
     return value<QString>(u"AutoRun/program"_s);
 }
 
-void Preferences::setAutoRunOnTorrentFinishedProgram(const QString &program)
+void Preferences::setAutoRunOnTorrentFinishedProgram(const QString& program)
 {
     if (program == getAutoRunOnTorrentFinishedProgram())
         return;
@@ -1511,7 +1510,7 @@ Path Preferences::getPythonExecutablePath() const
     return value(u"Preferences/Search/pythonExecutablePath"_s, Path());
 }
 
-void Preferences::setPythonExecutablePath(const Path &path)
+void Preferences::setPythonExecutablePath(const Path& path)
 {
     if (path == getPythonExecutablePath())
         return;
@@ -1635,7 +1634,7 @@ QDateTime Preferences::getDNSLastUpd() const
     return value<QDateTime>(u"DNSUpdater/lastUpdateTime"_s);
 }
 
-void Preferences::setDNSLastUpd(const QDateTime &date)
+void Preferences::setDNSLastUpd(const QDateTime& date)
 {
     if (date == getDNSLastUpd())
         return;
@@ -1648,7 +1647,7 @@ QString Preferences::getDNSLastIP() const
     return value<QString>(u"DNSUpdater/lastIP"_s);
 }
 
-void Preferences::setDNSLastIP(const QString &ip)
+void Preferences::setDNSLastIP(const QString& ip)
 {
     if (ip == getDNSLastIP())
         return;
@@ -1661,7 +1660,7 @@ QByteArray Preferences::getMainGeometry() const
     return value<QByteArray>(u"MainWindow/geometry"_s);
 }
 
-void Preferences::setMainGeometry(const QByteArray &geometry)
+void Preferences::setMainGeometry(const QByteArray& geometry)
 {
     if (geometry == getMainGeometry())
         return;
@@ -1700,7 +1699,7 @@ Path Preferences::getMainLastDir() const
     return value(u"MainWindow/LastDir"_s, Utils::Fs::homePath());
 }
 
-void Preferences::setMainLastDir(const Path &path)
+void Preferences::setMainLastDir(const Path& path)
 {
     if (path == getMainLastDir())
         return;
@@ -1713,7 +1712,7 @@ QByteArray Preferences::getPeerListState() const
     return value<QByteArray>(u"GUI/Qt6/TorrentProperties/PeerListState"_s);
 }
 
-void Preferences::setPeerListState(const QByteArray &state)
+void Preferences::setPeerListState(const QByteArray& state)
 {
     if (state == getPeerListState())
         return;
@@ -1726,7 +1725,7 @@ QString Preferences::getPropSplitterSizes() const
     return value<QString>(u"TorrentProperties/SplitterSizes"_s);
 }
 
-void Preferences::setPropSplitterSizes(const QString &sizes)
+void Preferences::setPropSplitterSizes(const QString& sizes)
 {
     if (sizes == getPropSplitterSizes())
         return;
@@ -1739,7 +1738,7 @@ QByteArray Preferences::getPropFileListState() const
     return value<QByteArray>(u"GUI/Qt6/TorrentProperties/FilesListState"_s);
 }
 
-void Preferences::setPropFileListState(const QByteArray &state)
+void Preferences::setPropFileListState(const QByteArray& state)
 {
     if (state == getPropFileListState())
         return;
@@ -1778,7 +1777,7 @@ QByteArray Preferences::getTrackerListState() const
     return value<QByteArray>(u"GUI/Qt6/TorrentProperties/TrackerListState"_s);
 }
 
-void Preferences::setTrackerListState(const QByteArray &state)
+void Preferences::setTrackerListState(const QByteArray& state)
 {
     if (state == getTrackerListState())
         return;
@@ -1791,7 +1790,7 @@ QStringList Preferences::getRssOpenFolders() const
     return value<QStringList>(u"GUI/RSSWidget/OpenedFolders"_s);
 }
 
-void Preferences::setRssOpenFolders(const QStringList &folders)
+void Preferences::setRssOpenFolders(const QStringList& folders)
 {
     if (folders == getRssOpenFolders())
         return;
@@ -1804,7 +1803,7 @@ QByteArray Preferences::getRssFeedListState() const
     return value<QByteArray>(u"GUI/Qt6/RSSWidget/FeedListState"_s);
 }
 
-void Preferences::setRssFeedListState(const QByteArray &state)
+void Preferences::setRssFeedListState(const QByteArray& state)
 {
     if (state == getRssFeedListState())
         return;
@@ -1817,7 +1816,7 @@ QByteArray Preferences::getRssSideSplitterState() const
     return value<QByteArray>(u"GUI/Qt6/RSSWidget/SideSplitterState"_s);
 }
 
-void Preferences::setRssSideSplitterState(const QByteArray &state)
+void Preferences::setRssSideSplitterState(const QByteArray& state)
 {
     if (state == getRssSideSplitterState())
         return;
@@ -1830,7 +1829,7 @@ QByteArray Preferences::getRssMainSplitterState() const
     return value<QByteArray>(u"GUI/Qt6/RSSWidget/MainSplitterState"_s);
 }
 
-void Preferences::setRssMainSplitterState(const QByteArray &state)
+void Preferences::setRssMainSplitterState(const QByteArray& state)
 {
     if (state == getRssMainSplitterState())
         return;
@@ -1843,7 +1842,7 @@ QByteArray Preferences::getSearchTabHeaderState() const
     return value<QByteArray>(u"GUI/Qt6/SearchTab/HeaderState"_s);
 }
 
-void Preferences::setSearchTabHeaderState(const QByteArray &state)
+void Preferences::setSearchTabHeaderState(const QByteArray& state)
 {
     if (state == getSearchTabHeaderState())
         return;
@@ -1869,7 +1868,7 @@ QStringList Preferences::getSearchEngDisabled() const
     return value<QStringList>(u"SearchEngines/disabledEngines"_s);
 }
 
-void Preferences::setSearchEngDisabled(const QStringList &engines)
+void Preferences::setSearchEngDisabled(const QStringList& engines)
 {
     if (engines == getSearchEngDisabled())
         return;
@@ -1882,7 +1881,7 @@ QString Preferences::getTorImportLastContentDir() const
     return value(u"TorrentImport/LastContentDir"_s, QDir::homePath());
 }
 
-void Preferences::setTorImportLastContentDir(const QString &path)
+void Preferences::setTorImportLastContentDir(const QString& path)
 {
     if (path == getTorImportLastContentDir())
         return;
@@ -1895,7 +1894,7 @@ QByteArray Preferences::getTorImportGeometry() const
     return value<QByteArray>(u"TorrentImportDlg/dimensions"_s);
 }
 
-void Preferences::setTorImportGeometry(const QByteArray &geometry)
+void Preferences::setTorImportGeometry(const QByteArray& geometry)
 {
     if (geometry == getTorImportGeometry())
         return;
@@ -2012,7 +2011,7 @@ QByteArray Preferences::getTransHeaderState() const
     return value<QByteArray>(u"GUI/Qt6/TransferList/HeaderState"_s);
 }
 
-void Preferences::setTransHeaderState(const QByteArray &state)
+void Preferences::setTransHeaderState(const QByteArray& state)
 {
     if (state == getTransHeaderState())
         return;
@@ -2065,16 +2064,16 @@ QList<QNetworkCookie> Preferences::getNetworkCookies() const
     const auto rawCookies = value<QStringList>(u"Network/Cookies"_s);
     QList<QNetworkCookie> cookies;
     cookies.reserve(rawCookies.size());
-    for (const QString &rawCookie : rawCookies)
+    for (const QString& rawCookie : rawCookies)
         cookies << QNetworkCookie::parseCookies(rawCookie.toUtf8());
     return cookies;
 }
 
-void Preferences::setNetworkCookies(const QList<QNetworkCookie> &cookies)
+void Preferences::setNetworkCookies(const QList<QNetworkCookie>& cookies)
 {
     QStringList rawCookies;
     rawCookies.reserve(cookies.size());
-    for (const QNetworkCookie &cookie : cookies)
+    for (const QNetworkCookie& cookie : cookies)
         rawCookies << QString::fromLatin1(cookie.toRawForm());
     setValue(u"Network/Cookies"_s, rawCookies);
 }

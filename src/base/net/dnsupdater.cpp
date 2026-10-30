@@ -28,27 +28,27 @@
 
 #include "dnsupdater.h"
 
-#include <QDebug>
-#include <QRegularExpression>
-#include <QUrlQuery>
-
 #include "base/global.h"
 #include "base/logger.h"
 #include "base/net/downloadmanager.h"
 #include "base/version.h"
+
+#include <QDebug>
+#include <QRegularExpression>
+#include <QUrlQuery>
 
 using namespace std::chrono_literals;
 using namespace Net;
 
 const std::chrono::seconds IP_CHECK_INTERVAL = 30min;
 
-DNSUpdater::DNSUpdater(QObject *parent)
+DNSUpdater::DNSUpdater(QObject* parent)
     : QObject(parent)
 {
     updateCredentials();
 
     // Load saved settings from previous session
-    const Preferences *const pref = Preferences::instance();
+    const Preferences* const pref = Preferences::instance();
     m_lastIPCheckTime = pref->getDNSLastUpd();
     m_lastIP = QHostAddress(pref->getDNSLastIP());
 
@@ -58,8 +58,7 @@ DNSUpdater::DNSUpdater(QObject *parent)
     m_ipCheckTimer.start();
 
     // Check lastUpdate to avoid flooding
-    if (!m_lastIPCheckTime.isValid()
-        || (m_lastIPCheckTime.secsTo(QDateTime::currentDateTime()) > IP_CHECK_INTERVAL.count()))
+    if (!m_lastIPCheckTime.isValid() || (m_lastIPCheckTime.secsTo(QDateTime::currentDateTime()) > IP_CHECK_INTERVAL.count()))
     {
         checkPublicIP();
     }
@@ -68,7 +67,7 @@ DNSUpdater::DNSUpdater(QObject *parent)
 DNSUpdater::~DNSUpdater()
 {
     // Save lastupdate time and last ip
-    Preferences *const pref = Preferences::instance();
+    Preferences* const pref = Preferences::instance();
     pref->setDNSLastUpd(m_lastIPCheckTime);
     pref->setDNSLastIP(m_lastIP.toString());
 }
@@ -78,13 +77,12 @@ void DNSUpdater::checkPublicIP()
     Q_ASSERT(m_state == OK);
 
     DownloadManager::instance()->download(
-            DownloadRequest(u"https://checkip.dyndns.org"_s).userAgent(QStringLiteral("qBittorrent Enhanced/" QBT_VERSION_2))
-            , Preferences::instance()->useProxyForGeneralPurposes(), this, &DNSUpdater::ipRequestFinished);
+        DownloadRequest(u"https://checkip.dyndns.org"_s).userAgent(QStringLiteral("qBittorrent Enhanced/" QBT_VERSION_2)), Preferences::instance()->useProxyForGeneralPurposes(), this, &DNSUpdater::ipRequestFinished);
 
     m_lastIPCheckTime = QDateTime::currentDateTime();
 }
 
-void DNSUpdater::ipRequestFinished(const DownloadResult &result)
+void DNSUpdater::ipRequestFinished(const DownloadResult& result)
 {
     if (result.status != DownloadStatus::Success)
     {
@@ -98,7 +96,7 @@ void DNSUpdater::ipRequestFinished(const DownloadResult &result)
     {
         const QString ipStr = ipRegexMatch.captured(1);
         qDebug() << Q_FUNC_INFO << "Regular expression captured the following IP:" << ipStr;
-        const QHostAddress newIp {ipStr};
+        const QHostAddress newIp{ ipStr };
         if (!newIp.isNull())
         {
             if (m_lastIP != newIp)
@@ -126,8 +124,7 @@ void DNSUpdater::updateDNSService()
 
     m_lastIPCheckTime = QDateTime::currentDateTime();
     DownloadManager::instance()->download(
-            DownloadRequest(getUpdateUrl()).userAgent(QStringLiteral("qBittorrent Enhanced/" QBT_VERSION_2))
-            , Preferences::instance()->useProxyForGeneralPurposes(), this, &DNSUpdater::ipUpdateFinished);
+        DownloadRequest(getUpdateUrl()).userAgent(QStringLiteral("qBittorrent Enhanced/" QBT_VERSION_2)), Preferences::instance()->useProxyForGeneralPurposes(), this, &DNSUpdater::ipUpdateFinished);
 }
 
 QString DNSUpdater::getUpdateUrl() const
@@ -164,7 +161,7 @@ QString DNSUpdater::getUpdateUrl() const
     return url.toString();
 }
 
-void DNSUpdater::ipUpdateFinished(const DownloadResult &result)
+void DNSUpdater::ipUpdateFinished(const DownloadResult& result)
 {
     if (result.status == DownloadStatus::Success)
         processIPUpdateReply(QString::fromUtf8(result.data));
@@ -172,7 +169,7 @@ void DNSUpdater::ipUpdateFinished(const DownloadResult &result)
         qWarning() << "IP update failed:" << result.errorString;
 }
 
-void DNSUpdater::processIPUpdateReply(const QString &reply)
+void DNSUpdater::processIPUpdateReply(const QString& reply)
 {
     qDebug() << Q_FUNC_INFO << reply;
     const QString code = reply.split(u' ').first();
@@ -212,7 +209,7 @@ void DNSUpdater::processIPUpdateReply(const QString &reply)
     if (code == u"badagent")
     {
         LogMsg(tr("Dynamic DNS error: qBittorrent was blacklisted by the service, please submit a bug report at https://bugs.qbittorrent.org."),
-                           Log::CRITICAL);
+               Log::CRITICAL);
         m_state = FATAL;
         return;
     }
@@ -220,7 +217,7 @@ void DNSUpdater::processIPUpdateReply(const QString &reply)
     if (code == u"!donator")
     {
         LogMsg(tr("Dynamic DNS error: %1 was returned by the service, please submit a bug report at https://bugs.qbittorrent.org.").arg(u"!donator"_s),
-                           Log::CRITICAL);
+               Log::CRITICAL);
         m_state = FATAL;
         return;
     }
@@ -234,8 +231,9 @@ void DNSUpdater::processIPUpdateReply(const QString &reply)
 
 void DNSUpdater::updateCredentials()
 {
-    if (m_state == FATAL) return;
-    Preferences *const pref = Preferences::instance();
+    if (m_state == FATAL)
+        return;
+    Preferences* const pref = Preferences::instance();
     bool change = false;
     // Get DNS service information
     if (m_service != pref->getDynDNSService())
@@ -297,9 +295,9 @@ QUrl DNSUpdater::getRegistrationUrl(const DNS::Service service)
     switch (service)
     {
     case DNS::Service::DynDNS:
-        return {u"https://account.dyn.com/entrance/"_s};
+        return { u"https://account.dyn.com/entrance/"_s };
     case DNS::Service::NoIP:
-        return {u"https://www.noip.com/remote-access"_s};
+        return { u"https://www.noip.com/remote-access"_s };
     default:
         Q_UNREACHABLE();
         break;

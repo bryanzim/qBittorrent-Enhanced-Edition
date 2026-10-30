@@ -28,9 +28,9 @@
 
 #include "random.h"
 
-#include <random>
-
 #include <QtSystemDetection>
+
+#include <random>
 
 #if defined(Q_OS_LINUX) && defined(QBT_USES_GETRANDOM)
 #include "randomlayer_linux.cpp"

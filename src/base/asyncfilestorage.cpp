@@ -28,16 +28,15 @@
 
 #include "asyncfilestorage.h"
 
-#include <QDebug>
-#include <QMetaObject>
-
 #include "base/logger.h"
 #include "base/utils/fs.h"
 #include "base/utils/io.h"
 
-AsyncFileStorage::AsyncFileStorage(const Path &storageFolderPath, QObject *parent)
-    : QObject(parent)
-    , m_storageDir(storageFolderPath)
+#include <QDebug>
+#include <QMetaObject>
+
+AsyncFileStorage::AsyncFileStorage(const Path& storageFolderPath, QObject* parent)
+    : QObject(parent), m_storageDir(storageFolderPath)
 {
     Q_ASSERT(m_storageDir.isAbsolute());
 
@@ -49,7 +48,7 @@ AsyncFileStorage::AsyncFileStorage(const Path &storageFolderPath, QObject *paren
     }
 }
 
-void AsyncFileStorage::store(const Path &filePath, const QByteArray &data)
+void AsyncFileStorage::store(const Path& filePath, const QByteArray& data)
 {
     QMetaObject::invokeMethod(this, [this, data, filePath] { store_impl(filePath, data); }, Qt::QueuedConnection);
 }
@@ -59,7 +58,7 @@ Path AsyncFileStorage::storageDir() const
     return m_storageDir;
 }
 
-void AsyncFileStorage::store_impl(const Path &fileName, const QByteArray &data)
+void AsyncFileStorage::store_impl(const Path& fileName, const QByteArray& data)
 {
     const Path filePath = m_storageDir / fileName;
     qDebug() << "AsyncFileStorage: Saving data to" << filePath.toString();

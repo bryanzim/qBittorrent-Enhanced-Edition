@@ -29,10 +29,10 @@
 
 #pragma once
 
+#include "piecesbar.h"
+
 #include <QBitArray>
 #include <QtContainerFwd>
-
-#include "piecesbar.h"
 
 class QWidget;
 
@@ -43,16 +43,16 @@ class DownloadedPiecesBar final : public PiecesBar
     Q_DISABLE_COPY_MOVE(DownloadedPiecesBar)
 
 public:
-    DownloadedPiecesBar(QWidget *parent);
+    DownloadedPiecesBar(QWidget* parent);
 
-    void setProgress(const QBitArray &pieces, const QBitArray &downloadedPieces);
+    void setProgress(const QBitArray& pieces, const QBitArray& downloadedPieces);
 
     // PiecesBar interface
     void clear() override;
 
 private:
     // scale bitfield vector to float vector
-    QList<float> bitfieldToFloatVector(const QBitArray &vecin, int reqSize);
+    QList<float> bitfieldToFloatVector(const QBitArray& vecin, int reqSize);
     QImage renderImage() override;
     QString simpleToolTipText() const override;
     void updateColors() override;

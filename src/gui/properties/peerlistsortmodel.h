@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QSortFilterProxyModel>
-
 #include "base/utils/compare.h"
+
+#include <QSortFilterProxyModel>
 
 class PeerListSortModel final : public QSortFilterProxyModel
 {
@@ -43,10 +43,10 @@ public:
         UnderlyingDataRole = Qt::UserRole
     };
 
-    explicit PeerListSortModel(QObject *parent = nullptr);
+    explicit PeerListSortModel(QObject* parent = nullptr);
 
 private:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
     Utils::Compare::NaturalLessThan<Qt::CaseInsensitive> m_naturalLessThan;
 };

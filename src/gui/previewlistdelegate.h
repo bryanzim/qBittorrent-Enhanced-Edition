@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QStyledItemDelegate>
-
 #include "progressbarpainter.h"
+
+#include <QStyledItemDelegate>
 
 class PreviewListDelegate final : public QStyledItemDelegate
 {
@@ -39,10 +39,10 @@ class PreviewListDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY_MOVE(PreviewListDelegate)
 
 public:
-    explicit PreviewListDelegate(QObject *parent = nullptr);
+    explicit PreviewListDelegate(QObject* parent = nullptr);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    QWidget *createEditor(QWidget *, const QStyleOptionViewItem &, const QModelIndex &) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    QWidget* createEditor(QWidget*, const QStyleOptionViewItem&, const QModelIndex&) const override;
 
 private:
     ProgressBarPainter m_progressBarPainter;

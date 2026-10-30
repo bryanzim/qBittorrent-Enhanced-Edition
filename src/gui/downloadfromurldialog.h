@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 namespace Ui
 {
@@ -43,18 +43,18 @@ class DownloadFromURLDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(DownloadFromURLDialog)
 
 public:
-    explicit DownloadFromURLDialog(QWidget *parent);
+    explicit DownloadFromURLDialog(QWidget* parent);
     ~DownloadFromURLDialog() override;
 
 signals:
-    void urlsReadyToBeDownloaded(const QStringList &torrentURLs);
+    void urlsReadyToBeDownloaded(const QStringList& torrentURLs);
 
 private slots:
     void onSubmit();
 
 private:
-    void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
-    Ui::DownloadFromURLDialog *m_ui = nullptr;
+    Ui::DownloadFromURLDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
 };

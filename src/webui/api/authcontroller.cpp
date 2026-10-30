@@ -28,15 +28,14 @@
 
 #include "authcontroller.h"
 
-#include <QString>
-
-#include "base/global.h"
 #include "apierror.h"
+#include "base/global.h"
 #include "isessionmanager.h"
 
-AuthController::AuthController(ISessionManager *sessionManager, IApplication *app, QObject *parent)
-    : APIController(app, parent)
-    , m_sessionManager {sessionManager}
+#include <QString>
+
+AuthController::AuthController(ISessionManager* sessionManager, IApplication* app, QObject* parent)
+    : APIController(app, parent), m_sessionManager{ sessionManager }
 {
 }
 

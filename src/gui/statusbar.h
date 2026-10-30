@@ -44,7 +44,7 @@ class StatusBar final : public QStatusBar
     Q_DISABLE_COPY_MOVE(StatusBar)
 
 public:
-    StatusBar(QWidget *parent = nullptr);
+    StatusBar(QWidget* parent = nullptr);
 
 signals:
     void alternativeSpeedsButtonClicked();
@@ -68,14 +68,14 @@ private:
     void updateExternalAddressesVisibility();
     void updateSpeedLabels();
 
-    QPushButton *m_dlSpeedLbl = nullptr;
-    QPushButton *m_upSpeedLbl = nullptr;
-    QLabel *m_freeDiskSpaceLbl = nullptr;
-    QWidget *m_freeDiskSpaceSeparator = nullptr;
-    QLabel *m_lastExternalIPsLbl = nullptr;
-    QWidget *m_lastExternalIPsSeparator = nullptr;
-    QLabel *m_DHTLbl = nullptr;
-    QWidget *m_DHTSeparator = nullptr;
-    QPushButton *m_connecStatusLblIcon = nullptr;
-    QPushButton *m_altSpeedsBtn = nullptr;
+    QPushButton* m_dlSpeedLbl = nullptr;
+    QPushButton* m_upSpeedLbl = nullptr;
+    QLabel* m_freeDiskSpaceLbl = nullptr;
+    QWidget* m_freeDiskSpaceSeparator = nullptr;
+    QLabel* m_lastExternalIPsLbl = nullptr;
+    QWidget* m_lastExternalIPsSeparator = nullptr;
+    QLabel* m_DHTLbl = nullptr;
+    QWidget* m_DHTSeparator = nullptr;
+    QPushButton* m_connecStatusLblIcon = nullptr;
+    QPushButton* m_altSpeedsBtn = nullptr;
 };

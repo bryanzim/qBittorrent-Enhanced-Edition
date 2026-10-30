@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <QtContainerFwd>
 #include <QTreeView>
+#include <QtContainerFwd>
 
 class TrackerListModel;
 
@@ -45,11 +45,11 @@ class TrackerListWidget : public QTreeView
     Q_DISABLE_COPY_MOVE(TrackerListWidget)
 
 public:
-    explicit TrackerListWidget(QWidget *parent = nullptr);
+    explicit TrackerListWidget(QWidget* parent = nullptr);
     ~TrackerListWidget() override;
 
-    void setTorrent(BitTorrent::Torrent *torrent);
-    BitTorrent::Torrent *torrent() const;
+    void setTorrent(BitTorrent::Torrent* torrent);
+    BitTorrent::Torrent* torrent() const;
 
 public slots:
     void decreaseSelectedTrackerTiers();
@@ -61,8 +61,8 @@ public slots:
     void showTrackerListMenu();
 
 private:
-    void setModel(QAbstractItemModel *model) override;
-    void wheelEvent(QWheelEvent *event) override;
+    void setModel(QAbstractItemModel* model) override;
+    void wheelEvent(QWheelEvent* event) override;
     void loadSettings();
     void saveSettings() const;
     QModelIndexList getSelectedTrackerRows() const;
@@ -70,5 +70,5 @@ private:
     void openAddTrackersDialog();
     void displayColumnHeaderMenu();
 
-    TrackerListModel *m_model;
+    TrackerListModel* m_model;
 };

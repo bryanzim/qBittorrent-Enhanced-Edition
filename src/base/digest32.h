@@ -28,13 +28,12 @@
 
 #pragma once
 
-#include <libtorrent/sha1_hash.hpp>
-
 #include <QByteArray>
 #include <QHash>
 #include <QSharedData>
 #include <QSharedDataPointer>
 #include <QString>
+#include <libtorrent/sha1_hash.hpp>
 
 template <int N>
 class Digest32
@@ -43,11 +42,11 @@ public:
     using UnderlyingType = lt::digest32<N>;
 
     Digest32() = default;
-    Digest32(const Digest32 &other) = default;
-    Digest32(Digest32 &&other) noexcept = default;
+    Digest32(const Digest32& other) = default;
+    Digest32(Digest32&& other) noexcept = default;
 
-    Digest32(const UnderlyingType &nativeDigest)
-        : m_dataPtr {new Data(nativeDigest)}
+    Digest32(const UnderlyingType& nativeDigest)
+        : m_dataPtr{ new Data(nativeDigest) }
     {
     }
 
@@ -61,8 +60,8 @@ public:
         return m_dataPtr->isValid();
     }
 
-    Digest32 &operator=(const Digest32 &other) = default;
-    Digest32 &operator=(Digest32 &&other) noexcept = default;
+    Digest32& operator=(const Digest32& other) = default;
+    Digest32& operator=(Digest32&& other) noexcept = default;
 
     operator UnderlyingType() const
     {
@@ -74,7 +73,7 @@ public:
         return m_dataPtr->hashString();
     }
 
-    static Digest32 fromString(const QString &digestString)
+    static Digest32 fromString(const QString& digestString)
     {
         return Digest32(QSharedDataPointer<Data>(new Data(digestString)));
     }
@@ -83,11 +82,11 @@ private:
     class Data;
 
     explicit Digest32(QSharedDataPointer<Data> dataPtr)
-        : m_dataPtr {std::move(dataPtr)}
+        : m_dataPtr{ std::move(dataPtr) }
     {
     }
 
-    QSharedDataPointer<Data> m_dataPtr {new Data};
+    QSharedDataPointer<Data> m_dataPtr{ new Data };
 };
 
 template <int N>
@@ -97,18 +96,17 @@ public:
     Data() = default;
 
     explicit Data(UnderlyingType nativeDigest)
-        : m_isValid {true}
-        , m_nativeDigest {nativeDigest}
+        : m_isValid{ true }, m_nativeDigest{ nativeDigest }
     {
     }
 
-    explicit Data(const QString &digestString)
+    explicit Data(const QString& digestString)
     {
         if (digestString.size() != (length() * 2))
             return;
 
         const QByteArray raw = QByteArray::fromHex(digestString.toLatin1());
-        if (raw.size() != length())  // QByteArray::fromHex() will skip over invalid characters
+        if (raw.size() != length()) // QByteArray::fromHex() will skip over invalid characters
             return;
 
         m_isValid = true;
@@ -137,21 +135,19 @@ private:
 };
 
 template <int N>
-bool operator==(const Digest32<N> &left, const Digest32<N> &right)
+bool operator==(const Digest32<N>& left, const Digest32<N>& right)
 {
-    return (static_cast<typename Digest32<N>::UnderlyingType>(left)
-            == static_cast<typename Digest32<N>::UnderlyingType>(right));
+    return (static_cast<typename Digest32<N>::UnderlyingType>(left) == static_cast<typename Digest32<N>::UnderlyingType>(right));
 }
 
 template <int N>
-bool operator<(const Digest32<N> &left, const Digest32<N> &right)
+bool operator<(const Digest32<N>& left, const Digest32<N>& right)
 {
-    return static_cast<typename Digest32<N>::UnderlyingType>(left)
-            < static_cast<typename Digest32<N>::UnderlyingType>(right);
+    return static_cast<typename Digest32<N>::UnderlyingType>(left) < static_cast<typename Digest32<N>::UnderlyingType>(right);
 }
 
 template <int N>
-std::size_t qHash(const Digest32<N> &key, const std::size_t seed = 0)
+std::size_t qHash(const Digest32<N>& key, const std::size_t seed = 0)
 {
     return ::qHash(static_cast<typename Digest32<N>::UnderlyingType>(key), seed);
 }

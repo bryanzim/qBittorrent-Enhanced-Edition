@@ -31,11 +31,13 @@
 #include "os.h"
 
 #ifdef Q_OS_WIN
-#include <algorithm>
+#include <powrprof.h>
 
 #include <windows.h>
-#include <powrprof.h>
+
 #include <shlobj.h>
+
+#include <algorithm>
 #endif // Q_OS_WIN
 
 #ifdef Q_OS_MACOS
@@ -57,11 +59,11 @@
 #include "base/global.h"
 #include "base/types.h"
 
-void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction &action)
+void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction& action)
 {
 #if defined(Q_OS_WIN)
-    HANDLE hToken;            // handle to process token
-    TOKEN_PRIVILEGES tkp;     // pointer to token structure
+    HANDLE hToken;        // handle to process token
+    TOKEN_PRIVILEGES tkp; // pointer to token structure
     if (!::OpenProcessToken(::GetCurrentProcess(), (TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY), &hToken))
         return;
     // Get the LUID for shutdown privilege.
@@ -89,14 +91,12 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction &ac
     }
     else if (action == ShutdownDialogAction::Shutdown)
     {
-        std::wstring msg = QCoreApplication::translate("misc"
-            , "qBittorrent will shutdown the computer now because all downloads are complete.").toStdWString();
+        std::wstring msg = QCoreApplication::translate("misc", "qBittorrent will shutdown the computer now because all downloads are complete.").toStdWString();
         ::InitiateSystemShutdownW(nullptr, msg.data(), 10, TRUE, FALSE);
     }
     else if (action == ShutdownDialogAction::Reboot)
     {
-        std::wstring msg = QCoreApplication::translate("misc"
-            , "qBittorrent will reboot the computer now because all downloads are complete.").toStdWString();
+        std::wstring msg = QCoreApplication::translate("misc", "qBittorrent will reboot the computer now because all downloads are complete.").toStdWString();
         ::InitiateSystemShutdownW(nullptr, msg.data(), 10, TRUE, TRUE);
     }
 
@@ -105,7 +105,7 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction &ac
     ::AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, NULL, 0);
 
 #elif defined(Q_OS_MACOS)
-    AEEventID EventToSend {};
+    AEEventID EventToSend{};
     if (action == ShutdownDialogAction::Suspend)
         EventToSend = kAESleep;
     else if (action == ShutdownDialogAction::Reboot)
@@ -113,25 +113,22 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction &ac
     else if (action == ShutdownDialogAction::Shutdown)
         EventToSend = kAEShutDown;
     AEAddressDesc targetDesc;
-    const ProcessSerialNumber kPSNOfSystemProcess = {0, kSystemProcess};
-    AppleEvent eventReply = {typeNull, NULL};
-    AppleEvent appleEventToSend = {typeNull, NULL};
+    const ProcessSerialNumber kPSNOfSystemProcess = { 0, kSystemProcess };
+    AppleEvent eventReply = { typeNull, NULL };
+    AppleEvent appleEventToSend = { typeNull, NULL };
 
-    OSStatus error = ::AECreateDesc(typeProcessSerialNumber, &kPSNOfSystemProcess
-        , sizeof(kPSNOfSystemProcess), &targetDesc);
+    OSStatus error = ::AECreateDesc(typeProcessSerialNumber, &kPSNOfSystemProcess, sizeof(kPSNOfSystemProcess), &targetDesc);
 
     if (error != noErr)
         return;
 
-    error = ::AECreateAppleEvent(kCoreEventClass, EventToSend, &targetDesc, kAutoGenerateReturnID
-        , kAnyTransactionID, &appleEventToSend);
+    error = ::AECreateAppleEvent(kCoreEventClass, EventToSend, &targetDesc, kAutoGenerateReturnID, kAnyTransactionID, &appleEventToSend);
 
     AEDisposeDesc(&targetDesc);
     if (error != noErr)
         return;
 
-    error = ::AESend(&appleEventToSend, &eventReply, kAENoReply, kAENormalPriority, kAEDefaultTimeout
-        , NULL, NULL);
+    error = ::AESend(&appleEventToSend, &eventReply, kAENoReply, kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
 
     ::AEDisposeDesc(&appleEventToSend);
     if (error != noErr)
@@ -228,9 +225,8 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction &ac
 #ifdef Q_OS_WIN
 Path Utils::OS::windowsSystemPath()
 {
-    static const Path path = []() -> Path
-    {
-        WCHAR systemPath[MAX_PATH] = {0};
+    static const Path path = []() -> Path {
+        WCHAR systemPath[MAX_PATH] = { 0 };
         ::GetSystemDirectoryW(systemPath, sizeof(systemPath) / sizeof(WCHAR));
         return Path(QString::fromWCharArray(systemPath));
     }();
@@ -239,7 +235,7 @@ Path Utils::OS::windowsSystemPath()
 #endif // Q_OS_WIN
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
-bool Utils::OS::applyMarkOfTheWeb(const Path &file, const QString &url)
+bool Utils::OS::applyMarkOfTheWeb(const Path& file, const QString& url)
 {
     // Trying to apply this to a non-existent file is unacceptable,
     // as it may unexpectedly create such a file.
@@ -255,27 +251,23 @@ bool Utils::OS::applyMarkOfTheWeb(const Path &file, const QString &url)
 
     const CFStringRef fileString = file.toString().toCFString();
     [[maybe_unused]] const auto fileStringGuard = qScopeGuard([&fileString] { ::CFRelease(fileString); });
-    const CFURLRef fileURL = ::CFURLCreateWithFileSystemPath(kCFAllocatorDefault
-        , fileString, kCFURLPOSIXPathStyle, false);
+    const CFURLRef fileURL = ::CFURLCreateWithFileSystemPath(kCFAllocatorDefault, fileString, kCFURLPOSIXPathStyle, false);
     [[maybe_unused]] const auto fileURLGuard = qScopeGuard([&fileURL] { ::CFRelease(fileURL); });
 
     if (CFDictionaryRef currentProperties = nullptr;
-        ::CFURLCopyResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey, &currentProperties, NULL)
-            && currentProperties)
+        ::CFURLCopyResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey, &currentProperties, NULL) && currentProperties)
     {
         [[maybe_unused]] const auto currentPropertiesGuard = qScopeGuard([&currentProperties] { ::CFRelease(currentProperties); });
 
         if (CFStringRef quarantineType = nullptr;
-            ::CFDictionaryGetValueIfPresent(currentProperties, kLSQuarantineTypeKey, reinterpret_cast<const void **>(&quarantineType))
-                && quarantineType)
+            ::CFDictionaryGetValueIfPresent(currentProperties, kLSQuarantineTypeKey, reinterpret_cast<const void**>(&quarantineType)) && quarantineType)
         {
             if (::CFStringCompare(quarantineType, kLSQuarantineTypeOtherDownload, 0) == kCFCompareEqualTo)
                 return true;
         }
     }
 
-    CFMutableDictionaryRef properties = ::CFDictionaryCreateMutable(kCFAllocatorDefault, 0
-        , &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFMutableDictionaryRef properties = ::CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     if (!properties)
         return false;
     [[maybe_unused]] const auto propertiesGuard = qScopeGuard([&properties] { ::CFRelease(properties); });
@@ -288,15 +280,12 @@ bool Utils::OS::applyMarkOfTheWeb(const Path &file, const QString &url)
         ::CFDictionarySetValue(properties, kLSQuarantineDataURLKey, urlCFString);
     }
 
-    const Boolean success = ::CFURLSetResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey
-        , properties, NULL);
+    const Boolean success = ::CFURLSetResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey, properties, NULL);
     return success;
 #elif defined(Q_OS_WIN)
     const QString zoneIDStream = file.toString() + u":Zone.Identifier";
 
-    HANDLE handle = ::CreateFileW(zoneIDStream.toStdWString().c_str(), (GENERIC_READ | GENERIC_WRITE)
-        , (FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE)
-        , nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE handle = ::CreateFileW(zoneIDStream.toStdWString().c_str(), (GENERIC_READ | GENERIC_WRITE), (FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE), nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (handle == INVALID_HANDLE_VALUE)
         return false;
     [[maybe_unused]] const auto handleGuard = qScopeGuard([&handle] { ::CloseHandle(handle); });
@@ -304,14 +293,13 @@ bool Utils::OS::applyMarkOfTheWeb(const Path &file, const QString &url)
     // 5.6.1 Zone.Identifier Stream Name
     // https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/6e3f7352-d11c-4d76-8c39-2516a9df36e8
     const QString hostURL = !url.isEmpty() ? url : u"about:internet"_s;
-    const QByteArray zoneID = QByteArrayLiteral("[ZoneTransfer]\r\nZoneId=3\r\n")
-        + u"HostUrl=%1\r\n"_s.arg(hostURL).toUtf8();
+    const QByteArray zoneID = QByteArrayLiteral("[ZoneTransfer]\r\nZoneId=3\r\n") + u"HostUrl=%1\r\n"_s.arg(hostURL).toUtf8();
 
-    if (LARGE_INTEGER streamSize {};
+    if (LARGE_INTEGER streamSize{};
         ::GetFileSizeEx(handle, &streamSize) && (streamSize.QuadPart > 0))
     {
         const DWORD expectedReadSize = std::min<LONGLONG>(streamSize.QuadPart, 1024);
-        QByteArray buf {static_cast<qsizetype>(expectedReadSize), '\0'};
+        QByteArray buf{ static_cast<qsizetype>(expectedReadSize), '\0' };
 
         if (DWORD actualReadSize = 0;
             ::ReadFile(handle, buf.data(), expectedReadSize, &actualReadSize, nullptr) && (actualReadSize == expectedReadSize))

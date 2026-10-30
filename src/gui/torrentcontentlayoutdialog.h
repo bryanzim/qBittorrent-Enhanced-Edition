@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QDialog>
-
 #include "base/path.h"
 #include "base/settingvalue.h"
+
+#include <QDialog>
+#include <QtContainerFwd>
 
 class TorrentContentLayoutModel;
 
@@ -52,8 +52,8 @@ class TorrentContentLayoutDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(TorrentContentLayoutDialog)
 
 public:
-    explicit TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler *contentHandler, QWidget *parent = nullptr);
-    TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler *contentHandler, const QSet<int> &selectedIndexes, QWidget *parent = nullptr);
+    explicit TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler* contentHandler, QWidget* parent = nullptr);
+    TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler* contentHandler, const QSet<int>& selectedIndexes, QWidget* parent = nullptr);
     ~TorrentContentLayoutDialog() override;
 
 private slots:
@@ -62,12 +62,12 @@ private slots:
 private:
     PathList selectedPaths() const;
     void populateCommonPath();
-    void onCommonPathEdited(const QString &pathStr);
+    void onCommonPathEdited(const QString& pathStr);
     void apply();
 
-    Ui::TorrentContentLayoutDialog *m_ui = nullptr;
+    Ui::TorrentContentLayoutDialog* m_ui = nullptr;
 
-    TorrentContentLayoutModel *m_model = nullptr;
+    TorrentContentLayoutModel* m_model = nullptr;
 
     SettingValue<QSize> m_storeDialogSize;
     SettingValue<QByteArray> m_storeViewState;

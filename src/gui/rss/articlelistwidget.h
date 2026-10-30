@@ -43,24 +43,24 @@ class ArticleListWidget : public QListWidget
     Q_DISABLE_COPY_MOVE(ArticleListWidget)
 
 public:
-    explicit ArticleListWidget(QWidget *parent);
+    explicit ArticleListWidget(QWidget* parent);
 
-    RSS::Article *getRSSArticle(QListWidgetItem *item) const;
-    QListWidgetItem *mapRSSArticle(RSS::Article *rssArticle) const;
+    RSS::Article* getRSSArticle(QListWidgetItem* item) const;
+    QListWidgetItem* mapRSSArticle(RSS::Article* rssArticle) const;
 
-    void setRSSItem(RSS::Item *rssItem, bool unreadOnly, const QString &filter);
+    void setRSSItem(RSS::Item* rssItem, bool unreadOnly, const QString& filter);
 
 private slots:
-    void handleArticleAdded(RSS::Article *rssArticle);
-    void handleArticleRead(RSS::Article *rssArticle);
-    void handleArticleAboutToBeRemoved(RSS::Article *rssArticle);
+    void handleArticleAdded(RSS::Article* rssArticle);
+    void handleArticleRead(RSS::Article* rssArticle);
+    void handleArticleAboutToBeRemoved(RSS::Article* rssArticle);
 
 private:
     void checkInvariant() const;
-    QListWidgetItem *createItem(RSS::Article *article) const;
-    void applyUITheme(QListWidgetItem *item) const;
+    QListWidgetItem* createItem(RSS::Article* article) const;
+    void applyUITheme(QListWidgetItem* item) const;
 
-    RSS::Item *m_rssItem = nullptr;
+    RSS::Item* m_rssItem = nullptr;
     bool m_unreadOnly = false;
-    QHash<RSS::Article *, QListWidgetItem *> m_rssArticleToListItemMapping;
+    QHash<RSS::Article*, QListWidgetItem*> m_rssArticleToListItemMapping;
 };

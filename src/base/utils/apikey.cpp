@@ -28,10 +28,10 @@
 
 #include "apikey.h"
 
-#include <QString>
-
 #include "base/global.h"
 #include "base/utils/password.h"
+
+#include <QString>
 
 namespace
 {
@@ -44,7 +44,7 @@ QString Utils::APIKey::generate()
     return prefix + Utils::Password::generate(keyLength);
 }
 
-bool Utils::APIKey::isValid(const QString &key)
+bool Utils::APIKey::isValid(const QString& key)
 {
     return key.startsWith(prefix) && (key.length() == (prefix.length() + keyLength));
 }

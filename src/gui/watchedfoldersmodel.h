@@ -28,14 +28,14 @@
 
 #pragma once
 
-#include <QtContainerFwd>
+#include "base/path.h"
+#include "base/torrentfileswatcher.h"
+
 #include <QAbstractListModel>
 #include <QHash>
 #include <QSet>
 #include <QStringList>
-
-#include "base/path.h"
-#include "base/torrentfileswatcher.h"
+#include <QtContainerFwd>
 
 class WatchedFoldersModel final : public QAbstractListModel
 {
@@ -43,26 +43,26 @@ class WatchedFoldersModel final : public QAbstractListModel
     Q_DISABLE_COPY_MOVE(WatchedFoldersModel)
 
 public:
-    explicit WatchedFoldersModel(TorrentFilesWatcher *fsWatcher, QObject *parent = nullptr);
+    explicit WatchedFoldersModel(TorrentFilesWatcher* fsWatcher, QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = {}) const override;
-    int columnCount(const QModelIndex &parent = {}) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex& parent = {}) const override;
+    int columnCount(const QModelIndex& parent = {}) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
-    void addFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options);
+    void addFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options);
 
     TorrentFilesWatcher::WatchedFolderOptions folderOptions(int row) const;
-    void setFolderOptions(int row, const TorrentFilesWatcher::WatchedFolderOptions &options);
+    void setFolderOptions(int row, const TorrentFilesWatcher::WatchedFolderOptions& options);
 
     void apply();
 
 private:
-    void onFolderSet(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options);
-    void onFolderRemoved(const Path &path);
+    void onFolderSet(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options);
+    void onFolderRemoved(const Path& path);
 
-    TorrentFilesWatcher *m_fsWatcher = nullptr;
+    TorrentFilesWatcher* m_fsWatcher = nullptr;
     PathList m_watchedFolders;
     QHash<Path, TorrentFilesWatcher::WatchedFolderOptions> m_watchedFoldersOptions;
     QSet<Path> m_deletedFolders;

@@ -30,14 +30,14 @@
 
 #pragma once
 
-#include <windows.h>
-
-#include <QtContainerFwd>
 #include <QString>
+#include <QtContainerFwd>
+
+#include <windows.h>
 
 namespace Utils::Reg
 {
     QStringList getSubkeys(const HKEY handle);
-    QString getStringValue(const HKEY handle, const QString &name = {});
-    ulong getULongValue(const HKEY handle, const QString &name = {});
+    QString getStringValue(const HKEY handle, const QString& name = {});
+    ulong getULongValue(const HKEY handle, const QString& name = {});
 }

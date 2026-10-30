@@ -29,10 +29,10 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QListWidget>
-
 #include "base/bittorrent/torrent.h"
+
+#include <QListWidget>
+#include <QtContainerFwd>
 
 class TransferListWidget;
 
@@ -42,12 +42,12 @@ class BaseFilterWidget : public QListWidget
     Q_DISABLE_COPY_MOVE(BaseFilterWidget)
 
 public:
-    BaseFilterWidget(QWidget *parent, TransferListWidget *transferList);
+    BaseFilterWidget(QWidget* parent, TransferListWidget* transferList);
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-    TransferListWidget *transferList() const;
+    TransferListWidget* transferList() const;
 
 public slots:
     void toggleFilter(bool checked);
@@ -55,9 +55,9 @@ public slots:
 private slots:
     virtual void showMenu() = 0;
     virtual void applyFilter(int row) = 0;
-    virtual void handleTorrentsLoaded(const QList<BitTorrent::Torrent *> &torrents) = 0;
-    virtual void torrentAboutToBeDeleted(BitTorrent::Torrent *) = 0;
+    virtual void handleTorrentsLoaded(const QList<BitTorrent::Torrent*>& torrents) = 0;
+    virtual void torrentAboutToBeDeleted(BitTorrent::Torrent*) = 0;
 
 private:
-    TransferListWidget *m_transferList = nullptr;
+    TransferListWidget* m_transferList = nullptr;
 };

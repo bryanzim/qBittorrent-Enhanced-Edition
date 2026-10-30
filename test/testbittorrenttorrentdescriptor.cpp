@@ -26,14 +26,14 @@
  * exception statement from your version.
  */
 
+#include "base/bittorrent/torrentdescriptor.h"
+#include "base/bittorrent/trackerentry.h"
+#include "base/global.h"
+
 #include <QObject>
 #include <QTest>
 #include <QUrl>
 #include <QUrlQuery>
-
-#include "base/bittorrent/torrentdescriptor.h"
-#include "base/bittorrent/trackerentry.h"
-#include "base/global.h"
 
 class TestBittorrentTorrentDescriptor final : public QObject
 {
@@ -49,16 +49,16 @@ private slots:
         const QString httpTracker = u"http://tracker.example.com/announce"_s;
         const QString udpTracker = u"udp://tracker.example.com:1337/announce"_s;
         const QString i2pTracker = u"http://tracker.example.i2p/announce"_s;
-        const QUrlQuery query {
-            {u"xt"_s, u"urn:btih:c58645e2e922428dceb1f98f51ffa424810570f0"_s},
-            {u"tr"_s, httpTracker},
-            {u"tr"_s, udpTracker},
-            {u"tr"_s, i2pTracker},
-            {u"tr"_s, u"<!DOCTYPE html><html>"_s},
-            {u"tr"_s, u"ftp://tracker.example.com/announce"_s},
-            {u"tr"_s, u"313131"_s}
+        const QUrlQuery query{
+            { u"xt"_s, u"urn:btih:c58645e2e922428dceb1f98f51ffa424810570f0"_s },
+            { u"tr"_s,                                            httpTracker },
+            { u"tr"_s,                                             udpTracker },
+            { u"tr"_s,                                             i2pTracker },
+            { u"tr"_s,                             u"<!DOCTYPE html><html>"_s },
+            { u"tr"_s,                u"ftp://tracker.example.com/announce"_s },
+            { u"tr"_s,                                            u"313131"_s }
         };
-        QUrl magnet {u"magnet:"_s};
+        QUrl magnet{ u"magnet:"_s };
         magnet.setQuery(query);
 
         const auto parseResult = BitTorrent::TorrentDescriptor::parse(magnet.toString(QUrl::FullyEncoded));
@@ -70,7 +70,7 @@ private slots:
         QCOMPARE(trackers.at(1).url, udpTracker);
         QCOMPARE(trackers.at(2).url, i2pTracker);
 
-        const lt::add_torrent_params &nativeParams = parseResult.value().ltAddTorrentParams();
+        const lt::add_torrent_params& nativeParams = parseResult.value().ltAddTorrentParams();
         QCOMPARE(nativeParams.trackers.size(), 3);
         QCOMPARE(nativeParams.tracker_tiers.size(), 3);
     }

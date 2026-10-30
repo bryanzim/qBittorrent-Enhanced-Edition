@@ -35,13 +35,12 @@ namespace
 {
     SettingValue<TorrentFileGuard::AutoDeleteMode> autoDeleteModeSetting()
     {
-        return SettingValue<TorrentFileGuard::AutoDeleteMode> {u"Core/AutoDeleteAddedTorrentFile"_s};
+        return SettingValue<TorrentFileGuard::AutoDeleteMode>{ u"Core/AutoDeleteAddedTorrentFile"_s };
     }
 }
 
-FileGuard::FileGuard(const Path &path)
-    : m_path {path}
-    , m_remove {true}
+FileGuard::FileGuard(const Path& path)
+    : m_path{ path }, m_remove{ true }
 {
 }
 
@@ -56,14 +55,13 @@ FileGuard::~FileGuard()
         std::ignore = Utils::Fs::removeFile(m_path); // removeFile() checks for file existence
 }
 
-TorrentFileGuard::TorrentFileGuard(const Path &path, const TorrentFileGuard::AutoDeleteMode mode)
-    : FileGuard {mode != Never ? path : Path()}
-    , m_mode {mode}
+TorrentFileGuard::TorrentFileGuard(const Path& path, const TorrentFileGuard::AutoDeleteMode mode)
+    : FileGuard{ mode != Never ? path : Path() }, m_mode{ mode }
 {
 }
 
-TorrentFileGuard::TorrentFileGuard(const Path &path)
-    : TorrentFileGuard {path, autoDeleteMode()}
+TorrentFileGuard::TorrentFileGuard(const Path& path)
+    : TorrentFileGuard{ path, autoDeleteMode() }
 {
 }
 

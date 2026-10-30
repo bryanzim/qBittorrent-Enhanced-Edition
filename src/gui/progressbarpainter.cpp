@@ -41,11 +41,11 @@
 #include "base/global.h"
 #include "gui/uithememanager.h"
 
-ProgressBarPainter::ProgressBarPainter(QObject *parent)
+ProgressBarPainter::ProgressBarPainter(QObject* parent)
     : QObject(parent)
 {
 #if (defined(Q_OS_WIN) || defined(Q_OS_MACOS))
-    auto *fusionStyle = new QProxyStyle(u"fusion"_s);
+    auto* fusionStyle = new QProxyStyle(u"fusion"_s);
     fusionStyle->setParent(&m_dummyProgressBar);
     m_dummyProgressBar.setStyle(fusionStyle);
 #endif
@@ -54,7 +54,7 @@ ProgressBarPainter::ProgressBarPainter(QObject *parent)
     connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, &ProgressBarPainter::applyUITheme);
 }
 
-void ProgressBarPainter::paint(QPainter *painter, const QStyleOptionViewItem &option, const QString &text, const int progress, const QColor &color) const
+void ProgressBarPainter::paint(QPainter* painter, const QStyleOptionViewItem& option, const QString& text, const int progress, const QColor& color) const
 {
     QStyleOptionProgressBar styleOption;
     styleOption.initFrom(&m_dummyProgressBar);
@@ -82,7 +82,7 @@ void ProgressBarPainter::paint(QPainter *painter, const QStyleOptionViewItem &op
     }
 
     painter->save();
-    const QStyle *style = m_dummyProgressBar.style();
+    const QStyle* style = m_dummyProgressBar.style();
     style->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, painter, option.widget);
     style->drawControl(QStyle::CE_ProgressBar, &styleOption, painter, &m_dummyProgressBar);
     painter->restore();

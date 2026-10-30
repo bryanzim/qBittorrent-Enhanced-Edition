@@ -31,17 +31,6 @@
 
 #include "torrentcreatordialog.h"
 
-#include <functional>
-
-#include <QDragEnterEvent>
-#include <QDropEvent>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QMimeData>
-#include <QThread>
-#include <QThreadPool>
-#include <QUrl>
-
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/torrent.h"
 #include "base/bittorrent/torrentcreator.h"
@@ -52,6 +41,17 @@
 #include "ui_torrentcreatordialog.h"
 #include "utils.h"
 
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QThread>
+#include <QThreadPool>
+#include <QUrl>
+
+#include <functional>
+
 #define SETTINGS_KEY(name) u"TorrentCreator/" name
 
 namespace
@@ -60,9 +60,9 @@ namespace
     // On Windows, however, QFileDialog::DontResolveSymlinks disables shortcuts (.lnk files) expansion, making it impossible to pick a file if its path contains a shortcut.
     // As of NTFS symlinks, they don't seem to be resolved anyways.
 #ifndef Q_OS_WIN
-    const QFileDialog::Options FILE_DIALOG_OPTIONS {QFileDialog::DontResolveSymlinks};
+    const QFileDialog::Options FILE_DIALOG_OPTIONS{ QFileDialog::DontResolveSymlinks };
 #else
-    const QFileDialog::Options FILE_DIALOG_OPTIONS {};
+    const QFileDialog::Options FILE_DIALOG_OPTIONS{};
 #endif
 
     class PieceCalculationThread final : public QThread
@@ -71,11 +71,10 @@ namespace
         Q_DISABLE_COPY_MOVE(PieceCalculationThread)
 
     public:
-        using CalcFunc = std::function<int ()>;
+        using CalcFunc = std::function<int()>;
 
-        explicit PieceCalculationThread(CalcFunc calc, QObject *parent = nullptr)
-            : QThread(parent)
-            , m_calc {std::move(calc)}
+        explicit PieceCalculationThread(CalcFunc calc, QObject* parent = nullptr)
+            : QThread(parent), m_calc{ std::move(calc) }
         {
         }
 
@@ -97,28 +96,17 @@ namespace
     };
 }
 
-TorrentCreatorDialog::TorrentCreatorDialog(QWidget *parent, const Path &defaultPath)
-    : QDialog(parent)
-    , m_ui(new Ui::TorrentCreatorDialog)
-    , m_threadPool {new QThreadPool(this)}
-    , m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
-    , m_storePieceSize(SETTINGS_KEY(u"PieceSize"_s))
-    , m_storeIgnoreDotfiles(SETTINGS_KEY(u"IgnoreDotfiles"_s))
-    , m_storePrivateTorrent(SETTINGS_KEY(u"PrivateTorrent"_s))
-    , m_storeStartSeeding(SETTINGS_KEY(u"StartSeeding"_s))
-    , m_storeIgnoreRatio(SETTINGS_KEY(u"IgnoreRatio"_s))
+TorrentCreatorDialog::TorrentCreatorDialog(QWidget* parent, const Path& defaultPath)
+    : QDialog(parent), m_ui(new Ui::TorrentCreatorDialog), m_threadPool{ new QThreadPool(this) }, m_storeDialogSize(SETTINGS_KEY(u"Size"_s)), m_storePieceSize(SETTINGS_KEY(u"PieceSize"_s)), m_storeIgnoreDotfiles(SETTINGS_KEY(u"IgnoreDotfiles"_s)), m_storePrivateTorrent(SETTINGS_KEY(u"PrivateTorrent"_s)), m_storeStartSeeding(SETTINGS_KEY(u"StartSeeding"_s)), m_storeIgnoreRatio(SETTINGS_KEY(u"IgnoreRatio"_s))
 #ifdef QBT_USES_LIBTORRENT2
-    , m_storeTorrentFormat(SETTINGS_KEY(u"TorrentFormat"_s))
+      ,
+      m_storeTorrentFormat(SETTINGS_KEY(u"TorrentFormat"_s))
 #else
-    , m_storeOptimizeAlignment(SETTINGS_KEY(u"OptimizeAlignment"_s))
-    , m_paddedFileSizeLimit(SETTINGS_KEY(u"PaddedFileSizeLimit"_s))
+      ,
+      m_storeOptimizeAlignment(SETTINGS_KEY(u"OptimizeAlignment"_s)), m_paddedFileSizeLimit(SETTINGS_KEY(u"PaddedFileSizeLimit"_s))
 #endif
-    , m_storeLastAddPath(SETTINGS_KEY(u"LastAddPath"_s))
-    , m_storeTrackerList(SETTINGS_KEY(u"TrackerList"_s))
-    , m_storeWebSeedList(SETTINGS_KEY(u"WebSeedList"_s))
-    , m_storeComments(SETTINGS_KEY(u"Comments"_s))
-    , m_storeLastSavePath(SETTINGS_KEY(u"LastSavePath"_s))
-    , m_storeSource(SETTINGS_KEY(u"Source"_s))
+      ,
+      m_storeLastAddPath(SETTINGS_KEY(u"LastAddPath"_s)), m_storeTrackerList(SETTINGS_KEY(u"TrackerList"_s)), m_storeWebSeedList(SETTINGS_KEY(u"WebSeedList"_s)), m_storeComments(SETTINGS_KEY(u"Comments"_s)), m_storeLastSavePath(SETTINGS_KEY(u"LastSavePath"_s)), m_storeSource(SETTINGS_KEY(u"Source"_s))
 {
     m_ui->setupUi(this);
 
@@ -161,9 +149,10 @@ TorrentCreatorDialog::~TorrentCreatorDialog()
     delete m_ui;
 }
 
-void TorrentCreatorDialog::updateInputPath(const Path &path)
+void TorrentCreatorDialog::updateInputPath(const Path& path)
 {
-    if (path.isEmpty()) return;
+    if (path.isEmpty())
+        return;
     m_ui->textInputPath->setSelectedPath(path);
     updateProgressBar(0);
 }
@@ -171,15 +160,14 @@ void TorrentCreatorDialog::updateInputPath(const Path &path)
 void TorrentCreatorDialog::onAddFolderButtonClicked()
 {
     const QString oldPath = m_ui->textInputPath->selectedPath().data();
-    const Path path {QFileDialog::getExistingDirectory(this, tr("Select folder")
-            , oldPath, (QFileDialog::ShowDirsOnly | FILE_DIALOG_OPTIONS))};
+    const Path path{ QFileDialog::getExistingDirectory(this, tr("Select folder"), oldPath, (QFileDialog::ShowDirsOnly | FILE_DIALOG_OPTIONS)) };
     updateInputPath(path);
 }
 
 void TorrentCreatorDialog::onAddFileButtonClicked()
 {
     const QString oldPath = m_ui->textInputPath->selectedPath().data();
-    const Path path {QFileDialog::getOpenFileName(this, tr("Select file"), oldPath, QString(), nullptr, FILE_DIALOG_OPTIONS)};
+    const Path path{ QFileDialog::getOpenFileName(this, tr("Select file"), oldPath, QString(), nullptr, FILE_DIALOG_OPTIONS) };
     updateInputPath(path);
 }
 
@@ -210,7 +198,7 @@ int TorrentCreatorDialog::getPaddedFileSizeLimit() const
 }
 #endif
 
-void TorrentCreatorDialog::dropEvent(QDropEvent *event)
+void TorrentCreatorDialog::dropEvent(QDropEvent* event)
 {
     event->acceptProposedAction();
 
@@ -218,15 +206,16 @@ void TorrentCreatorDialog::dropEvent(QDropEvent *event)
     {
         // only take the first one
         const QUrl firstItem = event->mimeData()->urls().first();
-        const Path path {
+        const Path path{
             (firstItem.scheme().compare(u"file", Qt::CaseInsensitive) == 0)
-                    ? firstItem.toLocalFile() : firstItem.toString()
+                ? firstItem.toLocalFile()
+                : firstItem.toString()
         };
         updateInputPath(path);
     }
 }
 
-void TorrentCreatorDialog::dragEnterEvent(QDragEnterEvent *event)
+void TorrentCreatorDialog::dragEnterEvent(QDragEnterEvent* event)
 {
     if (event->mimeData()->hasFormat(u"text/plain"_s) || event->mimeData()->hasFormat(u"text/uri-list"_s))
         event->acceptProposedAction();
@@ -238,31 +227,21 @@ void TorrentCreatorDialog::onCalculatePiecesButtonClicked()
     m_ui->labelTotalPieces->setText(tr("Calculating..."));
 
 #ifdef QBT_USES_LIBTORRENT2
-    PieceCalculationThread::CalcFunc calc = [path = m_ui->textInputPath->selectedPath()
-        , pieceSize = getPieceSize()
-        , ignoreDotfiles = m_ui->checkIgnoreDotfiles->isChecked()
-        , torrentFormat = getTorrentFormat()]() -> int
-        {
-            return BitTorrent::TorrentCreator::calculateTotalPieces(path, pieceSize, ignoreDotfiles, torrentFormat);
-        };
+    PieceCalculationThread::CalcFunc calc = [path = m_ui->textInputPath->selectedPath(), pieceSize = getPieceSize(), ignoreDotfiles = m_ui->checkIgnoreDotfiles->isChecked(), torrentFormat = getTorrentFormat()]() -> int {
+        return BitTorrent::TorrentCreator::calculateTotalPieces(path, pieceSize, ignoreDotfiles, torrentFormat);
+    };
 #else
-    PieceCalculationThread::CalcFunc calc = [path = m_ui->textInputPath->selectedPath()
-        , pieceSize = getPieceSize()
-        , ignoreDotfiles = m_ui->checkIgnoreDotfiles->isChecked()
-        , isAlignmentOptimized = m_ui->checkOptimizeAlignment->isChecked()
-        , paddedFileSizeLimit = getPaddedFileSizeLimit()]() -> int
-        {
-            return BitTorrent::TorrentCreator::calculateTotalPieces(path, pieceSize, ignoreDotfiles, isAlignmentOptimized, paddedFileSizeLimit);
-        };
+    PieceCalculationThread::CalcFunc calc = [path = m_ui->textInputPath->selectedPath(), pieceSize = getPieceSize(), ignoreDotfiles = m_ui->checkIgnoreDotfiles->isChecked(), isAlignmentOptimized = m_ui->checkOptimizeAlignment->isChecked(), paddedFileSizeLimit = getPaddedFileSizeLimit()]() -> int {
+        return BitTorrent::TorrentCreator::calculateTotalPieces(path, pieceSize, ignoreDotfiles, isAlignmentOptimized, paddedFileSizeLimit);
+    };
 #endif
 
     // since the calculation (in libtorrent) cannot be interrupted, always let it run to completion and
     // not managed by `parent`
-    auto *thread = new PieceCalculationThread(std::move(calc), nullptr);
+    auto* thread = new PieceCalculationThread(std::move(calc), nullptr);
     thread->setObjectName("PieceCalculationThread thread");
     connect(thread, &PieceCalculationThread::finished, thread, &QObject::deleteLater);
-    connect(thread, &PieceCalculationThread::resultReady, this, [this](const int pieces)
-    {
+    connect(thread, &PieceCalculationThread::resultReady, this, [this](const int pieces) {
         m_ui->labelTotalPieces->setText(QString::number(pieces));
         m_ui->buttonCalcTotalPieces->setEnabled(true);
     });
@@ -288,7 +267,7 @@ void TorrentCreatorDialog::onCreateButtonClicked()
 
     // get save path
     const Path lastSavePath = (m_storeLastSavePath.get(Utils::Fs::homePath()) / Path(inputPath.filename() + u".torrent"));
-    Path destPath {QFileDialog::getSaveFileName(this, tr("Select where to save the new torrent"), lastSavePath.data(), tr("Torrent Files (*.torrent)"))};
+    Path destPath{ QFileDialog::getSaveFileName(this, tr("Select where to save the new torrent"), lastSavePath.data(), tr("Torrent Files (*.torrent)")) };
     if (destPath.isEmpty())
         return;
     if (!destPath.isValid())
@@ -304,10 +283,8 @@ void TorrentCreatorDialog::onCreateButtonClicked()
     setInteractionEnabled(false);
     setCursor(QCursor(Qt::WaitCursor));
 
-    const QStringList trackers = m_ui->trackersList->toPlainText().trimmed()
-        .replace(QRegularExpression(u"\n\n[\n]+"_s), u"\n\n"_s).split(u'\n');
-    const BitTorrent::TorrentCreatorParams params
-    {
+    const QStringList trackers = m_ui->trackersList->toPlainText().trimmed().replace(QRegularExpression(u"\n\n[\n]+"_s), u"\n\n"_s).split(u'\n');
+    const BitTorrent::TorrentCreatorParams params{
         .ignoreDotfiles = m_ui->checkIgnoreDotfiles->isChecked(),
         .isPrivate = m_ui->checkPrivate->isChecked(),
 #ifdef QBT_USES_LIBTORRENT2
@@ -325,7 +302,7 @@ void TorrentCreatorDialog::onCreateButtonClicked()
         .urlSeeds = m_ui->URLSeedsList->toPlainText().split(u'\n', Qt::SkipEmptyParts)
     };
 
-    auto *torrentCreator = new BitTorrent::TorrentCreator(params);
+    auto* torrentCreator = new BitTorrent::TorrentCreator(params);
     connect(this, &QDialog::rejected, torrentCreator, &BitTorrent::TorrentCreator::requestInterruption);
     connect(torrentCreator, &BitTorrent::TorrentCreator::creationSuccess, this, &TorrentCreatorDialog::handleCreationSuccess);
     connect(torrentCreator, &BitTorrent::TorrentCreator::creationFailure, this, &TorrentCreatorDialog::handleCreationFailure);
@@ -335,7 +312,7 @@ void TorrentCreatorDialog::onCreateButtonClicked()
     m_threadPool->start(torrentCreator);
 }
 
-void TorrentCreatorDialog::handleCreationFailure(const QString &msg)
+void TorrentCreatorDialog::handleCreationFailure(const QString& msg)
 {
     // Remove busy cursor
     setCursor(QCursor(Qt::ArrowCursor));
@@ -343,13 +320,12 @@ void TorrentCreatorDialog::handleCreationFailure(const QString &msg)
     setInteractionEnabled(true);
 }
 
-void TorrentCreatorDialog::handleCreationSuccess(const BitTorrent::TorrentCreatorResult &result)
+void TorrentCreatorDialog::handleCreationSuccess(const BitTorrent::TorrentCreatorResult& result)
 {
     setCursor(QCursor(Qt::ArrowCursor));
     setInteractionEnabled(true);
 
-    QMessageBox::information(this, tr("Torrent creator")
-        , u"%1\n%2"_s.arg(tr("Torrent created:"), result.torrentFilePath.toString()));
+    QMessageBox::information(this, tr("Torrent creator"), u"%1\n%2"_s.arg(tr("Torrent created:"), result.torrentFilePath.toString()));
 
     if (m_ui->checkStartSeeding->isChecked())
     {
@@ -362,7 +338,7 @@ void TorrentCreatorDialog::handleCreationSuccess(const BitTorrent::TorrentCreato
             params.savePath = result.savePath;
             params.seedMode = true;
             params.stopCondition = BitTorrent::Torrent::StopCondition::None;
-            params.useAutoTMM = false;  // otherwise if it is on by default, it will overwrite `savePath` to the default save path
+            params.useAutoTMM = false; // otherwise if it is on by default, it will overwrite `savePath` to the default save path
             params.useDownloadPath = false;
 
             if (m_ui->checkIgnoreShareLimits->isChecked())

@@ -28,14 +28,14 @@
 
 #include "torrentfilter.h"
 
-#include <algorithm>
-
-#include <QUrl>
-
 #include "base/bittorrent/infohash.h"
 #include "base/bittorrent/torrent.h"
 #include "base/bittorrent/trackerentrystatus.h"
 #include "base/global.h"
+
+#include <QUrl>
+
+#include <algorithm>
 
 using namespace BitTorrent;
 
@@ -45,7 +45,7 @@ const std::optional<Tag> TorrentFilter::AnyTag;
 const std::optional<QString> TorrentFilter::AnyTrackerHost;
 const std::optional<TorrentAnnounceStatus> TorrentFilter::AnyAnnounceStatus;
 
-QString getTrackerHost(const QString &url)
+QString getTrackerHost(const QString& url)
 {
     // We want the hostname.
     if (const QString host = QUrl(url).host(); !host.isEmpty())
@@ -55,16 +55,8 @@ QString getTrackerHost(const QString &url)
     return url;
 }
 
-TorrentFilter::TorrentFilter(const Status status, const std::optional<TorrentIDSet> &idSet, const std::optional<QString> &category
-        , const std::optional<Tag> &tag, const std::optional<bool> &isPrivate, const std::optional<QString> &trackerHost
-        , const std::optional<TorrentAnnounceStatus> &announceStatus)
-    : m_status {status}
-    , m_category {category}
-    , m_tag {tag}
-    , m_idSet {idSet}
-    , m_private {isPrivate}
-    , m_trackerHost {trackerHost}
-    , m_announceStatus {announceStatus}
+TorrentFilter::TorrentFilter(const Status status, const std::optional<TorrentIDSet>& idSet, const std::optional<QString>& category, const std::optional<Tag>& tag, const std::optional<bool>& isPrivate, const std::optional<QString>& trackerHost, const std::optional<TorrentAnnounceStatus>& announceStatus)
+    : m_status{ status }, m_category{ category }, m_tag{ tag }, m_idSet{ idSet }, m_private{ isPrivate }, m_trackerHost{ trackerHost }, m_announceStatus{ announceStatus }
 {
 }
 
@@ -79,7 +71,7 @@ bool TorrentFilter::setStatus(const Status status)
     return false;
 }
 
-bool TorrentFilter::setTorrentIDSet(const std::optional<TorrentIDSet> &idSet)
+bool TorrentFilter::setTorrentIDSet(const std::optional<TorrentIDSet>& idSet)
 {
     if (m_idSet != idSet)
     {
@@ -90,7 +82,7 @@ bool TorrentFilter::setTorrentIDSet(const std::optional<TorrentIDSet> &idSet)
     return false;
 }
 
-bool TorrentFilter::setCategory(const std::optional<QString> &category)
+bool TorrentFilter::setCategory(const std::optional<QString>& category)
 {
     if (m_category != category)
     {
@@ -101,7 +93,7 @@ bool TorrentFilter::setCategory(const std::optional<QString> &category)
     return false;
 }
 
-bool TorrentFilter::setTag(const std::optional<Tag> &tag)
+bool TorrentFilter::setTag(const std::optional<Tag>& tag)
 {
     if (m_tag != tag)
     {
@@ -123,7 +115,7 @@ bool TorrentFilter::setPrivate(const std::optional<bool> isPrivate)
     return false;
 }
 
-bool TorrentFilter::setTrackerHost(const std::optional<QString> &trackerHost)
+bool TorrentFilter::setTrackerHost(const std::optional<QString>& trackerHost)
 {
     if (m_trackerHost != trackerHost)
     {
@@ -134,7 +126,7 @@ bool TorrentFilter::setTrackerHost(const std::optional<QString> &trackerHost)
     return false;
 }
 
-bool TorrentFilter::setAnnounceStatus(const std::optional<TorrentAnnounceStatus> &announceStatus)
+bool TorrentFilter::setAnnounceStatus(const std::optional<TorrentAnnounceStatus>& announceStatus)
 {
     if (m_announceStatus != announceStatus)
     {
@@ -145,17 +137,16 @@ bool TorrentFilter::setAnnounceStatus(const std::optional<TorrentAnnounceStatus>
     return false;
 }
 
-bool TorrentFilter::match(const Torrent *const torrent) const
+bool TorrentFilter::match(const Torrent* const torrent) const
 {
     Q_ASSERT(torrent);
     if (!torrent) [[unlikely]]
         return false;
 
-    return (matchStatus(torrent) && matchHash(torrent) && matchCategory(torrent)
-            && matchTag(torrent) && matchPrivate(torrent) && matchTracker(torrent));
+    return (matchStatus(torrent) && matchHash(torrent) && matchCategory(torrent) && matchTag(torrent) && matchPrivate(torrent) && matchTracker(torrent));
 }
 
-bool TorrentFilter::matchStatus(const Torrent *const torrent) const
+bool TorrentFilter::matchStatus(const Torrent* const torrent) const
 {
     const TorrentState state = torrent->state();
 
@@ -178,16 +169,13 @@ bool TorrentFilter::matchStatus(const Torrent *const torrent) const
     case Inactive:
         return torrent->isInactive();
     case Stalled:
-        return (state == TorrentState::StalledUploading)
-                || (state == TorrentState::StalledDownloading);
+        return (state == TorrentState::StalledUploading) || (state == TorrentState::StalledDownloading);
     case StalledUploading:
         return state == TorrentState::StalledUploading;
     case StalledDownloading:
         return state == TorrentState::StalledDownloading;
     case Checking:
-        return (state == TorrentState::CheckingUploading)
-                || (state == TorrentState::CheckingDownloading)
-                || (state == TorrentState::CheckingResumeData);
+        return (state == TorrentState::CheckingUploading) || (state == TorrentState::CheckingDownloading) || (state == TorrentState::CheckingResumeData);
     case Moving:
         return torrent->isMoving();
     case Errored:
@@ -200,7 +188,7 @@ bool TorrentFilter::matchStatus(const Torrent *const torrent) const
     return false;
 }
 
-bool TorrentFilter::matchHash(const Torrent *const torrent) const
+bool TorrentFilter::matchHash(const Torrent* const torrent) const
 {
     if (!m_idSet)
         return true;
@@ -208,7 +196,7 @@ bool TorrentFilter::matchHash(const Torrent *const torrent) const
     return m_idSet->contains(torrent->id());
 }
 
-bool TorrentFilter::matchCategory(const Torrent *const torrent) const
+bool TorrentFilter::matchCategory(const Torrent* const torrent) const
 {
     if (!m_category)
         return true;
@@ -216,7 +204,7 @@ bool TorrentFilter::matchCategory(const Torrent *const torrent) const
     return (torrent->belongsToCategory(*m_category));
 }
 
-bool TorrentFilter::matchTag(const Torrent *const torrent) const
+bool TorrentFilter::matchTag(const Torrent* const torrent) const
 {
     if (!m_tag)
         return true;
@@ -228,7 +216,7 @@ bool TorrentFilter::matchTag(const Torrent *const torrent) const
     return torrent->hasTag(*m_tag);
 }
 
-bool TorrentFilter::matchPrivate(const Torrent *const torrent) const
+bool TorrentFilter::matchPrivate(const Torrent* const torrent) const
 {
     if (!m_private)
         return true;
@@ -236,7 +224,7 @@ bool TorrentFilter::matchPrivate(const Torrent *const torrent) const
     return m_private == torrent->isPrivate();
 }
 
-bool TorrentFilter::matchTracker(const Torrent *torrent) const
+bool TorrentFilter::matchTracker(const Torrent* torrent) const
 {
     if (!m_trackerHost)
     {
@@ -244,7 +232,7 @@ bool TorrentFilter::matchTracker(const Torrent *torrent) const
             return true;
 
         const TorrentAnnounceStatus announceStatus = torrent->announceStatus();
-        const TorrentAnnounceStatus &testAnnounceStatus = *m_announceStatus;
+        const TorrentAnnounceStatus& testAnnounceStatus = *m_announceStatus;
         if (!testAnnounceStatus)
             return !announceStatus;
 
@@ -255,9 +243,7 @@ bool TorrentFilter::matchTracker(const Torrent *torrent) const
     if (m_trackerHost->isEmpty())
         return torrent->trackers().isEmpty() && !m_announceStatus;
 
-    return std::ranges::any_of(asConst(torrent->trackers())
-            , [trackerHost = m_trackerHost, announceStatus = m_announceStatus](const TrackerEntryStatus &trackerEntryStatus)
-    {
+    return std::ranges::any_of(asConst(torrent->trackers()), [trackerHost = m_trackerHost, announceStatus = m_announceStatus](const TrackerEntryStatus& trackerEntryStatus) {
         if (getTrackerHost(trackerEntryStatus.url) != trackerHost)
             return false;
 
@@ -266,15 +252,12 @@ bool TorrentFilter::matchTracker(const Torrent *torrent) const
 
         switch (trackerEntryStatus.state)
         {
-        case TrackerEndpointState::Working:
-            {
-                const bool hasWarningMessage = std::ranges::any_of(trackerEntryStatus.endpoints
-                        , [](const TrackerEndpointStatus &endpointEntry)
-                {
-                    return !endpointEntry.message.isEmpty() && (endpointEntry.state == TrackerEndpointState::Working);
-                });
-                return hasWarningMessage ? announceStatus->testFlag(TorrentAnnounceStatusFlag::HasWarning) : !*announceStatus;
-            }
+        case TrackerEndpointState::Working: {
+            const bool hasWarningMessage = std::ranges::any_of(trackerEntryStatus.endpoints, [](const TrackerEndpointStatus& endpointEntry) {
+                return !endpointEntry.message.isEmpty() && (endpointEntry.state == TrackerEndpointState::Working);
+            });
+            return hasWarningMessage ? announceStatus->testFlag(TorrentAnnounceStatusFlag::HasWarning) : !*announceStatus;
+        }
 
         case TrackerEndpointState::NotWorking:
         case TrackerEndpointState::Unreachable:

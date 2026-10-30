@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QSortFilterProxyModel>
-
 #include "base/utils/compare.h"
+
+#include <QSortFilterProxyModel>
 
 class QString;
 
@@ -39,14 +39,14 @@ class Tag;
 class TagFilterProxyModel final : public QSortFilterProxyModel
 {
 public:
-    explicit TagFilterProxyModel(QObject *parent = nullptr);
+    explicit TagFilterProxyModel(QObject* parent = nullptr);
 
     // TagFilterModel methods which we need to relay
-    QModelIndex index(const Tag &tag) const;
-    Tag tag(const QModelIndex &index) const;
+    QModelIndex index(const Tag& tag) const;
+    Tag tag(const QModelIndex& index) const;
 
 protected:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
 private:
     // we added another overload of index(), hence this using directive:

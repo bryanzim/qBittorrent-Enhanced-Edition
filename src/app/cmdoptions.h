@@ -30,14 +30,14 @@
 
 #pragma once
 
-#include <optional>
+#include "base/bittorrent/addtorrentparams.h"
+#include "base/exceptions.h"
+#include "base/path.h"
 
 #include <QString>
 #include <QStringList>
 
-#include "base/bittorrent/addtorrentparams.h"
-#include "base/exceptions.h"
-#include "base/path.h"
+#include <optional>
 
 class QProcessEnvironment;
 
@@ -66,7 +66,7 @@ struct QBtCommandLineParameters
     QString unknownParameter;
 
     QBtCommandLineParameters() = default;
-    explicit QBtCommandLineParameters(const QProcessEnvironment &);
+    explicit QBtCommandLineParameters(const QProcessEnvironment&);
 };
 
 class CommandLineParameterError : public RuntimeError
@@ -75,5 +75,5 @@ public:
     using RuntimeError::RuntimeError;
 };
 
-QBtCommandLineParameters parseCommandLine(const QStringList &args);
-void displayUsage(const QString &prgName);
+QBtCommandLineParameters parseCommandLine(const QStringList& args);
+void displayUsage(const QString& prgName);

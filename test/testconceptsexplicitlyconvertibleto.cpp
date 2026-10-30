@@ -26,13 +26,13 @@
  * exception statement from your version.
  */
 
-#include <string>
+#include "base/concepts/explicitlyconvertibleto.h"
 
 #include <QObject>
 #include <QString>
 #include <QTest>
 
-#include "base/concepts/explicitlyconvertibleto.h"
+#include <string>
 
 class TestExplicitlyConvertibleTo final : public QObject
 {
@@ -45,8 +45,8 @@ public:
 private slots:
     void testExplicitlyConvertibleTo() const
     {
-        static_assert(ExplicitlyConvertibleTo<const char *, std::string>);
-        static_assert(!ExplicitlyConvertibleTo<std::string, const char *>);
+        static_assert(ExplicitlyConvertibleTo<const char*, std::string>);
+        static_assert(!ExplicitlyConvertibleTo<std::string, const char*>);
     }
 };
 

@@ -30,9 +30,8 @@
 
 #include <QDateTime>
 
-CookiesModel::CookiesModel(const QList<QNetworkCookie> &cookies, QObject *parent)
-    : QAbstractItemModel(parent)
-    , m_cookies(cookies)
+CookiesModel::CookiesModel(const QList<QNetworkCookie>& cookies, QObject* parent)
+    : QAbstractItemModel(parent), m_cookies(cookies)
 {
 }
 
@@ -63,37 +62,36 @@ QVariant CookiesModel::headerData(int section, Qt::Orientation orientation, int 
     return {};
 }
 
-QModelIndex CookiesModel::index(const int row, const int column, const QModelIndex &parent) const
+QModelIndex CookiesModel::index(const int row, const int column, const QModelIndex& parent) const
 {
     if (parent.isValid() // no items with valid parent
-        || (row < 0) || (row >= m_cookies.size())
-        || (column < 0) || (column >= NB_COLUMNS))
+        || (row < 0) || (row >= m_cookies.size()) || (column < 0) || (column >= NB_COLUMNS))
         return {};
 
     return createIndex(row, column);
 }
 
-QModelIndex CookiesModel::parent([[maybe_unused]] const QModelIndex &index) const
+QModelIndex CookiesModel::parent([[maybe_unused]] const QModelIndex& index) const
 {
     return {};
 }
 
-int CookiesModel::rowCount(const QModelIndex &parent) const
+int CookiesModel::rowCount(const QModelIndex& parent) const
 {
-    if (parent.isValid()) return 0;
+    if (parent.isValid())
+        return 0;
 
     return m_cookies.size();
 }
 
-int CookiesModel::columnCount([[maybe_unused]] const QModelIndex &parent) const
+int CookiesModel::columnCount([[maybe_unused]] const QModelIndex& parent) const
 {
     return NB_COLUMNS;
 }
 
-QVariant CookiesModel::data(const QModelIndex &index, int role) const
+QVariant CookiesModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || (index.row() >= m_cookies.size())
-        || ((role != Qt::DisplayRole) && (role != Qt::EditRole)))
+    if (!index.isValid() || (index.row() >= m_cookies.size()) || ((role != Qt::DisplayRole) && (role != Qt::EditRole)))
         return {};
 
     switch (index.column())
@@ -113,9 +111,10 @@ QVariant CookiesModel::data(const QModelIndex &index, int role) const
     return {};
 }
 
-bool CookiesModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool CookiesModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (role != Qt::EditRole) return false;
+    if (role != Qt::EditRole)
+        return false;
 
     switch (index.column())
     {
@@ -142,9 +141,10 @@ bool CookiesModel::setData(const QModelIndex &index, const QVariant &value, int 
     return true;
 }
 
-bool CookiesModel::insertRows(int row, int count, const QModelIndex &parent)
+bool CookiesModel::insertRows(int row, int count, const QModelIndex& parent)
 {
-    if ((row < 0) || (row > m_cookies.size())) return false;
+    if ((row < 0) || (row > m_cookies.size()))
+        return false;
 
     QNetworkCookie newCookie;
     newCookie.setExpirationDate(QDateTime::currentDateTime().addYears(2));
@@ -157,11 +157,9 @@ bool CookiesModel::insertRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-bool CookiesModel::removeRows(int row, int count, const QModelIndex &parent)
+bool CookiesModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    if ((m_cookies.isEmpty())
-        || (row >= m_cookies.size())
-        || ((row + count) > m_cookies.size()))
+    if ((m_cookies.isEmpty()) || (row >= m_cookies.size()) || ((row + count) > m_cookies.size()))
         return false;
 
     beginRemoveRows(parent, row, (row + count - 1));
@@ -172,9 +170,10 @@ bool CookiesModel::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-Qt::ItemFlags CookiesModel::flags(const QModelIndex &index) const
+Qt::ItemFlags CookiesModel::flags(const QModelIndex& index) const
 {
-    if (!index.isValid()) return Qt::NoItemFlags;
+    if (!index.isValid())
+        return Qt::NoItemFlags;
 
     return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }

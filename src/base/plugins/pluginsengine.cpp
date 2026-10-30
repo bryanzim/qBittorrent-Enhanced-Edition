@@ -28,12 +28,6 @@
 
 #include "pluginsengine.h"
 
-#include <QDir>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QMetaEnum>
-#include <QScopeGuard>
-
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/torrent.h"
 #include "base/global.h"
@@ -43,6 +37,12 @@
 #include "base/utils/fs.h"
 #include "base/utils/io.h"
 #include "plugin.h"
+
+#include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMetaEnum>
+#include <QScopeGuard>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -56,14 +56,16 @@ namespace
         bool enabled = false;
     };
 
-    PluginEntryConfig parsePluginEntryConfig(const QJsonObject &jsonObj)
+    PluginEntryConfig parsePluginEntryConfig(const QJsonObject& jsonObj)
     {
-        return {.enabled = jsonObj.value(OPTION_ENABLED).toBool()};
+        return { .enabled = jsonObj.value(OPTION_ENABLED).toBool() };
     }
 
-    QJsonObject serializePluginEntryConfig(const PluginEntryConfig &config)
+    QJsonObject serializePluginEntryConfig(const PluginEntryConfig& config)
     {
-        return {{OPTION_ENABLED, config.enabled}};
+        return {
+            { OPTION_ENABLED, config.enabled }
+        };
     }
 }
 
@@ -79,7 +81,7 @@ void PluginsEngine::freeInstance()
     PluginsEngine::m_instance = nullptr;
 }
 
-PluginsEngine *PluginsEngine::instance()
+PluginsEngine* PluginsEngine::instance()
 {
     return PluginsEngine::m_instance;
 }
@@ -95,7 +97,7 @@ LuaBridgeVersion PluginsEngine::luaBridgeVersion()
     return LuaBridgeVersion(3, 0);
 }
 
-PluginsEngine::PluginsEngine(QObject *parent)
+PluginsEngine::PluginsEngine(QObject* parent)
     : QObject(parent)
 {
     loadPlugins();
@@ -125,14 +127,16 @@ void PluginsEngine::loadConfig()
     if (jsonError.error != QJsonParseError::NoError)
     {
         LogMsg(tr("Failed to parse plugins configuration from %1. Error: \"%2\"")
-                .arg(path.toString(), jsonError.errorString()), Log::WARNING);
+                   .arg(path.toString(), jsonError.errorString()),
+               Log::WARNING);
         return;
     }
 
     if (!jsonDoc.isObject())
     {
         LogMsg(tr("Failed to load plugins configuration from %1. Error: \"Invalid data format.\"")
-                .arg(path.toString()), Log::WARNING);
+                   .arg(path.toString()),
+               Log::WARNING);
         return;
     }
 
@@ -149,9 +153,9 @@ void PluginsEngine::loadConfig()
 void PluginsEngine::storeConfig() const
 {
     QJsonObject jsonObj;
-    for (const auto &[pluginID, pluginEntry] : asConst(m_plugins).asKeyValueRange())
+    for (const auto& [pluginID, pluginEntry] : asConst(m_plugins).asKeyValueRange())
     {
-        jsonObj[pluginID] = serializePluginEntryConfig({.enabled = pluginEntry.enabled});
+        jsonObj[pluginID] = serializePluginEntryConfig({ .enabled = pluginEntry.enabled });
     }
 
     const Path path = specialFolderLocation(SpecialFolder::Config) / Path(CONF_FILE_NAME);
@@ -160,13 +164,14 @@ void PluginsEngine::storeConfig() const
     if (!result)
     {
         LogMsg(tr("Couldn't store plugins configuration to %1. Error: %2")
-                .arg(path.toString(), result.error()), Log::WARNING);
+                   .arg(path.toString(), result.error()),
+               Log::WARNING);
     }
 
     m_configIsDirty = false;
 }
 
-PluginInfo PluginsEngine::getPluginInfo(const PluginEntry &pluginEntry) const
+PluginInfo PluginsEngine::getPluginInfo(const PluginEntry& pluginEntry) const
 {
     return {
         .id = pluginEntry.id,
@@ -186,13 +191,13 @@ QHash<QString, PluginInfo> PluginsEngine::allPlugins() const
 {
     QHash<QString, PluginInfo> plugins;
     plugins.reserve(m_plugins.size());
-    for (const auto &[pluginID, pluginEntry] : asConst(m_plugins).asKeyValueRange())
+    for (const auto& [pluginID, pluginEntry] : asConst(m_plugins).asKeyValueRange())
         plugins.emplace(pluginID, getPluginInfo(pluginEntry));
 
     return plugins;
 }
 
-std::optional<PluginInfo> PluginsEngine::pluginInfo(const QString &pluginID) const
+std::optional<PluginInfo> PluginsEngine::pluginInfo(const QString& pluginID) const
 {
     const auto pluginIter = m_plugins.constFind(pluginID);
     if (pluginIter == m_plugins.constEnd())
@@ -201,7 +206,7 @@ std::optional<PluginInfo> PluginsEngine::pluginInfo(const QString &pluginID) con
     return getPluginInfo(*pluginIter);
 }
 
-bool PluginsEngine::installPlugin(const Path &pluginPath)
+bool PluginsEngine::installPlugin(const Path& pluginPath)
 {
     if (!pluginPath.isAbsolute())
     {
@@ -252,8 +257,7 @@ void PluginsEngine::installPluginImpl()
 
     const QString pluginID = pluginEntry.id;
 
-    const auto [isExistingPlugin, existingPluginEntry] = std::invoke([this, pluginID]() -> std::pair<bool, PluginEntry>
-    {
+    const auto [isExistingPlugin, existingPluginEntry] = std::invoke([this, pluginID]() -> std::pair<bool, PluginEntry> {
         const auto iter = m_plugins.constFind(pluginID);
         if (iter == m_plugins.constEnd())
             return std::make_pair(false, PluginEntry());
@@ -337,7 +341,7 @@ void PluginsEngine::installPluginImpl()
     m_configIsDirty = true;
 }
 
-bool PluginsEngine::uninstallPlugin(const QString &pluginID)
+bool PluginsEngine::uninstallPlugin(const QString& pluginID)
 {
     if (!m_plugins.contains(pluginID))
     {
@@ -395,12 +399,12 @@ void PluginsEngine::uninstallPluginImpl()
 
 void PluginsEngine::loadPlugins()
 {
-    const QDir pluginsDir {pluginsPath().data()};
-    for (const QString &file : pluginsDir.entryList({u"*.lua"_s}))
+    const QDir pluginsDir{ pluginsPath().data() };
+    for (const QString& file : pluginsDir.entryList({ u"*.lua"_s }))
     {
         if (auto result = loadPlugin(Path(pluginsDir.absoluteFilePath(file))))
         {
-            PluginEntry &pluginEntry = result.value();
+            PluginEntry& pluginEntry = result.value();
             const QString pluginID = pluginEntry.id;
             m_plugins.insert(pluginID, std::move(pluginEntry));
             LogMsg(tr("Loaded plugin. ID: %1.").arg(pluginID));
@@ -423,8 +427,7 @@ void PluginsEngine::connectEventHandlers()
     connectEventHandler(&BT::Session::duplicateTorrentDetected, "onDuplicateTorrentDetected");
     connectEventHandler(&BT::Session::torrentsUpdated, "onTorrentsUpdated");
 
-    connect(BT::Session::instance(), &BT::Session::torrentAdded, this, [this](BT::Torrent *torrent)
-    {
+    connect(BT::Session::instance(), &BT::Session::torrentAdded, this, [this](BT::Torrent* torrent) {
         callEventHandlers("onTorrentAdded", torrent);
 
         if (torrent->hasMetadata())
@@ -454,18 +457,17 @@ void PluginsEngine::connectEventHandlers()
 }
 
 template <typename Signal>
-void PluginsEngine::connectEventHandler(Signal &&signal, const char *eventHandlerName)
+void PluginsEngine::connectEventHandler(Signal&& signal, const char* eventHandlerName)
 {
-    connect(BitTorrent::Session::instance(), std::forward<Signal>(signal), this, [this, eventHandlerName](auto&&... args)
-    {
+    connect(BitTorrent::Session::instance(), std::forward<Signal>(signal), this, [this, eventHandlerName](auto&&... args) {
         this->callEventHandlers(eventHandlerName, std::forward<decltype(args)>(args)...);
     });
 }
 
 template <typename... Args>
-void PluginsEngine::callEventHandlers(const char *eventHandlerName, Args&&... args)
+void PluginsEngine::callEventHandlers(const char* eventHandlerName, Args&&... args)
 {
-    for (const PluginEntry &pluginEntry : asConst(m_plugins))
+    for (const PluginEntry& pluginEntry : asConst(m_plugins))
     {
         if (!pluginEntry.enabled)
             continue;
@@ -474,21 +476,22 @@ void PluginsEngine::callEventHandlers(const char *eventHandlerName, Args&&... ar
         {
             pluginEntry.plugin->call(eventHandlerName, std::forward<Args>(args)...);
         }
-        catch (const std::exception &ex)
+        catch (const std::exception& ex)
         {
             LogMsg(tr("Failed to call the plugin. Plugin: %1. Reason: %2")
-                    .arg(pluginEntry.id, QString::fromStdString(ex.what())), Log::WARNING);
+                       .arg(pluginEntry.id, QString::fromStdString(ex.what())),
+                   Log::WARNING);
         }
     }
 }
 
-void PluginsEngine::setPluginEnabled(const QString &pluginID, const bool enabled)
+void PluginsEngine::setPluginEnabled(const QString& pluginID, const bool enabled)
 {
     Q_ASSERT(m_plugins.contains(pluginID));
     if (!m_plugins.contains(pluginID)) [[unlikely]]
         return;
 
-    PluginEntry &pluginEntry = m_plugins[pluginID];
+    PluginEntry& pluginEntry = m_plugins[pluginID];
     if (pluginEntry.enabled != enabled)
     {
         pluginEntry.enabled = enabled;
@@ -497,14 +500,14 @@ void PluginsEngine::setPluginEnabled(const QString &pluginID, const bool enabled
     }
 }
 
-void PluginsEngine::invokePlugin(const QString &pluginID)
+void PluginsEngine::invokePlugin(const QString& pluginID)
 {
     const auto pluginIter = m_plugins.constFind(pluginID);
     Q_ASSERT(pluginIter != m_plugins.constEnd());
     if (pluginIter == m_plugins.constEnd()) [[unlikely]]
         return;
 
-    const PluginEntry &pluginEntry = *pluginIter;
+    const PluginEntry& pluginEntry = *pluginIter;
     if (!pluginEntry.enabled)
         return;
 
@@ -512,20 +515,21 @@ void PluginsEngine::invokePlugin(const QString &pluginID)
     {
         pluginEntry.plugin->invoke();
     }
-    catch (const std::exception &ex)
+    catch (const std::exception& ex)
     {
         LogMsg(tr("Failed to call the plugin. Plugin: %1. Reason: %2")
-                .arg(pluginEntry.id, QString::fromStdString(ex.what())), Log::WARNING);
+                   .arg(pluginEntry.id, QString::fromStdString(ex.what())),
+               Log::WARNING);
     }
 }
 
-nonstd::expected<PluginsEngine::PluginEntry, QString> PluginsEngine::loadPlugin(const Path &path)
+nonstd::expected<PluginsEngine::PluginEntry, QString> PluginsEngine::loadPlugin(const Path& path)
 {
     auto loadResult = Plugin::load(path);
     if (!loadResult)
         return nonstd::make_unexpected(loadResult.error());
 
-    PluginEntry pluginEntry {
+    PluginEntry pluginEntry{
         .plugin = loadResult.value(),
         .id = path.removedExtension().filename(),
     };

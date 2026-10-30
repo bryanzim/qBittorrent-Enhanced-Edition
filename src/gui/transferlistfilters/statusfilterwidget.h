@@ -29,13 +29,13 @@
 
 #pragma once
 
-#include <bitset>
-
-#include <QtContainerFwd>
-#include <QHash>
-
 #include "base/torrentfilter.h"
 #include "basefilterwidget.h"
+
+#include <QHash>
+#include <QtContainerFwd>
+
+#include <bitset>
 
 class StatusFilterWidget final : public BaseFilterWidget
 {
@@ -43,7 +43,7 @@ class StatusFilterWidget final : public BaseFilterWidget
     Q_DISABLE_COPY_MOVE(StatusFilterWidget)
 
 public:
-    StatusFilterWidget(QWidget *parent, TransferListWidget *transferList);
+    StatusFilterWidget(QWidget* parent, TransferListWidget* transferList);
     ~StatusFilterWidget() override;
 
 private:
@@ -53,18 +53,18 @@ private:
     // No need to redeclare them here as slots.
     void showMenu() override;
     void applyFilter(int row) override;
-    void handleTorrentsLoaded(const QList<BitTorrent::Torrent *> &torrents) override;
-    void torrentAboutToBeDeleted(BitTorrent::Torrent *) override;
+    void handleTorrentsLoaded(const QList<BitTorrent::Torrent*>& torrents) override;
+    void torrentAboutToBeDeleted(BitTorrent::Torrent*) override;
 
     void configure();
 
-    void update(const QList<BitTorrent::Torrent *> &torrents);
-    void updateTorrentStatus(const BitTorrent::Torrent *torrent);
+    void update(const QList<BitTorrent::Torrent*>& torrents);
+    void updateTorrentStatus(const BitTorrent::Torrent* torrent);
     void updateTexts();
     void hideZeroItems();
 
-    using TorrentFilterBitset = std::bitset<32>;  // approximated size, this should be the number of TorrentFilter::Type elements
-    QHash<const BitTorrent::Torrent *, TorrentFilterBitset> m_torrentsStatus;
+    using TorrentFilterBitset = std::bitset<32>; // approximated size, this should be the number of TorrentFilter::Type elements
+    QHash<const BitTorrent::Torrent*, TorrentFilterBitset> m_torrentsStatus;
     int m_nbDownloading = 0;
     int m_nbSeeding = 0;
     int m_nbCompleted = 0;

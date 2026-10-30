@@ -77,10 +77,10 @@ public:
         COL_COUNT
     };
 
-    explicit PeerListWidget(PropertiesWidget *parent);
+    explicit PeerListWidget(PropertiesWidget* parent);
     ~PeerListWidget() override;
 
-    void loadPeers(const BitTorrent::Torrent *torrent);
+    void loadPeers(const BitTorrent::Torrent* torrent);
     void updatePeerHostNameResolutionState();
     void updatePeerCountryResolutionState();
     void clear();
@@ -94,20 +94,20 @@ private slots:
     void shadowbanSelectedPeers();
     void copySelectedPeers();
     void handleSortColumnChanged(int col);
-    void handleResolved(const QHostAddress &ip, const QString &hostname) const;
+    void handleResolved(const QHostAddress& ip, const QString& hostname) const;
 
 private:
-    void updatePeer(int row, const BitTorrent::Torrent *torrent, const BitTorrent::PeerInfo &peer, bool hideZeroValues);
+    void updatePeer(int row, const BitTorrent::Torrent* torrent, const BitTorrent::PeerInfo& peer, bool hideZeroValues);
     int visibleColumnsCount() const;
 
-    void wheelEvent(QWheelEvent *event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
-    QStandardItemModel *m_listModel = nullptr;
-    PeerListSortModel *m_proxyModel = nullptr;
-    PropertiesWidget *m_properties = nullptr;
-    QHash<PeerEndpoint, QStandardItem *> m_peerItems;
-    QList<QStandardItem *> m_I2PPeerItems;
-    QHash<QHostAddress, QSet<QStandardItem *>> m_itemsByIP;  // must be kept in sync with `m_peerItems`
+    QStandardItemModel* m_listModel = nullptr;
+    PeerListSortModel* m_proxyModel = nullptr;
+    PropertiesWidget* m_properties = nullptr;
+    QHash<PeerEndpoint, QStandardItem*> m_peerItems;
+    QList<QStandardItem*> m_I2PPeerItems;
+    QHash<QHostAddress, QSet<QStandardItem*>> m_itemsByIP; // must be kept in sync with `m_peerItems`
     bool m_resolveCountries = false;
     bool m_resolveHostNames = false;
 };

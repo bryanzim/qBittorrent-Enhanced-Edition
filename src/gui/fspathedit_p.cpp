@@ -30,6 +30,8 @@
 
 #include "fspathedit_p.h"
 
+#include "base/path.h"
+
 #include <QCompleter>
 #include <QContextMenuEvent>
 #include <QDir>
@@ -40,10 +42,8 @@
 #include <QStringList>
 #include <QStyle>
 
-#include "base/path.h"
-
 // -------------------- FileSystemPathValidator ----------------------------------------
-Private::FileSystemPathValidator::FileSystemPathValidator(QObject *parent)
+Private::FileSystemPathValidator::FileSystemPathValidator(QObject* parent)
     : QValidator(parent)
 {
 }
@@ -109,10 +109,10 @@ void Private::FileSystemPathValidator::setCheckWritePermission(const bool value)
 }
 
 Private::FileSystemPathValidator::TestResult
-Private::FileSystemPathValidator::testPath(const Path &path) const
+Private::FileSystemPathValidator::testPath(const Path& path) const
 {
     // `QFileInfo` will cache the query results and avoid excessive querying to filesystem
-    const QFileInfo info {path.data()};
+    const QFileInfo info{ path.data() };
 
     if (!info.exists())
         return existingOnly() ? TestResult::DoesNotExist : TestResult::OK;
@@ -148,19 +148,19 @@ QValidator::State Private::FileSystemPathValidator::lastValidationState() const
     return m_lastValidationState;
 }
 
-QValidator::State Private::FileSystemPathValidator::validate(QString &input, [[maybe_unused]] int &pos) const
+QValidator::State Private::FileSystemPathValidator::validate(QString& input, [[maybe_unused]] int& pos) const
 {
     // we ignore cursor position and validate the full path anyway
 
     m_lastTestResult = testPath(Path(input));
     m_lastValidationState = (m_lastTestResult == TestResult::OK)
-        ? QValidator::Acceptable
-        : (strictMode() ? QValidator::Invalid : QValidator::Intermediate);
+                                ? QValidator::Acceptable
+                                : (strictMode() ? QValidator::Invalid : QValidator::Intermediate);
 
     return m_lastValidationState;
 }
 
-Private::FileLineEdit::FileLineEdit(QWidget *parent)
+Private::FileLineEdit::FileLineEdit(QWidget* parent)
     : QLineEdit(parent)
 {
     setCompleter(new QCompleter(this));
@@ -178,25 +178,24 @@ void Private::FileLineEdit::completeDirectoriesOnly(const bool completeDirsOnly)
     m_completeDirectoriesOnly = completeDirsOnly;
     if (m_completerModel)
     {
-        const QDir::Filters filters = QDir::NoDotAndDotDot
-                | (completeDirsOnly ? QDir::Dirs : QDir::AllEntries);
+        const QDir::Filters filters = QDir::NoDotAndDotDot | (completeDirsOnly ? QDir::Dirs : QDir::AllEntries);
         m_completerModel->setFilter(filters);
     }
 }
 
-void Private::FileLineEdit::setFilenameFilters(const QStringList &filters)
+void Private::FileLineEdit::setFilenameFilters(const QStringList& filters)
 {
     m_filenameFilters = filters;
     if (m_completerModel)
         m_completerModel->setNameFilters(m_filenameFilters);
 }
 
-void Private::FileLineEdit::setBrowseAction(QAction *action)
+void Private::FileLineEdit::setBrowseAction(QAction* action)
 {
     m_browseAction = action;
 }
 
-void Private::FileLineEdit::setValidator(QValidator *validator)
+void Private::FileLineEdit::setValidator(QValidator* validator)
 {
     QLineEdit::setValidator(validator);
 }
@@ -206,17 +205,17 @@ QString Private::FileLineEdit::placeholder() const
     return placeholderText();
 }
 
-void Private::FileLineEdit::setPlaceholder(const QString &val)
+void Private::FileLineEdit::setPlaceholder(const QString& val)
 {
     setPlaceholderText(val);
 }
 
-QWidget *Private::FileLineEdit::widget()
+QWidget* Private::FileLineEdit::widget()
 {
     return this;
 }
 
-void Private::FileLineEdit::keyPressEvent(QKeyEvent *e)
+void Private::FileLineEdit::keyPressEvent(QKeyEvent* e)
 {
     QLineEdit::keyPressEvent(e);
 
@@ -231,8 +230,7 @@ void Private::FileLineEdit::keyPressEvent(QKeyEvent *e)
             m_completerModel->setIconProvider(m_iconProvider);
             m_completerModel->setOptions(QFileSystemModel::DontWatchForChanges);
             m_completerModel->setNameFilters(m_filenameFilters);
-            const QDir::Filters filters = QDir::NoDotAndDotDot
-                    | (m_completeDirectoriesOnly ? QDir::Dirs : QDir::AllEntries);
+            const QDir::Filters filters = QDir::NoDotAndDotDot | (m_completeDirectoriesOnly ? QDir::Dirs : QDir::AllEntries);
             m_completerModel->setFilter(filters);
 
             completer()->setModel(m_completerModel);
@@ -243,9 +241,9 @@ void Private::FileLineEdit::keyPressEvent(QKeyEvent *e)
     }
 }
 
-void Private::FileLineEdit::contextMenuEvent(QContextMenuEvent *event)
+void Private::FileLineEdit::contextMenuEvent(QContextMenuEvent* event)
 {
-    QMenu *menu = createStandardContextMenu();
+    QMenu* menu = createStandardContextMenu();
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
     if (m_browseAction)
@@ -265,7 +263,7 @@ void Private::FileLineEdit::showCompletionPopup()
 
 void Private::FileLineEdit::validateText()
 {
-    const auto *validator = qobject_cast<const FileSystemPathValidator *>(this->validator());
+    const auto* validator = qobject_cast<const FileSystemPathValidator*>(this->validator());
     if (!validator)
         return;
 
@@ -317,8 +315,8 @@ QString Private::FileLineEdit::warningText(const FileSystemPathValidator::TestRe
     return {};
 }
 
-Private::FileComboEdit::FileComboEdit(QWidget *parent)
-    : QComboBox {parent}
+Private::FileComboEdit::FileComboEdit(QWidget* parent)
+    : QComboBox{ parent }
 {
     setEditable(true);
     setLineEdit(new FileLineEdit(this));
@@ -326,15 +324,15 @@ Private::FileComboEdit::FileComboEdit(QWidget *parent)
 
 void Private::FileComboEdit::completeDirectoriesOnly(bool completeDirsOnly)
 {
-    static_cast<FileLineEdit *>(lineEdit())->completeDirectoriesOnly(completeDirsOnly);
+    static_cast<FileLineEdit*>(lineEdit())->completeDirectoriesOnly(completeDirsOnly);
 }
 
-void Private::FileComboEdit::setBrowseAction(QAction *action)
+void Private::FileComboEdit::setBrowseAction(QAction* action)
 {
-    static_cast<FileLineEdit *>(lineEdit())->setBrowseAction(action);
+    static_cast<FileLineEdit*>(lineEdit())->setBrowseAction(action);
 }
 
-void Private::FileComboEdit::setValidator(QValidator *validator)
+void Private::FileComboEdit::setValidator(QValidator* validator)
 {
     lineEdit()->setValidator(validator);
 }
@@ -344,17 +342,17 @@ QString Private::FileComboEdit::placeholder() const
     return lineEdit()->placeholderText();
 }
 
-void Private::FileComboEdit::setPlaceholder(const QString &val)
+void Private::FileComboEdit::setPlaceholder(const QString& val)
 {
     lineEdit()->setPlaceholderText(val);
 }
 
-void Private::FileComboEdit::setFilenameFilters(const QStringList &filters)
+void Private::FileComboEdit::setFilenameFilters(const QStringList& filters)
 {
-    static_cast<FileLineEdit *>(lineEdit())->setFilenameFilters(filters);
+    static_cast<FileLineEdit*>(lineEdit())->setFilenameFilters(filters);
 }
 
-QWidget *Private::FileComboEdit::widget()
+QWidget* Private::FileComboEdit::widget()
 {
     return this;
 }

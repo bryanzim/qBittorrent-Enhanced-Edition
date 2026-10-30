@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QStyledItemDelegate>
-
 #include "progressbarpainter.h"
+
+#include <QStyledItemDelegate>
 
 class TransferListDelegate final : public QStyledItemDelegate
 {
@@ -39,10 +39,10 @@ class TransferListDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY_MOVE(TransferListDelegate)
 
 public:
-    explicit TransferListDelegate(QObject *parent);
+    explicit TransferListDelegate(QObject* parent);
 
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 private:
     ProgressBarPainter m_progressBarPainter;

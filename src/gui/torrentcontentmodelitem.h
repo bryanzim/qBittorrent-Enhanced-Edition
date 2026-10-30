@@ -29,10 +29,10 @@
 
 #pragma once
 
+#include "base/bittorrent/downloadpriority.h"
+
 #include <QCoreApplication>
 #include <QList>
-
-#include "base/bittorrent/downloadpriority.h"
 
 class QVariant;
 
@@ -67,11 +67,11 @@ public:
     virtual ~TorrentContentModelItem();
 
     bool isRootItem() const;
-    TorrentContentModelFolder *parent() const;
+    TorrentContentModelFolder* parent() const;
     virtual ItemType itemType() const = 0;
 
     QString name() const;
-    void setName(const QString &name);
+    void setName(const QString& name);
 
     qulonglong size() const;
     qreal progress() const;
@@ -99,5 +99,5 @@ protected:
     qreal m_availability = -1;
 
 private:
-    TorrentContentModelFolder *m_parentItem = nullptr;
+    TorrentContentModelFolder* m_parentItem = nullptr;
 };

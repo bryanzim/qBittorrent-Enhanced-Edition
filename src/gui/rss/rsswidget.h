@@ -30,9 +30,9 @@
 
 #pragma once
 
-#include <QWidget>
-
 #include "gui/guiapplicationcomponent.h"
+
+#include <QWidget>
 
 class LineEdit;
 class QListWidgetItem;
@@ -54,7 +54,7 @@ class RSSWidget final : public GUIApplicationComponent<QWidget>
     Q_DISABLE_COPY_MOVE(RSSWidget)
 
 public:
-    explicit RSSWidget(IGUIApplication *app, QWidget *parent = nullptr);
+    explicit RSSWidget(IGUIApplication* app, QWidget* parent = nullptr);
     ~RSSWidget() override;
 
 public slots:
@@ -69,14 +69,14 @@ private slots:
     void on_newFeedButton_clicked();
     void refreshAllFeeds();
     void on_markReadButton_clicked();
-    void displayRSSListMenu(const QPoint &pos);
+    void displayRSSListMenu(const QPoint& pos);
     void displayItemsListMenu();
     void renameSelectedRSSItem();
     void editSelectedRSSFeed();
     void refreshSelectedItems();
     void copySelectedFeedsURL();
-    void handleCurrentFeedItemChanged(QTreeWidgetItem *currentItem);
-    void handleCurrentArticleItemChanged(QListWidgetItem *currentItem, QListWidgetItem *previousItem);
+    void handleCurrentFeedItemChanged(QTreeWidgetItem* currentItem);
+    void handleCurrentArticleItemChanged(QListWidgetItem* currentItem, QListWidgetItem* previousItem);
     void openSelectedArticlesUrls();
     void downloadSelectedTorrents();
     void saveSlidersPosition();
@@ -88,12 +88,12 @@ private slots:
     void on_rssDownloaderBtn_clicked();
     void handleSessionProcessingStateChanged(bool enabled);
     void handleUnreadCountChanged();
-    void handleRSSFilterTextChanged(const QString &newFilter);
+    void handleRSSFilterTextChanged(const QString& newFilter);
 
 private:
-    bool eventFilter(QObject *obj, QEvent *event) override;
-    void renderArticle(const RSS::Article *article) const;
+    bool eventFilter(QObject* obj, QEvent* event) override;
+    void renderArticle(const RSS::Article* article) const;
 
-    Ui::RSSWidget *m_ui = nullptr;
-    LineEdit *m_rssFilter = nullptr;
+    Ui::RSSWidget* m_ui = nullptr;
+    LineEdit* m_rssFilter = nullptr;
 };

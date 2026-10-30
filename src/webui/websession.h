@@ -29,8 +29,7 @@
 
 #pragma once
 
-#include <chrono>
-#include <functional>
+#include "api/isessionmanager.h"
 
 #include <QDeadlineTimer>
 #include <QElapsedTimer>
@@ -38,12 +37,13 @@
 #include <QObject>
 #include <QString>
 
-#include "api/isessionmanager.h"
+#include <chrono>
+#include <functional>
 
 using namespace std::chrono_literals;
 
 class APIController;
-using CreateAPIControllerFunc = std::function<APIController *()>;
+using CreateAPIControllerFunc = std::function<APIController*()>;
 
 enum class WebSessionType : qint8
 {
@@ -57,9 +57,9 @@ class WebSession : public QObject, public ISession
     Q_DISABLE_COPY_MOVE(WebSession)
 
 public:
-    static WebSession *create(WebSessionType type, const QString &sid);
+    static WebSession* create(WebSessionType type, const QString& sid);
 
-    explicit WebSession(const QString &sid);
+    explicit WebSession(const QString& sid);
 
     QString id() const override;
 
@@ -69,14 +69,14 @@ public:
     QElapsedTimer timestamp() const;
     void updateTimestamp();
 
-    void registerAPIController(const QString &scope, CreateAPIControllerFunc createAPIController);
-    APIController *getAPIController(const QString &scope) const;
+    void registerAPIController(const QString& scope, CreateAPIControllerFunc createAPIController);
+    APIController* getAPIController(const QString& scope) const;
 
 private:
     struct APIControllerEntry
     {
         CreateAPIControllerFunc create;
-        APIController *instance = nullptr;
+        APIController* instance = nullptr;
     };
 
     const QString m_sid;

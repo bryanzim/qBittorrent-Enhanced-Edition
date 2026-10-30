@@ -29,26 +29,23 @@
 
 #include "filelogger.h"
 
-#include <chrono>
+#include "base/global.h"
+#include "base/logger.h"
+#include "base/profile.h"
+#include "base/utils/fs.h"
 
 #include <QDateTime>
 #include <QDir>
 #include <QList>
 #include <QTextStream>
 
-#include "base/global.h"
-#include "base/logger.h"
-#include "base/profile.h"
-#include "base/utils/fs.h"
+#include <chrono>
 
 const QString LOG_FILENAME = u"qbittorrent.log"_s;
-const std::chrono::seconds FLUSH_INTERVAL {2};
+const std::chrono::seconds FLUSH_INTERVAL{ 2 };
 
-FileLogger::FileLogger(const Path &path, const bool backup
-        , const int maxSize, const bool deleteOld, const int age
-        , const FileLogAgeType ageType)
-    : m_backup {backup}
-    , m_maxSize {maxSize}
+FileLogger::FileLogger(const Path& path, const bool backup, const int maxSize, const bool deleteOld, const int age, const FileLogAgeType ageType)
+    : m_backup{ backup }, m_maxSize{ maxSize }
 {
     m_flusher.setInterval(FLUSH_INTERVAL);
     m_flusher.setSingleShot(true);
@@ -58,8 +55,8 @@ FileLogger::FileLogger(const Path &path, const bool backup
     if (deleteOld)
         this->deleteOld(age, ageType);
 
-    const Logger *const logger = Logger::instance();
-    for (const Log::Msg &msg : asConst(logger->getMessages()))
+    const Logger* const logger = Logger::instance();
+    for (const Log::Msg& msg : asConst(logger->getMessages()))
         addLogMessage(msg);
 
     connect(logger, &Logger::newLogMessage, this, &FileLogger::addLogMessage);
@@ -70,7 +67,7 @@ FileLogger::~FileLogger()
     closeLogFile();
 }
 
-void FileLogger::setPath(const Path &newPath)
+void FileLogger::setPath(const Path& newPath)
 {
     const Path newPathAbs = newPath.isAbsolute() ? newPath : (specialFolderLocation(SpecialFolder::Data) / newPath);
     // compare paths as strings to perform case sensitive comparison on all the platforms
@@ -89,11 +86,10 @@ void FileLogger::setPath(const Path &newPath)
 void FileLogger::deleteOld(const int age, const FileLogAgeType ageType)
 {
     const QDateTime date = QDateTime::currentDateTime();
-    const QDir dir {m_logsFolderPath.data()};
-    const QFileInfoList fileList = dir.entryInfoList(QStringList(LOG_FILENAME + u".bak*")
-        , (QDir::Files | QDir::Writable), (QDir::Time | QDir::Reversed));
+    const QDir dir{ m_logsFolderPath.data() };
+    const QFileInfoList fileList = dir.entryInfoList(QStringList(LOG_FILENAME + u".bak*"), (QDir::Files | QDir::Writable), (QDir::Time | QDir::Reversed));
 
-    for (const QFileInfo &file : fileList)
+    for (const QFileInfo& file : fileList)
     {
         QDateTime modificationDate = file.lastModified();
         switch (ageType)
@@ -123,9 +119,10 @@ void FileLogger::setMaxSize(const int value)
     m_maxSize = value;
 }
 
-void FileLogger::addLogMessage(const Log::Msg &msg)
+void FileLogger::addLogMessage(const Log::Msg& msg)
 {
-    if (!m_logFile.isOpen()) return;
+    if (!m_logFile.isOpen())
+        return;
 
     QTextStream stream(&m_logFile);
 
@@ -180,7 +177,8 @@ void FileLogger::openLogFile()
     if (!m_logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
     {
         LogMsg(tr("An error occurred while trying to open the log file. Logging to file is disabled. File: \"%1\". Error: \"%2\".")
-            .arg(m_logFile.fileName(), m_logFile.errorString()), Log::CRITICAL);
+                   .arg(m_logFile.fileName(), m_logFile.errorString()),
+               Log::CRITICAL);
         return;
     }
 

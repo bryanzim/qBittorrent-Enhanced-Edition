@@ -30,16 +30,16 @@
 
 #pragma once
 
-#include <chrono>
+#include "base/path.h"
 
-#include <QtTypes>
 #include <QHash>
 #include <QNetworkProxy>
 #include <QObject>
 #include <QQueue>
 #include <QSet>
+#include <QtTypes>
 
-#include "base/path.h"
+#include <chrono>
 
 class QNetworkAccessManager;
 class QNetworkCookie;
@@ -54,11 +54,11 @@ namespace Net
         QString hostName;
         int port;
 
-        static ServiceID fromURL(const QUrl &url);
+        static ServiceID fromURL(const QUrl& url);
     };
 
-    std::size_t qHash(const ServiceID &serviceID, std::size_t seed = 0);
-    bool operator==(const ServiceID &lhs, const ServiceID &rhs);
+    std::size_t qHash(const ServiceID& serviceID, std::size_t seed = 0);
+    bool operator==(const ServiceID& lhs, const ServiceID& rhs);
 
     enum class DownloadStatus
     {
@@ -70,33 +70,33 @@ namespace Net
     class DownloadRequest
     {
     public:
-        DownloadRequest(const QString &url);
-        DownloadRequest(const DownloadRequest &other) = default;
+        DownloadRequest(const QString& url);
+        DownloadRequest(const DownloadRequest& other) = default;
 
         QString url() const;
-        DownloadRequest &url(const QString &value);
+        DownloadRequest& url(const QString& value);
 
         QString userAgent() const;
-        DownloadRequest &userAgent(const QString &value);
+        DownloadRequest& userAgent(const QString& value);
 
         qint64 limit() const;
-        DownloadRequest &limit(qint64 value);
+        DownloadRequest& limit(qint64 value);
 
         bool saveToFile() const;
-        DownloadRequest &saveToFile(bool value);
+        DownloadRequest& saveToFile(bool value);
 
         // if saveToFile is set, the file is saved in destFileName
         // (deprecated) if destFileName is not provided, the file will be saved
         // in a temporary file, the name of file is set in DownloadResult::filePath
         Path destFileName() const;
-        DownloadRequest &destFileName(const Path &value);
+        DownloadRequest& destFileName(const Path& value);
 
         // when disabled, a redirection that downgrades HTTPS to a non-HTTPS scheme
         // makes the request fail instead of being followed, matching the policy
         // Qt applies by default (QNetworkRequest::NoLessSafeRedirectPolicy) but
         // that we opt out of by handling redirections manually
         bool allowInsecureRedirect() const;
-        DownloadRequest &allowInsecureRedirect(bool value);
+        DownloadRequest& allowInsecureRedirect(bool value);
 
     private:
         QString m_url;
@@ -128,7 +128,7 @@ namespace Net
         virtual void cancel() = 0;
 
     signals:
-        void finished(const DownloadResult &result);
+        void finished(const DownloadResult& result);
     };
 
     class DownloadHandlerImpl;
@@ -141,47 +141,47 @@ namespace Net
     public:
         static void initInstance();
         static void freeInstance();
-        static DownloadManager *instance();
+        static DownloadManager* instance();
 
-        DownloadHandler *download(const DownloadRequest &downloadRequest, bool useProxy);
+        DownloadHandler* download(const DownloadRequest& downloadRequest, bool useProxy);
 
         template <typename Context, typename Func>
-        void download(const DownloadRequest &downloadRequest, bool useProxy, Context context, Func &&slot);
+        void download(const DownloadRequest& downloadRequest, bool useProxy, Context context, Func&& slot);
 
-        void registerSequentialService(const ServiceID &serviceID, std::chrono::seconds delay = std::chrono::seconds(0));
+        void registerSequentialService(const ServiceID& serviceID, std::chrono::seconds delay = std::chrono::seconds(0));
 
-        QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const;
-        bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url);
+        QList<QNetworkCookie> cookiesForUrl(const QUrl& url) const;
+        bool setCookiesFromUrl(const QList<QNetworkCookie>& cookieList, const QUrl& url);
         QList<QNetworkCookie> allCookies() const;
-        void setAllCookies(const QList<QNetworkCookie> &cookieList);
-        bool deleteCookie(const QNetworkCookie &cookie);
+        void setAllCookies(const QList<QNetworkCookie>& cookieList);
+        bool deleteCookie(const QNetworkCookie& cookie);
 
-        static bool hasSupportedScheme(const QString &url);
+        static bool hasSupportedScheme(const QString& url);
 
     private:
         class NetworkCookieJar;
 
-        explicit DownloadManager(QObject *parent = nullptr);
+        explicit DownloadManager(QObject* parent = nullptr);
 
         void applyProxySettings();
-        void processWaitingJobs(const ServiceID &serviceID);
-        void processRequest(DownloadHandlerImpl *downloadHandler);
+        void processWaitingJobs(const ServiceID& serviceID);
+        void processRequest(DownloadHandlerImpl* downloadHandler);
 
-        static DownloadManager *m_instance;
-        NetworkCookieJar *m_networkCookieJar = nullptr;
-        QNetworkAccessManager *m_networkManager = nullptr;
+        static DownloadManager* m_instance;
+        NetworkCookieJar* m_networkCookieJar = nullptr;
+        QNetworkAccessManager* m_networkManager = nullptr;
         QNetworkProxy m_proxy;
 
         // m_sequentialServices value is delay for same host requests
         QHash<ServiceID, std::chrono::seconds> m_sequentialServices;
         QSet<ServiceID> m_busyServices;
-        QHash<ServiceID, QQueue<DownloadHandlerImpl *>> m_waitingJobs;
+        QHash<ServiceID, QQueue<DownloadHandlerImpl*>> m_waitingJobs;
     };
 
     template <typename Context, typename Func>
-    void DownloadManager::download(const DownloadRequest &downloadRequest, bool useProxy, Context context, Func &&slot)
+    void DownloadManager::download(const DownloadRequest& downloadRequest, bool useProxy, Context context, Func&& slot)
     {
-        const DownloadHandler *handler = download(downloadRequest, useProxy);
+        const DownloadHandler* handler = download(downloadRequest, useProxy);
         connect(handler, &DownloadHandler::finished, context, slot);
     }
 }

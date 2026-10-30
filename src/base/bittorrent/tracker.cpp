@@ -30,13 +30,6 @@
 
 #include "tracker.h"
 
-#include <libtorrent/bencode.hpp>
-#include <libtorrent/entry.hpp>
-
-#include <QtAssert>
-#include <QByteArrayView>
-#include <QHostAddress>
-
 #include "base/exceptions.h"
 #include "base/global.h"
 #include "base/http/constants.h"
@@ -46,6 +39,12 @@
 #include "base/logger.h"
 #include "base/preferences.h"
 
+#include <QByteArrayView>
+#include <QHostAddress>
+#include <QtAssert>
+#include <libtorrent/bencode.hpp>
+#include <libtorrent/entry.hpp>
+
 namespace
 {
     // static limits
@@ -53,7 +52,7 @@ namespace
     const int MAX_PEERS_PER_TORRENT = 200;
     // [BEP-3] the `ip` parameter may hold a DNS name, whose maximum length is 253 characters
     const int MAX_CLAIMED_ADDRESS_SIZE = 255;
-    const int ANNOUNCE_INTERVAL = 1800;  // 30min
+    const int ANNOUNCE_INTERVAL = 1800; // 30min
 
     // constants
     const int PEER_ID_SIZE = 20;
@@ -94,33 +93,31 @@ namespace
         using RuntimeError::RuntimeError;
     };
 
-    QByteArray toBigEndianByteArray(const QHostAddress &addr)
+    QByteArray toBigEndianByteArray(const QHostAddress& addr)
     {
         // translate IP address to a sequence of bytes in big-endian order
         switch (addr.protocol())
         {
         case QAbstractSocket::IPv4Protocol:
-        case QAbstractSocket::AnyIPProtocol:
-            {
-                const quint32 ipv4 = addr.toIPv4Address();
-                QByteArray ret;
-                ret.reserve(sizeof(quint32));
-                ret.append(static_cast<char>((ipv4 >> 24) & 0xFF))
-                   .append(static_cast<char>((ipv4 >> 16) & 0xFF))
-                   .append(static_cast<char>((ipv4 >> 8) & 0xFF))
-                   .append(static_cast<char>(ipv4 & 0xFF));
-                return ret;
-            }
+        case QAbstractSocket::AnyIPProtocol: {
+            const quint32 ipv4 = addr.toIPv4Address();
+            QByteArray ret;
+            ret.reserve(sizeof(quint32));
+            ret.append(static_cast<char>((ipv4 >> 24) & 0xFF))
+                .append(static_cast<char>((ipv4 >> 16) & 0xFF))
+                .append(static_cast<char>((ipv4 >> 8) & 0xFF))
+                .append(static_cast<char>(ipv4 & 0xFF));
+            return ret;
+        }
 
-        case QAbstractSocket::IPv6Protocol:
-            {
-                const Q_IPV6ADDR ipv6 = addr.toIPv6Address();
-                QByteArray ret;
-                ret.reserve(sizeof(Q_IPV6ADDR));
-                for (const quint8 i : ipv6.c)
-                    ret.append(i);
-                return ret;
-            }
+        case QAbstractSocket::IPv6Protocol: {
+            const Q_IPV6ADDR ipv6 = addr.toIPv6Address();
+            QByteArray ret;
+            ret.reserve(sizeof(Q_IPV6ADDR));
+            for (const quint8 i : ipv6.c)
+                ret.append(i);
+            return ret;
+        }
 
         case QAbstractSocket::UnknownNetworkLayerProtocol:
             return {};
@@ -132,7 +129,7 @@ namespace
     lt::entry::string_type toEntryString(const QByteArrayView array)
     {
         using SizeType = lt::entry::string_type::size_type;
-        return {array.constData(), static_cast<SizeType>(array.size())};
+        return { array.constData(), static_cast<SizeType>(array.size()) };
     }
 }
 
@@ -144,12 +141,12 @@ namespace BitTorrent
         return (QByteArray::fromStdString(address) + ':' + QByteArray::number(port));
     }
 
-    bool operator==(const Peer &left, const Peer &right)
+    bool operator==(const Peer& left, const Peer& right)
     {
         return (left.uniqueID() == right.uniqueID());
     }
 
-    std::size_t qHash(const Peer &key, const std::size_t seed)
+    std::size_t qHash(const Peer& key, const std::size_t seed)
     {
         return qHash(key.uniqueID(), seed);
     }
@@ -161,7 +158,7 @@ using namespace BitTorrent;
 struct Tracker::TrackerAnnounceRequest
 {
     QHostAddress socketAddress;
-    QByteArray claimedAddress;  // self claimed by peer
+    QByteArray claimedAddress; // self claimed by peer
     TorrentID torrentID;
     QString event;
     Peer peer;
@@ -171,7 +168,7 @@ struct Tracker::TrackerAnnounceRequest
 };
 
 // Tracker::TorrentStats
-void Tracker::TorrentStats::setPeer(const Peer &peer)
+void Tracker::TorrentStats::setPeer(const Peer& peer)
 {
     // always replace existing peer
     if (!removePeer(peer))
@@ -187,7 +184,7 @@ void Tracker::TorrentStats::setPeer(const Peer &peer)
     peers.insert(peer);
 }
 
-bool Tracker::TorrentStats::removePeer(const Peer &peer)
+bool Tracker::TorrentStats::removePeer(const Peer& peer)
 {
     const auto iter = peers.find(peer);
     if (iter == peers.end())
@@ -200,9 +197,8 @@ bool Tracker::TorrentStats::removePeer(const Peer &peer)
 }
 
 // Tracker
-Tracker::Tracker(QObject *parent)
-    : QObject(parent)
-    , m_server(new Http::Server(this, this))
+Tracker::Tracker(QObject* parent)
+    : QObject(parent), m_server(new Http::Server(this, this))
 {
 }
 
@@ -212,8 +208,7 @@ bool Tracker::start()
 
     if (m_server->isListening())
     {
-        if (const int oldPort = m_server->serverPort()
-            ; oldPort == port)
+        if (const int oldPort = m_server->serverPort(); oldPort == port)
         {
             // Already listening on the right port, just return
             return true;
@@ -229,23 +224,24 @@ bool Tracker::start()
     if (listenSuccess)
     {
         LogMsg(tr("Embedded Tracker: Now listening on IP: %1, port: %2")
-            .arg(ip.toString(), QString::number(port)), Log::INFO);
+                   .arg(ip.toString(), QString::number(port)),
+               Log::INFO);
     }
     else
     {
         LogMsg(tr("Embedded Tracker: Unable to bind to IP: %1, port: %2. Reason: %3")
-                .arg(ip.toString(), QString::number(port), m_server->errorString())
-            , Log::WARNING);
+                   .arg(ip.toString(), QString::number(port), m_server->errorString()),
+               Log::WARNING);
     }
 
     return listenSuccess;
 }
 
-void Tracker::processRequest(const Http::Request &request, const Http::Environment &env, Http::ResponseWriter &responseWriter)
+void Tracker::processRequest(const Http::Request& request, const Http::Environment& env, Http::ResponseWriter& responseWriter)
 {
     m_request = request;
     m_env = env;
-    m_response = {};  // clear response
+    m_response = {}; // clear response
 
     try
     {
@@ -258,7 +254,7 @@ void Tracker::processRequest(const Http::Request &request, const Http::Environme
         else
             throw NotFoundHTTPError();
     }
-    catch (const HTTPError &error)
+    catch (const HTTPError& error)
     {
         m_response.status = error.status();
         if (!error.message().isEmpty())
@@ -267,17 +263,16 @@ void Tracker::processRequest(const Http::Request &request, const Http::Environme
             m_response.content = error.message().toUtf8();
         }
     }
-    catch (const TrackerError &error)
+    catch (const TrackerError& error)
     {
-        m_response = {};  // clear response
+        m_response = {}; // clear response
 
-        const lt::entry::dictionary_type bencodedEntry =
-        {
-            {ANNOUNCE_RESPONSE_FAILURE_REASON, {error.message().toStdString()}}
+        const lt::entry::dictionary_type bencodedEntry = {
+            { ANNOUNCE_RESPONSE_FAILURE_REASON, { error.message().toStdString() } }
         };
         QByteArray reply;
         lt::bencode(std::back_inserter(reply), bencodedEntry);
-        m_response.status = {.code = 200};
+        m_response.status = { .code = 200 };
         m_response.headers.insert(Http::HEADER_CONTENT_TYPE, Http::CONTENT_TYPE_TXT);
         m_response.content = reply;
     }
@@ -287,7 +282,7 @@ void Tracker::processRequest(const Http::Request &request, const Http::Environme
 
 void Tracker::processAnnounceRequest()
 {
-    const QHash<QString, QByteArray> &queryParams = m_request.query;
+    const QHash<QString, QByteArray>& queryParams = m_request.query;
     TrackerAnnounceRequest announceReq;
 
     // ip address
@@ -355,25 +350,21 @@ void Tracker::processAnnounceRequest()
     announceReq.compact = (queryParams.value(ANNOUNCE_REQUEST_COMPACT) != "0");
 
     // 8. cache `peers` field so we don't recompute when sending response
-    const QHostAddress claimedIPAddress {QString::fromLatin1(announceReq.claimedAddress)};
+    const QHostAddress claimedIPAddress{ QString::fromLatin1(announceReq.claimedAddress) };
     announceReq.peer.endpoint = toEntryString(
         toBigEndianByteArray(!claimedIPAddress.isNull() ? claimedIPAddress : announceReq.socketAddress)
-        .append(static_cast<char>((announceReq.peer.port >> 8) & 0xFF))
-        .append(static_cast<char>(announceReq.peer.port)));
+            .append(static_cast<char>((announceReq.peer.port >> 8) & 0xFF))
+            .append(static_cast<char>(announceReq.peer.port)));
 
     // 9. cache `address` field so we don't recompute when sending response
     announceReq.peer.address = toEntryString(!announceReq.claimedAddress.isEmpty()
-        ? announceReq.claimedAddress
-        : announceReq.socketAddress.toString().toLatin1());
+                                                 ? announceReq.claimedAddress
+                                                 : announceReq.socketAddress.toString().toLatin1());
 
     // 10. event
     announceReq.event = QString::fromLatin1(queryParams.value(ANNOUNCE_REQUEST_EVENT));
 
-    if (announceReq.event.isEmpty()
-        || (announceReq.event == ANNOUNCE_REQUEST_EVENT_EMPTY)
-        || (announceReq.event == ANNOUNCE_REQUEST_EVENT_COMPLETED)
-        || (announceReq.event == ANNOUNCE_REQUEST_EVENT_STARTED)
-        || (announceReq.event == ANNOUNCE_REQUEST_EVENT_PAUSED))
+    if (announceReq.event.isEmpty() || (announceReq.event == ANNOUNCE_REQUEST_EVENT_EMPTY) || (announceReq.event == ANNOUNCE_REQUEST_EVENT_COMPLETED) || (announceReq.event == ANNOUNCE_REQUEST_EVENT_STARTED) || (announceReq.event == ANNOUNCE_REQUEST_EVENT_PAUSED))
     {
         // [BEP-21] Extension for partial seeds
         // (partial support - we don't support BEP-48 so the part that concerns that is not supported)
@@ -391,7 +382,7 @@ void Tracker::processAnnounceRequest()
     prepareAnnounceResponse(announceReq);
 }
 
-void Tracker::registerPeer(const TrackerAnnounceRequest &announceReq)
+void Tracker::registerPeer(const TrackerAnnounceRequest& announceReq)
 {
     if (!m_torrents.contains(announceReq.torrentID))
     {
@@ -403,7 +394,7 @@ void Tracker::registerPeer(const TrackerAnnounceRequest &announceReq)
     m_torrents[announceReq.torrentID].setPeer(announceReq.peer);
 }
 
-void Tracker::unregisterPeer(const TrackerAnnounceRequest &announceReq)
+void Tracker::unregisterPeer(const TrackerAnnounceRequest& announceReq)
 {
     const auto torrentStatsIter = m_torrents.find(announceReq.torrentID);
     if (torrentStatsIter == m_torrents.end())
@@ -415,19 +406,18 @@ void Tracker::unregisterPeer(const TrackerAnnounceRequest &announceReq)
         m_torrents.erase(torrentStatsIter);
 }
 
-void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest &announceReq)
+void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest& announceReq)
 {
     // don't create an entry for an unknown torrent, it would bypass the `MAX_TORRENTS` limit
-    const TorrentStats &torrentStats = m_torrents.value(announceReq.torrentID);
+    const TorrentStats& torrentStats = m_torrents.value(announceReq.torrentID);
 
-    lt::entry::dictionary_type replyDict
-    {
-        {ANNOUNCE_RESPONSE_INTERVAL, ANNOUNCE_INTERVAL},
-        {ANNOUNCE_RESPONSE_COMPLETE, torrentStats.seeders},
-        {ANNOUNCE_RESPONSE_INCOMPLETE, (torrentStats.peers.size() - torrentStats.seeders)},
+    lt::entry::dictionary_type replyDict{
+        {    ANNOUNCE_RESPONSE_INTERVAL,                                             ANNOUNCE_INTERVAL },
+        {    ANNOUNCE_RESPONSE_COMPLETE,                                          torrentStats.seeders },
+        {  ANNOUNCE_RESPONSE_INCOMPLETE,            (torrentStats.peers.size() - torrentStats.seeders) },
 
         // [BEP-24] Tracker Returns External IP (partial support - might not work properly for all IPv6 cases)
-        {ANNOUNCE_RESPONSE_EXTERNAL_IP, toBigEndianByteArray(announceReq.socketAddress).toStdString()}
+        { ANNOUNCE_RESPONSE_EXTERNAL_IP, toBigEndianByteArray(announceReq.socketAddress).toStdString() }
     };
 
     // peer list
@@ -441,19 +431,19 @@ void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest &announceReq)
         if (announceReq.event != ANNOUNCE_REQUEST_EVENT_STOPPED)
         {
             int counter = 0;
-            for (const Peer &peer : asConst(torrentStats.peers))
+            for (const Peer& peer : asConst(torrentStats.peers))
             {
                 if (counter++ >= announceReq.numwant)
                     break;
 
-                if (peer.endpoint.size() == 6)  // IPv4 + port
+                if (peer.endpoint.size() == 6) // IPv4 + port
                     peers.append(peer.endpoint);
-                else if (peer.endpoint.size() == 18)  // IPv6 + port
+                else if (peer.endpoint.size() == 18) // IPv6 + port
                     peers6.append(peer.endpoint);
             }
         }
 
-        replyDict[ANNOUNCE_RESPONSE_PEERS] = peers;  // required, even it's empty
+        replyDict[ANNOUNCE_RESPONSE_PEERS] = peers; // required, even it's empty
         if (!peers6.empty())
             replyDict[ANNOUNCE_RESPONSE_PEERS6] = peers6;
     }
@@ -464,15 +454,14 @@ void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest &announceReq)
         if (announceReq.event != ANNOUNCE_REQUEST_EVENT_STOPPED)
         {
             int counter = 0;
-            for (const Peer &peer : torrentStats.peers)
+            for (const Peer& peer : torrentStats.peers)
             {
                 if (counter++ >= announceReq.numwant)
                     break;
 
-                lt::entry::dictionary_type peerDict =
-                {
-                    {ANNOUNCE_RESPONSE_PEERS_IP, peer.address},
-                    {ANNOUNCE_RESPONSE_PEERS_PORT, peer.port}
+                lt::entry::dictionary_type peerDict = {
+                    {   ANNOUNCE_RESPONSE_PEERS_IP, peer.address },
+                    { ANNOUNCE_RESPONSE_PEERS_PORT,    peer.port }
                 };
 
                 if (!announceReq.noPeerId)
@@ -488,7 +477,7 @@ void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest &announceReq)
     // bencode
     QByteArray reply;
     lt::bencode(std::back_inserter(reply), replyDict);
-    m_response.status = {.code = 200};
+    m_response.status = { .code = 200 };
     m_response.headers.insert(Http::HEADER_CONTENT_TYPE, Http::CONTENT_TYPE_TXT);
     m_response.content = reply;
 }

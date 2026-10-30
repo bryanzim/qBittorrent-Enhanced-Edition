@@ -28,8 +28,6 @@
 
 #include "cookiesdialog.h"
 
-#include <algorithm>
-
 #include "base/global.h"
 #include "base/net/downloadmanager.h"
 #include "cookiesmodel.h"
@@ -37,14 +35,12 @@
 #include "uithememanager.h"
 #include "utils.h"
 
+#include <algorithm>
+
 #define SETTINGS_KEY(name) u"CookiesDialog/" name
 
-CookiesDialog::CookiesDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::CookiesDialog)
-    , m_cookiesModel(new CookiesModel(Net::DownloadManager::instance()->allCookies(), this))
-    , m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
-    , m_storeViewState("GUI/Qt6/" SETTINGS_KEY(u"ViewState"_s))
+CookiesDialog::CookiesDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::CookiesDialog), m_cookiesModel(new CookiesModel(Net::DownloadManager::instance()->allCookies(), this)), m_storeDialogSize(SETTINGS_KEY(u"Size"_s)), m_storeViewState("GUI/Qt6/" SETTINGS_KEY(u"ViewState"_s))
 {
     m_ui->setupUi(this);
 
@@ -64,8 +60,7 @@ CookiesDialog::CookiesDialog(QWidget *parent)
     m_ui->treeView->setModel(m_cookiesModel);
     if (m_cookiesModel->rowCount() > 0)
     {
-        m_ui->treeView->selectionModel()->setCurrentIndex(m_cookiesModel->index(0, 0)
-            , (QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows));
+        m_ui->treeView->selectionModel()->setCurrentIndex(m_cookiesModel->index(0, 0), (QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows));
     }
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
@@ -101,11 +96,10 @@ void CookiesDialog::onButtonDeleteClicked()
     QModelIndexList idxs = m_ui->treeView->selectionModel()->selectedRows();
 
     // sort in descending order
-    std::ranges::sort(idxs, [](const QModelIndex &l, const QModelIndex &r)
-    {
+    std::ranges::sort(idxs, [](const QModelIndex& l, const QModelIndex& r) {
         return (l.row() > r.row());
     });
 
-    for (const QModelIndex &idx : asConst(idxs))
+    for (const QModelIndex& idx : asConst(idxs))
         m_cookiesModel->removeRow(idx.row());
 }

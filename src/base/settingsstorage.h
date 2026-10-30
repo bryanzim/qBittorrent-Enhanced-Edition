@@ -30,7 +30,8 @@
 
 #pragma once
 
-#include <type_traits>
+#include "base/concepts/stringable.h"
+#include "utils/string.h"
 
 #include <QObject>
 #include <QReadWriteLock>
@@ -38,8 +39,7 @@
 #include <QVariant>
 #include <QVariantHash>
 
-#include "base/concepts/stringable.h"
-#include "utils/string.h"
+#include <type_traits>
 
 template <typename T>
 concept IsQFlags = std::same_as<T, QFlags<typename T::enum_type>>;
@@ -59,10 +59,10 @@ class SettingsStorage final : public QObject
 public:
     static void initInstance();
     static void freeInstance();
-    static SettingsStorage *instance();
+    static SettingsStorage* instance();
 
     template <typename T>
-    T loadValue(const QString &key, const T &defaultValue = {}) const
+    T loadValue(const QString& key, const T& defaultValue = {}) const
     {
         if constexpr (std::same_as<T, QVariant>)
         {
@@ -72,7 +72,7 @@ public:
         else if constexpr (Stringable<T>)
         {
             const QString value = loadValue(key, defaultValue.toString());
-            return T {value};
+            return T{ value };
         }
         else if constexpr (std::is_enum_v<T>)
         {
@@ -82,7 +82,7 @@ public:
         else if constexpr (IsQFlags<T>)
         {
             const typename T::Int value = loadValue(key, static_cast<typename T::Int>(defaultValue));
-            return T {value};
+            return T{ value };
         }
         else
         {
@@ -93,7 +93,7 @@ public:
     }
 
     template <typename T>
-    void storeValue(const QString &key, const T &value)
+    void storeValue(const QString& key, const T& value)
     {
         if constexpr (std::same_as<T, QVariant>)
             storeValueImpl(key, value);
@@ -107,20 +107,20 @@ public:
             storeValueImpl(key, QVariant::fromValue(value));
     }
 
-    void removeValue(const QString &key);
-    bool hasKey(const QString &key) const;
+    void removeValue(const QString& key);
+    bool hasKey(const QString& key) const;
     bool isEmpty() const;
 
 public slots:
     bool save();
 
 private:
-    QVariant loadValueImpl(const QString &key, const QVariant &defaultValue = {}) const;
-    void storeValueImpl(const QString &key, const QVariant &value);
+    QVariant loadValueImpl(const QString& key, const QVariant& defaultValue = {}) const;
+    void storeValueImpl(const QString& key, const QVariant& value);
     void readNativeSettings();
     bool writeNativeSettings() const;
 
-    static SettingsStorage *m_instance;
+    static SettingsStorage* m_instance;
 
     const QString m_nativeSettingsName;
     bool m_dirty = false;

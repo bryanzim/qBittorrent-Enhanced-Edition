@@ -28,9 +28,10 @@
 
 #include "asyncfilesender.h"
 
-#include <algorithm>
-#include <optional>
-#include <variant>
+#include "constants.h"
+#include "rangerequest.h"
+#include "response.h"
+#include "responseserialization.h"
 
 #include <QAbstractSocket>
 #include <QFile>
@@ -41,10 +42,9 @@
 #include <QString>
 #include <QThread>
 
-#include "constants.h"
-#include "rangerequest.h"
-#include "response.h"
-#include "responseserialization.h"
+#include <algorithm>
+#include <optional>
+#include <variant>
 
 using namespace Qt::StringLiterals;
 
@@ -65,9 +65,8 @@ class Http::AsyncFileSender::DataPipe final : public QObject
     Q_DISABLE_COPY_MOVE(DataPipe)
 
 public:
-    explicit DataPipe(QObject *parent = nullptr)
-        : QObject(parent)
-        , m_bufferSemaphore {MAX_BUFFER_SIZE}
+    explicit DataPipe(QObject* parent = nullptr)
+        : QObject(parent), m_bufferSemaphore{ MAX_BUFFER_SIZE }
     {
         m_buffer.reserve(MAX_BUFFER_SIZE);
     }
@@ -78,12 +77,12 @@ public:
         bool atEnd = false;
     };
 
-    void write(const QByteArray &data, const bool close = true)
+    void write(const QByteArray& data, const bool close = true)
     {
         const qsizetype dataSize = data.size();
         m_bufferSemaphore.acquire(dataSize);
 
-        const QMutexLocker locker {&m_bufferMutex};
+        const QMutexLocker locker{ &m_bufferMutex };
 
         // it can be closed while waiting for free buffer space
         if (m_isClosed)
@@ -104,13 +103,13 @@ public:
 
     ReadResult read(const qint64 maxSize)
     {
-        const QMutexLocker locker {&m_bufferMutex};
+        const QMutexLocker locker{ &m_bufferMutex };
         const auto sizeToFetch = std::min<qint64>(maxSize, m_buffer.size());
         const QByteArray data = m_buffer.first(sizeToFetch);
         m_buffer.remove(0, sizeToFetch);
         m_bufferSemaphore.release(sizeToFetch);
         m_hasNewData = false;
-        return {.data = data, .atEnd = (m_isClosed && m_buffer.isEmpty())};
+        return { .data = data, .atEnd = (m_isClosed && m_buffer.isEmpty()) };
     }
 
 signals:
@@ -130,12 +129,8 @@ class Http::AsyncFileSender::Worker final : public QThread
     Q_DISABLE_COPY_MOVE(Worker)
 
 public:
-    Worker(const Path &filePath, const Request &request, const HeaderMap &responseHeaders
-           , std::shared_ptr<DataPipe> dataPipe)
-        : m_filePath {filePath}
-        , m_request {request}
-        , m_responseHeaders {responseHeaders}
-        , m_dataPipe {std::move(dataPipe)}
+    Worker(const Path& filePath, const Request& request, const HeaderMap& responseHeaders, std::shared_ptr<DataPipe> dataPipe)
+        : m_filePath{ filePath }, m_request{ request }, m_responseHeaders{ responseHeaders }, m_dataPipe{ std::move(dataPipe) }
     {
         Q_ASSERT(filePath.isValid());
     }
@@ -144,7 +139,7 @@ signals:
     void failed();
 
 private:
-    bool initializeRangeRequest(const RangeRequest &rangeRequest, QFile &file, qint64 &size, qint64 &offset)
+    bool initializeRangeRequest(const RangeRequest& rangeRequest, QFile& file, qint64& size, qint64& offset)
     {
         const qint64 fileSize = file.size();
 
@@ -177,22 +172,26 @@ private:
         if ((offset < 0) || (size <= 0) || ((offset + size) > fileSize))
         {
             const QByteArray data = serializeResponse(
-                    {.status = {.code = 416, .text = u"Range Not Satisfiable"_s},
-                            .headers = {{HEADER_CONTENT_RANGE, u"bytes */%1"_s.arg(QString::number(fileSize))}}}
-                    , m_request);
+                {
+                    .status = { .code = 416, .text = u"Range Not Satisfiable"_s },
+                    .headers = { { HEADER_CONTENT_RANGE, u"bytes */%1"_s.arg(QString::number(fileSize)) } }
+            },
+                m_request);
             m_dataPipe->write(data);
             return false;
         }
 
         m_responseHeaders.insert(HEADER_CONTENT_RANGE, u"bytes %1-%2/%3"_s
-                .arg(QString::number(offset), QString::number(rangeEnd), QString::number(fileSize)));
+                                                           .arg(QString::number(offset), QString::number(rangeEnd), QString::number(fileSize)));
 
         if ((offset > 0) && !file.seek(offset))
         {
             const QByteArray data = serializeResponse(
-                    {.status = {.code = 500, .text = u"Internal Server Error"_s},
-                            .content = file.errorString().toUtf8()}
-                    , m_request);
+                {
+                    .status = { .code = 500, .text = u"Internal Server Error"_s },
+                    .content = file.errorString().toUtf8()
+            },
+                m_request);
             m_dataPipe->write(data);
             return false;
         }
@@ -208,7 +207,10 @@ private:
             const std::optional<RangeRequest> parseRangeResult = parseRangeHeader(rangeHeader);
             if (!parseRangeResult)
             {
-                const QByteArray data = serializeResponse({.status = {.code = 400, .text = u"Bad Request"_s}}, m_request);
+                const QByteArray data = serializeResponse({
+                                                              .status = { .code = 400, .text = u"Bad Request"_s }
+                },
+                                                          m_request);
                 m_dataPipe->write(data);
                 return;
             }
@@ -216,13 +218,16 @@ private:
             rangeRequest = parseRangeResult;
         }
 
-        QFile file {m_filePath.data()};
+        QFile file{ m_filePath.data() };
 
         if (!file.open(QIODevice::ReadOnly))
         {
             const QByteArray data = serializeResponse(
-                    {.status = {.code = 500, .text = u"Internal Server Error"_s}, .content = file.errorString().toUtf8()}
-                    , m_request);
+                {
+                    .status = { .code = 500, .text = u"Internal Server Error"_s },
+                    .content = file.errorString().toUtf8()
+            },
+                m_request);
             m_dataPipe->write(data);
             return;
         }
@@ -237,8 +242,8 @@ private:
         }
 
         const Http::ResponseStatus responseStatus = rangeRequest
-                ? Http::ResponseStatus {.code = 206, .text = u"Partial Content"_s}
-                : Http::ResponseStatus {.code = 200, .text = u"OK"_s};
+                                                        ? Http::ResponseStatus{ .code = 206, .text = u"Partial Content"_s }
+                                                        : Http::ResponseStatus{ .code = 200, .text = u"OK"_s };
 
         m_responseHeaders.insert(HEADER_CONTENT_LENGTH, QString::number(remainingSize));
         m_responseHeaders.insert(HEADER_ACCEPT_RANGES, u"bytes"_s);
@@ -272,13 +277,8 @@ private:
     std::shared_ptr<DataPipe> m_dataPipe;
 };
 
-Http::AsyncFileSender::AsyncFileSender(const Request &request, const Path &filePath
-        , const HeaderMap &headers, QAbstractSocket *socket, QObject *parent)
-    : QObject(parent)
-    , m_request {request}
-    , m_filePath {filePath}
-    , m_headers {headers}
-    , m_socket {socket}
+Http::AsyncFileSender::AsyncFileSender(const Request& request, const Path& filePath, const HeaderMap& headers, QAbstractSocket* socket, QObject* parent)
+    : QObject(parent), m_request{ request }, m_filePath{ filePath }, m_headers{ headers }, m_socket{ socket }
 {
     Q_ASSERT(socket);
 }

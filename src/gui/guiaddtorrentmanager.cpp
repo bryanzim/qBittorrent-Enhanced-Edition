@@ -29,21 +29,21 @@
 
 #include "guiaddtorrentmanager.h"
 
-#include <QScreen>
-
+#include "addnewtorrentdialog.h"
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/torrentdescriptor.h"
 #include "base/net/downloadmanager.h"
 #include "base/preferences.h"
 #include "base/torrentfileguard.h"
-#include "addnewtorrentdialog.h"
 #include "interfaces/iguiapplication.h"
 #include "mainwindow.h"
 #include "raisedmessagebox.h"
 
+#include <QScreen>
+
 namespace
 {
-    void adjustDialogGeometry(QWidget *dialog, const QWidget *parentWindow)
+    void adjustDialogGeometry(QWidget* dialog, const QWidget* parentWindow)
     {
         // It is preferable to place the dialog in the center of the parent window.
         // However, if it goes beyond the current screen, then move it so that it fits there
@@ -63,7 +63,7 @@ namespace
             delta.setY(0);
         dialogGeometry.translate(delta);
 
-        const QPoint frameOffset {10, 40};
+        const QPoint frameOffset{ 10, 40 };
         delta = screenGeometry.topLeft() - dialogGeometry.topLeft() + frameOffset;
         if (delta.x() < 0)
             delta.setX(0);
@@ -75,7 +75,7 @@ namespace
     }
 }
 
-GUIAddTorrentManager::GUIAddTorrentManager(IGUIApplication *app, BitTorrent::Session *session, QObject *parent)
+GUIAddTorrentManager::GUIAddTorrentManager(IGUIApplication* app, BitTorrent::Session* session, QObject* parent)
     : GUIApplicationComponent(app, session, parent)
 {
     connect(btSession(), &BitTorrent::Session::metadataDownloaded, this, &GUIAddTorrentManager::onMetadataDownloaded);
@@ -83,7 +83,7 @@ GUIAddTorrentManager::GUIAddTorrentManager(IGUIApplication *app, BitTorrent::Ses
 
 GUIAddTorrentManager::~GUIAddTorrentManager()
 {
-    for (AddNewTorrentDialog *dialog : asConst(m_dialogs))
+    for (AddNewTorrentDialog* dialog : asConst(m_dialogs))
     {
         dialog->disconnect(this);
         dialog->reject();
@@ -93,17 +93,16 @@ GUIAddTorrentManager::~GUIAddTorrentManager()
     }
 }
 
-bool GUIAddTorrentManager::addTorrent(const QString &source, const BitTorrent::AddTorrentParams &params, const AddTorrentOption option)
+bool GUIAddTorrentManager::addTorrent(const QString& source, const BitTorrent::AddTorrentParams& params, const AddTorrentOption option)
 {
     // `source`: .torrent file path,  magnet URI or URL
 
     if (source.isEmpty())
         return false;
 
-    const auto *pref = Preferences::instance();
+    const auto* pref = Preferences::instance();
 
-    if ((option == AddTorrentOption::SkipDialog)
-            || ((option == AddTorrentOption::Default) && !pref->isAddNewTorrentDialogEnabled()))
+    if ((option == AddTorrentOption::SkipDialog) || ((option == AddTorrentOption::Default) && !pref->isAddNewTorrentDialogEnabled()))
     {
         return AddTorrentManager::addTorrent(source, params);
     }
@@ -115,8 +114,7 @@ bool GUIAddTorrentManager::addTorrent(const QString &source, const BitTorrent::A
 
         LogMsg(tr("Downloading torrent... Source: \"%1\"").arg(source));
         // Launch downloader
-        Net::DownloadManager::instance()->download(Net::DownloadRequest(source).limit(pref->getTorrentFileSizeLimit())
-                , pref->useProxyForGeneralPurposes(), this, &GUIAddTorrentManager::onDownloadFinished);
+        Net::DownloadManager::instance()->download(Net::DownloadRequest(source).limit(pref->getTorrentFileSizeLimit()), pref->useProxyForGeneralPurposes(), this, &GUIAddTorrentManager::onDownloadFinished);
         m_downloadedTorrents[source] = params;
 
         return true;
@@ -132,12 +130,13 @@ bool GUIAddTorrentManager::addTorrent(const QString &source, const BitTorrent::A
         return false;
     }
 
-    const Path decodedPath {source.startsWith(u"file://", Qt::CaseInsensitive)
-            ? QUrl::fromEncoded(source.toLocal8Bit()).toLocalFile() : source};
+    const Path decodedPath{ source.startsWith(u"file://", Qt::CaseInsensitive)
+                                ? QUrl::fromEncoded(source.toLocal8Bit()).toLocalFile()
+                                : source };
     auto torrentFileGuard = std::make_shared<TorrentFileGuard>(decodedPath);
     if (const auto loadResult = BitTorrent::TorrentDescriptor::loadFromFile(decodedPath))
     {
-        const BitTorrent::TorrentDescriptor &torrentDescriptor = loadResult.value();
+        const BitTorrent::TorrentDescriptor& torrentDescriptor = loadResult.value();
         const bool isProcessing = processTorrent(source, torrentDescriptor, params);
         if (isProcessing)
             setTorrentFileGuard(source, torrentFileGuard);
@@ -152,9 +151,9 @@ bool GUIAddTorrentManager::addTorrent(const QString &source, const BitTorrent::A
     return false;
 }
 
-void GUIAddTorrentManager::onDownloadFinished(const Net::DownloadResult &result)
+void GUIAddTorrentManager::onDownloadFinished(const Net::DownloadResult& result)
 {
-    const QString &source = result.url;
+    const QString& source = result.url;
     const BitTorrent::AddTorrentParams addTorrentParams = m_downloadedTorrents.take(source);
 
     switch (result.status)
@@ -176,26 +175,25 @@ void GUIAddTorrentManager::onDownloadFinished(const Net::DownloadResult &result)
     }
 }
 
-void GUIAddTorrentManager::onMetadataDownloaded(const BitTorrent::TorrentInfo &metadata)
+void GUIAddTorrentManager::onMetadataDownloaded(const BitTorrent::TorrentInfo& metadata)
 {
     Q_ASSERT(metadata.isValid());
     if (!metadata.isValid()) [[unlikely]]
         return;
 
-    for (const auto &[infoHash, dialog] : asConst(m_dialogs).asKeyValueRange())
+    for (const auto& [infoHash, dialog] : asConst(m_dialogs).asKeyValueRange())
     {
         if (metadata.matchesInfoHash(infoHash))
             dialog->updateMetadata(metadata);
     }
 }
 
-bool GUIAddTorrentManager::processTorrent(const QString &source
-        , const BitTorrent::TorrentDescriptor &torrentDescr, const BitTorrent::AddTorrentParams &params)
+bool GUIAddTorrentManager::processTorrent(const QString& source, const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& params)
 {
     const bool hasMetadata = torrentDescr.info().has_value();
     const BitTorrent::InfoHash infoHash = torrentDescr.infoHash();
 
-    if (AddNewTorrentDialog *dialog = m_dialogs.value(infoHash))
+    if (AddNewTorrentDialog* dialog = m_dialogs.value(infoHash))
     {
         if (hasMetadata)
             dialog->updateMetadata(*torrentDescr.info());
@@ -208,7 +206,7 @@ bool GUIAddTorrentManager::processTorrent(const QString &source
     }
 
     // Prevent showing the dialog if download is already present
-    if (BitTorrent::Torrent *torrent = btSession()->findTorrent(infoHash))
+    if (BitTorrent::Torrent* torrent = btSession()->findTorrent(infoHash))
     {
         if (Preferences::instance()->confirmMergeTrackers())
         {
@@ -224,15 +222,12 @@ bool GUIAddTorrentManager::processTorrent(const QString &source
             {
                 // We cannot merge trackers for private torrent but we still notify user
                 // about duplicate torrent if confirmation dialog is enabled.
-                RaisedMessageBox::warning(app()->mainWindow(), dialogCaption
-                        , tr("Trackers cannot be merged because it is a private torrent."));
+                RaisedMessageBox::warning(app()->mainWindow(), dialogCaption, tr("Trackers cannot be merged because it is a private torrent."));
             }
             else
             {
                 const bool mergeTrackers = btSession()->isMergeTrackersEnabled();
-                const QMessageBox::StandardButton btn = RaisedMessageBox::question(app()->mainWindow(), dialogCaption
-                        , tr("Torrent '%1' is already in the transfer list. Do you want to merge trackers from new source?").arg(torrent->name())
-                        , (QMessageBox::Yes | QMessageBox::No), (mergeTrackers ? QMessageBox::Yes : QMessageBox::No));
+                const QMessageBox::StandardButton btn = RaisedMessageBox::question(app()->mainWindow(), dialogCaption, tr("Torrent '%1' is already in the transfer list. Do you want to merge trackers from new source?").arg(torrent->name()), (QMessageBox::Yes | QMessageBox::No), (mergeTrackers ? QMessageBox::Yes : QMessageBox::No));
                 if (btn == QMessageBox::Yes)
                 {
                     torrent->addTrackers(torrentDescr.trackers());
@@ -259,7 +254,7 @@ bool GUIAddTorrentManager::processTorrent(const QString &source
 
     // By not setting a parent to the "AddNewTorrentDialog", all those dialogs
     // will be displayed on top and will not overlap with the main window.
-    auto *dlg = new AddNewTorrentDialog(torrentDescr, params, (attached ? app()->mainWindow() : nullptr));
+    auto* dlg = new AddNewTorrentDialog(torrentDescr, params, (attached ? app()->mainWindow() : nullptr));
     // Qt::Window is required to avoid showing only two dialog on top (see #12852).
     // Also improves the general convenience of adding multiple torrents.
     if (!attached)
@@ -267,9 +262,7 @@ bool GUIAddTorrentManager::processTorrent(const QString &source
 
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     m_dialogs[infoHash] = dlg;
-    connect(dlg, &AddNewTorrentDialog::torrentAccepted, this
-            , [this, source, dlg](const BitTorrent::TorrentDescriptor &torrentDescr, const BitTorrent::AddTorrentParams &addTorrentParams)
-    {
+    connect(dlg, &AddNewTorrentDialog::torrentAccepted, this, [this, source, dlg](const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& addTorrentParams) {
         if (dlg->isDoNotDeleteTorrentChecked())
         {
             if (auto torrentFileGuard = releaseTorrentFileGuard(source))
@@ -278,12 +271,10 @@ bool GUIAddTorrentManager::processTorrent(const QString &source
 
         addTorrentToSession(source, torrentDescr, addTorrentParams);
     });
-    connect(dlg, &AddNewTorrentDialog::torrentRejected, this, [this, source]
-    {
+    connect(dlg, &AddNewTorrentDialog::torrentRejected, this, [this, source] {
         releaseTorrentFileGuard(source);
     });
-    connect(dlg, &QDialog::finished, this, [this, infoHash]
-    {
+    connect(dlg, &QDialog::finished, this, [this, infoHash] {
         m_dialogs.remove(infoHash);
     });
 

@@ -29,26 +29,26 @@
 
 #include "speedplotview.h"
 
-#include <cmath>
-
-#include <QLocale>
-#include <QPainter>
-#include <QPen>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "base/unicodestrings.h"
 #include "base/utils/misc.h"
 
+#include <QLocale>
+#include <QPainter>
+#include <QPen>
+
+#include <cmath>
+
 namespace
 {
     // table of supposed nice steps for grid marks to get nice looking quarters of scale
-    const qreal roundingTable[] = {1.2, 1.6, 2, 2.4, 2.8, 3.2, 4, 6, 8};
+    const qreal roundingTable[] = { 1.2, 1.6, 2, 2.4, 2.8, 3.2, 4, 6, 8 };
 
     struct SplitValue
     {
         qreal arg = 0;
-        Utils::Misc::SizeUnit unit {};
+        Utils::Misc::SizeUnit unit{};
         qlonglong sizeInBytes() const
         {
             return Utils::Misc::sizeInBytes(arg, unit);
@@ -59,8 +59,10 @@ namespace
     {
         using Utils::Misc::SizeUnit;
 
-        if (value == 0.0) return {0, SizeUnit::Byte};
-        if (value <= 12.0) return {12, SizeUnit::Byte};
+        if (value == 0.0)
+            return { 0, SizeUnit::Byte };
+        if (value <= 12.0)
+            return { 12, SizeUnit::Byte };
 
         SizeUnit calculatedUnit = SizeUnit::Byte;
         while (value > 1024)
@@ -71,42 +73,39 @@ namespace
 
         if (value > 100)
         {
-            const qreal roundedValue {std::ceil(value / 40) * 40};
-            return {roundedValue, calculatedUnit};
+            const qreal roundedValue{ std::ceil(value / 40) * 40 };
+            return { roundedValue, calculatedUnit };
         }
 
         if (value > 10)
         {
-            const qreal roundedValue {std::ceil(value / 4) * 4};
-            return {roundedValue, calculatedUnit};
+            const qreal roundedValue{ std::ceil(value / 4) * 4 };
+            return { roundedValue, calculatedUnit };
         }
 
-        for (const auto &roundedValue : roundingTable)
+        for (const auto& roundedValue : roundingTable)
         {
             if (value <= roundedValue)
-                return {roundedValue, calculatedUnit};
+                return { roundedValue, calculatedUnit };
         }
-        return {10.0, calculatedUnit};
+        return { 10.0, calculatedUnit };
     }
 
     QString formatLabel(const qreal argValue, const Utils::Misc::SizeUnit unit)
     {
         // check is there need for digits after decimal separator
         const int precision = (argValue < 10) ? friendlyUnitPrecision(unit) : 0;
-        return QLocale::system().toString(argValue, 'f', precision)
-               + QChar::Nbsp + unitString(unit, true);
+        return QLocale::system().toString(argValue, 'f', precision) + QChar::Nbsp + unitString(unit, true);
     }
 }
 
 SpeedPlotView::Averager::Averager(const milliseconds duration, const milliseconds resolution)
-    : m_resolution {resolution}
-    , m_maxDuration {duration}
-    , m_sink {static_cast<DataCircularBuffer::size_type>(duration / resolution)}
+    : m_resolution{ resolution }, m_maxDuration{ duration }, m_sink{ static_cast<DataCircularBuffer::size_type>(duration / resolution) }
 {
     m_lastSampleTime.start();
 }
 
-bool SpeedPlotView::Averager::push(const SampleData &sampleData)
+bool SpeedPlotView::Averager::push(const SampleData& sampleData)
 {
     // Accumulator overflow will be hit in worst case on longest used averaging span,
     // defined by resolution. Maximum resolution is 144 seconds
@@ -118,9 +117,9 @@ bool SpeedPlotView::Averager::push(const SampleData &sampleData)
         m_accumulator[id] += sampleData[id];
 
     // system may go to sleep, that can cause very big elapsed interval
-    const milliseconds updateInterval {static_cast<int64_t>(BitTorrent::Session::instance()->refreshInterval() * 1.25)};
-    const milliseconds maxElapsed {std::max(updateInterval, m_resolution)};
-    const milliseconds elapsed {std::min(milliseconds {m_lastSampleTime.elapsed()}, maxElapsed)};
+    const milliseconds updateInterval{ static_cast<int64_t>(BitTorrent::Session::instance()->refreshInterval() * 1.25) };
+    const milliseconds maxElapsed{ std::max(updateInterval, m_resolution) };
+    const milliseconds elapsed{ std::min(milliseconds{ m_lastSampleTime.elapsed() }, maxElapsed) };
     if (elapsed < m_resolution)
         return false; // still accumulating
 
@@ -135,8 +134,7 @@ bool SpeedPlotView::Averager::push(const SampleData &sampleData)
     {
         // once we go above the max duration never go below that
         // otherwise it will cause empty space in graphs
-        while (!m_sink.empty()
-               && ((m_currentDuration - m_sink.front().duration) >= m_maxDuration))
+        while (!m_sink.empty() && ((m_currentDuration - m_sink.front().duration) >= m_maxDuration))
         {
             m_currentDuration -= m_sink.front().duration;
             m_sink.pop_front();
@@ -145,7 +143,7 @@ bool SpeedPlotView::Averager::push(const SampleData &sampleData)
 
     // now flush out averaged data
     Q_ASSERT(m_sink.size() < m_sink.capacity());
-    m_sink.push_back({elapsed, m_accumulator});
+    m_sink.push_back({ elapsed, m_accumulator });
 
     // reset
     m_accumulator = {};
@@ -154,13 +152,13 @@ bool SpeedPlotView::Averager::push(const SampleData &sampleData)
     return true;
 }
 
-const SpeedPlotView::DataCircularBuffer &SpeedPlotView::Averager::data() const
+const SpeedPlotView::DataCircularBuffer& SpeedPlotView::Averager::data() const
 {
     return m_sink;
 }
 
-SpeedPlotView::SpeedPlotView(QWidget *parent)
-    : QGraphicsView {parent}
+SpeedPlotView::SpeedPlotView(QWidget* parent)
+    : QGraphicsView{ parent }
 {
     QPen greenPen;
     greenPen.setWidthF(1.5);
@@ -199,11 +197,9 @@ void SpeedPlotView::setGraphEnable(GraphID id, bool enable)
     viewport()->update();
 }
 
-void SpeedPlotView::pushPoint(const SpeedPlotView::SampleData &point)
+void SpeedPlotView::pushPoint(const SpeedPlotView::SampleData& point)
 {
-    for (Averager *averager : {&m_averager5Min, &m_averager30Min
-                                , &m_averager6Hour, &m_averager12Hour
-                                , &m_averager24Hour})
+    for (Averager* averager : { &m_averager5Min, &m_averager30Min, &m_averager6Hour, &m_averager12Hour, &m_averager24Hour })
     {
         if (averager->push(point))
         {
@@ -250,14 +246,14 @@ void SpeedPlotView::setPeriod(const TimePeriod period)
     viewport()->update();
 }
 
-const SpeedPlotView::DataCircularBuffer &SpeedPlotView::currentData() const
+const SpeedPlotView::DataCircularBuffer& SpeedPlotView::currentData() const
 {
     return m_currentAverager->data();
 }
 
 quint64 SpeedPlotView::maxYValue() const
 {
-    const DataCircularBuffer &queue = currentData();
+    const DataCircularBuffer& queue = currentData();
 
     quint64 maxYValue = 0;
     for (int id = UP; id < NB_GRAPHS; ++id)
@@ -266,7 +262,7 @@ quint64 SpeedPlotView::maxYValue() const
         if (!m_properties[static_cast<GraphID>(id)].enable)
             continue;
 
-        milliseconds duration {0};
+        milliseconds duration{ 0 };
         for (int i = static_cast<int>(queue.size()) - 1; i >= 0; --i)
         {
             maxYValue = std::max(maxYValue, queue[i].data[id]);
@@ -279,7 +275,7 @@ quint64 SpeedPlotView::maxYValue() const
     return maxYValue;
 }
 
-void SpeedPlotView::paintEvent(QPaintEvent *)
+void SpeedPlotView::paintEvent(QPaintEvent*)
 {
     QPainter painter(viewport());
 
@@ -292,8 +288,7 @@ void SpeedPlotView::paintEvent(QPaintEvent *)
     rect.adjust(0, fontMetrics.height(), 0, 0); // Add top padding for top speed text
 
     // draw Y axis speed labels
-    const QList<QString> speedLabels =
-    {
+    const QList<QString> speedLabels = {
         formatLabel(niceScale.arg, niceScale.unit),
         formatLabel((0.75 * niceScale.arg), niceScale.unit),
         formatLabel((0.50 * niceScale.arg), niceScale.unit),
@@ -302,14 +297,14 @@ void SpeedPlotView::paintEvent(QPaintEvent *)
     };
 
     int yAxisWidth = 0;
-    for (const QString &label : speedLabels)
+    for (const QString& label : speedLabels)
     {
         if (fontMetrics.horizontalAdvance(label) > yAxisWidth)
             yAxisWidth = fontMetrics.horizontalAdvance(label);
     }
 
     int i = 0;
-    for (const QString &label : speedLabels)
+    for (const QString& label : speedLabels)
     {
         QRectF labelRect(rect.topLeft() + QPointF(-yAxisWidth, (i++) * 0.25 * rect.height() - fontMetrics.height()),
                          QSizeF(2 * yAxisWidth, fontMetrics.height()));
@@ -346,10 +341,10 @@ void SpeedPlotView::paintEvent(QPaintEvent *)
     painter.setClipping(true);
     painter.setClipRect(rect);
 
-    const DataCircularBuffer &queue = currentData();
+    const DataCircularBuffer& queue = currentData();
 
     // last point will be drawn at x=0, so we don't need it in the calculation of xTickSize
-    const milliseconds lastDuration {queue.empty() ? 0ms : queue.back().duration};
+    const milliseconds lastDuration{ queue.empty() ? 0ms : queue.back().duration };
     const qreal xTickSize = static_cast<qreal>(rect.width()) / (m_currentMaxDuration - lastDuration).count();
     const qreal yMultiplier = (niceScale.arg == 0) ? 0 : (static_cast<qreal>(rect.height()) / niceScale.sizeInBytes());
 
@@ -359,7 +354,7 @@ void SpeedPlotView::paintEvent(QPaintEvent *)
             continue;
 
         QList<QPoint> points;
-        milliseconds duration {0};
+        milliseconds duration{ 0 };
 
         for (int i = static_cast<int>(queue.size()) - 1; i >= 0; --i)
         {
@@ -382,7 +377,7 @@ void SpeedPlotView::paintEvent(QPaintEvent *)
 
     qreal legendHeight = 0;
     int legendWidth = 0;
-    for (const auto &property : asConst(m_properties))
+    for (const auto& property : asConst(m_properties))
     {
         if (!property.enable)
             continue;
@@ -394,11 +389,11 @@ void SpeedPlotView::paintEvent(QPaintEvent *)
 
     QRectF legendBackgroundRect(QPoint(legendTopLeft.x() - 4, legendTopLeft.y() - 4), QSizeF(legendWidth + 8, legendHeight + 8));
     QColor legendBackgroundColor = QWidget::palette().color(QWidget::backgroundRole());
-    legendBackgroundColor.setAlpha(128);  // 50% transparent
+    legendBackgroundColor.setAlpha(128); // 50% transparent
     painter.fillRect(legendBackgroundRect, legendBackgroundColor);
 
     i = 0;
-    for (const auto &property : asConst(m_properties))
+    for (const auto& property : asConst(m_properties))
     {
         if (!property.enable)
             continue;
@@ -419,9 +414,7 @@ SpeedPlotView::GraphProperties::GraphProperties()
 {
 }
 
-SpeedPlotView::GraphProperties::GraphProperties(const QString &name, const QPen &pen, bool enable)
-    : name(name)
-    , pen(pen)
-    , enable(enable)
+SpeedPlotView::GraphProperties::GraphProperties(const QString& name, const QPen& pen, bool enable)
+    : name(name), pen(pen), enable(enable)
 {
 }

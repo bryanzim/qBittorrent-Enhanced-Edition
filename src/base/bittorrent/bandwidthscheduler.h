@@ -38,7 +38,7 @@ class BandwidthScheduler : public QObject
     Q_DISABLE_COPY_MOVE(BandwidthScheduler)
 
 public:
-    explicit BandwidthScheduler(QObject *parent = nullptr);
+    explicit BandwidthScheduler(QObject* parent = nullptr);
     void start();
 
 signals:

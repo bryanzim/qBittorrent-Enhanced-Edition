@@ -30,22 +30,22 @@
 
 #include "tagfiltermodel.h"
 
-TagFilterProxyModel::TagFilterProxyModel(QObject *parent)
+TagFilterProxyModel::TagFilterProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent)
 {
 }
 
-QModelIndex TagFilterProxyModel::index(const Tag &tag) const
+QModelIndex TagFilterProxyModel::index(const Tag& tag) const
 {
-    return mapFromSource(static_cast<TagFilterModel *>(sourceModel())->index(tag));
+    return mapFromSource(static_cast<TagFilterModel*>(sourceModel())->index(tag));
 }
 
-Tag TagFilterProxyModel::tag(const QModelIndex &index) const
+Tag TagFilterProxyModel::tag(const QModelIndex& index) const
 {
-    return static_cast<TagFilterModel *>(sourceModel())->tag(mapToSource(index));
+    return static_cast<TagFilterModel*>(sourceModel())->tag(mapToSource(index));
 }
 
-bool TagFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool TagFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
     // "All" and "Untagged" must be left in place
     if (TagFilterModel::isSpecialItem(left) || TagFilterModel::isSpecialItem(right))

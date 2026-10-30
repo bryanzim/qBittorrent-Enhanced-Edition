@@ -29,7 +29,6 @@
 #pragma once
 
 template <typename From, typename To>
-concept ExplicitlyConvertibleTo = requires (From f)
-{
+concept ExplicitlyConvertibleTo = requires(From f) {
     static_cast<To>(f);
 };

@@ -28,12 +28,6 @@
 
 #include "luaclasses.h"
 
-#include <LuaBridge/LuaBridge.h>
-#include <LuaBridge/Vector.h>
-
-#include <QDateTime>
-#include <QString>
-
 #include "base/bittorrent/infohash.h"
 #include "base/bittorrent/sharelimits.h"
 #include "base/bittorrent/torrent.h"
@@ -42,9 +36,14 @@
 #include "luanamespace.h"
 #include "luastack.h"
 
+#include <LuaBridge/LuaBridge.h>
+#include <LuaBridge/Vector.h>
+#include <QDateTime>
+#include <QString>
+
 namespace
 {
-    qint64 toSecondsSinceEpoch(const BitTorrent::AnnounceTimePoint &time)
+    qint64 toSecondsSinceEpoch(const BitTorrent::AnnounceTimePoint& time)
     {
         const auto now = std::chrono::system_clock::now();
         const auto timepointNow = BitTorrent::AnnounceTimePoint::clock::now();
@@ -52,24 +51,24 @@ namespace
         return std::chrono::duration_cast<std::chrono::seconds>(timeEpoch).count();
     }
 
-    void registerLuaClassTorrent(lua_State *luaState)
+    void registerLuaClassTorrent(lua_State* luaState)
     {
         using Torrent = BitTorrent::Torrent;
 
         auto qBittorrentNS = luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE);
         auto cls = qBittorrentNS.beginClass<Torrent>("Torrent");
 
-        cls.addProperty("id", +[](const Torrent *torrent) { return torrent->id().toString(); });
-        cls.addProperty("infoHashV1", +[](const Torrent *torrent) { return torrent->infoHash().v1().toString(); });
-        cls.addProperty("infoHashV2", +[](const Torrent *torrent) { return torrent->infoHash().v2().toString(); });
-        cls.addProperty("hasMetadata", +[](const Torrent *torrent) { return torrent->hasMetadata(); });
+        cls.addProperty("id", +[](const Torrent* torrent) { return torrent->id().toString(); });
+        cls.addProperty("infoHashV1", +[](const Torrent* torrent) { return torrent->infoHash().v1().toString(); });
+        cls.addProperty("infoHashV2", +[](const Torrent* torrent) { return torrent->infoHash().v2().toString(); });
+        cls.addProperty("hasMetadata", +[](const Torrent* torrent) { return torrent->hasMetadata(); });
         cls.addProperty("name", &Torrent::name, &Torrent::setName);
-        cls.addProperty("creationTime", +[](const Torrent *torrent) { return torrent->creationDate().toSecsSinceEpoch(); });
+        cls.addProperty("creationTime", +[](const Torrent* torrent) { return torrent->creationDate().toSecsSinceEpoch(); });
         cls.addProperty("creator", &Torrent::creator);
         cls.addProperty("comment", &Torrent::comment, &Torrent::setComment);
 
         // metadata
-        cls.addProperty("filesCount", +[](const Torrent *torrent) { return torrent->filesCount(); });
+        cls.addProperty("filesCount", +[](const Torrent* torrent) { return torrent->filesCount(); });
         cls.addFunction("filePath", &Torrent::filePath);
         cls.addFunction("fileSize", &Torrent::fileSize);
         cls.addProperty("pieceSize", &Torrent::pieceLength);
@@ -79,23 +78,18 @@ namespace
 
         cls.addProperty("savePath", &Torrent::savePath, &Torrent::setSavePath);
         cls.addProperty("downloadPath", &Torrent::downloadPath, &Torrent::setDownloadPath);
-        cls.addProperty("category", &Torrent::category, +[](Torrent *torrent, const QString &category)
-        {
-            torrent->setCategory(category);
-        });
-        cls.addProperty("tags", +[](const Torrent *torrent) -> std::vector<QString>
-        {
+        cls.addProperty("category", &Torrent::category, +[](Torrent* torrent, const QString& category) { torrent->setCategory(category); });
+        cls.addProperty("tags", +[](const Torrent* torrent) -> std::vector<QString> {
             const auto tags = torrent->tags();
-            return {tags.cbegin(), tags.cend()};
-        });
+            return {tags.cbegin(), tags.cend()}; });
         cls.addFunction("hasTag", &Torrent::hasTag);
         cls.addFunction("addTag", &Torrent::addTag);
         cls.addFunction("removeTag", &Torrent::removeTag);
         cls.addFunction("clearTags", &Torrent::clearTags);
 
-        cls.addProperty("addedTime", +[](const Torrent *torrent) { return torrent->addedTime().toSecsSinceEpoch(); });
-        cls.addProperty("completedTime", +[](const Torrent *torrent) { return torrent->completedTime().toSecsSinceEpoch(); });
-        cls.addProperty("lastSeenComplete", +[](const Torrent *torrent) { return torrent->lastSeenComplete().toSecsSinceEpoch(); });
+        cls.addProperty("addedTime", +[](const Torrent* torrent) { return torrent->addedTime().toSecsSinceEpoch(); });
+        cls.addProperty("completedTime", +[](const Torrent* torrent) { return torrent->completedTime().toSecsSinceEpoch(); });
+        cls.addProperty("lastSeenComplete", +[](const Torrent* torrent) { return torrent->lastSeenComplete().toSecsSinceEpoch(); });
         cls.addProperty("activeTime", &Torrent::activeTime);
         cls.addProperty("finishedTime", &Torrent::finishedTime);
         cls.addProperty("timeSinceActivity", &Torrent::timeSinceActivity);
@@ -128,19 +122,19 @@ namespace
         cls.addFunction("stop", &Torrent::stop);
     }
 
-    void registerLuaClassTrackerEntry(lua_State *luaState)
+    void registerLuaClassTrackerEntry(lua_State* luaState)
     {
         using TrackerEntry = BitTorrent::TrackerEntry;
 
         auto qBittorrentNS = luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE);
         auto cls = qBittorrentNS.beginClass<TrackerEntry>("TrackerEntry");
 
-        cls.addConstructor<void ()>();
+        cls.addConstructor<void()>();
         cls.addProperty("url", &TrackerEntry::url);
         cls.addProperty("tier", &TrackerEntry::tier);
     }
 
-    void registerLuaEnumTrackerEndpointState(lua_State *luaState)
+    void registerLuaEnumTrackerEndpointState(lua_State* luaState)
     {
         auto qBittorrentNS = luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE);
         qBittorrentNS.beginNamespace("TrackerEndpointState")
@@ -152,7 +146,7 @@ namespace
             .endNamespace();
     }
 
-    void registerLuaClassTrackerEndpointStatus(lua_State *luaState)
+    void registerLuaClassTrackerEndpointStatus(lua_State* luaState)
     {
         using TrackerEndpointStatus = BitTorrent::TrackerEndpointStatus;
 
@@ -171,17 +165,11 @@ namespace
         cls.addProperty("numLeeches", &TrackerEndpointStatus::numLeeches);
         cls.addProperty("numDownloaded", &TrackerEndpointStatus::numDownloaded);
 
-        cls.addProperty("nextAnnounceTime", +[](const BitTorrent::TrackerEndpointStatus &endpoint)
-        {
-            return toSecondsSinceEpoch(endpoint.nextAnnounceTime);
-        });
-        cls.addProperty("minAnnounceTime", +[](const BitTorrent::TrackerEndpointStatus &endpoint)
-        {
-            return toSecondsSinceEpoch(endpoint.minAnnounceTime);
-        });
+        cls.addProperty("nextAnnounceTime", +[](const BitTorrent::TrackerEndpointStatus& endpoint) { return toSecondsSinceEpoch(endpoint.nextAnnounceTime); });
+        cls.addProperty("minAnnounceTime", +[](const BitTorrent::TrackerEndpointStatus& endpoint) { return toSecondsSinceEpoch(endpoint.minAnnounceTime); });
     }
 
-    void registerLuaClassTrackerEntryStatus(lua_State *luaState)
+    void registerLuaClassTrackerEntryStatus(lua_State* luaState)
     {
         using TrackerEntryStatus = BitTorrent::TrackerEntryStatus;
 
@@ -203,7 +191,7 @@ namespace
         cls.addProperty("endpoints", &TrackerEntryStatus::endpoints);
     }
 
-    void registerLuaEnumShareLimitAction(lua_State *luaState)
+    void registerLuaEnumShareLimitAction(lua_State* luaState)
     {
         auto qBittorrentNS = luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE);
         qBittorrentNS.beginNamespace("ShareLimitAction")
@@ -215,7 +203,7 @@ namespace
             .endNamespace();
     }
 
-    void registerLuaEnumShareLimitsMode(lua_State *luaState)
+    void registerLuaEnumShareLimitsMode(lua_State* luaState)
     {
         auto qBittorrentNS = luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE);
         qBittorrentNS.beginNamespace("ShareLimitsMode")
@@ -225,14 +213,14 @@ namespace
             .endNamespace();
     }
 
-    void registerLuaClassShareLimits(lua_State *luaState)
+    void registerLuaClassShareLimits(lua_State* luaState)
     {
         using ShareLimits = BitTorrent::ShareLimits;
 
         auto qBittorrentNS = luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE);
         auto cls = qBittorrentNS.beginClass<ShareLimits>("ShareLimits");
 
-        cls.addConstructor<void ()>();
+        cls.addConstructor<void()>();
         cls.addProperty("ratioLimit", &ShareLimits::ratioLimit);
         cls.addProperty("seedingTimeLimit", &ShareLimits::seedingTimeLimit);
         cls.addProperty("inactiveSeedingTimeLimit", &ShareLimits::inactiveSeedingTimeLimit);
@@ -242,7 +230,7 @@ namespace
 
 }
 
-void registerLuaClasses(lua_State *luaState)
+void registerLuaClasses(lua_State* luaState)
 {
     registerLuaClassTorrent(luaState);
 
@@ -255,5 +243,4 @@ void registerLuaClasses(lua_State *luaState)
     registerLuaEnumShareLimitAction(luaState);
     registerLuaEnumShareLimitsMode(luaState);
     registerLuaClassShareLimits(luaState);
-
 }

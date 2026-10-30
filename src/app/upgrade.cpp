@@ -28,10 +28,6 @@
 
 #include "upgrade.h"
 
-#include <QtSystemDetection>
-#include <QCoreApplication>
-#include <QMetaEnum>
-
 #include "base/bittorrent/sharelimits.h"
 #include "base/bittorrent/torrentcontentlayout.h"
 #include "base/logger.h"
@@ -44,6 +40,10 @@
 #include "base/utils/io.h"
 #include "base/utils/string.h"
 
+#include <QCoreApplication>
+#include <QMetaEnum>
+#include <QtSystemDetection>
+
 using namespace Qt::Literals::StringLiterals;
 
 namespace
@@ -53,15 +53,14 @@ namespace
 
     void exportWebUIHttpsFiles()
     {
-        const auto migrate = [](const QString &oldKey, const QString &newKey, const Path &savePath)
-        {
-            auto *settingsStorage = SettingsStorage::instance();
+        const auto migrate = [](const QString& oldKey, const QString& newKey, const Path& savePath) {
+            auto* settingsStorage = SettingsStorage::instance();
             if (!settingsStorage->hasKey(oldKey))
                 return;
 
-            const auto oldData {settingsStorage->loadValue<QByteArray>(oldKey)};
-            const auto newData {settingsStorage->loadValue<QString>(newKey)};
-            const QString errorMsgFormat {QCoreApplication::translate("Upgrade", "Migrate preferences failed: WebUI https, file: \"%1\", error: \"%2\"")};
+            const auto oldData{ settingsStorage->loadValue<QByteArray>(oldKey) };
+            const auto newData{ settingsStorage->loadValue<QString>(newKey) };
+            const QString errorMsgFormat{ QCoreApplication::translate("Upgrade", "Migrate preferences failed: WebUI https, file: \"%1\", error: \"%2\"") };
 
             if (!newData.isEmpty() || oldData.isEmpty())
                 return;
@@ -69,44 +68,39 @@ namespace
             const nonstd::expected<void, QString> result = Utils::IO::saveToFile(savePath, oldData);
             if (!result)
             {
-                LogMsg(errorMsgFormat.arg(savePath.toString(), result.error()) , Log::WARNING);
+                LogMsg(errorMsgFormat.arg(savePath.toString(), result.error()), Log::WARNING);
                 return;
             }
 
             settingsStorage->storeValue(newKey, savePath);
             settingsStorage->removeValue(oldKey);
 
-            LogMsg(QCoreApplication::translate("Upgrade", "Migrated preferences: WebUI https, exported data to file: \"%1\"").arg(savePath.toString())
-                , Log::INFO);
+            LogMsg(QCoreApplication::translate("Upgrade", "Migrated preferences: WebUI https, exported data to file: \"%1\"").arg(savePath.toString()), Log::INFO);
         };
 
         const Path configPath = specialFolderLocation(SpecialFolder::Config);
-        migrate(u"Preferences/WebUI/HTTPS/Certificate"_s
-            , u"Preferences/WebUI/HTTPS/CertificatePath"_s
-            , (configPath / Path(u"WebUICertificate.crt"_s)));
-        migrate(u"Preferences/WebUI/HTTPS/Key"_s
-            , u"Preferences/WebUI/HTTPS/KeyPath"_s
-            , (configPath / Path(u"WebUIPrivateKey.pem"_s)));
+        migrate(u"Preferences/WebUI/HTTPS/Certificate"_s, u"Preferences/WebUI/HTTPS/CertificatePath"_s, (configPath / Path(u"WebUICertificate.crt"_s)));
+        migrate(u"Preferences/WebUI/HTTPS/Key"_s, u"Preferences/WebUI/HTTPS/KeyPath"_s, (configPath / Path(u"WebUIPrivateKey.pem"_s)));
     }
 
     void upgradeTorrentContentLayout()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const QString oldKey = u"BitTorrent/Session/CreateTorrentSubfolder"_s;
         if (!settingsStorage->hasKey(oldKey))
             return;
 
         const QString newKey = u"BitTorrent/Session/TorrentContentLayout"_s;
 
-        const auto oldData {settingsStorage->loadValue<QVariant>(oldKey)};
-        const auto newData {settingsStorage->loadValue<QString>(newKey)};
+        const auto oldData{ settingsStorage->loadValue<QVariant>(oldKey) };
+        const auto newData{ settingsStorage->loadValue<QString>(newKey) };
 
         if (!newData.isEmpty() || !oldData.isValid())
             return;
 
         const bool createSubfolder = oldData.toBool();
         const BitTorrent::TorrentContentLayout torrentContentLayout =
-                (createSubfolder ? BitTorrent::TorrentContentLayout::Original : BitTorrent::TorrentContentLayout::NoSubfolder);
+            (createSubfolder ? BitTorrent::TorrentContentLayout::Original : BitTorrent::TorrentContentLayout::NoSubfolder);
 
         settingsStorage->storeValue(newKey, Utils::String::fromEnum(torrentContentLayout));
         settingsStorage->removeValue(oldKey);
@@ -116,7 +110,7 @@ namespace
     {
         const auto oldKey = u"BitTorrent/Session/UseRandomPort"_s;
         const auto newKey = u"Preferences/Connection/PortRangeMin"_s;
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
 
         if (settingsStorage->hasKey(oldKey))
         {
@@ -129,7 +123,7 @@ namespace
 
     void upgradeSchedulerDaysSettings()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Preferences/Scheduler/days"_s;
         if (!settingsStorage->hasKey(key))
             return;
@@ -174,7 +168,8 @@ namespace
                 break;
             default:
                 LogMsg(QCoreApplication::translate("Upgrade", "Invalid value found in configuration file, reverting it to default. Key: \"%1\". Invalid value: \"%2\".")
-                    .arg(key, QString::number(number)), Log::WARNING);
+                           .arg(key, QString::number(number)),
+                       Log::WARNING);
                 settingsStorage->removeValue(key);
                 break;
             }
@@ -183,7 +178,7 @@ namespace
 
     void upgradeDNSServiceSettings()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Preferences/DynDNS/Service"_s;
         const auto value = settingsStorage->loadValue<QString>(key);
         if (!settingsStorage->hasKey(key))
@@ -207,7 +202,8 @@ namespace
                 break;
             default:
                 LogMsg(QCoreApplication::translate("Upgrade", "Invalid value found in configuration file, reverting it to default. Key: \"%1\". Invalid value: \"%2\".")
-                    .arg(key, QString::number(number)), Log::WARNING);
+                           .arg(key, QString::number(number)),
+                       Log::WARNING);
                 settingsStorage->removeValue(key);
                 break;
             }
@@ -216,7 +212,7 @@ namespace
 
     void upgradeTrayIconStyleSettings()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Preferences/Advanced/TrayIconStyle"_s;
         if (!settingsStorage->hasKey(key))
             return;
@@ -240,7 +236,8 @@ namespace
                 break;
             default:
                 LogMsg(QCoreApplication::translate("Upgrade", "Invalid value found in configuration file, reverting it to default. Key: \"%1\". Invalid value: \"%2\".")
-                    .arg(key, QString::number(number)), Log::WARNING);
+                           .arg(key, QString::number(number)),
+                       Log::WARNING);
                 settingsStorage->removeValue(key);
                 break;
             }
@@ -249,7 +246,7 @@ namespace
 
     void upgradeTrayIconStyleSettings2()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto oldKey = u"Preferences/Advanced/TrayIconStyle"_s;
         if (!settingsStorage->hasKey(oldKey))
             return;
@@ -280,86 +277,85 @@ namespace
             QString oldKey;
         };
 
-        const KeyMapping mappings[] =
-        {
-            {u"AddNewTorrentDialog/Enabled"_s, u"Preferences/Downloads/NewAdditionDialog"_s},
-            {u"AddNewTorrentDialog/Expanded"_s, u"AddNewTorrentDialog/expanded"_s},
-            {u"AddNewTorrentDialog/Position"_s, u"AddNewTorrentDialog/y"_s},
-            {u"AddNewTorrentDialog/SavePathHistory"_s, u"TorrentAdditionDlg/save_path_history"_s},
-            {u"AddNewTorrentDialog/TopLevel"_s, u"Preferences/Downloads/NewAdditionDialogFront"_s},
-            {u"AddNewTorrentDialog/TreeHeaderState"_s, u"AddNewTorrentDialog/qt5/treeHeaderState"_s},
-            {u"AddNewTorrentDialog/Width"_s, u"AddNewTorrentDialog/width"_s},
-            {u"BitTorrent/Session/AddExtensionToIncompleteFiles"_s, u"Preferences/Downloads/UseIncompleteExtension"_s},
-            {u"BitTorrent/Session/AdditionalTrackers"_s, u"Preferences/Bittorrent/TrackersList"_s},
-            {u"BitTorrent/Session/AddTorrentPaused"_s, u"Preferences/Downloads/StartInPause"_s},
-            {u"BitTorrent/Session/AddTrackersEnabled"_s, u"Preferences/Bittorrent/AddTrackers"_s},
-            {u"BitTorrent/Session/AlternativeGlobalDLSpeedLimit"_s, u"Preferences/Connection/GlobalDLLimitAlt"_s},
-            {u"BitTorrent/Session/AlternativeGlobalUPSpeedLimit"_s, u"Preferences/Connection/GlobalUPLimitAlt"_s},
-            {u"BitTorrent/Session/AnnounceIP"_s, u"Preferences/Connection/InetAddress"_s},
-            {u"BitTorrent/Session/AnnounceToAllTrackers"_s, u"Preferences/Advanced/AnnounceToAllTrackers"_s},
-            {u"BitTorrent/Session/AnonymousModeEnabled"_s, u"Preferences/Advanced/AnonymousMode"_s},
-            {u"BitTorrent/Session/BandwidthSchedulerEnabled"_s, u"Preferences/Scheduler/Enabled"_s},
-            {u"BitTorrent/Session/DefaultSavePath"_s, u"Preferences/Downloads/SavePath"_s},
-            {u"BitTorrent/Session/DHTEnabled"_s, u"Preferences/Bittorrent/DHT"_s},
-            {u"BitTorrent/Session/DiskCacheSize"_s, u"Preferences/Downloads/DiskWriteCacheSize"_s},
-            {u"BitTorrent/Session/DiskCacheTTL"_s, u"Preferences/Downloads/DiskWriteCacheTTL"_s},
-            {u"BitTorrent/Session/Encryption"_s, u"Preferences/Bittorrent/Encryption"_s},
-            {u"BitTorrent/Session/FinishedTorrentExportDirectory"_s, u"Preferences/Downloads/FinishedTorrentExportDir"_s},
-            {u"BitTorrent/Session/ForceProxy"_s, u"Preferences/Connection/ProxyForce"_s},
-            {u"BitTorrent/Session/GlobalDLSpeedLimit"_s, u"Preferences/Connection/GlobalDLLimit"_s},
-            {u"BitTorrent/Session/GlobalMaxRatio"_s, u"Preferences/Bittorrent/MaxRatio"_s},
-            {u"BitTorrent/Session/GlobalUPSpeedLimit"_s, u"Preferences/Connection/GlobalUPLimit"_s},
-            {u"BitTorrent/Session/IgnoreLimitsOnLAN"_s, u"Preferences/Advanced/IgnoreLimitsLAN"_s},
-            {u"BitTorrent/Session/IgnoreSlowTorrentsForQueueing"_s, u"Preferences/Queueing/IgnoreSlowTorrents"_s},
-            {u"BitTorrent/Session/IncludeOverheadInLimits"_s, u"Preferences/Advanced/IncludeOverhead"_s},
-            {u"BitTorrent/Session/Interface"_s, u"Preferences/Connection/Interface"_s},
-            {u"BitTorrent/Session/InterfaceAddress"_s, u"Preferences/Connection/InterfaceAddress"_s},
-            {u"BitTorrent/Session/InterfaceName"_s, u"Preferences/Connection/InterfaceName"_s},
-            {u"BitTorrent/Session/IPFilter"_s, u"Preferences/IPFilter/File"_s},
-            {u"BitTorrent/Session/IPFilteringEnabled"_s, u"Preferences/IPFilter/Enabled"_s},
-            {u"BitTorrent/Session/LSDEnabled"_s, u"Preferences/Bittorrent/LSD"_s},
-            {u"BitTorrent/Session/MaxActiveDownloads"_s, u"Preferences/Queueing/MaxActiveDownloads"_s},
-            {u"BitTorrent/Session/MaxActiveTorrents"_s, u"Preferences/Queueing/MaxActiveTorrents"_s},
-            {u"BitTorrent/Session/MaxActiveUploads"_s, u"Preferences/Queueing/MaxActiveUploads"_s},
-            {u"BitTorrent/Session/MaxConnections"_s, u"Preferences/Bittorrent/MaxConnecs"_s},
-            {u"BitTorrent/Session/MaxConnectionsPerTorrent"_s, u"Preferences/Bittorrent/MaxConnecsPerTorrent"_s},
-            {u"BitTorrent/Session/MaxHalfOpenConnections"_s, u"Preferences/Connection/MaxHalfOpenConnec"_s},
-            {u"BitTorrent/Session/MaxRatioAction"_s, u"Preferences/Bittorrent/MaxRatioAction"_s},
-            {u"BitTorrent/Session/MaxUploads"_s, u"Preferences/Bittorrent/MaxUploads"_s},
-            {u"BitTorrent/Session/MaxUploadsPerTorrent"_s, u"Preferences/Bittorrent/MaxUploadsPerTorrent"_s},
-            {u"BitTorrent/Session/OutgoingPortsMax"_s, u"Preferences/Advanced/OutgoingPortsMax"_s},
-            {u"BitTorrent/Session/OutgoingPortsMin"_s, u"Preferences/Advanced/OutgoingPortsMin"_s},
-            {u"BitTorrent/Session/PeXEnabled"_s, u"Preferences/Bittorrent/PeX"_s},
-            {u"BitTorrent/Session/Port"_s, u"Preferences/Connection/PortRangeMin"_s},
-            {u"BitTorrent/Session/Preallocation"_s, u"Preferences/Downloads/PreAllocation"_s},
-            {u"BitTorrent/Session/ProxyPeerConnections"_s, u"Preferences/Connection/ProxyPeerConnections"_s},
-            {u"BitTorrent/Session/QueueingSystemEnabled"_s, u"Preferences/Queueing/QueueingEnabled"_s},
-            {u"BitTorrent/Session/RefreshInterval"_s, u"Preferences/General/RefreshInterval"_s},
-            {u"BitTorrent/Session/SaveResumeDataInterval"_s, u"Preferences/Downloads/SaveResumeDataInterval"_s},
-            {u"BitTorrent/Session/SuperSeedingEnabled"_s, u"Preferences/Advanced/SuperSeeding"_s},
-            {u"BitTorrent/Session/TempPath"_s, u"Preferences/Downloads/TempPath"_s},
-            {u"BitTorrent/Session/TempPathEnabled"_s, u"Preferences/Downloads/TempPathEnabled"_s},
-            {u"BitTorrent/Session/TorrentExportDirectory"_s, u"Preferences/Downloads/TorrentExportDir"_s},
-            {u"BitTorrent/Session/TrackerFilteringEnabled"_s, u"Preferences/IPFilter/FilterTracker"_s},
-            {u"BitTorrent/Session/UseAlternativeGlobalSpeedLimit"_s, u"Preferences/Connection/alt_speeds_on"_s},
-            {u"BitTorrent/Session/UseOSCache"_s, u"Preferences/Advanced/osCache"_s},
-            {u"BitTorrent/Session/UseRandomPort"_s, u"Preferences/General/UseRandomPort"_s},
-            {u"BitTorrent/Session/uTPEnabled"_s, u"Preferences/Bittorrent/uTP"_s},
-            {u"BitTorrent/Session/uTPRateLimited"_s, u"Preferences/Bittorrent/uTP_rate_limited"_s},
-            {u"BitTorrent/TrackerEnabled"_s, u"Preferences/Advanced/trackerEnabled"_s},
-            {u"Network/PortForwardingEnabled"_s, u"Preferences/Connection/UPnP"_s},
-            {u"Network/Proxy/Authentication"_s, u"Preferences/Connection/Proxy/Authentication"_s},
-            {u"Network/Proxy/IP"_s, u"Preferences/Connection/Proxy/IP"_s},
-            {u"Network/Proxy/OnlyForTorrents"_s, u"Preferences/Connection/ProxyOnlyForTorrents"_s},
-            {u"Network/Proxy/Password"_s, u"Preferences/Connection/Proxy/Password"_s},
-            {u"Network/Proxy/Port"_s, u"Preferences/Connection/Proxy/Port"_s},
-            {u"Network/Proxy/Type"_s, u"Preferences/Connection/ProxyType"_s},
-            {u"Network/Proxy/Username"_s, u"Preferences/Connection/Proxy/Username"_s},
-            {u"State/BannedIPs"_s, u"Preferences/IPFilter/BannedIPs"_s}
+        const KeyMapping mappings[] = {
+            {                       u"AddNewTorrentDialog/Enabled"_s,        u"Preferences/Downloads/NewAdditionDialog"_s },
+            {                      u"AddNewTorrentDialog/Expanded"_s,                   u"AddNewTorrentDialog/expanded"_s },
+            {                      u"AddNewTorrentDialog/Position"_s,                          u"AddNewTorrentDialog/y"_s },
+            {               u"AddNewTorrentDialog/SavePathHistory"_s,           u"TorrentAdditionDlg/save_path_history"_s },
+            {                      u"AddNewTorrentDialog/TopLevel"_s,   u"Preferences/Downloads/NewAdditionDialogFront"_s },
+            {               u"AddNewTorrentDialog/TreeHeaderState"_s,        u"AddNewTorrentDialog/qt5/treeHeaderState"_s },
+            {                         u"AddNewTorrentDialog/Width"_s,                      u"AddNewTorrentDialog/width"_s },
+            {  u"BitTorrent/Session/AddExtensionToIncompleteFiles"_s,   u"Preferences/Downloads/UseIncompleteExtension"_s },
+            {             u"BitTorrent/Session/AdditionalTrackers"_s,            u"Preferences/Bittorrent/TrackersList"_s },
+            {               u"BitTorrent/Session/AddTorrentPaused"_s,             u"Preferences/Downloads/StartInPause"_s },
+            {             u"BitTorrent/Session/AddTrackersEnabled"_s,             u"Preferences/Bittorrent/AddTrackers"_s },
+            {  u"BitTorrent/Session/AlternativeGlobalDLSpeedLimit"_s,        u"Preferences/Connection/GlobalDLLimitAlt"_s },
+            {  u"BitTorrent/Session/AlternativeGlobalUPSpeedLimit"_s,        u"Preferences/Connection/GlobalUPLimitAlt"_s },
+            {                     u"BitTorrent/Session/AnnounceIP"_s,             u"Preferences/Connection/InetAddress"_s },
+            {          u"BitTorrent/Session/AnnounceToAllTrackers"_s,     u"Preferences/Advanced/AnnounceToAllTrackers"_s },
+            {           u"BitTorrent/Session/AnonymousModeEnabled"_s,             u"Preferences/Advanced/AnonymousMode"_s },
+            {      u"BitTorrent/Session/BandwidthSchedulerEnabled"_s,                  u"Preferences/Scheduler/Enabled"_s },
+            {                u"BitTorrent/Session/DefaultSavePath"_s,                 u"Preferences/Downloads/SavePath"_s },
+            {                     u"BitTorrent/Session/DHTEnabled"_s,                     u"Preferences/Bittorrent/DHT"_s },
+            {                  u"BitTorrent/Session/DiskCacheSize"_s,       u"Preferences/Downloads/DiskWriteCacheSize"_s },
+            {                   u"BitTorrent/Session/DiskCacheTTL"_s,        u"Preferences/Downloads/DiskWriteCacheTTL"_s },
+            {                     u"BitTorrent/Session/Encryption"_s,              u"Preferences/Bittorrent/Encryption"_s },
+            { u"BitTorrent/Session/FinishedTorrentExportDirectory"_s, u"Preferences/Downloads/FinishedTorrentExportDir"_s },
+            {                     u"BitTorrent/Session/ForceProxy"_s,              u"Preferences/Connection/ProxyForce"_s },
+            {             u"BitTorrent/Session/GlobalDLSpeedLimit"_s,           u"Preferences/Connection/GlobalDLLimit"_s },
+            {                 u"BitTorrent/Session/GlobalMaxRatio"_s,                u"Preferences/Bittorrent/MaxRatio"_s },
+            {             u"BitTorrent/Session/GlobalUPSpeedLimit"_s,           u"Preferences/Connection/GlobalUPLimit"_s },
+            {              u"BitTorrent/Session/IgnoreLimitsOnLAN"_s,           u"Preferences/Advanced/IgnoreLimitsLAN"_s },
+            {  u"BitTorrent/Session/IgnoreSlowTorrentsForQueueing"_s,        u"Preferences/Queueing/IgnoreSlowTorrents"_s },
+            {        u"BitTorrent/Session/IncludeOverheadInLimits"_s,           u"Preferences/Advanced/IncludeOverhead"_s },
+            {                      u"BitTorrent/Session/Interface"_s,               u"Preferences/Connection/Interface"_s },
+            {               u"BitTorrent/Session/InterfaceAddress"_s,        u"Preferences/Connection/InterfaceAddress"_s },
+            {                  u"BitTorrent/Session/InterfaceName"_s,           u"Preferences/Connection/InterfaceName"_s },
+            {                       u"BitTorrent/Session/IPFilter"_s,                      u"Preferences/IPFilter/File"_s },
+            {             u"BitTorrent/Session/IPFilteringEnabled"_s,                   u"Preferences/IPFilter/Enabled"_s },
+            {                     u"BitTorrent/Session/LSDEnabled"_s,                     u"Preferences/Bittorrent/LSD"_s },
+            {             u"BitTorrent/Session/MaxActiveDownloads"_s,        u"Preferences/Queueing/MaxActiveDownloads"_s },
+            {              u"BitTorrent/Session/MaxActiveTorrents"_s,         u"Preferences/Queueing/MaxActiveTorrents"_s },
+            {               u"BitTorrent/Session/MaxActiveUploads"_s,          u"Preferences/Queueing/MaxActiveUploads"_s },
+            {                 u"BitTorrent/Session/MaxConnections"_s,              u"Preferences/Bittorrent/MaxConnecs"_s },
+            {       u"BitTorrent/Session/MaxConnectionsPerTorrent"_s,    u"Preferences/Bittorrent/MaxConnecsPerTorrent"_s },
+            {         u"BitTorrent/Session/MaxHalfOpenConnections"_s,       u"Preferences/Connection/MaxHalfOpenConnec"_s },
+            {                 u"BitTorrent/Session/MaxRatioAction"_s,          u"Preferences/Bittorrent/MaxRatioAction"_s },
+            {                     u"BitTorrent/Session/MaxUploads"_s,              u"Preferences/Bittorrent/MaxUploads"_s },
+            {           u"BitTorrent/Session/MaxUploadsPerTorrent"_s,    u"Preferences/Bittorrent/MaxUploadsPerTorrent"_s },
+            {               u"BitTorrent/Session/OutgoingPortsMax"_s,          u"Preferences/Advanced/OutgoingPortsMax"_s },
+            {               u"BitTorrent/Session/OutgoingPortsMin"_s,          u"Preferences/Advanced/OutgoingPortsMin"_s },
+            {                     u"BitTorrent/Session/PeXEnabled"_s,                     u"Preferences/Bittorrent/PeX"_s },
+            {                           u"BitTorrent/Session/Port"_s,            u"Preferences/Connection/PortRangeMin"_s },
+            {                  u"BitTorrent/Session/Preallocation"_s,            u"Preferences/Downloads/PreAllocation"_s },
+            {           u"BitTorrent/Session/ProxyPeerConnections"_s,    u"Preferences/Connection/ProxyPeerConnections"_s },
+            {          u"BitTorrent/Session/QueueingSystemEnabled"_s,           u"Preferences/Queueing/QueueingEnabled"_s },
+            {                u"BitTorrent/Session/RefreshInterval"_s,            u"Preferences/General/RefreshInterval"_s },
+            {         u"BitTorrent/Session/SaveResumeDataInterval"_s,   u"Preferences/Downloads/SaveResumeDataInterval"_s },
+            {            u"BitTorrent/Session/SuperSeedingEnabled"_s,              u"Preferences/Advanced/SuperSeeding"_s },
+            {                       u"BitTorrent/Session/TempPath"_s,                 u"Preferences/Downloads/TempPath"_s },
+            {                u"BitTorrent/Session/TempPathEnabled"_s,          u"Preferences/Downloads/TempPathEnabled"_s },
+            {         u"BitTorrent/Session/TorrentExportDirectory"_s,         u"Preferences/Downloads/TorrentExportDir"_s },
+            {        u"BitTorrent/Session/TrackerFilteringEnabled"_s,             u"Preferences/IPFilter/FilterTracker"_s },
+            { u"BitTorrent/Session/UseAlternativeGlobalSpeedLimit"_s,           u"Preferences/Connection/alt_speeds_on"_s },
+            {                     u"BitTorrent/Session/UseOSCache"_s,                   u"Preferences/Advanced/osCache"_s },
+            {                  u"BitTorrent/Session/UseRandomPort"_s,              u"Preferences/General/UseRandomPort"_s },
+            {                     u"BitTorrent/Session/uTPEnabled"_s,                     u"Preferences/Bittorrent/uTP"_s },
+            {                 u"BitTorrent/Session/uTPRateLimited"_s,        u"Preferences/Bittorrent/uTP_rate_limited"_s },
+            {                         u"BitTorrent/TrackerEnabled"_s,            u"Preferences/Advanced/trackerEnabled"_s },
+            {                     u"Network/PortForwardingEnabled"_s,                    u"Preferences/Connection/UPnP"_s },
+            {                      u"Network/Proxy/Authentication"_s,    u"Preferences/Connection/Proxy/Authentication"_s },
+            {                                  u"Network/Proxy/IP"_s,                u"Preferences/Connection/Proxy/IP"_s },
+            {                     u"Network/Proxy/OnlyForTorrents"_s,    u"Preferences/Connection/ProxyOnlyForTorrents"_s },
+            {                            u"Network/Proxy/Password"_s,          u"Preferences/Connection/Proxy/Password"_s },
+            {                                u"Network/Proxy/Port"_s,              u"Preferences/Connection/Proxy/Port"_s },
+            {                                u"Network/Proxy/Type"_s,               u"Preferences/Connection/ProxyType"_s },
+            {                            u"Network/Proxy/Username"_s,          u"Preferences/Connection/Proxy/Username"_s },
+            {                                   u"State/BannedIPs"_s,                 u"Preferences/IPFilter/BannedIPs"_s }
         };
 
-        auto *settingsStorage = SettingsStorage::instance();
-        for (const KeyMapping &mapping : mappings)
+        auto* settingsStorage = SettingsStorage::instance();
+        for (const KeyMapping& mapping : mappings)
         {
             if constexpr (migrateOption == MigrateOption::AddNewKeys)
             {
@@ -378,7 +374,7 @@ namespace
 
     void migrateProxySettingsEnum()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Network/Proxy/Type"_s;
         if (!settingsStorage->hasKey(key))
             return;
@@ -411,7 +407,8 @@ namespace
                 break;
             default:
                 LogMsg(QCoreApplication::translate("Upgrade", "Invalid value found in configuration file, reverting it to default. Key: \"%1\". Invalid value: \"%2\".")
-                        .arg(key, QString::number(number)), Log::WARNING);
+                           .arg(key, QString::number(number)),
+                       Log::WARNING);
                 settingsStorage->removeValue(key);
                 break;
             }
@@ -420,10 +417,9 @@ namespace
 
     void migrateProxySettings()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto proxyType = settingsStorage->loadValue<QString>(u"Network/Proxy/Type"_s, u"None"_s);
-        const auto onlyForTorrents = settingsStorage->loadValue<bool>(u"Network/Proxy/OnlyForTorrents"_s)
-                || (proxyType == u"SOCKS4");
+        const auto onlyForTorrents = settingsStorage->loadValue<bool>(u"Network/Proxy/OnlyForTorrents"_s) || (proxyType == u"SOCKS4");
 
         settingsStorage->storeValue(u"Network/Proxy/Profiles/BitTorrent"_s, true);
         settingsStorage->storeValue(u"Network/Proxy/Profiles/RSS"_s, !onlyForTorrents);
@@ -450,7 +446,7 @@ namespace
 #ifdef Q_OS_WIN
     void migrateMemoryPrioritySettings()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const QString oldKey = u"BitTorrent/OSMemoryPriority"_s;
         const QString newKey = u"Application/ProcessMemoryPriority"_s;
 
@@ -464,7 +460,7 @@ namespace
 
     void migrateStartupWindowState()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         if (settingsStorage->hasKey(u"Preferences/General/StartMinimized"_s))
         {
             const auto startMinimized = settingsStorage->loadValue<bool>(u"Preferences/General/StartMinimized"_s);
@@ -476,7 +472,7 @@ namespace
 
     void migrateChineseLocale()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Preferences/General/Locale"_s;
         if (settingsStorage->hasKey(key))
         {
@@ -488,7 +484,7 @@ namespace
 
     void migrateShareLimitActionSettings()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto oldKey = u"BitTorrent/Session/MaxRatioAction"_s;
         if (!settingsStorage->hasKey(oldKey))
             return;
@@ -512,7 +508,8 @@ namespace
             break;
         default:
             LogMsg(QCoreApplication::translate("Upgrade", "Invalid value found in configuration file, reverting it to default. Key: \"%1\". Invalid value: \"%2\".")
-                    .arg(oldKey, QString::number(value)), Log::WARNING);
+                       .arg(oldKey, QString::number(value)),
+                   Log::WARNING);
             break;
         }
 
@@ -521,7 +518,7 @@ namespace
 
     void migrateAddPausedSetting()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const auto oldKey = u"BitTorrent/Session/AddTorrentPaused"_s;
         if (!settingsStorage->hasKey(oldKey))
             return;
@@ -533,15 +530,15 @@ namespace
 
     void migrateSMTPEncryptionSetting()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const QString oldKey = u"Preferences/MailNotification/req_ssl"_s;
         const QString newKey = u"Preferences/MailNotification/SMTPEncryptionType"_s;
 
         if (settingsStorage->hasKey(oldKey))
         {
             const Net::SMTPEncryptionType setting = settingsStorage->loadValue<bool>(oldKey)
-                ? Net::SMTPEncryptionType::SMTPS
-                : Net::SMTPEncryptionType::None;
+                                                        ? Net::SMTPEncryptionType::SMTPS
+                                                        : Net::SMTPEncryptionType::None;
             settingsStorage->storeValue(newKey, setting);
             settingsStorage->removeValue(oldKey);
         }
@@ -552,7 +549,7 @@ namespace
         // User may not have touched this setting so it will stay at the default and its value is empty.
         // Set it to the previous default value so existing installations are not affected by the new default
 
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
         const QString key = u"Preferences/Connection/ResolvePeerCountries"_s;
         if (!settingsStorage->hasKey(key))
             SettingsStorage::instance()->storeValue(key, true);
@@ -560,9 +557,8 @@ namespace
 
     void migrateTorrentExportFolderSettings()
     {
-        const auto doMigrate = [](const QString &oldKey, const QString &newKey, const QString &newEnabledKey)
-        {
-            auto *settingsStorage = SettingsStorage::instance();
+        const auto doMigrate = [](const QString& oldKey, const QString& newKey, const QString& newEnabledKey) {
+            auto* settingsStorage = SettingsStorage::instance();
             if (settingsStorage->hasKey(oldKey))
             {
                 const auto oldPath = settingsStorage->loadValue<Path>(oldKey);
@@ -578,9 +574,8 @@ namespace
 
     void migrateWebUISettings()
     {
-        const auto doMigrate = [](const QString &oldKey, const QString &newKey)
-        {
-            auto *settingsStorage = SettingsStorage::instance();
+        const auto doMigrate = [](const QString& oldKey, const QString& newKey) {
+            auto* settingsStorage = SettingsStorage::instance();
             if (settingsStorage->hasKey(oldKey))
             {
                 settingsStorage->storeValue(newKey, settingsStorage->loadValue<QVariant>(oldKey));
@@ -619,7 +614,7 @@ namespace
 
     void migrateSearchSettingKeys()
     {
-        auto *settingsStorage = SettingsStorage::instance();
+        auto* settingsStorage = SettingsStorage::instance();
 
         const auto oldKey1 = u"Search/StoreOpenedSearchTabs"_s;
         const auto newKey1 = u"Search/StoreSearchJobs"_s;
@@ -641,7 +636,7 @@ namespace
 
 bool upgrade()
 {
-    if (CachedSettingValue<int> version {MIGRATION_VERSION_KEY, 0}; version != MIGRATION_VERSION)
+    if (CachedSettingValue<int> version{ MIGRATION_VERSION_KEY, 0 }; version != MIGRATION_VERSION)
     {
         if (version < 1)
         {
@@ -718,18 +713,16 @@ void handleChangedDefaults(const DefaultPreferencesMode mode)
         QVariant current;
     };
 
-    const DefaultValue changedDefaults[] =
-    {
-        {u"BitTorrent/Session/QueueingSystemEnabled"_s, true, false}
+    const DefaultValue changedDefaults[] = {
+        { u"BitTorrent/Session/QueueingSystemEnabled"_s, true, false }
     };
 
-    auto *settingsStorage = SettingsStorage::instance();
-    for (const DefaultValue &value : changedDefaults)
+    auto* settingsStorage = SettingsStorage::instance();
+    for (const DefaultValue& value : changedDefaults)
     {
         if (!settingsStorage->hasKey(value.name))
         {
-            settingsStorage->storeValue(value.name
-                , (mode == DefaultPreferencesMode::Legacy ? value.legacy : value.current));
+            settingsStorage->storeValue(value.name, (mode == DefaultPreferencesMode::Legacy ? value.legacy : value.current));
         }
     }
 }

@@ -32,9 +32,9 @@
 #include <libtorrent/info_hash.hpp>
 #endif
 
-#include <QMetaType>
-
 #include "base/digest32.h"
+
+#include <QMetaType>
 
 class QString;
 
@@ -54,10 +54,10 @@ namespace BitTorrent
         using BaseType = Digest32<160>;
         using BaseType::BaseType;
 
-        static TorrentID fromString(const QString &hashString);
-        static TorrentID fromInfoHash(const InfoHash &infoHash);
-        static TorrentID fromSHA1Hash(const SHA1Hash &hash);
-        static TorrentID fromSHA256Hash(const SHA256Hash &hash);
+        static TorrentID fromString(const QString& hashString);
+        static TorrentID fromInfoHash(const InfoHash& infoHash);
+        static TorrentID fromSHA1Hash(const SHA1Hash& hash);
+        static TorrentID fromSHA256Hash(const SHA256Hash& hash);
     };
 
     class InfoHash
@@ -70,9 +70,9 @@ namespace BitTorrent
 #endif
 
         InfoHash() = default;
-        InfoHash(const WrappedType &nativeHash);
+        InfoHash(const WrappedType& nativeHash);
 #ifdef QBT_USES_LIBTORRENT2
-        InfoHash(const SHA1Hash &v1, const SHA256Hash &v2);
+        InfoHash(const SHA1Hash& v1, const SHA256Hash& v2);
 #endif
 
         bool isValid() const;
@@ -90,10 +90,10 @@ namespace BitTorrent
         WrappedType m_nativeHash;
     };
 
-    std::size_t qHash(const TorrentID &key, std::size_t seed = 0);
-    std::size_t qHash(const InfoHash &key, std::size_t seed = 0);
+    std::size_t qHash(const TorrentID& key, std::size_t seed = 0);
+    std::size_t qHash(const InfoHash& key, std::size_t seed = 0);
 
-    bool operator==(const InfoHash &left, const InfoHash &right);
+    bool operator==(const InfoHash& left, const InfoHash& right);
 }
 
 Q_DECLARE_METATYPE(BitTorrent::TorrentID)

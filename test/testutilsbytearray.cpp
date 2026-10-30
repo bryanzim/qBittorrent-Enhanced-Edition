@@ -27,13 +27,13 @@
  * exception statement from your version.
  */
 
+#include "base/utils/bytearray.h"
+
 #include <QByteArray>
 #include <QByteArrayView>
 #include <QLatin1StringView>
 #include <QObject>
 #include <QTest>
-
-#include "base/utils/bytearray.h"
 
 class TestUtilsByteArray final : public QObject
 {
@@ -48,8 +48,7 @@ private slots:
     {
         using BAViews = QList<QByteArrayView>;
 
-        const auto checkSkipEmptyParts = [](const QByteArrayView in, const QByteArrayView sep, const BAViews expected)
-        {
+        const auto checkSkipEmptyParts = [](const QByteArrayView in, const QByteArrayView sep, const BAViews expected) {
             // verify it works
             QCOMPARE(Utils::ByteArray::splitToViews(in, sep), expected);
 
@@ -57,31 +56,31 @@ private slots:
             using Latin1Views = QList<QLatin1StringView>;
 
             const Latin1Views reference = QLatin1StringView(in)
-                .tokenize(QLatin1StringView(sep), Qt::SkipEmptyParts).toContainer();
+                                              .tokenize(QLatin1StringView(sep), Qt::SkipEmptyParts)
+                                              .toContainer();
             Latin1Views expectedStrings;
-            for (const auto &string : expected)
+            for (const auto& string : expected)
                 expectedStrings.append(QLatin1StringView(string));
             QCOMPARE(reference, expectedStrings);
         };
 
         checkSkipEmptyParts({}, {}, {});
         checkSkipEmptyParts({}, "/", {});
-        checkSkipEmptyParts("/", {}, {"/"});
-        checkSkipEmptyParts("/ab", {}, (BAViews {"/", "a", "b"}));
+        checkSkipEmptyParts("/", {}, { "/" });
+        checkSkipEmptyParts("/ab", {}, (BAViews{ "/", "a", "b" }));
         checkSkipEmptyParts("/", "/", {});
-        checkSkipEmptyParts("/a", "/", {"a"});
-        checkSkipEmptyParts("/a/", "/", {"a"});
-        checkSkipEmptyParts("/a/b", "/", (BAViews {"a", "b"}));
-        checkSkipEmptyParts("/a/b/", "/", (BAViews {"a", "b"}));
-        checkSkipEmptyParts("/a/b", "//", {"/a/b"});
-        checkSkipEmptyParts("//a/b", "//", {"a/b"});
-        checkSkipEmptyParts("//a//b", "//", (BAViews {"a", "b"}));
-        checkSkipEmptyParts("//a//b/", "//", (BAViews {"a", "b/"}));
-        checkSkipEmptyParts("//a//b//", "//", (BAViews {"a", "b"}));
-        checkSkipEmptyParts("///a//b//", "//", (BAViews {"/a", "b"}));
+        checkSkipEmptyParts("/a", "/", { "a" });
+        checkSkipEmptyParts("/a/", "/", { "a" });
+        checkSkipEmptyParts("/a/b", "/", (BAViews{ "a", "b" }));
+        checkSkipEmptyParts("/a/b/", "/", (BAViews{ "a", "b" }));
+        checkSkipEmptyParts("/a/b", "//", { "/a/b" });
+        checkSkipEmptyParts("//a/b", "//", { "a/b" });
+        checkSkipEmptyParts("//a//b", "//", (BAViews{ "a", "b" }));
+        checkSkipEmptyParts("//a//b/", "//", (BAViews{ "a", "b/" }));
+        checkSkipEmptyParts("//a//b//", "//", (BAViews{ "a", "b" }));
+        checkSkipEmptyParts("///a//b//", "//", (BAViews{ "/a", "b" }));
 
-        const auto checkKeepEmptyParts = [](const QByteArrayView in, const QByteArrayView sep, const BAViews expected)
-        {
+        const auto checkKeepEmptyParts = [](const QByteArrayView in, const QByteArrayView sep, const BAViews expected) {
             // verify it works
             QCOMPARE(Utils::ByteArray::splitToViews(in, sep, Qt::KeepEmptyParts), expected);
 
@@ -89,28 +88,29 @@ private slots:
             using Latin1Views = QList<QLatin1StringView>;
 
             const Latin1Views reference = QLatin1StringView(in)
-                .tokenize(QLatin1StringView(sep), Qt::KeepEmptyParts).toContainer();
+                                              .tokenize(QLatin1StringView(sep), Qt::KeepEmptyParts)
+                                              .toContainer();
             Latin1Views expectedStrings;
-            for (const auto &string : expected)
+            for (const auto& string : expected)
                 expectedStrings.append(QLatin1StringView(string));
             QCOMPARE(reference, expectedStrings);
         };
 
-        checkKeepEmptyParts({}, {}, {{}, {}});
-        checkKeepEmptyParts({}, "/", {{}});
-        checkKeepEmptyParts("/", {}, {"", "/", ""});
-        checkKeepEmptyParts("/ab", {}, (BAViews {"", "/", "a", "b", ""}));
-        checkKeepEmptyParts("/", "/", {"", ""});
-        checkKeepEmptyParts("/a", "/", {"", "a"});
-        checkKeepEmptyParts("/a/", "/", {"", "a", ""});
-        checkKeepEmptyParts("/a/b", "/", (BAViews {"", "a", "b"}));
-        checkKeepEmptyParts("/a/b/", "/", (BAViews {"", "a", "b", ""}));
-        checkKeepEmptyParts("/a/b", "//", {"/a/b"});
-        checkKeepEmptyParts("//a/b", "//", {"", "a/b"});
-        checkKeepEmptyParts("//a//b", "//", (BAViews {"", "a", "b"}));
-        checkKeepEmptyParts("//a//b/", "//", (BAViews {"", "a", "b/"}));
-        checkKeepEmptyParts("//a//b//", "//", (BAViews {"", "a", "b", ""}));
-        checkKeepEmptyParts("///a//b//", "//", (BAViews {"", "/a", "b", ""}));
+        checkKeepEmptyParts({}, {}, { {}, {} });
+        checkKeepEmptyParts({}, "/", { {} });
+        checkKeepEmptyParts("/", {}, { "", "/", "" });
+        checkKeepEmptyParts("/ab", {}, (BAViews{ "", "/", "a", "b", "" }));
+        checkKeepEmptyParts("/", "/", { "", "" });
+        checkKeepEmptyParts("/a", "/", { "", "a" });
+        checkKeepEmptyParts("/a/", "/", { "", "a", "" });
+        checkKeepEmptyParts("/a/b", "/", (BAViews{ "", "a", "b" }));
+        checkKeepEmptyParts("/a/b/", "/", (BAViews{ "", "a", "b", "" }));
+        checkKeepEmptyParts("/a/b", "//", { "/a/b" });
+        checkKeepEmptyParts("//a/b", "//", { "", "a/b" });
+        checkKeepEmptyParts("//a//b", "//", (BAViews{ "", "a", "b" }));
+        checkKeepEmptyParts("//a//b/", "//", (BAViews{ "", "a", "b/" }));
+        checkKeepEmptyParts("//a//b//", "//", (BAViews{ "", "a", "b", "" }));
+        checkKeepEmptyParts("///a//b//", "//", (BAViews{ "", "/a", "b", "" }));
     }
 
     void testAsQByteArray() const
@@ -131,8 +131,7 @@ private slots:
 
     void testUnquote() const
     {
-        const auto test = []<typename T>()
-        {
+        const auto test = []<typename T>() {
             QCOMPARE(Utils::ByteArray::unquote<T>({}), {});
             QCOMPARE(Utils::ByteArray::unquote<T>("abc"), "abc");
             QCOMPARE(Utils::ByteArray::unquote<T>("\"abc\""), "abc");

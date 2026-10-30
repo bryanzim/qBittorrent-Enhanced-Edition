@@ -31,8 +31,8 @@
 
 #include "base/utils/fs.h"
 
-FreeDiskSpaceChecker::FreeDiskSpaceChecker(const Path &pathToCheck)
-    : m_pathToCheck {pathToCheck}
+FreeDiskSpaceChecker::FreeDiskSpaceChecker(const Path& pathToCheck)
+    : m_pathToCheck{ pathToCheck }
 {
 }
 
@@ -41,7 +41,7 @@ Path FreeDiskSpaceChecker::pathToCheck() const
     return m_pathToCheck;
 }
 
-void FreeDiskSpaceChecker::setPathToCheck(const Path &newPathToCheck)
+void FreeDiskSpaceChecker::setPathToCheck(const Path& newPathToCheck)
 {
     m_pathToCheck = newPathToCheck;
 }

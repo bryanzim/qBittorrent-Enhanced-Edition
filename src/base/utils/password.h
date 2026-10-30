@@ -44,10 +44,10 @@ namespace Utils::Password
 
     namespace PBKDF2
     {
-        QByteArray generate(const QString &password);
-        QByteArray generate(const QByteArray &password);
+        QByteArray generate(const QString& password);
+        QByteArray generate(const QByteArray& password);
 
-        bool verify(const QByteArray &secret, QStringView password);
-        bool verify(const QByteArray &secret, const QByteArray &password);
+        bool verify(const QByteArray& secret, QStringView password);
+        bool verify(const QByteArray& secret, const QByteArray& password);
     }
 }

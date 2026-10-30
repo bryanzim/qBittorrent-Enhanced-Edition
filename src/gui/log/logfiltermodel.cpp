@@ -28,13 +28,12 @@
 
 #include "logfiltermodel.h"
 
-#include <QtVersionChecks>
-
 #include "logmodel.h"
 
-LogFilterModel::LogFilterModel(const Log::MsgTypes types, QObject *parent)
-    : QSortFilterProxyModel(parent)
-    , m_types(types)
+#include <QtVersionChecks>
+
+LogFilterModel::LogFilterModel(const Log::MsgTypes types, QObject* parent)
+    : QSortFilterProxyModel(parent), m_types(types)
 {
 }
 
@@ -50,9 +49,9 @@ void LogFilterModel::setMessageTypes(const Log::MsgTypes types)
 #endif
 }
 
-bool LogFilterModel::filterAcceptsRow(const int sourceRow, const QModelIndex &sourceParent) const
+bool LogFilterModel::filterAcceptsRow(const int sourceRow, const QModelIndex& sourceParent) const
 {
-    const QAbstractItemModel *const sourceModel = this->sourceModel();
+    const QAbstractItemModel* const sourceModel = this->sourceModel();
     const QModelIndex index = sourceModel->index(sourceRow, 0, sourceParent);
     const Log::MsgType type = static_cast<Log::MsgType>(sourceModel->data(index, BaseLogModel::TypeRole).toInt());
 

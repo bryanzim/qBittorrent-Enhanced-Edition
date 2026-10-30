@@ -33,11 +33,11 @@
 #include <QtSystemDetection>
 
 #ifdef Q_OS_WIN
-#include <string>
+#include <QString>
 
 #include <windows.h>
 
-#include <QString>
+#include <string>
 #endif
 
 #include "base/path.h"
@@ -46,13 +46,13 @@ enum class ShutdownDialogAction;
 
 namespace Utils::OS
 {
-    void shutdownComputer(const ShutdownDialogAction &action);
+    void shutdownComputer(const ShutdownDialogAction& action);
 
 #ifdef Q_OS_WIN
     Path windowsSystemPath();
 
     template <typename T>
-    T loadWinAPI(const QString &source, const char *funcName)
+    T loadWinAPI(const QString& source, const char* funcName)
     {
         const std::wstring path = (windowsSystemPath() / Path(source)).toString().toStdWString();
         return reinterpret_cast<T>(::GetProcAddress(::LoadLibraryW(path.c_str()), funcName));
@@ -60,6 +60,6 @@ namespace Utils::OS
 #endif // Q_OS_WIN
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
-    bool applyMarkOfTheWeb(const Path &file, const QString &url = {});
+    bool applyMarkOfTheWeb(const Path& file, const QString& url = {});
 #endif // Q_OS_MACOS || Q_OS_WIN
 }

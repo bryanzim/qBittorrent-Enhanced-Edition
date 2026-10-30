@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QStyledItemDelegate>
-
 #include "gui/progressbarpainter.h"
+
+#include <QStyledItemDelegate>
 
 class QAbstractItemModel;
 class QModelIndex;
@@ -43,15 +43,15 @@ class TorrentContentItemDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY_MOVE(TorrentContentItemDelegate)
 
 public:
-    explicit TorrentContentItemDelegate(QWidget *parent = nullptr);
+    explicit TorrentContentItemDelegate(QWidget* parent = nullptr);
 
-    void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 public slots:
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 private:
     ProgressBarPainter m_progressBarPainter;

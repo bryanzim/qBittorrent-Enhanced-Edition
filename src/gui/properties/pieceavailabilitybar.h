@@ -39,9 +39,9 @@ class PieceAvailabilityBar final : public PiecesBar
     using base = PiecesBar;
 
 public:
-    PieceAvailabilityBar(QWidget *parent);
+    PieceAvailabilityBar(QWidget* parent);
 
-    void setAvailability(const QList<int> &avail);
+    void setAvailability(const QList<int>& avail);
 
     // PiecesBar interface
     void clear() override;
@@ -55,5 +55,5 @@ private:
     QList<int> m_pieces;
 
     // scale int vector to float vector
-    QList<float> intToFloatVector(const QList<int> &vecin, int reqSize);
+    QList<float> intToFloatVector(const QList<int>& vecin, int reqSize);
 };

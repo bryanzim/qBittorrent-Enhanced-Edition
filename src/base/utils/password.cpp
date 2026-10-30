@@ -29,19 +29,18 @@
 
 #include "password.h"
 
-#include <array>
-
-#include <openssl/evp.h>
+#include "base/global.h"
+#include "bytearray.h"
+#include "random.h"
 
 #include <QByteArray>
 #include <QByteArrayView>
 #include <QList>
 #include <QString>
 #include <QStringView>
+#include <openssl/evp.h>
 
-#include "base/global.h"
-#include "bytearray.h"
-#include "random.h"
+#include <array>
 
 namespace Utils
 {
@@ -85,38 +84,36 @@ QString Utils::Password::generate(const int passwordLength)
     return pass;
 }
 
-QByteArray Utils::Password::PBKDF2::generate(const QString &password)
+QByteArray Utils::Password::PBKDF2::generate(const QString& password)
 {
     return generate(password.toUtf8());
 }
 
-QByteArray Utils::Password::PBKDF2::generate(const QByteArray &password)
+QByteArray Utils::Password::PBKDF2::generate(const QByteArray& password)
 {
-    const std::array<uint32_t, 4> salt {
-        {Random::rand(), Random::rand(), Random::rand(), Random::rand()}};
+    const std::array<uint32_t, 4> salt{
+        { Random::rand(), Random::rand(), Random::rand(), Random::rand() }
+    };
 
-    std::array<unsigned char, 64> outBuf {};
-    const int hmacResult = PKCS5_PBKDF2_HMAC(password.constData(), password.size()
-        , reinterpret_cast<const unsigned char *>(salt.data()), static_cast<int>(sizeof(salt[0]) * salt.size())
-        , hashIterations, hashMethod
-        , static_cast<int>(outBuf.size()), outBuf.data());
+    std::array<unsigned char, 64> outBuf{};
+    const int hmacResult = PKCS5_PBKDF2_HMAC(password.constData(), password.size(), reinterpret_cast<const unsigned char*>(salt.data()), static_cast<int>(sizeof(salt[0]) * salt.size()), hashIterations, hashMethod, static_cast<int>(outBuf.size()), outBuf.data());
     if (hmacResult != 1)
         return {};
 
     const QByteArray saltView = QByteArray::fromRawData(
-        reinterpret_cast<const char *>(salt.data()), static_cast<int>(sizeof(salt[0]) * salt.size()));
+        reinterpret_cast<const char*>(salt.data()), static_cast<int>(sizeof(salt[0]) * salt.size()));
     const QByteArray outBufView = QByteArray::fromRawData(
-        reinterpret_cast<const char *>(outBuf.data()), static_cast<int>(outBuf.size()));
+        reinterpret_cast<const char*>(outBuf.data()), static_cast<int>(outBuf.size()));
 
     return (saltView.toBase64() + ':' + outBufView.toBase64());
 }
 
-bool Utils::Password::PBKDF2::verify(const QByteArray &secret, const QStringView password)
+bool Utils::Password::PBKDF2::verify(const QByteArray& secret, const QStringView password)
 {
     return verify(secret, password.toUtf8());
 }
 
-bool Utils::Password::PBKDF2::verify(const QByteArray &secret, const QByteArray &password)
+bool Utils::Password::PBKDF2::verify(const QByteArray& secret, const QByteArray& password)
 {
     const QList<QByteArrayView> list = ByteArray::splitToViews(secret, ":");
     if (list.size() != 2)
@@ -125,15 +122,12 @@ bool Utils::Password::PBKDF2::verify(const QByteArray &secret, const QByteArray 
     const QByteArray salt = QByteArray::fromBase64(Utils::ByteArray::asQByteArray(list[0]));
     const QByteArray key = QByteArray::fromBase64(Utils::ByteArray::asQByteArray(list[1]));
 
-    std::array<unsigned char, 64> outBuf {};
-    const int hmacResult = PKCS5_PBKDF2_HMAC(password.constData(), password.size()
-        , reinterpret_cast<const unsigned char *>(salt.constData()), salt.size()
-        , hashIterations, hashMethod
-        , static_cast<int>(outBuf.size()), outBuf.data());
+    std::array<unsigned char, 64> outBuf{};
+    const int hmacResult = PKCS5_PBKDF2_HMAC(password.constData(), password.size(), reinterpret_cast<const unsigned char*>(salt.constData()), salt.size(), hashIterations, hashMethod, static_cast<int>(outBuf.size()), outBuf.data());
     if (hmacResult != 1)
         return false;
 
     const QByteArray outBufView = QByteArray::fromRawData(
-        reinterpret_cast<const char *>(outBuf.data()), static_cast<int>(outBuf.size()));
+        reinterpret_cast<const char*>(outBuf.data()), static_cast<int>(outBuf.size()));
     return slowEquals(key, outBufView);
 }

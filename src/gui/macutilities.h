@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <objc/objc.h>
-
 #include "base/pathfwd.h"
+
+#include <objc/objc.h>
 
 class QMenu;
 class QPixmap;
@@ -39,11 +39,11 @@ class QString;
 
 namespace MacUtils
 {
-    QPixmap pixmapForExtension(const QString &ext, const QSize &size);
+    QPixmap pixmapForExtension(const QString& ext, const QSize& size);
     void overrideDockClickHandler(bool (*dockClickHandler)(id, SEL, ...));
     void askForNotificationPermission();
-    void displayNotification(const QString &title, const QString &message);
-    void openFiles(const PathList &pathList);
+    void displayNotification(const QString& title, const QString& message);
+    void openFiles(const PathList& pathList);
 
     bool isMagnetLinkAssocSet();
     void setMagnetLinkAssoc();
@@ -51,7 +51,7 @@ namespace MacUtils
     void setTorrentFileAssoc();
 
     QString badgeLabelText();
-    void setBadgeLabelText(const QString &text);
+    void setBadgeLabelText(const QString& text);
 
-    void setupWindowMenu(QMenu *windowMenu);
+    void setupWindowMenu(QMenu* windowMenu);
 }

@@ -28,19 +28,19 @@
 
 #include "plugin.h"
 
-#include <chrono>
-
-#include <QDeadlineTimer>
-#include <QHash>
-#include <QScopeGuard>
-#include <QString>
-
 #include "base/path.h"
 #include "base/utils/io.h"
 #include "luaclasses.h"
 #include "luafunctions.h"
 #include "luanamespace.h"
 #include "luastack.h"
+
+#include <QDeadlineTimer>
+#include <QHash>
+#include <QScopeGuard>
+#include <QString>
+
+#include <chrono>
 
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
@@ -51,32 +51,31 @@ const std::chrono::milliseconds LUA_TIMEOUT = 1s;
 
 namespace
 {
-    QHash<lua_State *, QDeadlineTimer> LUA_DEADLINES_REGISTRY;
+    QHash<lua_State*, QDeadlineTimer> LUA_DEADLINES_REGISTRY;
 
-    void checkLuaDeadline(lua_State *luaState, lua_Debug *)
+    void checkLuaDeadline(lua_State* luaState, lua_Debug*)
     {
-        const QDeadlineTimer &deadlineTimer = LUA_DEADLINES_REGISTRY.value(luaState);
+        const QDeadlineTimer& deadlineTimer = LUA_DEADLINES_REGISTRY.value(luaState);
         if (deadlineTimer.hasExpired())
             luaL_error(luaState, Plugin::tr("Timed out.").toUtf8().constData());
     }
 
-    void resetLuaDeadline(lua_State *luaState)
+    void resetLuaDeadline(lua_State* luaState)
     {
-        QDeadlineTimer &deadlineTimer = LUA_DEADLINES_REGISTRY[luaState];
+        QDeadlineTimer& deadlineTimer = LUA_DEADLINES_REGISTRY[luaState];
         deadlineTimer.setRemainingTime(LUA_TIMEOUT);
     }
 }
 
-nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path &pluginPath)
+nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path& pluginPath)
 {
-    lua_State *luaState = luaL_newstate();
+    lua_State* luaState = luaL_newstate();
     if (!luaState)
         return nonstd::make_unexpected(tr("Failed to allocate Lua state."));
 
     LUA_DEADLINES_REGISTRY.emplace(luaState);
 
-    [[maybe_unused]] auto scopeGuard = qScopeGuard([luaState]
-    {
+    [[maybe_unused]] auto scopeGuard = qScopeGuard([luaState] {
         LUA_DEADLINES_REGISTRY.remove(luaState);
         lua_close(luaState);
     });
@@ -131,8 +130,7 @@ nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path &plug
     if (pluginName.isEmpty())
         return nonstd::make_unexpected(tr("Plugin name is missing or invalid."));
 
-    const PluginVersion pluginVersion = std::invoke([luaState]
-    {
+    const PluginVersion pluginVersion = std::invoke([luaState] {
         const auto pluginVersionStr = getGlobal(luaState, "VERSION").cast<QString>().valueOr(u""_s);
         return PluginVersion::fromString(pluginVersionStr);
     });
@@ -143,22 +141,12 @@ nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path &plug
     return std::shared_ptr<Plugin>(new Plugin(luaState, pluginName, pluginVersion));
 }
 
-Plugin::Plugin(lua_State *luaState, const QString &name, const PluginVersion &version)
-    : m_luaState {luaState}
-    , m_name {name}
-    , m_version {version}
+Plugin::Plugin(lua_State* luaState, const QString& name, const PluginVersion& version)
+    : m_luaState{ luaState }, m_name{ name }, m_version{ version }
 {
     m_isInvocable = luabridge::getGlobal(luaState, "invoke").isFunction();
 
-    luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE)
-        .addFunction("debug", LuaFunctions::debug)
-        .addFunction("log", LuaFunctions::log)
-        .addFunction("exec", LuaFunctions::exec)
-        .addFunction("sendMail", luabridge::bind_back(LuaFunctions::sendMail, this))
-        .addFunction("friendlySizeUnit", LuaFunctions::friendlySizeUnit1, LuaFunctions::friendlySizeUnit2)
-        .addFunction("friendlySpeedUnit", LuaFunctions::friendlySpeedUnit1, LuaFunctions::friendlySpeedUnit2)
-        .addFunction("friendlyDuration", LuaFunctions::friendlyDuration)
-        .addFunction("formatDateTime", LuaFunctions::formatDateTime1, LuaFunctions::formatDateTime2);
+    luabridge::getGlobalNamespace(luaState).beginNamespace(QBT_NAMESPACE).addFunction("debug", LuaFunctions::debug).addFunction("log", LuaFunctions::log).addFunction("exec", LuaFunctions::exec).addFunction("sendMail", luabridge::bind_back(LuaFunctions::sendMail, this)).addFunction("friendlySizeUnit", LuaFunctions::friendlySizeUnit1, LuaFunctions::friendlySizeUnit2).addFunction("friendlySpeedUnit", LuaFunctions::friendlySpeedUnit1, LuaFunctions::friendlySpeedUnit2).addFunction("friendlyDuration", LuaFunctions::friendlyDuration).addFunction("formatDateTime", LuaFunctions::formatDateTime1, LuaFunctions::formatDateTime2);
 
     registerLuaClasses(luaState);
 }

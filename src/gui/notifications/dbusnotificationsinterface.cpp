@@ -28,14 +28,13 @@
 
 #include "dbusnotificationsinterface.h"
 
+#include "base/global.h"
+
 #include <QDBusConnection>
 #include <QString>
 #include <QVariant>
 
-#include "base/global.h"
-
-DBusNotificationsInterface::DBusNotificationsInterface(const QString &service
-        , const QString &path, const QDBusConnection &connection, QObject *parent)
+DBusNotificationsInterface::DBusNotificationsInterface(const QString& service, const QString& path, const QDBusConnection& connection, QObject* parent)
     : QDBusAbstractInterface(service, path, DBUS_INTERFACE_NAME, connection, parent)
 {
 }
@@ -50,7 +49,7 @@ QDBusPendingReply<QString, QString, QString, QString> DBusNotificationsInterface
     return asyncCall(u"GetServerInformation"_s);
 }
 
-QDBusReply<QString> DBusNotificationsInterface::getServerInformation(QString &vendor, QString &version, QString &specVersion)
+QDBusReply<QString> DBusNotificationsInterface::getServerInformation(QString& vendor, QString& version, QString& specVersion)
 {
     const QDBusMessage reply = call(QDBus::Block, u"GetServerInformation"_s);
     if ((reply.type() == QDBusMessage::ReplyMessage) && (reply.arguments().count() == 4))
@@ -63,9 +62,7 @@ QDBusReply<QString> DBusNotificationsInterface::getServerInformation(QString &ve
     return reply;
 }
 
-QDBusPendingReply<uint> DBusNotificationsInterface::notify(const QString &appName
-        , const uint id, const QString &icon, const QString &summary, const QString &body
-        , const QStringList &actions, const QVariantMap &hints, const int timeout)
+QDBusPendingReply<uint> DBusNotificationsInterface::notify(const QString& appName, const uint id, const QString& icon, const QString& summary, const QString& body, const QStringList& actions, const QVariantMap& hints, const int timeout)
 {
     return asyncCall(u"Notify"_s, appName, id, icon, summary, body, actions, hints, timeout);
 }

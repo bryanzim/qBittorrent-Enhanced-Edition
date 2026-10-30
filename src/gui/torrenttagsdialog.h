@@ -28,10 +28,10 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
 #include "base/tagset.h"
+
+#include <QDialog>
 
 namespace Ui
 {
@@ -44,7 +44,7 @@ class TorrentTagsDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(TorrentTagsDialog)
 
 public:
-    explicit TorrentTagsDialog(const TagSet &initialTags, QWidget *parent = nullptr);
+    explicit TorrentTagsDialog(const TagSet& initialTags, QWidget* parent = nullptr);
     ~TorrentTagsDialog() override;
 
     TagSet tags() const;
@@ -52,6 +52,6 @@ public:
 private:
     void addNewTag();
 
-    Ui::TorrentTagsDialog *m_ui = nullptr;
+    Ui::TorrentTagsDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
 };

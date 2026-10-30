@@ -28,7 +28,7 @@
 
 #include "apicontroller.h"
 
-#include <utility>
+#include "apierror.h"
 
 #include <QHash>
 #include <QJsonDocument>
@@ -36,21 +36,20 @@
 #include <QMetaObject>
 #include <QScopeGuard>
 
-#include "apierror.h"
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
-APIController::APIController(IApplication *app, QObject *parent)
+APIController::APIController(IApplication* app, QObject* parent)
     : ApplicationComponent(app, parent)
 {
 }
 
-APIResult APIController::run(const QString &action, const StringMap &params, const DataMap &data)
+APIResult APIController::run(const QString& action, const StringMap& params, const DataMap& data)
 {
     m_params = params;
     m_data = data;
-    [[maybe_unused]] const auto inputsGuard = qScopeGuard([this]
-    {
+    [[maybe_unused]] const auto inputsGuard = qScopeGuard([this] {
         m_params = {};
         m_data = {};
     });
@@ -62,22 +61,22 @@ APIResult APIController::run(const QString &action, const StringMap &params, con
     return std::exchange(m_result, {});
 }
 
-const StringMap &APIController::params() const
+const StringMap& APIController::params() const
 {
     return m_params;
 }
 
-const DataMap &APIController::data() const
+const DataMap& APIController::data() const
 {
     return m_data;
 }
 
-void APIController::requireParams(const QList<QString> &requiredParams) const
+void APIController::requireParams(const QList<QString>& requiredParams) const
 {
     QStringList missingParams;
     missingParams.reserve(requiredParams.size());
 
-    for (const QString &requiredParam : requiredParams)
+    for (const QString& requiredParam : requiredParams)
     {
         if (!params().contains(requiredParam))
             missingParams.append(requiredParam);
@@ -87,29 +86,29 @@ void APIController::requireParams(const QList<QString> &requiredParams) const
         throw APIError(APIErrorType::BadParams, tr("Missing required parameters: %1").arg(missingParams.join(u", ")));
 }
 
-void APIController::setResult(const QString &result)
+void APIController::setResult(const QString& result)
 {
-    m_result = RegularAPIResult {.data = result};
+    m_result = RegularAPIResult{ .data = result };
 }
 
-void APIController::setResult(const QJsonArray &result)
+void APIController::setResult(const QJsonArray& result)
 {
-    m_result = RegularAPIResult {.data = QJsonDocument(result)};
+    m_result = RegularAPIResult{ .data = QJsonDocument(result) };
 }
 
-void APIController::setResult(const QJsonObject &result)
+void APIController::setResult(const QJsonObject& result)
 {
-    m_result = RegularAPIResult {.data = QJsonDocument(result)};
+    m_result = RegularAPIResult{ .data = QJsonDocument(result) };
 }
 
-void APIController::setResult(const QByteArray &result, const QString &mimeType, const QString &filename)
+void APIController::setResult(const QByteArray& result, const QString& mimeType, const QString& filename)
 {
-    m_result = RegularAPIResult {.data = result, .mimeType = mimeType, .filename = filename};
+    m_result = RegularAPIResult{ .data = result, .mimeType = mimeType, .filename = filename };
 }
 
-void APIController::setResult(const Path &filePath)
+void APIController::setResult(const Path& filePath)
 {
-    m_result = StreamFileAPIResult {.filePath = filePath};
+    m_result = StreamFileAPIResult{ .filePath = filePath };
 }
 
 void APIController::setStatus(const APIStatus status)

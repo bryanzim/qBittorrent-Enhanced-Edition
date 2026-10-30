@@ -36,8 +36,8 @@ class Tag final
 public:
     Tag() = default;
 
-    explicit Tag(const QString &tagStr);
-    explicit Tag(const std::string &tagStr);
+    explicit Tag(const QString& tagStr);
+    explicit Tag(const std::string& tagStr);
 
     bool isValid() const;
     bool isEmpty() const;
@@ -46,7 +46,7 @@ public:
 
     explicit operator QString() const noexcept;
 
-    friend bool operator==(const Tag &, const Tag &) = default;
+    friend bool operator==(const Tag&, const Tag&) = default;
 
 private:
     QString m_tagStr;
@@ -54,13 +54,13 @@ private:
 
 Q_DECLARE_METATYPE(Tag)
 
-QDataStream &operator<<(QDataStream &out, const Tag &tag);
-QDataStream &operator>>(QDataStream &in, Tag &tag);
+QDataStream& operator<<(QDataStream& out, const Tag& tag);
+QDataStream& operator>>(QDataStream& in, Tag& tag);
 
 template <>
 struct std::hash<Tag>
 {
-    std::size_t operator()(const Tag &tag, const std::size_t seed = 0) const noexcept
+    std::size_t operator()(const Tag& tag, const std::size_t seed = 0) const noexcept
     {
         return qHash(tag.toString(), seed);
     }

@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <QList>
-#include <QWidget>
-
 #include "base/settingvalue.h"
 #include "gui/filterpatternformat.h"
+
+#include <QList>
+#include <QWidget>
 
 class QPushButton;
 class QTreeView;
@@ -67,22 +67,22 @@ public:
         VISIBLE
     };
 
-    explicit PropertiesWidget(QWidget *parent);
+    explicit PropertiesWidget(QWidget* parent);
     ~PropertiesWidget() override;
 
-    BitTorrent::Torrent *getCurrentTorrent() const;
-    TrackerListWidget *getTrackerList() const;
-    PeerListWidget *getPeerList() const;
-    QTreeView *getFilesList() const;
-    PropTabBar *tabBar() const;
-    LineEdit *contentFilterLine() const;
+    BitTorrent::Torrent* getCurrentTorrent() const;
+    TrackerListWidget* getTrackerList() const;
+    PeerListWidget* getPeerList() const;
+    QTreeView* getFilesList() const;
+    PropTabBar* tabBar() const;
+    LineEdit* contentFilterLine() const;
 
 signals:
     void openAdvancedSettingsLinkActivated();
 
 public slots:
     void setVisibility(bool visible);
-    void loadTorrentInfos(BitTorrent::Torrent *torrent);
+    void loadTorrentInfos(BitTorrent::Torrent* torrent);
     void loadDynamicData();
     void clear();
     void readSettings();
@@ -101,24 +101,24 @@ protected slots:
 
 private slots:
     void configure();
-    void updateSavePath(BitTorrent::Torrent *torrent);
+    void updateSavePath(BitTorrent::Torrent* torrent);
 
 private:
-    QPushButton *getButtonFromIndex(int index);
+    QPushButton* getButtonFromIndex(int index);
     void showContentFilterContextMenu();
     void setContentFilterPattern();
 
-    Ui::PropertiesWidget *m_ui = nullptr;
-    BitTorrent::Torrent *m_torrent = nullptr;
+    Ui::PropertiesWidget* m_ui = nullptr;
+    BitTorrent::Torrent* m_torrent = nullptr;
     SlideState m_state;
-    PeerListWidget *m_peerList = nullptr;
-    TrackerListWidget *m_trackerList = nullptr;
-    QWidget *m_speedWidget = nullptr;
+    PeerListWidget* m_peerList = nullptr;
+    TrackerListWidget* m_trackerList = nullptr;
+    QWidget* m_speedWidget = nullptr;
     QList<int> m_slideSizes;
-    DownloadedPiecesBar *m_downloadedPieces = nullptr;
-    PieceAvailabilityBar *m_piecesAvailability = nullptr;
-    PropTabBar *m_tabBar = nullptr;
-    LineEdit *m_contentFilterLine = nullptr;
+    DownloadedPiecesBar* m_downloadedPieces = nullptr;
+    PieceAvailabilityBar* m_piecesAvailability = nullptr;
+    PropTabBar* m_tabBar = nullptr;
+    LineEdit* m_contentFilterLine = nullptr;
     int m_handleWidth = -1;
 
     SettingValue<FilterPatternFormat> m_storeFilterPatternFormat;

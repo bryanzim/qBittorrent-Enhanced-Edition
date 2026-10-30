@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-WebSession *WebSession::create(const WebSessionType type, const QString &sid)
+WebSession* WebSession::create(const WebSessionType type, const QString& sid)
 {
     switch (type)
     {
@@ -45,8 +45,8 @@ WebSession *WebSession::create(const WebSessionType type, const QString &sid)
     Q_UNREACHABLE_RETURN(nullptr);
 }
 
-WebSession::WebSession(const QString &sid)
-    : m_sid {sid}
+WebSession::WebSession(const QString& sid)
+    : m_sid{ sid }
 {
     updateTimestamp();
 }
@@ -66,13 +66,13 @@ void WebSession::updateTimestamp()
     m_timestamp.start();
 }
 
-void WebSession::registerAPIController(const QString &scope, CreateAPIControllerFunc createAPIController)
+void WebSession::registerAPIController(const QString& scope, CreateAPIControllerFunc createAPIController)
 {
     Q_ASSERT(createAPIController);
-    m_apiControllers.insert(scope, {.create = std::move(createAPIController), .instance = nullptr});
+    m_apiControllers.insert(scope, { .create = std::move(createAPIController), .instance = nullptr });
 }
 
-APIController *WebSession::getAPIController(const QString &scope) const
+APIController* WebSession::getAPIController(const QString& scope) const
 {
     const auto iter = m_apiControllers.find(scope);
     if (iter == m_apiControllers.end())

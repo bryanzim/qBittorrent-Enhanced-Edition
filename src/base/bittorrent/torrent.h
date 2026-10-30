@@ -29,11 +29,6 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QtTypes>
-#include <QMetaType>
-#include <QString>
-
 #include "base/3rdparty/expected.hpp"
 #include "base/pathfwd.h"
 #include "base/tagset.h"
@@ -41,12 +36,18 @@
 #include "torrentannouncestatus.h"
 #include "torrentcontenthandler.h"
 
+#include <QMetaType>
+#include <QString>
+#include <QtContainerFwd>
+#include <QtTypes>
+
 class QBitArray;
 class QByteArray;
 class QDateTime;
 class QUrl;
 
-template <typename T> class QFuture;
+template <typename T>
+class QFuture;
 
 namespace BitTorrent
 {
@@ -129,14 +130,14 @@ namespace BitTorrent
 
         using TorrentContentHandler::TorrentContentHandler;
 
-        virtual Session *session() const = 0;
+        virtual Session* session() const = 0;
 
         virtual InfoHash infoHash() const = 0;
         virtual QString name() const = 0;
         virtual QDateTime creationDate() const = 0;
         virtual QString creator() const = 0;
         virtual QString comment() const = 0;
-        virtual void setComment(const QString &comment) = 0;
+        virtual void setComment(const QString& comment) = 0;
         virtual bool isPrivate() const = 0;
         virtual qlonglong totalSize() const = 0;
         virtual qlonglong wantedSize() const = 0;
@@ -190,19 +191,19 @@ namespace BitTorrent
         virtual bool isAutoTMMEnabled() const = 0;
         virtual void setAutoTMMEnabled(bool enabled) = 0;
         virtual Path savePath() const = 0;
-        virtual void setSavePath(const Path &savePath) = 0;
+        virtual void setSavePath(const Path& savePath) = 0;
         virtual Path downloadPath() const = 0;
-        virtual void setDownloadPath(const Path &downloadPath) = 0;
+        virtual void setDownloadPath(const Path& downloadPath) = 0;
         virtual Path rootPath() const = 0;
         virtual Path contentPath() const = 0;
         virtual QString category() const = 0;
-        virtual bool belongsToCategory(const QString &category) const = 0;
-        virtual bool setCategory(const QString &category) = 0;
+        virtual bool belongsToCategory(const QString& category) const = 0;
+        virtual bool setCategory(const QString& category) = 0;
 
         virtual TagSet tags() const = 0;
-        virtual bool hasTag(const Tag &tag) const = 0;
-        virtual bool addTag(const Tag &tag) = 0;
-        virtual bool removeTag(const Tag &tag) = 0;
+        virtual bool hasTag(const Tag& tag) const = 0;
+        virtual bool addTag(const Tag& tag) = 0;
+        virtual bool removeTag(const Tag& tag) = 0;
         virtual void clearTags() = 0;
 
         virtual int piecesCount() const = 0;
@@ -219,7 +220,7 @@ namespace BitTorrent
         virtual qlonglong timeSinceActivity() const = 0;
 
         // Share limits
-        virtual const ShareLimits &shareLimits() const = 0;
+        virtual const ShareLimits& shareLimits() const = 0;
         virtual void setShareLimits(ShareLimits shareLimits) = 0;
         virtual ShareLimits effectiveShareLimits() const = 0;
 
@@ -276,7 +277,7 @@ namespace BitTorrent
         virtual qlonglong nextAnnounce() const = 0;
         virtual TorrentAnnounceStatus announceStatus() const = 0;
 
-        virtual void setName(const QString &name) = 0;
+        virtual void setName(const QString& name) = 0;
         virtual void setSequentialDownload(bool enable) = 0;
         virtual void setFirstLastPiecePriority(bool enabled) = 0;
         virtual void stop() = 0;
@@ -291,22 +292,22 @@ namespace BitTorrent
         virtual void setPEXDisabled(bool disable) = 0;
         virtual void setLSDDisabled(bool disable) = 0;
         virtual void addTrackers(QList<TrackerEntry> trackers) = 0;
-        virtual void removeTrackers(const QStringList &trackers) = 0;
+        virtual void removeTrackers(const QStringList& trackers) = 0;
         virtual void replaceTrackers(QList<TrackerEntry> trackers) = 0;
-        virtual void addUrlSeeds(const QList<QUrl> &urlSeeds) = 0;
-        virtual void removeUrlSeeds(const QList<QUrl> &urlSeeds) = 0;
-        virtual bool connectPeer(const PeerAddress &peerAddress) = 0;
+        virtual void addUrlSeeds(const QList<QUrl>& urlSeeds) = 0;
+        virtual void removeUrlSeeds(const QList<QUrl>& urlSeeds) = 0;
+        virtual bool connectPeer(const PeerAddress& peerAddress) = 0;
         virtual void clearPeers() = 0;
-        virtual void setMetadata(const TorrentInfo &torrentInfo) = 0;
+        virtual void setMetadata(const TorrentInfo& torrentInfo) = 0;
 
         virtual StopCondition stopCondition() const = 0;
         virtual void setStopCondition(StopCondition stopCondition) = 0;
         virtual SSLParameters getSSLParameters() const = 0;
-        virtual void setSSLParameters(const SSLParameters &sslParams) = 0;
+        virtual void setSSLParameters(const SSLParameters& sslParams) = 0;
 
         virtual QString createMagnetURI() const = 0;
         virtual nonstd::expected<QByteArray, QString> exportToBuffer() const = 0;
-        virtual nonstd::expected<void, QString> exportToFile(const Path &path) const = 0;
+        virtual nonstd::expected<void, QString> exportToFile(const Path& path) const = 0;
 
         virtual QFuture<QList<PeerInfo>> fetchPeerInfo() const = 0;
         virtual QFuture<QList<QUrl>> fetchURLSeeds() const = 0;

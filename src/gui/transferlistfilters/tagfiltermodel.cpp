@@ -29,12 +29,12 @@
 
 #include "tagfiltermodel.h"
 
-#include <QIcon>
-#include <QList>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "gui/uithememanager.h"
+
+#include <QIcon>
+#include <QList>
 
 const int ROW_ALL = 0;
 const int ROW_UNTAGGED = 1;
@@ -42,9 +42,8 @@ const int ROW_UNTAGGED = 1;
 class TagModelItem
 {
 public:
-    TagModelItem(const Tag &tag, int torrentsCount = 0)
-        : m_tag {tag}
-        , m_torrentsCount {torrentsCount}
+    TagModelItem(const Tag& tag, int torrentsCount = 0)
+        : m_tag{ tag }, m_torrentsCount{ torrentsCount }
     {
     }
 
@@ -74,11 +73,11 @@ private:
     int m_torrentsCount;
 };
 
-TagFilterModel::TagFilterModel(QObject *parent)
+TagFilterModel::TagFilterModel(QObject* parent)
     : QAbstractListModel(parent)
 {
     using Session = BitTorrent::Session;
-    const auto *session = Session::instance();
+    const auto* session = Session::instance();
 
     connect(session, &Session::tagAdded, this, &TagFilterModel::tagAdded);
     connect(session, &Session::tagRemoved, this, &TagFilterModel::tagRemoved);
@@ -91,23 +90,22 @@ TagFilterModel::TagFilterModel(QObject *parent)
 
 TagFilterModel::~TagFilterModel() = default;
 
-bool TagFilterModel::isSpecialItem(const QModelIndex &index)
+bool TagFilterModel::isSpecialItem(const QModelIndex& index)
 {
     // the first two items are special items: 'All' and 'Untagged'
     return (!index.parent().isValid() && (index.row() <= 1));
 }
 
-QVariant TagFilterModel::data(const QModelIndex &index, int role) const
+QVariant TagFilterModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || (index.column() != 0))
         return {};
 
     const int row = index.internalId();
     Q_ASSERT(isValidRow(row));
-    const TagModelItem &item = m_tagItems[row];
+    const TagModelItem& item = m_tagItems[row];
 
-    const auto displayName = [&row, tag = item.tag()]
-    {
+    const auto displayName = [&row, tag = item.tag()] {
         switch (row)
         {
         case 0:
@@ -132,7 +130,7 @@ QVariant TagFilterModel::data(const QModelIndex &index, int role) const
     }
 }
 
-Qt::ItemFlags TagFilterModel::flags(const QModelIndex &index) const
+Qt::ItemFlags TagFilterModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -147,14 +145,14 @@ QVariant TagFilterModel::headerData(int section, Qt::Orientation orientation, in
     return {};
 }
 
-QModelIndex TagFilterModel::index(int row, int, const QModelIndex &) const
+QModelIndex TagFilterModel::index(int row, int, const QModelIndex&) const
 {
     if (!isValidRow(row))
         return {};
     return createIndex(row, 0, row);
 }
 
-int TagFilterModel::rowCount(const QModelIndex &parent) const
+int TagFilterModel::rowCount(const QModelIndex& parent) const
 {
     if (!parent.isValid())
         return m_tagItems.count();
@@ -166,7 +164,7 @@ bool TagFilterModel::isValidRow(int row) const
     return (row >= 0) && (row < m_tagItems.size());
 }
 
-QModelIndex TagFilterModel::index(const Tag &tag) const
+QModelIndex TagFilterModel::index(const Tag& tag) const
 {
     const int row = findRow(tag);
     if (!isValidRow(row))
@@ -174,7 +172,7 @@ QModelIndex TagFilterModel::index(const Tag &tag) const
     return index(row, 0, QModelIndex());
 }
 
-Tag TagFilterModel::tag(const QModelIndex &index) const
+Tag TagFilterModel::tag(const QModelIndex& index) const
 {
     if (!index.isValid())
         return {};
@@ -183,7 +181,7 @@ Tag TagFilterModel::tag(const QModelIndex &index) const
     return m_tagItems[row].tag();
 }
 
-void TagFilterModel::tagAdded(const Tag &tag)
+void TagFilterModel::tagAdded(const Tag& tag)
 {
     const int row = m_tagItems.count();
     beginInsertRows(QModelIndex(), row, row);
@@ -191,7 +189,7 @@ void TagFilterModel::tagAdded(const Tag &tag)
     endInsertRows();
 }
 
-void TagFilterModel::tagRemoved(const Tag &tag)
+void TagFilterModel::tagRemoved(const Tag& tag)
 {
     QModelIndex i = index(tag);
     beginRemoveRows(i.parent(), i.row(), i.row());
@@ -199,7 +197,7 @@ void TagFilterModel::tagRemoved(const Tag &tag)
     endRemoveRows();
 }
 
-void TagFilterModel::torrentTagAdded(BitTorrent::Torrent *const torrent, const Tag &tag)
+void TagFilterModel::torrentTagAdded(BitTorrent::Torrent* const torrent, const Tag& tag)
 {
     if (torrent->tags().count() == 1)
     {
@@ -210,14 +208,14 @@ void TagFilterModel::torrentTagAdded(BitTorrent::Torrent *const torrent, const T
 
     const int row = findRow(tag);
     Q_ASSERT(isValidRow(row));
-    TagModelItem &item = m_tagItems[row];
+    TagModelItem& item = m_tagItems[row];
 
     item.increaseTorrentsCount();
     const QModelIndex i = index(row, 0);
     emit dataChanged(i, i);
 }
 
-void TagFilterModel::torrentTagRemoved(BitTorrent::Torrent *const torrent, const Tag &tag)
+void TagFilterModel::torrentTagRemoved(BitTorrent::Torrent* const torrent, const Tag& tag)
 {
     if (torrent->tags().empty())
     {
@@ -236,24 +234,24 @@ void TagFilterModel::torrentTagRemoved(BitTorrent::Torrent *const torrent, const
     emit dataChanged(i, i);
 }
 
-void TagFilterModel::torrentsLoaded(const QList<BitTorrent::Torrent *> &torrents)
+void TagFilterModel::torrentsLoaded(const QList<BitTorrent::Torrent*>& torrents)
 {
-    for (const BitTorrent::Torrent *torrent : torrents)
+    for (const BitTorrent::Torrent* torrent : torrents)
     {
         allTagsItem()->increaseTorrentsCount();
 
-        const QList<TagModelItem *> items = findItems(torrent->tags());
+        const QList<TagModelItem*> items = findItems(torrent->tags());
         if (items.isEmpty())
             untaggedItem()->increaseTorrentsCount();
 
-        for (TagModelItem *item : items)
+        for (TagModelItem* item : items)
             item->increaseTorrentsCount();
     }
 
     emit dataChanged(index(0, 0), index((rowCount() - 1), 0));
 }
 
-void TagFilterModel::torrentAboutToBeRemoved(BitTorrent::Torrent *const torrent)
+void TagFilterModel::torrentAboutToBeRemoved(BitTorrent::Torrent* const torrent)
 {
     allTagsItem()->decreaseTorrentsCount();
 
@@ -270,7 +268,7 @@ void TagFilterModel::torrentAboutToBeRemoved(BitTorrent::Torrent *const torrent)
     }
     else
     {
-        for (const Tag &tag : asConst(torrent->tags()))
+        for (const Tag& tag : asConst(torrent->tags()))
         {
             const int row = findRow(tag);
             Q_ASSERT(isValidRow(row));
@@ -288,25 +286,23 @@ void TagFilterModel::populate()
 {
     using Torrent = BitTorrent::Torrent;
 
-    const auto *session = BitTorrent::Session::instance();
+    const auto* session = BitTorrent::Session::instance();
     const auto torrents = session->torrents();
 
     // All torrents
     addToModel(Tag(), torrents.count());
 
-    const int untaggedCount = std::ranges::count_if(torrents
-            , [](const Torrent *torrent) { return torrent->tags().isEmpty(); });
+    const int untaggedCount = std::ranges::count_if(torrents, [](const Torrent* torrent) { return torrent->tags().isEmpty(); });
     addToModel(Tag(), untaggedCount);
 
-    for (const Tag &tag : asConst(session->tags()))
+    for (const Tag& tag : asConst(session->tags()))
     {
-        const int count = std::ranges::count_if(torrents
-                , [&tag](const Torrent *torrent) { return torrent->hasTag(tag); });
+        const int count = std::ranges::count_if(torrents, [&tag](const Torrent* torrent) { return torrent->hasTag(tag); });
         addToModel(tag, count);
     }
 }
 
-void TagFilterModel::addToModel(const Tag &tag, const int count)
+void TagFilterModel::addToModel(const Tag& tag, const int count)
 {
     m_tagItems.append(TagModelItem(tag, count));
 }
@@ -317,7 +313,7 @@ void TagFilterModel::removeFromModel(int row)
     m_tagItems.removeAt(row);
 }
 
-int TagFilterModel::findRow(const Tag &tag) const
+int TagFilterModel::findRow(const Tag& tag) const
 {
     if (!tag.isValid())
         return -1;
@@ -331,7 +327,7 @@ int TagFilterModel::findRow(const Tag &tag) const
     return -1;
 }
 
-TagModelItem *TagFilterModel::findItem(const Tag &tag)
+TagModelItem* TagFilterModel::findItem(const Tag& tag)
 {
     const int row = findRow(tag);
     if (!isValidRow(row))
@@ -339,13 +335,13 @@ TagModelItem *TagFilterModel::findItem(const Tag &tag)
     return &m_tagItems[row];
 }
 
-QList<TagModelItem *> TagFilterModel::findItems(const TagSet &tags)
+QList<TagModelItem*> TagFilterModel::findItems(const TagSet& tags)
 {
-    QList<TagModelItem *> items;
+    QList<TagModelItem*> items;
     items.reserve(tags.count());
-    for (const Tag &tag : tags)
+    for (const Tag& tag : tags)
     {
-        TagModelItem *item = findItem(tag);
+        TagModelItem* item = findItem(tag);
         if (item)
             items.push_back(item);
         else
@@ -354,13 +350,13 @@ QList<TagModelItem *> TagFilterModel::findItems(const TagSet &tags)
     return items;
 }
 
-TagModelItem *TagFilterModel::allTagsItem()
+TagModelItem* TagFilterModel::allTagsItem()
 {
     Q_ASSERT(!m_tagItems.isEmpty());
     return &m_tagItems[ROW_ALL];
 }
 
-TagModelItem *TagFilterModel::untaggedItem()
+TagModelItem* TagFilterModel::untaggedItem()
 {
     Q_ASSERT(m_tagItems.size() > ROW_UNTAGGED);
     return &m_tagItems[ROW_UNTAGGED];

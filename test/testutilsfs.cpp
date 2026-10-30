@@ -26,11 +26,11 @@
  * exception statement from your version.
  */
 
-#include <QObject>
-#include <QTest>
-
 #include "base/global.h"
 #include "base/utils/fs.h"
+
+#include <QObject>
+#include <QTest>
 
 class TestUtilsFs final : public QObject
 {

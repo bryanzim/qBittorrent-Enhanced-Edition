@@ -31,7 +31,7 @@
 #include <QChar>
 #include <QString>
 
-int Utils::Compare::naturalCompare(const QString &left, const QString &right, const Qt::CaseSensitivity caseSensitivity)
+int Utils::Compare::naturalCompare(const QString& left, const QString& right, const Qt::CaseSensitivity caseSensitivity)
 {
     // Return value <0: `left` is smaller than `right`
     // Return value >0: `left` is greater than `right`
@@ -41,8 +41,7 @@ int Utils::Compare::naturalCompare(const QString &left, const QString &right, co
     int posR = 0;
     while (true)
     {
-        if (const qsizetype lSize = left.size(), rSize = right.size()
-            ; (posL == lSize) || (posR == rSize))
+        if (const qsizetype lSize = left.size(), rSize = right.size(); (posL == lSize) || (posR == rSize))
         {
             // when a shorter string is another string's prefix, place shorter string before longer string
             if (lSize < rSize)
@@ -67,8 +66,7 @@ int Utils::Compare::naturalCompare(const QString &left, const QString &right, co
         {
             // Both are digits, compare the numbers
 
-            const auto numberView = [](const QStringView str, int &pos) -> QStringView
-            {
+            const auto numberView = [](const QStringView str, int& pos) -> QStringView {
                 const int start = pos;
                 while ((pos < str.size()) && str[pos].isDigit())
                     ++pos;

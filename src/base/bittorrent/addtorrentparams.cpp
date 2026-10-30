@@ -28,12 +28,12 @@
 
 #include "addtorrentparams.h"
 
+#include "base/utils/sslkey.h"
+#include "base/utils/string.h"
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-
-#include "base/utils/sslkey.h"
-#include "base/utils/string.h"
 
 const QString PARAM_CATEGORY = u"category"_s;
 const QString PARAM_TAGS = u"tags"_s;
@@ -62,25 +62,25 @@ const QString DEPRECATED_PARAM_SKIP_CHECKING = u"skip_checking"_s;
 
 namespace
 {
-    TagSet parseTagSet(const QJsonArray &jsonArr)
+    TagSet parseTagSet(const QJsonArray& jsonArr)
     {
         TagSet tags;
-        for (const QJsonValue &jsonVal : jsonArr)
+        for (const QJsonValue& jsonVal : jsonArr)
             tags.insert(Tag(jsonVal.toString()));
 
         return tags;
     }
 
-    QJsonArray serializeTagSet(const TagSet &tags)
+    QJsonArray serializeTagSet(const TagSet& tags)
     {
         QJsonArray arr;
-        for (const Tag &tag : tags)
+        for (const Tag& tag : tags)
             arr.append(tag.toString());
 
         return arr;
     }
 
-    std::optional<bool> getOptionalBool(const QJsonObject &jsonObj, const QString &key)
+    std::optional<bool> getOptionalBool(const QJsonObject& jsonObj, const QString& key)
     {
         const QJsonValue jsonVal = jsonObj.value(key);
         if (jsonVal.isUndefined() || jsonVal.isNull())
@@ -90,7 +90,7 @@ namespace
     }
 
     template <typename Enum>
-    std::optional<Enum> getOptionalEnum(const QJsonObject &jsonObj, const QString &key)
+    std::optional<Enum> getOptionalEnum(const QJsonObject& jsonObj, const QString& key)
     {
         const QJsonValue jsonVal = jsonObj.value(key);
         if (jsonVal.isUndefined() || jsonVal.isNull())
@@ -100,19 +100,18 @@ namespace
     }
 
     template <typename Enum>
-    Enum getEnum(const QJsonObject &jsonObj, const QString &key, const Enum defaultValue = {})
+    Enum getEnum(const QJsonObject& jsonObj, const QString& key, const Enum defaultValue = {})
     {
         const QJsonValue jsonVal = jsonObj.value(key);
         return Utils::String::toEnum<Enum>(jsonVal.toString(), defaultValue);
     }
 }
 
-BitTorrent::AddTorrentParams BitTorrent::parseAddTorrentParams(const QJsonObject &jsonObj)
+BitTorrent::AddTorrentParams BitTorrent::parseAddTorrentParams(const QJsonObject& jsonObj)
 {
     const QJsonValue seedModeValue = jsonObj.value(PARAM_SEEDMODE);
 
-    const AddTorrentParams params
-    {
+    const AddTorrentParams params{
         .name = {},
         .category = jsonObj.value(PARAM_CATEGORY).toString(),
         .tags = parseTagSet(jsonObj.value(PARAM_TAGS).toArray()),
@@ -130,45 +129,38 @@ BitTorrent::AddTorrentParams BitTorrent::parseAddTorrentParams(const QJsonObject
         .useAutoTMM = getOptionalBool(jsonObj, PARAM_AUTOTMM),
         .uploadLimit = jsonObj.value(PARAM_UPLOADLIMIT).toInt(-1),
         .downloadLimit = jsonObj.value(PARAM_DOWNLOADLIMIT).toInt(-1),
-        .shareLimits =
-        {
-            .ratioLimit = jsonObj.value(PARAM_RATIOLIMIT).toDouble(DEFAULT_RATIO_LIMIT),
-            .seedingTimeLimit = jsonObj.value(PARAM_SEEDINGTIMELIMIT).toInt(DEFAULT_SEEDING_TIME_LIMIT),
-            .inactiveSeedingTimeLimit = jsonObj.value(PARAM_INACTIVESEEDINGTIMELIMIT).toInt(DEFAULT_SEEDING_TIME_LIMIT),
-            .mode = getEnum<ShareLimitsMode>(jsonObj, PARAM_SHARELIMITSMODE, ShareLimitsMode::Default),
-            .action = getEnum<ShareLimitAction>(jsonObj, PARAM_SHARELIMITACTION, ShareLimitAction::Default)
-        },
-        .sslParameters =
-        {
-            .certificate = QSslCertificate(jsonObj.value(PARAM_SSL_CERTIFICATE).toString().toLatin1()),
-            .privateKey = Utils::SSLKey::load(jsonObj.value(PARAM_SSL_PRIVATEKEY).toString().toLatin1()),
-            .dhParams = jsonObj.value(PARAM_SSL_DHPARAMS).toString().toLatin1()
-        }
+        .shareLimits = {
+                 .ratioLimit = jsonObj.value(PARAM_RATIOLIMIT).toDouble(DEFAULT_RATIO_LIMIT),
+                 .seedingTimeLimit = jsonObj.value(PARAM_SEEDINGTIMELIMIT).toInt(DEFAULT_SEEDING_TIME_LIMIT),
+                 .inactiveSeedingTimeLimit = jsonObj.value(PARAM_INACTIVESEEDINGTIMELIMIT).toInt(DEFAULT_SEEDING_TIME_LIMIT),
+                 .mode = getEnum<ShareLimitsMode>(jsonObj, PARAM_SHARELIMITSMODE, ShareLimitsMode::Default),
+                 .action = getEnum<ShareLimitAction>(jsonObj, PARAM_SHARELIMITACTION, ShareLimitAction::Default) },
+        .sslParameters = { .certificate = QSslCertificate(jsonObj.value(PARAM_SSL_CERTIFICATE).toString().toLatin1()), .privateKey = Utils::SSLKey::load(jsonObj.value(PARAM_SSL_PRIVATEKEY).toString().toLatin1()), .dhParams = jsonObj.value(PARAM_SSL_DHPARAMS).toString().toLatin1() }
     };
     return params;
 }
 
-QJsonObject BitTorrent::serializeAddTorrentParams(const AddTorrentParams &params)
+QJsonObject BitTorrent::serializeAddTorrentParams(const AddTorrentParams& params)
 {
-    QJsonObject jsonObj
-    {
-        {PARAM_CATEGORY, params.category},
-        {PARAM_TAGS, serializeTagSet(params.tags)},
-        {PARAM_SAVEPATH, params.savePath.data()},
-        {PARAM_DOWNLOADPATH, params.downloadPath.data()},
-        {PARAM_OPERATINGMODE, Utils::String::fromEnum(params.addForced
-                ? TorrentOperatingMode::Forced : TorrentOperatingMode::AutoManaged)},
-        {PARAM_SEEDMODE, params.seedMode},
-        {PARAM_UPLOADLIMIT, params.uploadLimit},
-        {PARAM_DOWNLOADLIMIT, params.downloadLimit},
-        {PARAM_RATIOLIMIT, params.shareLimits.ratioLimit},
-        {PARAM_SEEDINGTIMELIMIT, params.shareLimits.seedingTimeLimit},
-        {PARAM_INACTIVESEEDINGTIMELIMIT, params.shareLimits.inactiveSeedingTimeLimit},
-        {PARAM_SHARELIMITACTION, Utils::String::fromEnum(params.shareLimits.action)},
-        {PARAM_SHARELIMITSMODE, Utils::String::fromEnum(params.shareLimits.mode)},
-        {PARAM_SSL_CERTIFICATE, QString::fromLatin1(params.sslParameters.certificate.toPem())},
-        {PARAM_SSL_PRIVATEKEY, QString::fromLatin1(params.sslParameters.privateKey.toPem())},
-        {PARAM_SSL_DHPARAMS, QString::fromLatin1(params.sslParameters.dhParams)}
+    QJsonObject jsonObj{
+        {                 PARAM_CATEGORY,                                                                                params.category },
+        {                     PARAM_TAGS,                                                                   serializeTagSet(params.tags) },
+        {                 PARAM_SAVEPATH,                                                                         params.savePath.data() },
+        {             PARAM_DOWNLOADPATH,                                                                     params.downloadPath.data() },
+        {            PARAM_OPERATINGMODE, Utils::String::fromEnum(params.addForced
+ ? TorrentOperatingMode::Forced
+ : TorrentOperatingMode::AutoManaged)                                                          },
+        {                 PARAM_SEEDMODE,                                                                                params.seedMode },
+        {              PARAM_UPLOADLIMIT,                                                                             params.uploadLimit },
+        {            PARAM_DOWNLOADLIMIT,                                                                           params.downloadLimit },
+        {               PARAM_RATIOLIMIT,                                                                  params.shareLimits.ratioLimit },
+        {         PARAM_SEEDINGTIMELIMIT,                                                            params.shareLimits.seedingTimeLimit },
+        { PARAM_INACTIVESEEDINGTIMELIMIT,                                                    params.shareLimits.inactiveSeedingTimeLimit },
+        {         PARAM_SHARELIMITACTION,                                             Utils::String::fromEnum(params.shareLimits.action) },
+        {          PARAM_SHARELIMITSMODE,                                               Utils::String::fromEnum(params.shareLimits.mode) },
+        {          PARAM_SSL_CERTIFICATE,                                  QString::fromLatin1(params.sslParameters.certificate.toPem()) },
+        {           PARAM_SSL_PRIVATEKEY,                                   QString::fromLatin1(params.sslParameters.privateKey.toPem()) },
+        {             PARAM_SSL_DHPARAMS,                                             QString::fromLatin1(params.sslParameters.dhParams) }
     };
 
     if (params.addToQueueTop)

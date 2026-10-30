@@ -29,13 +29,6 @@
 
 #include "transferlistfilterswidget.h"
 
-#include <QIcon>
-#include <QListWidgetItem>
-#include <QMenu>
-#include <QScrollArea>
-#include <QUrl>
-#include <QVBoxLayout>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "base/preferences.h"
@@ -49,24 +42,30 @@
 #include "transferlistwidget.h"
 #include "utils.h"
 
-TransferListFiltersWidget::TransferListFiltersWidget(QWidget *parent, TransferListWidget *transferList, const bool downloadFavicon)
-    : QWidget(parent)
-    , m_transferList {transferList}
+#include <QIcon>
+#include <QListWidgetItem>
+#include <QMenu>
+#include <QScrollArea>
+#include <QUrl>
+#include <QVBoxLayout>
+
+TransferListFiltersWidget::TransferListFiltersWidget(QWidget* parent, TransferListWidget* transferList, const bool downloadFavicon)
+    : QWidget(parent), m_transferList{ transferList }
 {
     setBackgroundRole(QPalette::Base);
 
-    Preferences *const pref = Preferences::instance();
+    Preferences* const pref = Preferences::instance();
 
     // Construct lists
-    auto *mainWidget = new QWidget;
-    auto *mainWidgetLayout = new QVBoxLayout(mainWidget);
+    auto* mainWidget = new QWidget;
+    auto* mainWidgetLayout = new QVBoxLayout(mainWidget);
     mainWidgetLayout->setContentsMargins(0, 2, 0, 0);
     mainWidgetLayout->setSpacing(2);
     mainWidgetLayout->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     {
-        auto *statusFilterWidget = new StatusFilterWidget(this, transferList);
-        auto *item = new TransferListFiltersWidgetItem(tr("Status"), statusFilterWidget, this);
+        auto* statusFilterWidget = new StatusFilterWidget(this, transferList);
+        auto* item = new TransferListFiltersWidgetItem(tr("Status"), statusFilterWidget, this);
         item->setChecked(pref->getStatusFilterState());
         connect(item, &TransferListFiltersWidgetItem::toggled, statusFilterWidget, &StatusFilterWidget::toggleFilter);
         connect(item, &TransferListFiltersWidgetItem::toggled, pref, &Preferences::setStatusFilterState);
@@ -75,22 +74,16 @@ TransferListFiltersWidget::TransferListFiltersWidget(QWidget *parent, TransferLi
     }
 
     {
-        auto *categoryFilterWidget = new CategoryFilterWidget(this);
-        connect(categoryFilterWidget, &CategoryFilterWidget::actionDeleteTorrentsTriggered
-                , transferList, &TransferListWidget::deleteVisibleTorrents);
-        connect(categoryFilterWidget, &CategoryFilterWidget::actionStopTorrentsTriggered
-                , transferList, &TransferListWidget::stopVisibleTorrents);
-        connect(categoryFilterWidget, &CategoryFilterWidget::actionStartTorrentsTriggered
-                , transferList, &TransferListWidget::startVisibleTorrents);
-        connect(categoryFilterWidget, &CategoryFilterWidget::actionForceStartTorrentsTriggered
-                , transferList, &TransferListWidget::forceStartVisibleTorrents);
-        connect(categoryFilterWidget, &CategoryFilterWidget::categoryChanged
-                , transferList, &TransferListWidget::applyCategoryFilter);
+        auto* categoryFilterWidget = new CategoryFilterWidget(this);
+        connect(categoryFilterWidget, &CategoryFilterWidget::actionDeleteTorrentsTriggered, transferList, &TransferListWidget::deleteVisibleTorrents);
+        connect(categoryFilterWidget, &CategoryFilterWidget::actionStopTorrentsTriggered, transferList, &TransferListWidget::stopVisibleTorrents);
+        connect(categoryFilterWidget, &CategoryFilterWidget::actionStartTorrentsTriggered, transferList, &TransferListWidget::startVisibleTorrents);
+        connect(categoryFilterWidget, &CategoryFilterWidget::actionForceStartTorrentsTriggered, transferList, &TransferListWidget::forceStartVisibleTorrents);
+        connect(categoryFilterWidget, &CategoryFilterWidget::categoryChanged, transferList, &TransferListWidget::applyCategoryFilter);
 
-        auto *item = new TransferListFiltersWidgetItem(tr("Categories"), categoryFilterWidget, this);
+        auto* item = new TransferListFiltersWidgetItem(tr("Categories"), categoryFilterWidget, this);
         item->setChecked(pref->getCategoryFilterState());
-        connect(item, &TransferListFiltersWidgetItem::toggled, this, [this, categoryFilterWidget](const bool enabled)
-        {
+        connect(item, &TransferListFiltersWidgetItem::toggled, this, [this, categoryFilterWidget](const bool enabled) {
             m_transferList->applyCategoryFilter(enabled ? categoryFilterWidget->currentCategory() : QString());
         });
         connect(item, &TransferListFiltersWidgetItem::toggled, pref, &Preferences::setCategoryFilterState);
@@ -98,22 +91,16 @@ TransferListFiltersWidget::TransferListFiltersWidget(QWidget *parent, TransferLi
     }
 
     {
-        auto *tagFilterWidget = new TagFilterWidget(this);
-        connect(tagFilterWidget, &TagFilterWidget::actionDeleteTorrentsTriggered
-                , transferList, &TransferListWidget::deleteVisibleTorrents);
-        connect(tagFilterWidget, &TagFilterWidget::actionStopTorrentsTriggered
-                , transferList, &TransferListWidget::stopVisibleTorrents);
-        connect(tagFilterWidget, &TagFilterWidget::actionStartTorrentsTriggered
-                , transferList, &TransferListWidget::startVisibleTorrents);
-        connect(tagFilterWidget, &TagFilterWidget::actionForceStartTorrentsTriggered
-                , transferList, &TransferListWidget::forceStartVisibleTorrents);
-        connect(tagFilterWidget, &TagFilterWidget::tagChanged
-                , transferList, &TransferListWidget::applyTagFilter);
+        auto* tagFilterWidget = new TagFilterWidget(this);
+        connect(tagFilterWidget, &TagFilterWidget::actionDeleteTorrentsTriggered, transferList, &TransferListWidget::deleteVisibleTorrents);
+        connect(tagFilterWidget, &TagFilterWidget::actionStopTorrentsTriggered, transferList, &TransferListWidget::stopVisibleTorrents);
+        connect(tagFilterWidget, &TagFilterWidget::actionStartTorrentsTriggered, transferList, &TransferListWidget::startVisibleTorrents);
+        connect(tagFilterWidget, &TagFilterWidget::actionForceStartTorrentsTriggered, transferList, &TransferListWidget::forceStartVisibleTorrents);
+        connect(tagFilterWidget, &TagFilterWidget::tagChanged, transferList, &TransferListWidget::applyTagFilter);
 
-        auto *item = new TransferListFiltersWidgetItem(tr("Tags"), tagFilterWidget, this);
+        auto* item = new TransferListFiltersWidgetItem(tr("Tags"), tagFilterWidget, this);
         item->setChecked(pref->getTagFilterState());
-        connect(item, &TransferListFiltersWidgetItem::toggled, this, [this, tagFilterWidget](const bool enabled)
-        {
+        connect(item, &TransferListFiltersWidgetItem::toggled, this, [this, tagFilterWidget](const bool enabled) {
             m_transferList->applyTagFilter(enabled ? tagFilterWidget->currentTag() : std::nullopt);
         });
         connect(item, &TransferListFiltersWidgetItem::toggled, pref, &Preferences::setTagFilterState);
@@ -125,7 +112,7 @@ TransferListFiltersWidget::TransferListFiltersWidget(QWidget *parent, TransferLi
     {
         m_trackersFilterWidget = new TrackersFilterWidget(this, transferList, downloadFavicon);
 
-        auto *item = new TransferListFiltersWidgetItem(tr("Trackers"), m_trackersFilterWidget, this);
+        auto* item = new TransferListFiltersWidgetItem(tr("Trackers"), m_trackersFilterWidget, this);
         item->setChecked(pref->getTrackerFilterState());
         connect(item, &TransferListFiltersWidgetItem::toggled, m_trackersFilterWidget, &TrackersFilterWidget::toggleFilter);
         connect(item, &TransferListFiltersWidgetItem::toggled, pref, &Preferences::setTrackerFilterState);
@@ -133,20 +120,19 @@ TransferListFiltersWidget::TransferListFiltersWidget(QWidget *parent, TransferLi
         mainWidgetLayout->addWidget(item);
     }
 
-    auto *scroll = new QScrollArea(this);
+    auto* scroll = new QScrollArea(this);
     scroll->setWidgetResizable(true);
     scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scroll->setFrameShape(QFrame::NoFrame);
     scroll->setWidget(mainWidget);
 
-    auto *vLayout = new QVBoxLayout(this);
+    auto* vLayout = new QVBoxLayout(this);
     vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->addWidget(scroll);
 
-    const auto createTrackerStatusItem = [this, mainWidgetLayout, trackerStatusItemPos, pref]
-    {
-        auto *trackerStatusFilterWidget = new TrackerStatusFilterWidget(this, m_transferList);
-        auto *item = new TransferListFiltersWidgetItem(tr("Tracker status"), trackerStatusFilterWidget, this);
+    const auto createTrackerStatusItem = [this, mainWidgetLayout, trackerStatusItemPos, pref] {
+        auto* trackerStatusFilterWidget = new TrackerStatusFilterWidget(this, m_transferList);
+        auto* item = new TransferListFiltersWidgetItem(tr("Tracker status"), trackerStatusFilterWidget, this);
         item->setChecked(pref->getTrackerStatusFilterState());
         connect(item, &TransferListFiltersWidgetItem::toggled, trackerStatusFilterWidget, &TrackerStatusFilterWidget::toggleFilter);
         connect(item, &TransferListFiltersWidgetItem::toggled, pref, &Preferences::setTrackerStatusFilterState);
@@ -154,9 +140,8 @@ TransferListFiltersWidget::TransferListFiltersWidget(QWidget *parent, TransferLi
         mainWidgetLayout->insertWidget(trackerStatusItemPos, item);
     };
 
-    const auto removeTrackerStatusItem = [mainWidgetLayout, trackerStatusItemPos]
-    {
-        QLayoutItem *layoutItem = mainWidgetLayout->takeAt(trackerStatusItemPos);
+    const auto removeTrackerStatusItem = [mainWidgetLayout, trackerStatusItemPos] {
+        QLayoutItem* layoutItem = mainWidgetLayout->takeAt(trackerStatusItemPos);
         delete layoutItem->widget();
         delete layoutItem;
     };
@@ -165,8 +150,7 @@ TransferListFiltersWidget::TransferListFiltersWidget(QWidget *parent, TransferLi
     if (m_useSeparateTrackerStatusFilter)
         createTrackerStatusItem();
 
-    connect(pref, &Preferences::changed, this, [this, pref, createTrackerStatusItem, removeTrackerStatusItem]
-    {
+    connect(pref, &Preferences::changed, this, [this, pref, createTrackerStatusItem, removeTrackerStatusItem] {
         if (m_useSeparateTrackerStatusFilter == pref->useSeparateTrackerStatusFilter())
             return;
 

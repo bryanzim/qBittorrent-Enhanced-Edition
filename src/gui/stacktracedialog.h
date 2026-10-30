@@ -42,11 +42,11 @@ class StacktraceDialog : public QDialog
     Q_DISABLE_COPY_MOVE(StacktraceDialog)
 
 public:
-    explicit StacktraceDialog(QWidget *parent = nullptr);
+    explicit StacktraceDialog(QWidget* parent = nullptr);
     ~StacktraceDialog() override;
 
-    void setText(const QString &signalName, const QString &stacktrace);
+    void setText(const QString& signalName, const QString& stacktrace);
 
 private:
-    Ui::StacktraceDialog *m_ui = nullptr;
+    Ui::StacktraceDialog* m_ui = nullptr;
 };

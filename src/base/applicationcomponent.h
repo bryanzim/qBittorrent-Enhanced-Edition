@@ -28,10 +28,10 @@
 
 #pragma once
 
+#include <QtClassHelperMacros>
+
 #include <concepts>
 #include <utility>
-
-#include <QtClassHelperMacros>
 
 class IApplication;
 
@@ -42,27 +42,26 @@ class ApplicationComponentBase
 public:
     virtual ~ApplicationComponentBase() = default;
 
-    IApplication *app() const;
+    IApplication* app() const;
 
 protected:
-    explicit ApplicationComponentBase(IApplication *app);
+    explicit ApplicationComponentBase(IApplication* app);
 
 private:
-    IApplication *m_app = nullptr;
+    IApplication* m_app = nullptr;
 };
 
 template <typename T>
 concept IsApplicationComponent = std::derived_from<T, ApplicationComponentBase>;
 
 template <typename Base>
-requires (!IsApplicationComponent<Base>)
+    requires(!IsApplicationComponent<Base>)
 class ApplicationComponent : public Base, public ApplicationComponentBase
 {
 public:
     template <typename... Args>
-    explicit ApplicationComponent(IApplication *app, Args&&... args)
-        : Base(std::forward<Args>(args)...)
-        , ApplicationComponentBase(app)
+    explicit ApplicationComponent(IApplication* app, Args&&... args)
+        : Base(std::forward<Args>(args)...), ApplicationComponentBase(app)
     {
     }
 };

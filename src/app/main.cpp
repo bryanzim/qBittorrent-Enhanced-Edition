@@ -67,11 +67,11 @@ Q_IMPORT_PLUGIN(QICOPlugin)
 #include <cstdio>
 #endif // DISABLE_GUI
 
+#include "application.h"
 #include "base/preferences.h"
 #include "base/profile.h"
 #include "base/settingvalue.h"
 #include "base/version.h"
-#include "application.h"
 #include "cmdoptions.h"
 #include "legalnotice.h"
 #include "signalhandler.h"
@@ -89,7 +89,7 @@ using namespace Qt::Literals::StringLiterals;
 
 namespace
 {
-    void displayBadArgMessage(const QString &message)
+    void displayBadArgMessage(const QString& message)
     {
         const QString help = QCoreApplication::translate("Main", "Run application with -h option to read about command line parameters.");
 #if defined(Q_OS_WIN) && !defined(DISABLE_GUI)
@@ -99,14 +99,12 @@ namespace
         msgBox.move(Utils::Gui::screenCenter(&msgBox));
         msgBox.exec();
 #else
-        const QString errMsg = QCoreApplication::translate("Main", "Bad command line: ") + u'\n'
-            + message + u'\n'
-            + help + u'\n';
+        const QString errMsg = QCoreApplication::translate("Main", "Bad command line: ") + u'\n' + message + u'\n' + help + u'\n';
         fprintf(stderr, "%s", qUtf8Printable(errMsg));
 #endif
     }
 
-    void displayErrorMessage(const QString &message)
+    void displayErrorMessage(const QString& message)
     {
 #ifndef DISABLE_GUI
         if (QApplication::instance())
@@ -146,17 +144,17 @@ namespace
         painter.setPen(QPen(Qt::white));
         painter.setFont(QFont(u"Arial"_s, 22, QFont::Black));
         painter.drawText(224 - painter.fontMetrics().horizontalAdvance(version), 270, version);
-        QSplashScreen *splash = new QSplashScreen(splashImg);
+        QSplashScreen* splash = new QSplashScreen(splashImg);
         splash->show();
         QTimer::singleShot(1500ms, Qt::CoarseTimer, splash, &QObject::deleteLater);
         qApp->processEvents();
     }
-#endif  // DISABLE_GUI
+#endif // DISABLE_GUI
 
 #ifdef Q_OS_UNIX
     void adjustFileDescriptorLimit()
     {
-        rlimit limit {};
+        rlimit limit{};
 
         if (getrlimit(RLIMIT_NOFILE, &limit) != 0)
             return;
@@ -176,7 +174,7 @@ namespace
 }
 
 // Main
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 #ifdef DISABLE_GUI
     setvbuf(stdout, nullptr, _IONBF, 0);
@@ -224,8 +222,8 @@ int main(int argc, char *argv[])
         if (!params.unknownParameter.isEmpty())
         {
             throw CommandLineParameterError(QCoreApplication::translate("Main", "%1 is an unknown command line parameter.",
-                                                        "--random-parameter is an unknown command line parameter.")
-                                                        .arg(params.unknownParameter));
+                                                                        "--random-parameter is an unknown command line parameter.")
+                                                .arg(params.unknownParameter));
         }
 
         // Check if qBittorrent is already running
@@ -235,7 +233,7 @@ int main(int argc, char *argv[])
             if (params.shouldDaemonize)
             {
                 throw CommandLineParameterError(QCoreApplication::translate("Main", "You cannot use %1: qBittorrent is already running.")
-                    .arg(u"-d (or --daemon)"_s));
+                                                    .arg(u"-d (or --daemon)"_s));
             }
 
             // print friendly message if there are no other command line args
@@ -252,7 +250,7 @@ int main(int argc, char *argv[])
             return EXIT_SUCCESS;
         }
 
-        CachedSettingValue<bool> legalNoticeShown {u"LegalNotice/Accepted"_s, false};
+        CachedSettingValue<bool> legalNoticeShown{ u"LegalNotice/Accepted"_s, false };
         if (params.confirmLegalNotice)
             legalNoticeShown = true;
 
@@ -264,8 +262,7 @@ int main(int argc, char *argv[])
             const bool isInteractive = (_isatty(_fileno(stdin)) != 0) && (_isatty(_fileno(stdout)) != 0);
 #else
             // when run in daemon mode user can only dismiss the notice with command line option
-            const bool isInteractive = !params.shouldDaemonize
-                && ((isatty(fileno(stdin)) != 0) && (isatty(fileno(stdout)) != 0));
+            const bool isInteractive = !params.shouldDaemonize && ((isatty(fileno(stdin)) != 0) && (isatty(fileno(stdout)) != 0));
 #endif
             showLegalNotice(isInteractive);
             if (isInteractive)
@@ -298,7 +295,7 @@ int main(int argc, char *argv[])
                     // It is undefined behavior to write to log file since there is another qbt instance
                     // in play. But we still do it since there is chance that the log message will survive.
                     const QString errorMessage = QCoreApplication::translate("Main", "Found unexpected qBittorrent instance. Exiting this instance. Current process ID: %1.")
-                        .arg(QString::number(QCoreApplication::applicationPid()));
+                                                     .arg(QString::number(QCoreApplication::applicationPid()));
                     LogMsg(errorMessage, Log::CRITICAL);
                     // stdout, stderr is closed so we can't use them
                     return EXIT_FAILURE;
@@ -307,7 +304,7 @@ int main(int argc, char *argv[])
             else
             {
                 const QString errorMessage = QCoreApplication::translate("Main", "Error when daemonizing. Reason: \"%1\". Error code: %2.")
-                    .arg(QString::fromLocal8Bit(strerror(errno)), QString::number(errno));
+                                                 .arg(QString::fromLocal8Bit(strerror(errno)), QString::number(errno));
                 LogMsg(errorMessage, Log::CRITICAL);
                 qCritical("%s", qUtf8Printable(errorMessage));
                 return EXIT_FAILURE;
@@ -322,12 +319,12 @@ int main(int argc, char *argv[])
 
         return app->exec();
     }
-    catch (const CommandLineParameterError &er)
+    catch (const CommandLineParameterError& er)
     {
         displayBadArgMessage(er.message());
         return EXIT_FAILURE;
     }
-    catch (const RuntimeError &er)
+    catch (const RuntimeError& er)
     {
         displayErrorMessage(er.message());
         return EXIT_FAILURE;

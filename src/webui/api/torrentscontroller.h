@@ -28,11 +28,11 @@
 
 #pragma once
 
+#include "apicontroller.h"
+#include "base/bittorrent/torrentdescriptor.h"
+
 #include <QHash>
 #include <QSet>
-
-#include "base/bittorrent/torrentdescriptor.h"
-#include "apicontroller.h"
 
 class QByteArray;
 
@@ -54,7 +54,7 @@ class TorrentsController : public APIController
     Q_DISABLE_COPY_MOVE(TorrentsController)
 
 public:
-    explicit TorrentsController(IApplication *app, QObject *parent = nullptr);
+    explicit TorrentsController(IApplication* app, QObject* parent = nullptr);
 
 private slots:
     void countAction();
@@ -121,11 +121,11 @@ private slots:
     void downloadFileAction();
 
 private:
-    void onDownloadFinished(const Net::DownloadResult &result);
-    void onMetadataDownloaded(const BitTorrent::TorrentInfo &info);
-    void onSearchPluginTorrentDownloaded(const QString &source, const QString &data);
-    void cacheTorrentFile(const QString &source, const QByteArray &data);
-    void cacheMagnetURI(const QString &source, const BitTorrent::TorrentDescriptor &torrentDescr);
+    void onDownloadFinished(const Net::DownloadResult& result);
+    void onMetadataDownloaded(const BitTorrent::TorrentInfo& info);
+    void onSearchPluginTorrentDownloaded(const QString& source, const QString& data);
+    void cacheTorrentFile(const QString& source, const QByteArray& data);
+    void cacheMagnetURI(const QString& source, const BitTorrent::TorrentDescriptor& torrentDescr);
 
     QHash<QString, BitTorrent::InfoHash> m_torrentSourceCache;
     QHash<BitTorrent::TorrentID, BitTorrent::TorrentDescriptor> m_torrentMetadataCache;

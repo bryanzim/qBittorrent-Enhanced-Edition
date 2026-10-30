@@ -28,7 +28,7 @@
 
 #include "net.h"
 
-#include <ranges>
+#include "base/global.h"
 
 #include <QList>
 #include <QNetworkInterface>
@@ -36,7 +36,7 @@
 #include <QSslKey>
 #include <QString>
 
-#include "base/global.h"
+#include <ranges>
 
 namespace
 {
@@ -70,7 +70,7 @@ namespace
         return true;
     }
 
-    bool isValidIPRange(const QHostAddress &first, const QHostAddress &last)
+    bool isValidIPRange(const QHostAddress& first, const QHostAddress& last)
     {
         if (first.isNull() || last.isNull())
             return false;
@@ -88,21 +88,21 @@ namespace Utils
 {
     namespace Net
     {
-        bool isValidIP(const QString &ip)
+        bool isValidIP(const QString& ip)
         {
             return !QHostAddress(ip).isNull();
         }
 
-        std::optional<Subnet> parseSubnet(const QString &subnetStr)
+        std::optional<Subnet> parseSubnet(const QString& subnetStr)
         {
             const Subnet subnet = QHostAddress::parseSubnet(subnetStr);
-            const Subnet invalid = {QHostAddress(), -1};
+            const Subnet invalid = { QHostAddress(), -1 };
             if (subnet == invalid)
                 return std::nullopt;
             return subnet;
         }
 
-        bool isIPInSubnets(const QHostAddress &addr, const QList<Subnet> &subnets)
+        bool isIPInSubnets(const QHostAddress& addr, const QList<Subnet>& subnets)
         {
             QHostAddress protocolEquivalentAddress;
             bool addrConversionOk = false;
@@ -119,19 +119,17 @@ namespace Utils
                 protocolEquivalentAddress = QHostAddress(addr.toIPv4Address(&addrConversionOk));
             }
 
-            return std::ranges::any_of(subnets, [&](const Subnet &subnet)
-            {
-                return addr.isInSubnet(subnet)
-                    || (addrConversionOk && protocolEquivalentAddress.isInSubnet(subnet));
+            return std::ranges::any_of(subnets, [&](const Subnet& subnet) {
+                return addr.isInSubnet(subnet) || (addrConversionOk && protocolEquivalentAddress.isInSubnet(subnet));
             });
         }
 
-        QString subnetToString(const Subnet &subnet)
+        QString subnetToString(const Subnet& subnet)
         {
             return subnet.first.toString() + u'/' + QString::number(subnet.second);
         }
 
-        IPRange subnetToIPRange(const Subnet &subnet)
+        IPRange subnetToIPRange(const Subnet& subnet)
         {
             const QHostAddress address = subnet.first;
             const int prefixLength = subnet.second;
@@ -146,8 +144,8 @@ namespace Utils
                 const quint32 network = ip & mask;
                 const quint32 broadcast = network | ~mask;
 
-                const QHostAddress start {network};
-                const QHostAddress end {broadcast};
+                const QHostAddress start{ network };
+                const QHostAddress end{ broadcast };
 
                 return std::make_pair(start, end);
             }
@@ -164,12 +162,12 @@ namespace Utils
                 const auto maskByte = (static_cast<quint8>(0xFF) << (8 - bits));
 
                 addressBytes[headBytes] &= maskByte;
-                const QHostAddress start {addressBytes};
+                const QHostAddress start{ addressBytes };
 
                 addressBytes[headBytes] |= ~maskByte;
                 for (int i = headBytes + 1; i < 16; ++i)
                     addressBytes[i] = 0xFF;
-                const QHostAddress end {addressBytes};
+                const QHostAddress end{ addressBytes };
 
                 return std::make_pair(start, end);
             }
@@ -178,7 +176,7 @@ namespace Utils
             return {};
         }
 
-        QHostAddress canonicalIPv6Addr(const QHostAddress &addr)
+        QHostAddress canonicalIPv6Addr(const QHostAddress& addr)
         {
             // Link-local IPv6 textual address always contains a scope id (or zone index)
             // The scope id is appended to the IPv6 address using the '%' character
@@ -192,7 +190,7 @@ namespace Utils
             // as scope id. Furthermore, QHostAddress doesn't have any convenient method to
             // affect this, so we jump through hoops here.
             if (addr.protocol() != QAbstractSocket::IPv6Protocol)
-                return QHostAddress{addr.toIPv6Address()};
+                return QHostAddress{ addr.toIPv6Address() };
 
             // QHostAddress::setScopeId(addr.scopeId()); // Even though the docs say that setScopeId
             // will convert a name to a number, this doesn't happen. Probably a Qt bug.
@@ -209,8 +207,7 @@ namespace Utils
             return canonical;
         }
 
-        QHostAddress resolveForwardedClientAddress(const QHostAddress &peerAddress
-                , const QStringView forwardedFor, const QList<Subnet> &trustedProxies)
+        QHostAddress resolveForwardedClientAddress(const QHostAddress& peerAddress, const QStringView forwardedFor, const QList<Subnet>& trustedProxies)
         {
             // only a trusted proxy may declare an address on the client's behalf
             if (!isIPInSubnets(peerAddress, trustedProxies))
@@ -223,7 +220,7 @@ namespace Utils
             QHostAddress hopAddress;
             for (const QStringView hop : std::views::reverse(hops))
             {
-                if (!hopAddress.setAddress(hop.trimmed().toString()))  // the chain is unresolvable past this point
+                if (!hopAddress.setAddress(hop.trimmed().toString())) // the chain is unresolvable past this point
                     return peerAddress;
 
                 // anything beyond the nearest hop that no trusted proxy vouches for was
@@ -274,14 +271,13 @@ namespace Utils
             else
             {
                 firstIPStr = filterStr;
-                const QHostAddress addr {filterStr.toString()};
+                const QHostAddress addr{ filterStr.toString() };
                 first = addr;
                 last = addr;
             }
             if (isStrictIPv4 && (first.protocol() == QAbstractSocket::IPv4Protocol))
             {
-                if (!isValidIPv4(firstIPStr)
-                    || (!lastIPStr.isEmpty() && !isValidIPv4(lastIPStr)))
+                if (!isValidIPv4(firstIPStr) || (!lastIPStr.isEmpty() && !isValidIPv4(lastIPStr)))
                 {
                     return std::nullopt;
                 }
@@ -291,7 +287,7 @@ namespace Utils
             return std::make_pair(first, last);
         }
 
-        QString ipRangeToString(const IPRange &ipRange)
+        QString ipRangeToString(const IPRange& ipRange)
         {
             const QHostAddress firstIP = ipRange.first;
             const QHostAddress lastIP = ipRange.second;
@@ -301,22 +297,21 @@ namespace Utils
             return (firstIP.toString() + u" - " + lastIP.toString());
         }
 
-        QList<QSslCertificate> loadSSLCertificate(const QByteArray &data)
+        QList<QSslCertificate> loadSSLCertificate(const QByteArray& data)
         {
-            const QList<QSslCertificate> certs {QSslCertificate::fromData(data)};
-            const bool hasInvalidCerts = std::ranges::any_of(certs, [](const QSslCertificate &cert)
-            {
+            const QList<QSslCertificate> certs{ QSslCertificate::fromData(data) };
+            const bool hasInvalidCerts = std::ranges::any_of(certs, [](const QSslCertificate& cert) {
                 return cert.isNull();
             });
             return hasInvalidCerts ? QList<QSslCertificate>() : certs;
         }
 
-        bool isSSLCertificatesValid(const QByteArray &data)
+        bool isSSLCertificatesValid(const QByteArray& data)
         {
             return !loadSSLCertificate(data).isEmpty();
         }
 
-        bool lessThan(const QHostAddress &left, const QHostAddress &right)
+        bool lessThan(const QHostAddress& left, const QHostAddress& right)
         {
             const QAbstractSocket::NetworkLayerProtocol leftProtocol = left.protocol();
             const QAbstractSocket::NetworkLayerProtocol rightProtocol = right.protocol();

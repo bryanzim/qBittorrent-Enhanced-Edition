@@ -51,14 +51,14 @@ class QString;
 
 namespace Utils::Compare
 {
-    int naturalCompare(const QString &left, const QString &right, Qt::CaseSensitivity caseSensitivity);
+    int naturalCompare(const QString& left, const QString& right, Qt::CaseSensitivity caseSensitivity);
 
     template <Qt::CaseSensitivity caseSensitivity>
     class NaturalCompare
     {
     public:
 #if (QBT_USE_QCOLLATOR == 0)
-        int operator()(const QString &left, const QString &right) const
+        int operator()(const QString& left, const QString& right) const
         {
             return naturalCompare(left, right, caseSensitivity);
         }
@@ -69,7 +69,7 @@ namespace Utils::Compare
             m_collator.setCaseSensitivity(caseSensitivity);
         }
 
-        int operator()(const QString &left, const QString &right) const
+        int operator()(const QString& left, const QString& right) const
         {
             return m_collator.compare(left, right);
         }
@@ -83,7 +83,7 @@ namespace Utils::Compare
     class NaturalLessThan
     {
     public:
-        bool operator()(const QString &left, const QString &right) const
+        bool operator()(const QString& left, const QString& right) const
         {
             return (m_comparator(left, right) < 0);
         }

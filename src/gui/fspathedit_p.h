@@ -29,12 +29,12 @@
 
 #pragma once
 
+#include "base/pathfwd.h"
+
 #include <QComboBox>
 #include <QLineEdit>
-#include <QtContainerFwd>
 #include <QValidator>
-
-#include "base/pathfwd.h"
+#include <QtContainerFwd>
 
 class QAction;
 class QContextMenuEvent;
@@ -60,7 +60,7 @@ namespace Private
             CantWrite
         };
 
-        FileSystemPathValidator(QObject *parent = nullptr);
+        FileSystemPathValidator(QObject* parent = nullptr);
 
         bool strictMode() const;
         void setStrictMode(bool value);
@@ -83,10 +83,10 @@ namespace Private
         TestResult lastTestResult() const;
         QValidator::State lastValidationState() const;
 
-        QValidator::State validate(QString &input, int &pos) const override;
+        QValidator::State validate(QString& input, int& pos) const override;
 
     private:
-        TestResult testPath(const Path &path) const;
+        TestResult testPath(const Path& path) const;
 
         bool m_strictMode = false;
         bool m_existingOnly = false;
@@ -104,12 +104,12 @@ namespace Private
     public:
         virtual ~IFileEditorWithCompletion() = default;
         virtual void completeDirectoriesOnly(bool completeDirsOnly) = 0;
-        virtual void setFilenameFilters(const QStringList &filters) = 0;
-        virtual void setBrowseAction(QAction *action) = 0;
-        virtual void setValidator(QValidator *validator) = 0;
+        virtual void setFilenameFilters(const QStringList& filters) = 0;
+        virtual void setBrowseAction(QAction* action) = 0;
+        virtual void setValidator(QValidator* validator) = 0;
         virtual QString placeholder() const = 0;
-        virtual void setPlaceholder(const QString &val) = 0;
-        virtual QWidget *widget() = 0;
+        virtual void setPlaceholder(const QString& val) = 0;
+        virtual QWidget* widget() = 0;
     };
 
     class FileLineEdit final : public QLineEdit, public IFileEditorWithCompletion
@@ -118,20 +118,20 @@ namespace Private
         Q_DISABLE_COPY_MOVE(FileLineEdit)
 
     public:
-        FileLineEdit(QWidget *parent = nullptr);
+        FileLineEdit(QWidget* parent = nullptr);
         ~FileLineEdit();
 
         void completeDirectoriesOnly(bool completeDirsOnly) override;
-        void setFilenameFilters(const QStringList &filters) override;
-        void setBrowseAction(QAction *action) override;
-        void setValidator(QValidator *validator) override;
+        void setFilenameFilters(const QStringList& filters) override;
+        void setBrowseAction(QAction* action) override;
+        void setValidator(QValidator* validator) override;
         QString placeholder() const override;
-        void setPlaceholder(const QString &val) override;
-        QWidget *widget() override;
+        void setPlaceholder(const QString& val) override;
+        QWidget* widget() override;
 
     protected:
-        void keyPressEvent(QKeyEvent *event) override;
-        void contextMenuEvent(QContextMenuEvent *event) override;
+        void keyPressEvent(QKeyEvent* event) override;
+        void contextMenuEvent(QContextMenuEvent* event) override;
 
     private:
         void showCompletionPopup();
@@ -139,10 +139,10 @@ namespace Private
 
         static QString warningText(FileSystemPathValidator::TestResult result);
 
-        QFileSystemModel *m_completerModel = nullptr;
-        QAction *m_browseAction = nullptr;
-        QAction *m_warningAction = nullptr;
-        QFileIconProvider *m_iconProvider = nullptr;
+        QFileSystemModel* m_completerModel = nullptr;
+        QAction* m_browseAction = nullptr;
+        QAction* m_warningAction = nullptr;
+        QFileIconProvider* m_iconProvider = nullptr;
         bool m_completeDirectoriesOnly = false;
         QStringList m_filenameFilters;
     };
@@ -153,15 +153,15 @@ namespace Private
         Q_DISABLE_COPY_MOVE(FileComboEdit)
 
     public:
-        FileComboEdit(QWidget *parent = nullptr);
+        FileComboEdit(QWidget* parent = nullptr);
 
         void completeDirectoriesOnly(bool completeDirsOnly) override;
-        void setFilenameFilters(const QStringList &filters) override;
-        void setBrowseAction(QAction *action) override;
-        void setValidator(QValidator *validator) override;
+        void setFilenameFilters(const QStringList& filters) override;
+        void setBrowseAction(QAction* action) override;
+        void setValidator(QValidator* validator) override;
         QString placeholder() const override;
-        void setPlaceholder(const QString &val) override;
-        QWidget *widget() override;
+        void setPlaceholder(const QString& val) override;
+        QWidget* widget() override;
 
     protected:
         QString text() const;

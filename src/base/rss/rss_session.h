@@ -63,16 +63,16 @@
  * 3.   Feed is JSON object (keys are property names, values are property values; 'uid' and 'url' are required)
  */
 
-#include <chrono>
+#include "base/3rdparty/expected.hpp"
+#include "base/settingvalue.h"
+#include "base/utils/thread.h"
 
 #include <QHash>
 #include <QObject>
 #include <QPointer>
 #include <QTimer>
 
-#include "base/3rdparty/expected.hpp"
-#include "base/settingvalue.h"
-#include "base/utils/thread.h"
+#include <chrono>
 
 class QThread;
 
@@ -96,14 +96,14 @@ namespace RSS
         ~Session() override;
 
     public:
-        static Session *instance();
+        static Session* instance();
 
         bool isProcessingEnabled() const;
         void setProcessingEnabled(bool enabled);
 
-        QThread *workingThread() const;
-        AsyncFileStorage *confFileStorage() const;
-        AsyncFileStorage *dataFileStorage() const;
+        QThread* workingThread() const;
+        AsyncFileStorage* confFileStorage() const;
+        AsyncFileStorage* dataFileStorage() const;
 
         int maxArticlesPerFeed() const;
         void setMaxArticlesPerFeed(int n);
@@ -114,47 +114,47 @@ namespace RSS
         std::chrono::seconds fetchDelay() const;
         void setFetchDelay(std::chrono::seconds delay);
 
-        nonstd::expected<Folder *, QString> addFolder(const QString &path);
-        nonstd::expected<Feed *, QString> addFeed(const QString &url, const QString &path, std::chrono::seconds refreshInterval = {});
-        nonstd::expected<void, QString> setFeedURL(const QString &path, const QString &url);
-        nonstd::expected<void, QString> setFeedURL(Feed *feed, const QString &url);
-        nonstd::expected<void, QString> moveItem(const QString &itemPath, const QString &destPath);
-        nonstd::expected<void, QString> moveItem(Item *item, const QString &destPath);
-        nonstd::expected<void, QString> removeItem(const QString &itemPath);
+        nonstd::expected<Folder*, QString> addFolder(const QString& path);
+        nonstd::expected<Feed*, QString> addFeed(const QString& url, const QString& path, std::chrono::seconds refreshInterval = {});
+        nonstd::expected<void, QString> setFeedURL(const QString& path, const QString& url);
+        nonstd::expected<void, QString> setFeedURL(Feed* feed, const QString& url);
+        nonstd::expected<void, QString> moveItem(const QString& itemPath, const QString& destPath);
+        nonstd::expected<void, QString> moveItem(Item* item, const QString& destPath);
+        nonstd::expected<void, QString> removeItem(const QString& itemPath);
 
-        QList<Item *> items() const;
-        Item *itemByPath(const QString &path) const;
-        QList<Feed *> feeds() const;
-        Feed *feedByURL(const QString &url) const;
+        QList<Item*> items() const;
+        Item* itemByPath(const QString& path) const;
+        QList<Feed*> feeds() const;
+        Feed* feedByURL(const QString& url) const;
 
-        Folder *rootFolder() const;
+        Folder* rootFolder() const;
 
     signals:
         void processingStateChanged(bool enabled);
         void maxArticlesPerFeedChanged(int n);
-        void itemAdded(Item *item);
-        void itemPathChanged(Item *item);
-        void itemAboutToBeRemoved(Item *item);
-        void feedIconLoaded(Feed *feed);
-        void feedStateChanged(Feed *feed);
-        void feedURLChanged(Feed *feed, const QString &oldURL);
+        void itemAdded(Item* item);
+        void itemPathChanged(Item* item);
+        void itemAboutToBeRemoved(Item* item);
+        void feedIconLoaded(Feed* feed);
+        void feedStateChanged(Feed* feed);
+        void feedURLChanged(Feed* feed, const QString& oldURL);
 
     private slots:
-        void handleItemAboutToBeDestroyed(Item *item);
-        void handleFeedTitleChanged(Feed *feed);
+        void handleItemAboutToBeDestroyed(Item* item);
+        void handleFeedTitleChanged(Feed* feed);
 
     private:
         QUuid generateUID() const;
         void load();
-        bool loadFolder(const QJsonObject &jsonObj, Folder *folder);
+        bool loadFolder(const QJsonObject& jsonObj, Folder* folder);
         void loadLegacy();
         void store();
-        nonstd::expected<Folder *, QString> prepareItemDest(const QString &path);
-        Folder *addSubfolder(const QString &name, Folder *parentFolder);
-        Feed *addFeedToFolder(const QUuid &uid, const QString &url, const QString &name, Folder *parentFolder, std::chrono::seconds refreshInterval);
-        void addItem(Item *item, Folder *destFolder);
+        nonstd::expected<Folder*, QString> prepareItemDest(const QString& path);
+        Folder* addSubfolder(const QString& name, Folder* parentFolder);
+        Feed* addFeedToFolder(const QUuid& uid, const QString& url, const QString& name, Folder* parentFolder, std::chrono::seconds refreshInterval);
+        void addItem(Item* item, Folder* destFolder);
         void refresh();
-        std::chrono::system_clock::time_point refreshFeed(Feed *feed, const std::chrono::system_clock::time_point &currentTimepoint);
+        std::chrono::system_clock::time_point refreshFeed(Feed* feed, const std::chrono::system_clock::time_point& currentTimepoint);
 
         static QPointer<Session> m_instance;
 
@@ -163,12 +163,12 @@ namespace RSS
         CachedSettingValue<qint64> m_storeFetchDelay;
         CachedSettingValue<int> m_storeMaxArticlesPerFeed;
         Utils::Thread::UniquePtr m_workingThread;
-        AsyncFileStorage *m_confFileStorage = nullptr;
-        AsyncFileStorage *m_dataFileStorage = nullptr;
+        AsyncFileStorage* m_confFileStorage = nullptr;
+        AsyncFileStorage* m_dataFileStorage = nullptr;
         QTimer m_refreshTimer;
-        QHash<QString, Item *> m_itemsByPath;
-        QHash<QUuid, Feed *> m_feedsByUID;
-        QHash<QString, Feed *> m_feedsByURL;
-        QHash<Feed *, std::chrono::system_clock::time_point> m_refreshTimepoints;
+        QHash<QString, Item*> m_itemsByPath;
+        QHash<QUuid, Feed*> m_feedsByUID;
+        QHash<QString, Feed*> m_feedsByURL;
+        QHash<Feed*, std::chrono::system_clock::time_point> m_refreshTimepoints;
     };
 }

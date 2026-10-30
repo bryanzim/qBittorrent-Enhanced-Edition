@@ -28,11 +28,11 @@
 
 #pragma once
 
+#include <QStringView>
+#include <QtTypes>
+
 #include <optional>
 #include <variant>
-
-#include <QtTypes>
-#include <QStringView>
 
 namespace Http
 {

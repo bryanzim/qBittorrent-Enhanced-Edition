@@ -26,13 +26,13 @@
  * exception statement from your version.
  */
 
-#include <QtSystemDetection>
-#include <QObject>
-#include <QTest>
-
 #include "base/global.h"
 #include "base/path.h"
 #include "base/utils/io.h"
+
+#include <QObject>
+#include <QTest>
+#include <QtSystemDetection>
 
 class TestUtilsIO final : public QObject
 {

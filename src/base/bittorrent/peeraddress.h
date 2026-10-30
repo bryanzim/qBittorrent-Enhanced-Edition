@@ -28,8 +28,8 @@
 
 #pragma once
 
-#include <QtTypes>
 #include <QHostAddress>
+#include <QtTypes>
 
 class QString;
 class QStringView;
@@ -44,9 +44,9 @@ namespace BitTorrent
         static PeerAddress parse(QStringView address);
         QString toString() const;
 
-        friend bool operator<(const PeerAddress &left, const PeerAddress &right);
-        friend bool operator==(const PeerAddress &left, const PeerAddress &right) = default;
+        friend bool operator<(const PeerAddress& left, const PeerAddress& right);
+        friend bool operator==(const PeerAddress& left, const PeerAddress& right) = default;
     };
 
-    std::size_t qHash(const PeerAddress &addr, std::size_t seed = 0);
+    std::size_t qHash(const PeerAddress& addr, std::size_t seed = 0);
 }

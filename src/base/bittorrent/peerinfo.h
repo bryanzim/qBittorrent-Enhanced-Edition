@@ -28,9 +28,8 @@
 
 #pragma once
 
-#include <libtorrent/peer_info.hpp>
-
 #include <QCoreApplication>
+#include <libtorrent/peer_info.hpp>
 
 class QBitArray;
 
@@ -44,7 +43,7 @@ namespace BitTorrent
 
     public:
         PeerInfo() = default;
-        PeerInfo(const lt::peer_info &nativeInfo, const QBitArray &allPieces);
+        PeerInfo(const lt::peer_info& nativeInfo, const QBitArray& allPieces);
 
         bool fromDHT() const;
         bool fromPeX() const;
@@ -95,7 +94,7 @@ namespace BitTorrent
         int downloadingPieceIndex() const;
 
     private:
-        qreal calcRelevance(const QBitArray &allPieces) const;
+        qreal calcRelevance(const QBitArray& allPieces) const;
         void determineFlags();
 
         lt::peer_info m_nativeInfo = {};

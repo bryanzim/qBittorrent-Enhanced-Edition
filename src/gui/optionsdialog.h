@@ -29,13 +29,13 @@
 
 #pragma once
 
-#include <QDialog>
-
+#include "base/net/downloadmanager.h"
 #include "base/net/proxytype.h"
 #include "base/pathfwd.h"
 #include "base/settingvalue.h"
-#include "base/net/downloadmanager.h"
 #include "guiapplicationcomponent.h"
+
+#include <QDialog>
 
 class QListWidgetItem;
 
@@ -77,7 +77,7 @@ class OptionsDialog final : public GUIApplicationComponent<QDialog>
     };
 
 public:
-    explicit OptionsDialog(IGUIApplication *app, QWidget *parent = nullptr);
+    explicit OptionsDialog(IGUIApplication* app, QWidget* parent = nullptr);
     ~OptionsDialog() override;
 
 public slots:
@@ -92,10 +92,10 @@ private slots:
     void on_buttonBox_rejected();
     void enableApplyButton();
     void toggleComboRatioLimitAct();
-    void changePage(QListWidgetItem *, QListWidgetItem *);
+    void changePage(QListWidgetItem*, QListWidgetItem*);
     void loadSplitterState();
     void handleWatchedFolderViewSelectionChanged();
-    void editWatchedFolderOptions(const QModelIndex &index);
+    void editWatchedFolderOptions(const QModelIndex& index);
     void on_IpFilterRefreshBtn_clicked();
     void handleIPFilterParsed(bool error, int ruleCount);
     void on_banListButton_clicked();
@@ -105,11 +105,11 @@ private slots:
     void on_addWatchedFolderButton_clicked();
     void on_editWatchedFolderButton_clicked();
     void on_removeWatchedFolderButton_clicked();
-    void setLocale(const QString &localeStr);
+    void setLocale(const QString& localeStr);
 
 #ifndef DISABLE_WEBUI
-    void webUIHttpsCertChanged(const Path &path);
-    void webUIHttpsKeyChanged(const Path &path);
+    void webUIHttpsCertChanged(const Path& path);
+    void webUIHttpsKeyChanged(const Path& path);
     void on_registerDNSBtn_clicked();
     void onBtnWebUIAPIKeyCopyClicked();
     void onBtnWebUIAPIKeyRotateClicked();
@@ -118,7 +118,7 @@ private slots:
 #endif
 
 private:
-    void showEvent(QShowEvent *e) override;
+    void showEvent(QShowEvent* e) override;
 
     // Methods
     bool applySettings();
@@ -204,14 +204,14 @@ private:
 
     bool schedTimesOk();
 
-    Ui::OptionsDialog *m_ui = nullptr;
+    Ui::OptionsDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
     SettingValue<QStringList> m_storeHSplitterSize;
     SettingValue<int> m_storeLastViewedPage;
 
-    QPushButton *m_applyButton = nullptr;
+    QPushButton* m_applyButton = nullptr;
 
-    AdvancedSettings *m_advancedSettings = nullptr;
+    AdvancedSettings* m_advancedSettings = nullptr;
 
     bool m_refreshingIpFilter = false;
 

@@ -29,38 +29,39 @@
 
 #include "downloadedpiecesbar.h"
 
-#include <algorithm>
-#include <cmath>
+#include "base/global.h"
+#include "gui/uithememanager.h"
 
 #include <QDebug>
 #include <QList>
 
-#include "base/global.h"
-#include "gui/uithememanager.h"
+#include <algorithm>
+#include <cmath>
 
 namespace
 {
-    QColor dlPieceColor(const QColor &pieceColor)
+    QColor dlPieceColor(const QColor& pieceColor)
     {
         const QColor color = UIThemeManager::instance()->getColor(u"PiecesBar.PartialPiece"_s);
         if (color.isValid())
             return color;
 
-        const QColor green {Qt::green};
+        const QColor green{ Qt::green };
         return QColor::fromHsl(green.hslHue(), pieceColor.hslSaturation(), pieceColor.lightness());
     }
 }
 
-DownloadedPiecesBar::DownloadedPiecesBar(QWidget *parent)
+DownloadedPiecesBar::DownloadedPiecesBar(QWidget* parent)
     : base(parent)
 {
     updateColorsImpl();
 }
 
-QList<float> DownloadedPiecesBar::bitfieldToFloatVector(const QBitArray &vecin, int reqSize)
+QList<float> DownloadedPiecesBar::bitfieldToFloatVector(const QBitArray& vecin, int reqSize)
 {
     QList<float> result(reqSize, 0.0);
-    if (vecin.isEmpty()) return result;
+    if (vecin.isEmpty())
+        return result;
 
     const float ratio = vecin.size() / static_cast<float>(reqSize);
 
@@ -137,7 +138,7 @@ QList<float> DownloadedPiecesBar::bitfieldToFloatVector(const QBitArray &vecin, 
 QImage DownloadedPiecesBar::renderImage()
 {
     //  qDebug() << "updateImage";
-    QImage image {width() - 2 * borderWidth, 1, QImage::Format_RGB888};
+    QImage image{ width() - 2 * borderWidth, 1, QImage::Format_RGB888 };
     if (image.isNull())
     {
         qDebug() << "QImage allocation failed, width():" << width();
@@ -177,7 +178,7 @@ QImage DownloadedPiecesBar::renderImage()
     return image;
 }
 
-void DownloadedPiecesBar::setProgress(const QBitArray &pieces, const QBitArray &downloadedPieces)
+void DownloadedPiecesBar::setProgress(const QBitArray& pieces, const QBitArray& downloadedPieces)
 {
     m_pieces = pieces;
     m_downloadedPieces = downloadedPieces;
@@ -196,12 +197,7 @@ QString DownloadedPiecesBar::simpleToolTipText() const
 {
     const QString borderColor = colorBoxBorderColor().name();
     const QString rowHTML = u"<tr><td width=20 bgcolor='%1' style='border: 1px solid \"%2\";'></td><td>%3</td></tr>"_s;
-    return u"<table cellspacing=4>"
-           + rowHTML.arg(backgroundColor().name(), borderColor, tr("Missing pieces"))
-           + rowHTML.arg(m_dlPieceColor.name(), borderColor, tr("Partial pieces"))
-           + rowHTML.arg(pieceColor().name(), borderColor, tr("Completed pieces"))
-           + u"</table>";
-
+    return u"<table cellspacing=4>" + rowHTML.arg(backgroundColor().name(), borderColor, tr("Missing pieces")) + rowHTML.arg(m_dlPieceColor.name(), borderColor, tr("Partial pieces")) + rowHTML.arg(pieceColor().name(), borderColor, tr("Completed pieces")) + u"</table>";
 }
 
 void DownloadedPiecesBar::updateColors()

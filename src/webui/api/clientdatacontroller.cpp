@@ -28,25 +28,24 @@
 
 #include "clientdatacontroller.h"
 
+#include "apierror.h"
+#include "base/global.h"
+#include "base/interfaces/iapplication.h"
+#include "base/logger.h"
+#include "webui/clientdatastorage.h"
+
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "base/global.h"
-#include "base/interfaces/iapplication.h"
-#include "base/logger.h"
-#include "apierror.h"
-#include "webui/clientdatastorage.h"
-
-ClientDataController::ClientDataController(ClientDataStorage *clientDataStorage, IApplication *app, QObject *parent)
-    : APIController(app, parent)
-    , m_clientDataStorage {clientDataStorage}
+ClientDataController::ClientDataController(ClientDataStorage* clientDataStorage, IApplication* app, QObject* parent)
+    : APIController(app, parent), m_clientDataStorage{ clientDataStorage }
 {
 }
 
 void ClientDataController::loadAction()
 {
-    const QString keysParam {params()[u"keys"_s]};
+    const QString keysParam{ params()[u"keys"_s] };
     if (keysParam.isEmpty())
     {
         setResult(m_clientDataStorage->loadData());
@@ -61,7 +60,7 @@ void ClientDataController::loadAction()
         throw APIError(APIErrorType::BadParams, tr("`keys` must be an array"));
 
     QStringList keys;
-    for (const QJsonValue &keysJsonVal : asConst(keysJsonDocument.array()))
+    for (const QJsonValue& keysJsonVal : asConst(keysJsonDocument.array()))
     {
         if (!keysJsonVal.isString())
             throw APIError(APIErrorType::BadParams, tr("Items of `keys` must be strings"));
@@ -74,7 +73,7 @@ void ClientDataController::loadAction()
 
 void ClientDataController::storeAction()
 {
-    requireParams({u"data"_s});
+    requireParams({ u"data"_s });
     QJsonParseError jsonError;
     const auto dataJsonDocument = QJsonDocument::fromJson(params()[u"data"_s].toUtf8(), &jsonError);
     if (jsonError.error != QJsonParseError::NoError)

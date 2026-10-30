@@ -28,14 +28,14 @@
 
 #pragma once
 
-#include <QtTypes>
+#include "base/pathfwd.h"
+
 #include <QByteArray>
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QHash>
 #include <QVariant>
-
-#include "base/pathfwd.h"
+#include <QtTypes>
 
 class QHostAddress;
 class QString;
@@ -48,28 +48,29 @@ class GeoIPDatabase
     Q_DECLARE_TR_FUNCTIONS(GeoIPDatabase)
 
 public:
-    static GeoIPDatabase *load(const Path &filename, QString &error);
-    static GeoIPDatabase *load(const QByteArray &data, QString &error);
+    static GeoIPDatabase* load(const Path& filename, QString& error);
+    static GeoIPDatabase* load(const QByteArray& data, QString& error);
 
     QString type() const;
     quint16 ipVersion() const;
     QDateTime buildEpoch() const;
-    QString lookup(const QHostAddress &hostAddr) const;
+    QString lookup(const QHostAddress& hostAddr) const;
 
 private:
-    GeoIPDatabase(const QByteArray &data);
+    GeoIPDatabase(const QByteArray& data);
 
-    bool parseMetadata(const QVariantHash &metadata, QString &error);
-    bool loadDB(QString &error) const;
+    bool parseMetadata(const QVariantHash& metadata, QString& error);
+    bool loadDB(QString& error) const;
     QVariantHash readMetadata() const;
 
-    QVariant readDataField(quint32 &offset) const;
-    bool readDataFieldDescriptor(quint32 &offset, DataFieldDescriptor &out) const;
-    void fromBigEndian(uchar *buf, quint32 len) const;
-    QVariant readMapValue(quint32 &offset, quint32 count) const;
-    QVariant readArrayValue(quint32 &offset, quint32 count) const;
+    QVariant readDataField(quint32& offset) const;
+    bool readDataFieldDescriptor(quint32& offset, DataFieldDescriptor& out) const;
+    void fromBigEndian(uchar* buf, quint32 len) const;
+    QVariant readMapValue(quint32& offset, quint32 count) const;
+    QVariant readArrayValue(quint32& offset, quint32 count) const;
 
-    template <typename T> QVariant readPlainValue(quint32 &offset, quint8 len) const;
+    template <typename T>
+    QVariant readPlainValue(quint32& offset, quint8 len) const;
 
     // Metadata
     quint16 m_ipVersion = 0;

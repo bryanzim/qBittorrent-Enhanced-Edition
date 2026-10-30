@@ -45,20 +45,17 @@ class DBusNotificationsInterface final : public QDBusAbstractInterface
 public:
     inline static const char DBUS_INTERFACE_NAME[] = "org.freedesktop.Notifications";
 
-    DBusNotificationsInterface(const QString &service, const QString &path
-            , const QDBusConnection &connection, QObject *parent = nullptr);
+    DBusNotificationsInterface(const QString& service, const QString& path, const QDBusConnection& connection, QObject* parent = nullptr);
 
 public slots:
     QDBusPendingReply<QStringList> getCapabilities();
     QDBusPendingReply<QString, QString, QString, QString> getServerInformation();
-    QDBusReply<QString> getServerInformation(QString &vendor, QString &version, QString &specVersion);
-    QDBusPendingReply<uint> notify(const QString &appName
-            , uint id, const QString &icon, const QString &summary, const QString &body
-            , const QStringList &actions, const QVariantMap &hints, int timeout);
+    QDBusReply<QString> getServerInformation(QString& vendor, QString& version, QString& specVersion);
+    QDBusPendingReply<uint> notify(const QString& appName, uint id, const QString& icon, const QString& summary, const QString& body, const QStringList& actions, const QVariantMap& hints, int timeout);
     QDBusPendingReply<> closeNotification(uint id);
 
 signals:
     // Signal names must exactly match the ones from corresponding D-Bus interface
-    void ActionInvoked(uint id, const QString &action);
+    void ActionInvoked(uint id, const QString& action);
     void NotificationClosed(uint id, uint reason);
 };

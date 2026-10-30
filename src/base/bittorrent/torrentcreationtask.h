@@ -29,12 +29,12 @@
 
 #pragma once
 
+#include "base/applicationcomponent.h"
+#include "torrentcreator.h"
+
 #include <QDateTime>
 #include <QObject>
 #include <QString>
-
-#include "base/applicationcomponent.h"
-#include "torrentcreator.h"
 
 namespace BitTorrent
 {
@@ -51,11 +51,10 @@ namespace BitTorrent
             Finished
         };
 
-        TorrentCreationTask(IApplication *app, const QString &id, TorrentCreator *torrentCreator
-                , bool startSeeding, QObject *parent = nullptr);
+        TorrentCreationTask(IApplication* app, const QString& id, TorrentCreator* torrentCreator, bool startSeeding, QObject* parent = nullptr);
 
         QString id() const;
-        const TorrentCreatorParams &params() const;
+        const TorrentCreatorParams& params() const;
         State state() const;
         bool isQueued() const;
         bool isRunning() const;
@@ -65,7 +64,7 @@ namespace BitTorrent
         QDateTime timeStarted() const;
         QDateTime timeFinished() const;
         int progress() const;
-        const TorrentCreatorResult &result() const;
+        const TorrentCreatorResult& result() const;
         QString errorMsg() const;
 
     private:

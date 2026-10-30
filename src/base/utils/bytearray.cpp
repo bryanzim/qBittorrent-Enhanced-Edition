@@ -59,13 +59,13 @@ QList<QByteArrayView> Utils::ByteArray::splitToViews(const QByteArrayView in, co
     }
 
     if (in.isEmpty()) [[unlikely]]
-        return (behavior == Qt::SkipEmptyParts) ? QList<QByteArrayView> {} : QList<QByteArrayView> {{}};
+        return (behavior == Qt::SkipEmptyParts) ? QList<QByteArrayView>{} : QList<QByteArrayView>{ {} };
 
-    const QByteArrayMatcher matcher {sep};
+    const QByteArrayMatcher matcher{ sep };
     QList<QByteArrayView> ret;
     ret.reserve((behavior == Qt::SkipEmptyParts)
-            ? (1 + (in.size() / (sep.size() + 1)))
-            : (1 + (in.size() / sep.size())));
+                    ? (1 + (in.size() / (sep.size() + 1)))
+                    : (1 + (in.size() / sep.size())));
     qsizetype head = 0;
     while (head < in.size())
     {
@@ -93,7 +93,7 @@ QByteArray Utils::ByteArray::asQByteArray(const QByteArrayView view)
     return QByteArray::fromRawData(view.constData(), view.size());
 }
 
-QByteArray Utils::ByteArray::toBase32(const QByteArray &in)
+QByteArray Utils::ByteArray::toBase32(const QByteArray& in)
 {
     const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
     const char padchar = '=';
@@ -102,7 +102,7 @@ QByteArray Utils::ByteArray::toBase32(const QByteArray &in)
 
     auto tmp = QByteArray((inSize + 4) / 5 * 8, Qt::Uninitialized);
     qsizetype inIndex = 0;
-    char *out = tmp.data();
+    char* out = tmp.data();
     while (inIndex < inSize)
     {
         // encode 5 bytes at a time
@@ -115,7 +115,7 @@ QByteArray Utils::ByteArray::toBase32(const QByteArray &in)
                 break;
         }
 
-        const int outCharCounts[] = {8, 7, 5, 4, 2};
+        const int outCharCounts[] = { 8, 7, 5, 4, 2 };
         for (int i = 7; i >= 0; --i)
         {
             if (i >= (8 - outCharCounts[inPadLen]))

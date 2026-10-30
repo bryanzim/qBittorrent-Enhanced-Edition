@@ -39,19 +39,19 @@ class TagFilterWidget final : public QTreeView
     Q_DISABLE_COPY_MOVE(TagFilterWidget)
 
 public:
-    explicit TagFilterWidget(QWidget *parent = nullptr);
+    explicit TagFilterWidget(QWidget* parent = nullptr);
 
     std::optional<Tag> currentTag() const;
 
 signals:
-    void tagChanged(const std::optional<Tag> &tag);
+    void tagChanged(const std::optional<Tag>& tag);
     void actionStartTorrentsTriggered();
     void actionForceStartTorrentsTriggered();
     void actionStopTorrentsTriggered();
     void actionDeleteTorrentsTriggered();
 
 private slots:
-    void onCurrentRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void onCurrentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void showMenu();
     void callUpdateGeometry();
     void addTag();
@@ -61,6 +61,6 @@ private slots:
 private:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
-    void rowsInserted(const QModelIndex &parent, int start, int end) override;
+    void rowsInserted(const QModelIndex& parent, int start, int end) override;
     Tag askTagName();
 };

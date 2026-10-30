@@ -26,10 +26,10 @@
  * exception statement from your version.
  */
 
+#include "base/utils/datetime.h"
+
 #include <QDateTime>
 #include <QTest>
-
-#include "base/utils/datetime.h"
 
 class TestUtilsDateTime final : public QObject
 {

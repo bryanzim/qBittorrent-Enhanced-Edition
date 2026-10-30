@@ -42,10 +42,10 @@ class IGUIApplication : public IApplication
 public:
     ~IGUIApplication() override = default;
 
-    GUIAddTorrentManager *addTorrentManager() const override = 0;
+    GUIAddTorrentManager* addTorrentManager() const override = 0;
 
-    virtual DesktopIntegration *desktopIntegration() = 0;
-    virtual MainWindow *mainWindow() = 0;
+    virtual DesktopIntegration* desktopIntegration() = 0;
+    virtual MainWindow* mainWindow() = 0;
 
     virtual WindowState startUpWindowState() const = 0;
     virtual void setStartUpWindowState(WindowState windowState) = 0;

@@ -30,4 +30,4 @@
 
 #include <lua/lua.hpp>
 
-void registerLuaClasses(lua_State *luaState);
+void registerLuaClasses(lua_State* luaState);

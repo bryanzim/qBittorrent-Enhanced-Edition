@@ -32,9 +32,8 @@
 #include "ui_autoexpandabledialog.h"
 #include "utils.h"
 
-AutoExpandableDialog::AutoExpandableDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::AutoExpandableDialog)
+AutoExpandableDialog::AutoExpandableDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::AutoExpandableDialog)
 {
     m_ui->setupUi(this);
 
@@ -47,9 +46,9 @@ AutoExpandableDialog::~AutoExpandableDialog()
     delete m_ui;
 }
 
-QString AutoExpandableDialog::getText(QWidget *parent, const QString &title, const QString &label,
-                                      QLineEdit::EchoMode mode, const QString &text,
-                                      bool *ok, const bool excludeExtension, Qt::InputMethodHints inputMethodHints)
+QString AutoExpandableDialog::getText(QWidget* parent, const QString& title, const QString& label,
+                                      QLineEdit::EchoMode mode, const QString& text,
+                                      bool* ok, const bool excludeExtension, Qt::InputMethodHints inputMethodHints)
 {
     AutoExpandableDialog d(parent);
     d.setWindowTitle(title);
@@ -70,12 +69,13 @@ QString AutoExpandableDialog::getText(QWidget *parent, const QString &title, con
     if (ok)
         *ok = res;
 
-    if (!res) return {};
+    if (!res)
+        return {};
 
     return d.m_ui->textEdit->text();
 }
 
-void AutoExpandableDialog::showEvent(QShowEvent *e)
+void AutoExpandableDialog::showEvent(QShowEvent* e)
 {
     // Overriding showEvent is required for consistent UI with fixed size under custom DPI
     QDialog::showEvent(e);
@@ -103,7 +103,7 @@ void AutoExpandableDialog::showEvent(QShowEvent *e)
     // If the value is less than dialog default size, default size is used
     if (wd > width())
     {
-        QSize size = {width() - m_ui->verticalLayout->sizeHint().width() + wd, height()};
+        QSize size = { width() - m_ui->verticalLayout->sizeHint().width() + wd, height() };
         resize(size);
     }
 }

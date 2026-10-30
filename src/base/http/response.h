@@ -29,23 +29,23 @@
 
 #pragma once
 
+#include "headermap.h"
+
 #include <QByteArray>
 #include <QString>
-
-#include "headermap.h"
 
 namespace Http
 {
     struct ResponseStatus
     {
         int code = 0;
-        QString text {};
+        QString text{};
     };
 
     struct Response
     {
-        ResponseStatus status {};
-        HeaderMap headers {};
-        QByteArray content {};
+        ResponseStatus status{};
+        HeaderMap headers{};
+        QByteArray content{};
     };
 }

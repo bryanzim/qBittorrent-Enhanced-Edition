@@ -29,15 +29,6 @@
 
 #include "searchhandler.h"
 
-#include <chrono>
-
-#include <QtLogging>
-#include <QList>
-#include <QMetaObject>
-#include <QProcess>
-#include <QTimer>
-#include <QUrl>
-
 #include "base/global.h"
 #include "base/logger.h"
 #include "base/path.h"
@@ -45,6 +36,15 @@
 #include "base/utils/foreignapps.h"
 #include "base/utils/fs.h"
 #include "searchpluginmanager.h"
+
+#include <QList>
+#include <QMetaObject>
+#include <QProcess>
+#include <QTimer>
+#include <QUrl>
+#include <QtLogging>
+
+#include <chrono>
 
 using namespace std::chrono_literals;
 
@@ -84,14 +84,8 @@ namespace
     };
 }
 
-SearchHandler::SearchHandler(const QString &pattern, const QString &category, const QStringList &usedPlugins, SearchPluginManager *manager)
-    : QObject(manager)
-    , m_pattern {pattern}
-    , m_category {category}
-    , m_usedPlugins {usedPlugins}
-    , m_manager {manager}
-    , m_searchProcess {new QProcess(this)}
-    , m_searchTimeout {new QTimer(this)}
+SearchHandler::SearchHandler(const QString& pattern, const QString& category, const QStringList& usedPlugins, SearchPluginManager* manager)
+    : QObject(manager), m_pattern{ pattern }, m_category{ category }, m_usedPlugins{ usedPlugins }, m_manager{ manager }, m_searchProcess{ new QProcess(this) }, m_searchTimeout{ new QTimer(this) }
 {
     // Load environment variables (proxy)
     m_searchProcess->setProcessEnvironment(m_manager->proxyEnvironment());
@@ -100,8 +94,7 @@ SearchHandler::SearchHandler(const QString &pattern, const QString &category, co
     m_searchProcess->setUnixProcessParameters(QProcess::UnixProcessFlag::CloseFileDescriptors);
 #endif
 
-    const QStringList params
-    {
+    const QStringList params{
         Utils::ForeignApps::PYTHON_ISOLATE_MODE_FLAG,
         Utils::ForeignApps::PYTHON_UTF8_MODE_FLAG,
         (SearchPluginManager::engineLocation() / Path(u"nova2.py"_s)).toString(),
@@ -110,19 +103,18 @@ SearchHandler::SearchHandler(const QString &pattern, const QString &category, co
     };
     m_searchProcess->setArguments(params + m_pattern.split(u' '));
 
-    connect(m_searchProcess, &QProcess::errorOccurred, this, [this](const QProcess::ProcessError error)
-    {
+    connect(m_searchProcess, &QProcess::errorOccurred, this, [this](const QProcess::ProcessError error) {
         if (!m_searchCancelled)
         {
             const auto errMsg = toString(error);
             LogMsg(tr("Search process failed. Search query: \"%1\". Category: \"%2\". Engines: \"%3\". Error: \"%4\".")
-                .arg(m_pattern, m_category, m_usedPlugins.join(u", "), errMsg), Log::WARNING);
+                       .arg(m_pattern, m_category, m_usedPlugins.join(u", "), errMsg),
+                   Log::WARNING);
             emit searchFailed(errMsg);
         }
     });
     connect(m_searchProcess, &QProcess::readyReadStandardOutput, this, &SearchHandler::readSearchOutput);
-    connect(m_searchProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished)
-            , this, &SearchHandler::processFinished);
+    connect(m_searchProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &SearchHandler::processFinished);
 
     m_searchTimeout->setSingleShot(true);
     connect(m_searchTimeout, &QTimer::timeout, this, &SearchHandler::cancelSearch);
@@ -130,8 +122,7 @@ SearchHandler::SearchHandler(const QString &pattern, const QString &category, co
 
     // Launch search
     // deferred start allows clients to handle starting-related signals
-    QMetaObject::invokeMethod(this, [this]() { m_searchProcess->start(QIODevice::ReadOnly); }
-        , Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [this]() { m_searchProcess->start(QIODevice::ReadOnly); }, Qt::QueuedConnection);
 }
 
 bool SearchHandler::isActive() const
@@ -165,7 +156,8 @@ void SearchHandler::processFinished(const int exitcode)
     {
         qWarning("%s", qUtf8Printable(errMsg));
         LogMsg(tr("Error occurred in search engine. Search query: \"%1\". Category: \"%2\". Engines: \"%3\". Error: \"%4\".")
-            .arg(m_pattern, m_category, m_usedPlugins.join(u", "), errMsg), Log::WARNING);
+                   .arg(m_pattern, m_category, m_usedPlugins.join(u", "), errMsg),
+               Log::WARNING);
     }
 
     if (m_searchCancelled)
@@ -189,7 +181,7 @@ void SearchHandler::readSearchOutput()
     QList<SearchResult> searchResultList;
     searchResultList.reserve(lines.size());
 
-    for (const QByteArrayView &line : asConst(lines))
+    for (const QByteArrayView& line : asConst(lines))
     {
         if (SearchResult searchResult; parseSearchResult(line, searchResult))
             searchResultList.append(std::move(searchResult));
@@ -205,7 +197,7 @@ void SearchHandler::readSearchOutput()
 // Parse one line of search results list
 // Line is in the following form:
 // file url | file name | file size | nb seeds | nb leechers | Search engine url
-bool SearchHandler::parseSearchResult(const QByteArrayView line, SearchResult &searchResult)
+bool SearchHandler::parseSearchResult(const QByteArrayView line, SearchResult& searchResult)
 {
     const QList<QByteArrayView> parts = Utils::ByteArray::splitToViews(line, "|");
     const qsizetype nbFields = parts.size();
@@ -214,9 +206,9 @@ bool SearchHandler::parseSearchResult(const QByteArrayView line, SearchResult &s
         return false; // Anything after ENGINE_URL is optional
 
     searchResult = SearchResult();
-    searchResult.fileUrl = QString::fromUtf8(parts.at(PL_DL_LINK).trimmed()); // download URL
+    searchResult.fileUrl = QString::fromUtf8(parts.at(PL_DL_LINK).trimmed());                                       // download URL
     searchResult.fileName = QUrl::fromPercentEncoding(Utils::ByteArray::asQByteArray(parts.at(PL_NAME).trimmed())); // Name
-    searchResult.fileSize = parts.at(PL_SIZE).trimmed().toLongLong(); // Size
+    searchResult.fileSize = parts.at(PL_SIZE).trimmed().toLongLong();                                               // Size
 
     bool ok = false;
 
@@ -228,7 +220,7 @@ bool SearchHandler::parseSearchResult(const QByteArrayView line, SearchResult &s
     if (!ok || (searchResult.nbLeechers < 0))
         searchResult.nbLeechers = -1;
 
-    searchResult.siteUrl = QString::fromUtf8(parts.at(PL_ENGINE_URL).trimmed()); // Search engine site URL
+    searchResult.siteUrl = QString::fromUtf8(parts.at(PL_ENGINE_URL).trimmed());    // Search engine site URL
     searchResult.engineName = m_manager->pluginNameBySiteURL(searchResult.siteUrl); // Search engine name
 
     if (nbFields > PL_DESC_LINK)
@@ -244,7 +236,7 @@ bool SearchHandler::parseSearchResult(const QByteArrayView line, SearchResult &s
     return true;
 }
 
-SearchPluginManager *SearchHandler::manager() const
+SearchPluginManager* SearchHandler::manager() const
 {
     return m_manager;
 }

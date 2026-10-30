@@ -29,9 +29,6 @@
 
 #include "tagfilterwidget.h"
 
-#include <QMenu>
-#include <QMessageBox>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "gui/autoexpandabledialog.h"
@@ -40,24 +37,27 @@
 #include "tagfiltermodel.h"
 #include "tagfilterproxymodel.h"
 
+#include <QMenu>
+#include <QMessageBox>
+
 namespace
 {
-    std::optional<Tag> getTagFilter(const TagFilterProxyModel *const model, const QModelIndex &index)
+    std::optional<Tag> getTagFilter(const TagFilterProxyModel* const model, const QModelIndex& index)
     {
         if (!index.isValid() || (index.row() == 0))
             return std::nullopt; // All tags
 
         if (index.row() == 1)
-            return Tag();  // Untagged
+            return Tag(); // Untagged
 
         return model->tag(index);
     }
 }
 
-TagFilterWidget::TagFilterWidget(QWidget *parent)
+TagFilterWidget::TagFilterWidget(QWidget* parent)
     : QTreeView(parent)
 {
-    auto *proxyModel = new TagFilterProxyModel(this);
+    auto* proxyModel = new TagFilterProxyModel(this);
     proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
     proxyModel->setSourceModel(new TagFilterModel(this));
     setModel(proxyModel);
@@ -79,8 +79,7 @@ TagFilterWidget::TagFilterWidget(QWidget *parent)
     connect(this, &TagFilterWidget::collapsed, this, &TagFilterWidget::callUpdateGeometry);
     connect(this, &TagFilterWidget::expanded, this, &TagFilterWidget::callUpdateGeometry);
     connect(this, &TagFilterWidget::customContextMenuRequested, this, &TagFilterWidget::showMenu);
-    connect(selectionModel(), &QItemSelectionModel::currentRowChanged, this
-            , &TagFilterWidget::onCurrentRowChanged);
+    connect(selectionModel(), &QItemSelectionModel::currentRowChanged, this, &TagFilterWidget::onCurrentRowChanged);
     connect(model(), &QAbstractItemModel::modelReset, this, &TagFilterWidget::callUpdateGeometry);
 }
 
@@ -91,40 +90,33 @@ std::optional<Tag> TagFilterWidget::currentTag() const
     if (!selectedRows.isEmpty())
         current = selectedRows.first();
 
-    return getTagFilter(static_cast<TagFilterProxyModel *>(model()), current);
+    return getTagFilter(static_cast<TagFilterProxyModel*>(model()), current);
 }
 
-void TagFilterWidget::onCurrentRowChanged(const QModelIndex &current, [[maybe_unused]] const QModelIndex &previous)
+void TagFilterWidget::onCurrentRowChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
-    emit tagChanged(getTagFilter(static_cast<TagFilterProxyModel *>(model()), current));
+    emit tagChanged(getTagFilter(static_cast<TagFilterProxyModel*>(model()), current));
 }
 
 void TagFilterWidget::showMenu()
 {
-    QMenu *menu = new QMenu(this);
+    QMenu* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"list-add"_s), tr("Add tag...")
-        , this, &TagFilterWidget::addTag);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"list-add"_s), tr("Add tag..."), this, &TagFilterWidget::addTag);
 
     const auto selectedRows = selectionModel()->selectedRows();
     if (!selectedRows.empty() && !TagFilterModel::isSpecialItem(selectedRows.first()))
     {
-        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove tag")
-            , this, &TagFilterWidget::removeTag);
+        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove tag"), this, &TagFilterWidget::removeTag);
     }
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove unused tags")
-        , this, &TagFilterWidget::removeUnusedTags);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove unused tags"), this, &TagFilterWidget::removeUnusedTags);
     menu->addSeparator();
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents")
-        , this, &TagFilterWidget::actionStartTorrentsTriggered);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents")
-        , this, &TagFilterWidget::actionForceStartTorrentsTriggered);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents")
-        , this, &TagFilterWidget::actionStopTorrentsTriggered);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents")
-        , this, &TagFilterWidget::actionDeleteTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents"), this, &TagFilterWidget::actionStartTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents"), this, &TagFilterWidget::actionForceStartTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents"), this, &TagFilterWidget::actionStopTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents"), this, &TagFilterWidget::actionDeleteTorrentsTriggered);
 
     menu->popup(QCursor::pos());
 }
@@ -136,8 +128,7 @@ void TagFilterWidget::callUpdateGeometry()
 
 QSize TagFilterWidget::sizeHint() const
 {
-    return
-    {
+    return {
         // Width should be exactly the width of the content
         sizeHintForColumn(0),
         // Height should be exactly the height of the content
@@ -152,7 +143,7 @@ QSize TagFilterWidget::minimumSizeHint() const
     return size;
 }
 
-void TagFilterWidget::rowsInserted(const QModelIndex &parent, int start, int end)
+void TagFilterWidget::rowsInserted(const QModelIndex& parent, int start, int end)
 {
     QTreeView::rowsInserted(parent, start, end);
     updateGeometry();
@@ -166,15 +157,13 @@ Tag TagFilterWidget::askTagName()
     while (invalid)
     {
         invalid = false;
-        tag = Tag(AutoExpandableDialog::getText(this, tr("Add tag"), tr("Tag:")
-                , QLineEdit::Normal, tag.toString(), &ok));
+        tag = Tag(AutoExpandableDialog::getText(this, tr("Add tag"), tr("Tag:"), QLineEdit::Normal, tag.toString(), &ok));
         if (ok && !tag.isEmpty())
         {
             if (!tag.isValid())
             {
                 QMessageBox::warning(
-                    this, tr("Invalid tag name")
-                    , tr("Tag name '%1' is invalid").arg(tag.toString()));
+                    this, tr("Invalid tag name"), tr("Tag name '%1' is invalid").arg(tag.toString()));
                 invalid = true;
             }
         }
@@ -201,16 +190,16 @@ void TagFilterWidget::removeTag()
     if (!selectedRows.empty() && !TagFilterModel::isSpecialItem(selectedRows.first()))
     {
         BitTorrent::Session::instance()->removeTag(
-            static_cast<TagFilterProxyModel *>(model())->tag(selectedRows.first()));
+            static_cast<TagFilterProxyModel*>(model())->tag(selectedRows.first()));
         updateGeometry();
     }
 }
 
 void TagFilterWidget::removeUnusedTags()
 {
-    auto *session = BitTorrent::Session::instance();
-    for (const Tag &tag : asConst(session->tags()))
-        if (model()->data(static_cast<TagFilterProxyModel *>(model())->index(tag), Qt::UserRole) == 0)
+    auto* session = BitTorrent::Session::instance();
+    for (const Tag& tag : asConst(session->tags()))
+        if (model()->data(static_cast<TagFilterProxyModel*>(model())->index(tag), Qt::UserRole) == 0)
             session->removeTag(tag);
     updateGeometry();
 }

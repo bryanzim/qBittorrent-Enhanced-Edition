@@ -29,23 +29,21 @@
 
 #include "shutdownconfirmdialog.h"
 
-#include <chrono>
+#include "base/preferences.h"
+#include "ui_shutdownconfirmdialog.h"
+#include "utils.h"
 
 #include <QDialogButtonBox>
 #include <QIcon>
 #include <QPushButton>
 #include <QStyle>
 
-#include "base/preferences.h"
-#include "ui_shutdownconfirmdialog.h"
-#include "utils.h"
+#include <chrono>
 
 using namespace std::chrono_literals;
 
-ShutdownConfirmDialog::ShutdownConfirmDialog(QWidget *parent, const ShutdownDialogAction &action)
-    : QDialog(parent)
-    , m_ui(new Ui::ShutdownConfirmDialog)
-    , m_action(action)
+ShutdownConfirmDialog::ShutdownConfirmDialog(QWidget* parent, const ShutdownDialogAction& action)
+    : QDialog(parent), m_ui(new Ui::ShutdownConfirmDialog), m_action(action)
 {
     m_ui->setupUi(this);
 
@@ -59,7 +57,7 @@ ShutdownConfirmDialog::ShutdownConfirmDialog(QWidget *parent, const ShutdownDial
         m_ui->neverShowAgainCheckbox->setVisible(false);
 
     // Cancel Button
-    QPushButton *cancelButton = m_ui->buttonBox->button(QDialogButtonBox::Cancel);
+    QPushButton* cancelButton = m_ui->buttonBox->button(QDialogButtonBox::Cancel);
     cancelButton->setFocus();
     cancelButton->setDefault(true);
 
@@ -79,13 +77,13 @@ ShutdownConfirmDialog::~ShutdownConfirmDialog()
     delete m_ui;
 }
 
-void ShutdownConfirmDialog::showEvent(QShowEvent *event)
+void ShutdownConfirmDialog::showEvent(QShowEvent* event)
 {
     QDialog::showEvent(event);
     m_timer.start();
 }
 
-bool ShutdownConfirmDialog::askForConfirmation(QWidget *parent, const ShutdownDialogAction &action)
+bool ShutdownConfirmDialog::askForConfirmation(QWidget* parent, const ShutdownDialogAction& action)
 {
     ShutdownConfirmDialog dlg(parent, action);
     return (dlg.exec() == QDialog::Accepted);
@@ -110,7 +108,7 @@ void ShutdownConfirmDialog::accept()
 
 void ShutdownConfirmDialog::initText()
 {
-    QPushButton *okButton = m_ui->buttonBox->button(QDialogButtonBox::Ok);
+    QPushButton* okButton = m_ui->buttonBox->button(QDialogButtonBox::Ok);
 
     switch (m_action)
     {

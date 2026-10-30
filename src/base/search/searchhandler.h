@@ -61,33 +61,32 @@ class SearchHandler : public QObject
 
     friend class SearchPluginManager;
 
-    SearchHandler(const QString &pattern, const QString &category
-                  , const QStringList &usedPlugins, SearchPluginManager *manager);
+    SearchHandler(const QString& pattern, const QString& category, const QStringList& usedPlugins, SearchPluginManager* manager);
 
 public:
     bool isActive() const;
     QString pattern() const;
-    SearchPluginManager *manager() const;
+    SearchPluginManager* manager() const;
     QList<SearchResult> results() const;
 
     void cancelSearch();
 
 signals:
     void searchFinished(bool cancelled = false);
-    void searchFailed(const QString &errorMessage);
-    void newSearchResults(const QList<SearchResult> &results);
+    void searchFailed(const QString& errorMessage);
+    void newSearchResults(const QList<SearchResult>& results);
 
 private:
     void readSearchOutput();
     void processFinished(int exitcode);
-    bool parseSearchResult(QByteArrayView line, SearchResult &searchResult);
+    bool parseSearchResult(QByteArrayView line, SearchResult& searchResult);
 
     const QString m_pattern;
     const QString m_category;
     const QStringList m_usedPlugins;
-    SearchPluginManager *m_manager = nullptr;
-    QProcess *m_searchProcess = nullptr;
-    QTimer *m_searchTimeout = nullptr;
+    SearchPluginManager* m_manager = nullptr;
+    QProcess* m_searchProcess = nullptr;
+    QTimer* m_searchTimeout = nullptr;
     QByteArray m_searchResultLineTruncated;
     bool m_searchCancelled = false;
     QList<SearchResult> m_results;

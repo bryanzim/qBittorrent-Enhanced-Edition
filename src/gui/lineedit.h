@@ -40,13 +40,13 @@ class LineEdit final : public QLineEdit
     Q_DISABLE_COPY_MOVE(LineEdit)
 
 public:
-    explicit LineEdit(QWidget *parent = nullptr);
+    explicit LineEdit(QWidget* parent = nullptr);
 
 signals:
-    void textUpdated(const QString &text);
+    void textUpdated(const QString& text);
 
 private:
-    void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
-    QTimer *m_delayedTextChangedTimer = nullptr;
+    QTimer* m_delayedTextChangedTimer = nullptr;
 };

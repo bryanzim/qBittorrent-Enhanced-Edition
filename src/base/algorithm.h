@@ -32,14 +32,13 @@
 namespace Algorithm
 {
     template <typename T>
-    concept HasMappedType = requires
-    {
+    concept HasMappedType = requires {
         typename T::mapped_type;
     };
 
     // To be used with associative array types, such as QMap, QHash and its variants
     template <HasMappedType T, typename BinaryPredicate>
-    void removeIf(T &dict, BinaryPredicate &&p)
+    void removeIf(T& dict, BinaryPredicate&& p)
     {
         auto it = dict.begin();
         while (it != dict.end())

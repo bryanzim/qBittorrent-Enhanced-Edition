@@ -28,13 +28,13 @@
 
 #include "tag.h"
 
-#include <QDataStream>
-
 #include "base/concepts/stringable.h"
+
+#include <QDataStream>
 
 namespace
 {
-    QString cleanTag(const QString &tag)
+    QString cleanTag(const QString& tag)
     {
         return tag.trimmed();
     }
@@ -43,12 +43,12 @@ namespace
 // `Tag` should satisfy `Stringable` concept in order to be stored in settings as string
 static_assert(Stringable<Tag>);
 
-Tag::Tag(const QString &tagStr)
-    : m_tagStr {cleanTag(tagStr)}
+Tag::Tag(const QString& tagStr)
+    : m_tagStr{ cleanTag(tagStr) }
 {
 }
 
-Tag::Tag(const std::string &tagStr)
+Tag::Tag(const std::string& tagStr)
     : Tag(QString::fromStdString(tagStr))
 {
 }
@@ -76,13 +76,13 @@ Tag::operator QString() const noexcept
     return toString();
 }
 
-QDataStream &operator<<(QDataStream &out, const Tag &tag)
+QDataStream& operator<<(QDataStream& out, const Tag& tag)
 {
     out << tag.toString();
     return out;
 }
 
-QDataStream &operator>>(QDataStream &in, Tag &tag)
+QDataStream& operator>>(QDataStream& in, Tag& tag)
 {
     QString tagStr;
     in >> tagStr;

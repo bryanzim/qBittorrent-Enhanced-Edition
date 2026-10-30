@@ -29,22 +29,23 @@
 
 #include "pieceavailabilitybar.h"
 
-#include <algorithm>
-#include <cmath>
+#include "base/global.h"
 
 #include <QDebug>
 
-#include "base/global.h"
+#include <algorithm>
+#include <cmath>
 
-PieceAvailabilityBar::PieceAvailabilityBar(QWidget *parent)
-    : base {parent}
+PieceAvailabilityBar::PieceAvailabilityBar(QWidget* parent)
+    : base{ parent }
 {
 }
 
-QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int> &vecin, int reqSize)
+QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int>& vecin, int reqSize)
 {
     QList<float> result(reqSize, 0.0);
-    if (vecin.isEmpty()) return result;
+    if (vecin.isEmpty())
+        return result;
 
     const float ratio = static_cast<float>(vecin.size()) / reqSize;
 
@@ -69,7 +70,7 @@ QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int> &vecin, int
         const float toR = (x + 1) * ratio;
 
         // C - integer
-        int fromC = fromR;// std::floor not needed
+        int fromC = fromR; // std::floor not needed
         int toC = std::ceil(toR);
         if (toC > vecin.size())
             --toC;
@@ -129,7 +130,7 @@ QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int> &vecin, int
 
 QImage PieceAvailabilityBar::renderImage()
 {
-    QImage image {width() - 2 * borderWidth, 1, QImage::Format_RGB888};
+    QImage image{ width() - 2 * borderWidth, 1, QImage::Format_RGB888 };
     if (image.isNull())
     {
         qDebug() << "QImage allocation failed, width():" << width();
@@ -154,7 +155,7 @@ QImage PieceAvailabilityBar::renderImage()
     return image;
 }
 
-void PieceAvailabilityBar::setAvailability(const QList<int> &avail)
+void PieceAvailabilityBar::setAvailability(const QList<int>& avail)
 {
     m_pieces = avail;
 
@@ -171,9 +172,5 @@ QString PieceAvailabilityBar::simpleToolTipText() const
 {
     const QString borderColor = colorBoxBorderColor().name();
     const QString rowHTML = u"<tr><td width=20 bgcolor='%1' style='border: 1px solid \"%2\";'></td><td>%3</td></tr>"_s;
-    return u"<table cellspacing=4>"
-           + rowHTML.arg(backgroundColor().name(), borderColor, tr("Unavailable pieces"))
-           + rowHTML.arg(pieceColor().name(), borderColor, tr("Available pieces"))
-           + u"</table>";
-
+    return u"<table cellspacing=4>" + rowHTML.arg(backgroundColor().name(), borderColor, tr("Unavailable pieces")) + rowHTML.arg(pieceColor().name(), borderColor, tr("Available pieces")) + u"</table>";
 }

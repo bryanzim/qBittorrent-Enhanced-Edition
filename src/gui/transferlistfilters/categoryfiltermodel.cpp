@@ -28,24 +28,23 @@
 
 #include "categoryfiltermodel.h"
 
-#include <QHash>
-#include <QIcon>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "gui/uithememanager.h"
 
+#include <QHash>
+#include <QIcon>
+
 class CategoryModelItem
 {
 public:
-    inline static const QString UID_ALL {QChar(1)};
+    inline static const QString UID_ALL{ QChar(1) };
     inline static const QString UID_UNCATEGORIZED;
 
     CategoryModelItem() = default;
 
-    CategoryModelItem(CategoryModelItem *parent, const QString &categoryName, const int torrentsCount = 0)
-        : m_name(categoryName)
-        , m_torrentsCount(torrentsCount)
+    CategoryModelItem(CategoryModelItem* parent, const QString& categoryName, const int torrentsCount = 0)
+        : m_name(categoryName), m_torrentsCount(torrentsCount)
     {
         if (parent)
             parent->addChild(m_name, this);
@@ -76,7 +75,7 @@ public:
         return u"%1/%2"_s.arg(m_parent->fullName(), m_name);
     }
 
-    CategoryModelItem *parent() const
+    CategoryModelItem* parent() const
     {
         return m_parent;
     }
@@ -119,7 +118,7 @@ public:
         return -1;
     }
 
-    bool hasChild(const QString &name) const
+    bool hasChild(const QString& name) const
     {
         return m_children.contains(name);
     }
@@ -129,12 +128,12 @@ public:
         return m_children.count();
     }
 
-    CategoryModelItem *child(const QString &uid) const
+    CategoryModelItem* child(const QString& uid) const
     {
         return m_children.value(uid);
     }
 
-    CategoryModelItem *childAt(int index) const
+    CategoryModelItem* childAt(int index) const
     {
         if ((index < 0) || (index >= m_childUids.count()))
             return nullptr;
@@ -142,7 +141,7 @@ public:
         return m_children[m_childUids[index]];
     }
 
-    void addChild(const QString &uid, CategoryModelItem *item)
+    void addChild(const QString& uid, CategoryModelItem* item)
     {
         Q_ASSERT(item);
         Q_ASSERT(!item->parent());
@@ -163,16 +162,16 @@ public:
     }
 
 private:
-    CategoryModelItem *m_parent = nullptr;
+    CategoryModelItem* m_parent = nullptr;
     QString m_name;
     int m_torrentsCount = 0;
-    QHash<QString, CategoryModelItem *> m_children;
+    QHash<QString, CategoryModelItem*> m_children;
     QStringList m_childUids;
 };
 
 namespace
 {
-    QString shortName(const QString &fullName)
+    QString shortName(const QString& fullName)
     {
         const qsizetype pos = fullName.lastIndexOf(u'/');
         if (pos >= 0)
@@ -181,12 +180,11 @@ namespace
     }
 }
 
-CategoryFilterModel::CategoryFilterModel(QObject *parent)
-    : QAbstractItemModel(parent)
-    , m_rootItem(new CategoryModelItem)
+CategoryFilterModel::CategoryFilterModel(QObject* parent)
+    : QAbstractItemModel(parent), m_rootItem(new CategoryModelItem)
 {
     using namespace BitTorrent;
-    const auto *session = Session::instance();
+    const auto* session = Session::instance();
 
     connect(session, &Session::categoryAdded, this, &CategoryFilterModel::categoryAdded);
     connect(session, &Session::categoryRemoved, this, &CategoryFilterModel::categoryRemoved);
@@ -203,24 +201,24 @@ CategoryFilterModel::~CategoryFilterModel()
     delete m_rootItem;
 }
 
-bool CategoryFilterModel::isSpecialItem(const QModelIndex &index)
+bool CategoryFilterModel::isSpecialItem(const QModelIndex& index)
 {
     // the first two items at first level are special items:
     // 'All' and 'Uncategorized'
     return (!index.parent().isValid() && (index.row() <= 1));
 }
 
-int CategoryFilterModel::columnCount(const QModelIndex &) const
+int CategoryFilterModel::columnCount(const QModelIndex&) const
 {
     return 1;
 }
 
-QVariant CategoryFilterModel::data(const QModelIndex &index, int role) const
+QVariant CategoryFilterModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return {};
 
-    const auto *item = static_cast<const CategoryModelItem *>(index.internalPointer());
+    const auto* item = static_cast<const CategoryModelItem*>(index.internalPointer());
 
     if ((index.column() == 0) && (role == Qt::DecorationRole))
     {
@@ -240,9 +238,10 @@ QVariant CategoryFilterModel::data(const QModelIndex &index, int role) const
     return {};
 }
 
-Qt::ItemFlags CategoryFilterModel::flags(const QModelIndex &index) const
+Qt::ItemFlags CategoryFilterModel::flags(const QModelIndex& index) const
 {
-    if (!index.isValid()) return Qt::NoItemFlags;
+    if (!index.isValid())
+        return Qt::NoItemFlags;
 
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -256,7 +255,7 @@ QVariant CategoryFilterModel::headerData(int section, Qt::Orientation orientatio
     return {};
 }
 
-QModelIndex CategoryFilterModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex CategoryFilterModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (column > 0)
         return {};
@@ -264,27 +263,28 @@ QModelIndex CategoryFilterModel::index(int row, int column, const QModelIndex &p
     if (parent.isValid() && (parent.column() != 0))
         return {};
 
-    auto *parentItem = parent.isValid()
-            ? static_cast<CategoryModelItem *>(parent.internalPointer()) : m_rootItem;
+    auto* parentItem = parent.isValid()
+                           ? static_cast<CategoryModelItem*>(parent.internalPointer())
+                           : m_rootItem;
     if (row < parentItem->childCount())
         return createIndex(row, column, parentItem->childAt(row));
 
     return {};
 }
 
-QModelIndex CategoryFilterModel::parent(const QModelIndex &index) const
+QModelIndex CategoryFilterModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
         return {};
 
-    auto *item = static_cast<CategoryModelItem *>(index.internalPointer());
+    auto* item = static_cast<CategoryModelItem*>(index.internalPointer());
     if (!item)
         return {};
 
     return this->index(item->parent());
 }
 
-int CategoryFilterModel::rowCount(const QModelIndex &parent) const
+int CategoryFilterModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.column() > 0)
         return 0;
@@ -292,27 +292,27 @@ int CategoryFilterModel::rowCount(const QModelIndex &parent) const
     if (!parent.isValid())
         return m_rootItem->childCount();
 
-    auto *item = static_cast<CategoryModelItem *>(parent.internalPointer());
+    auto* item = static_cast<CategoryModelItem*>(parent.internalPointer());
     if (!item)
         return 0;
 
     return item->childCount();
 }
 
-QModelIndex CategoryFilterModel::index(const QString &categoryName) const
+QModelIndex CategoryFilterModel::index(const QString& categoryName) const
 {
     return index(findItem(categoryName));
 }
 
-QString CategoryFilterModel::categoryName(const QModelIndex &index) const
+QString CategoryFilterModel::categoryName(const QModelIndex& index) const
 {
     if (!index.isValid())
         return {};
 
-    return static_cast<CategoryModelItem *>(index.internalPointer())->fullName();
+    return static_cast<CategoryModelItem*>(index.internalPointer())->fullName();
 }
 
-QModelIndex CategoryFilterModel::index(CategoryModelItem *item) const
+QModelIndex CategoryFilterModel::index(CategoryModelItem* item) const
 {
     if (!item || !item->parent())
         return {};
@@ -320,9 +320,9 @@ QModelIndex CategoryFilterModel::index(CategoryModelItem *item) const
     return index(item->pos(), 0, index(item->parent()));
 }
 
-void CategoryFilterModel::categoryAdded(const QString &categoryName)
+void CategoryFilterModel::categoryAdded(const QString& categoryName)
 {
-    CategoryModelItem *parent = m_rootItem;
+    CategoryModelItem* parent = m_rootItem;
 
     const QStringList expanded = BitTorrent::Session::expandCategory(categoryName);
     if (expanded.count() > 1)
@@ -338,9 +338,9 @@ void CategoryFilterModel::categoryAdded(const QString &categoryName)
     endInsertRows();
 }
 
-void CategoryFilterModel::categoryRemoved(const QString &categoryName)
+void CategoryFilterModel::categoryRemoved(const QString& categoryName)
 {
-    auto *item = findItem(categoryName);
+    auto* item = findItem(categoryName);
     if (item)
     {
         const QModelIndex i = index(item);
@@ -350,11 +350,11 @@ void CategoryFilterModel::categoryRemoved(const QString &categoryName)
     }
 }
 
-void CategoryFilterModel::torrentsLoaded(const QList<BitTorrent::Torrent *> &torrents)
+void CategoryFilterModel::torrentsLoaded(const QList<BitTorrent::Torrent*>& torrents)
 {
-    for (const BitTorrent::Torrent *torrent : torrents)
+    for (const BitTorrent::Torrent* torrent : torrents)
     {
-        CategoryModelItem *item = findItem(torrent->category());
+        CategoryModelItem* item = findItem(torrent->category());
         Q_ASSERT(item);
 
         item->increaseTorrentsCount();
@@ -371,9 +371,9 @@ void CategoryFilterModel::torrentsLoaded(const QList<BitTorrent::Torrent *> &tor
     emit dataChanged(index(0, 0), index(0, 0));
 }
 
-void CategoryFilterModel::torrentAboutToBeRemoved(BitTorrent::Torrent *const torrent)
+void CategoryFilterModel::torrentAboutToBeRemoved(BitTorrent::Torrent* const torrent)
 {
-    CategoryModelItem *item = findItem(torrent->category());
+    CategoryModelItem* item = findItem(torrent->category());
     Q_ASSERT(item);
 
     item->decreaseTorrentsCount();
@@ -388,9 +388,9 @@ void CategoryFilterModel::torrentAboutToBeRemoved(BitTorrent::Torrent *const tor
     emit dataChanged(index(0, 0), index(0, 0));
 }
 
-void CategoryFilterModel::torrentCategoryChanged(BitTorrent::Torrent *const torrent, const QString &oldCategory)
+void CategoryFilterModel::torrentCategoryChanged(BitTorrent::Torrent* const torrent, const QString& oldCategory)
 {
-    auto *item = findItem(oldCategory);
+    auto* item = findItem(oldCategory);
     Q_ASSERT(item);
 
     item->decreaseTorrentsCount();
@@ -424,31 +424,27 @@ void CategoryFilterModel::populate()
 {
     m_rootItem->clear();
 
-    const auto *session = BitTorrent::Session::instance();
+    const auto* session = BitTorrent::Session::instance();
     const auto torrents = session->torrents();
 
     // All torrents
-    m_rootItem->addChild(CategoryModelItem::UID_ALL
-            , new CategoryModelItem(nullptr, tr("All"), torrents.count()));
+    m_rootItem->addChild(CategoryModelItem::UID_ALL, new CategoryModelItem(nullptr, tr("All"), torrents.count()));
 
     // Uncategorized torrents
     using Torrent = BitTorrent::Torrent;
-    const int torrentsCount = std::ranges::count_if(torrents
-            , [](const Torrent *torrent) { return torrent->category().isEmpty(); });
-    m_rootItem->addChild(CategoryModelItem::UID_UNCATEGORIZED
-            , new CategoryModelItem(nullptr, tr("Uncategorized"), torrentsCount));
+    const int torrentsCount = std::ranges::count_if(torrents, [](const Torrent* torrent) { return torrent->category().isEmpty(); });
+    m_rootItem->addChild(CategoryModelItem::UID_UNCATEGORIZED, new CategoryModelItem(nullptr, tr("Uncategorized"), torrentsCount));
 
     using BitTorrent::Torrent;
-    for (const QString &categoryName : asConst(session->categories()))
+    for (const QString& categoryName : asConst(session->categories()))
     {
-        CategoryModelItem *parent = m_rootItem;
-        for (const QString &subcat : asConst(BitTorrent::Session::expandCategory(categoryName)))
+        CategoryModelItem* parent = m_rootItem;
+        for (const QString& subcat : asConst(BitTorrent::Session::expandCategory(categoryName)))
         {
             const QString subcatName = shortName(subcat);
             if (!parent->hasChild(subcatName))
             {
-                const int torrentsCount = std::ranges::count_if(torrents
-                        , [&subcat](const Torrent *torrent) { return torrent->category() == subcat; });
+                const int torrentsCount = std::ranges::count_if(torrents, [&subcat](const Torrent* torrent) { return torrent->category() == subcat; });
                 new CategoryModelItem(parent, subcatName, torrentsCount);
             }
             parent = parent->child(subcatName);
@@ -456,13 +452,13 @@ void CategoryFilterModel::populate()
     }
 }
 
-CategoryModelItem *CategoryFilterModel::findItem(const QString &fullName) const
+CategoryModelItem* CategoryFilterModel::findItem(const QString& fullName) const
 {
     if (fullName.isEmpty())
         return m_rootItem->childAt(1); // "Uncategorized" item
 
-    CategoryModelItem *item = m_rootItem;
-    for (const QString &subcat : asConst(BitTorrent::Session::expandCategory(fullName)))
+    CategoryModelItem* item = m_rootItem;
+    for (const QString& subcat : asConst(BitTorrent::Session::expandCategory(fullName)))
     {
         const QString subcatName = shortName(subcat);
         if (!item->hasChild(subcatName))

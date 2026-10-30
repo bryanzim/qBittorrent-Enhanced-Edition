@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QSortFilterProxyModel>
-
 #include "base/logger.h"
+
+#include <QSortFilterProxyModel>
 
 class LogFilterModel final : public QSortFilterProxyModel
 {
@@ -38,11 +38,11 @@ class LogFilterModel final : public QSortFilterProxyModel
     Q_DISABLE_COPY_MOVE(LogFilterModel)
 
 public:
-    explicit LogFilterModel(Log::MsgTypes types = Log::ALL, QObject *parent = nullptr);
+    explicit LogFilterModel(Log::MsgTypes types = Log::ALL, QObject* parent = nullptr);
     void setMessageTypes(Log::MsgTypes types);
 
 private:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
     Log::MsgTypes m_types;
 };

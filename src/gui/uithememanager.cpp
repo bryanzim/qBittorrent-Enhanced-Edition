@@ -30,18 +30,18 @@
 
 #include "uithememanager.h"
 
+#include "base/logger.h"
+#include "base/path.h"
+#include "base/preferences.h"
+#include "base/profile.h"
+#include "uithemecommon.h"
+
 #include <QApplication>
 #include <QPalette>
 #include <QPixmapCache>
 #include <QResource>
 #include <QStyle>
 #include <QStyleHints>
-
-#include "base/logger.h"
-#include "base/path.h"
-#include "base/profile.h"
-#include "base/preferences.h"
-#include "uithemecommon.h"
 
 #ifdef Q_OS_WIN
 #include "base/utils/reg.h"
@@ -54,17 +54,17 @@ namespace
     bool isDarkTheme()
     {
         const QPalette palette = qApp->palette();
-        const QColor &color = palette.color(QPalette::Active, QPalette::Base);
+        const QColor& color = palette.color(QPalette::Active, QPalette::Base);
         return (color.lightness() < 127);
     }
 
-    Path resolveThemePath(const Path &themePath)
+    Path resolveThemePath(const Path& themePath)
     {
         return (themePath.isAbsolute() ? themePath : (Profile::instance()->location(SpecialFolder::Config) / themePath));
     }
 }
 
-UIThemeManager *UIThemeManager::m_instance = nullptr;
+UIThemeManager* UIThemeManager::m_instance = nullptr;
 
 void UIThemeManager::freeInstance()
 {
@@ -79,13 +79,16 @@ void UIThemeManager::initInstance()
 }
 
 UIThemeManager::UIThemeManager()
-    : m_useCustomTheme {Preferences::instance()->useCustomUITheme()}
+    : m_useCustomTheme{ Preferences::instance()->useCustomUITheme() }
 #ifdef QBT_HAS_COLORSCHEME_OPTION
-    , m_colorSchemeSetting {u"Appearance/ColorScheme"_s}
+      ,
+      m_colorSchemeSetting{ u"Appearance/ColorScheme"_s }
 #endif
-    , m_trayIconStyleSetting {u"Appearance/TrayIconStyle"_s}
+      ,
+      m_trayIconStyleSetting{ u"Appearance/TrayIconStyle"_s }
 #if (defined(Q_OS_UNIX) && !defined(Q_OS_MACOS))
-    , m_useSystemIcons {Preferences::instance()->useSystemIcons()}
+      ,
+      m_useSystemIcons{ Preferences::instance()->useSystemIcons() }
 #endif
 {
 #ifdef Q_OS_WIN
@@ -131,7 +134,7 @@ UIThemeManager::UIThemeManager()
     }
 }
 
-UIThemeManager *UIThemeManager::instance()
+UIThemeManager* UIThemeManager::instance()
 {
     return m_instance;
 }
@@ -194,9 +197,9 @@ void UIThemeManager::onColorSchemeChanged()
     QApplication::setStyle(QApplication::style()->name());
 }
 
-QIcon UIThemeManager::getIcon(const QString &iconId, [[maybe_unused]] const QString &fallback, const ColorMode colorMode) const
+QIcon UIThemeManager::getIcon(const QString& iconId, [[maybe_unused]] const QString& fallback, const ColorMode colorMode) const
 {
-    auto &icons = (colorMode == ColorMode::Dark) ? m_darkModeIcons : m_icons;
+    auto& icons = (colorMode == ColorMode::Dark) ? m_darkModeIcons : m_icons;
 
     const auto iter = icons.find(iconId);
     if (iter != icons.end())
@@ -213,12 +216,12 @@ QIcon UIThemeManager::getIcon(const QString &iconId, [[maybe_unused]] const QStr
     }
 #endif
 
-    const QIcon icon {m_themeSource->getIconPath(iconId, colorMode).data()};
+    const QIcon icon{ m_themeSource->getIconPath(iconId, colorMode).data() };
     icons[iconId] = icon;
     return icon;
 }
 
-QIcon UIThemeManager::getIcon(const QString &iconId, const QString &fallback) const
+QIcon UIThemeManager::getIcon(const QString& iconId, const QString& fallback) const
 {
     const auto colorMode = isDarkTheme() ? ColorMode::Dark : ColorMode::Light;
     return getIcon(iconId, fallback, colorMode);
@@ -230,10 +233,12 @@ QIcon UIThemeManager::getSystrayIcon() const
     const auto colorMode = m_systemColorMode;
 #else
     const auto colorMode = (qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark)
-            ? ColorMode::Dark : ColorMode::Light;
+                               ? ColorMode::Dark
+                               : ColorMode::Light;
 #endif
     const QString fallback = (colorMode == ColorMode::Light)
-            ? u"qbittorrent-tray-light"_s : u"qbittorrent-tray-dark"_s;
+                                 ? u"qbittorrent-tray-light"_s
+                                 : u"qbittorrent-tray-dark"_s;
 
     switch (trayIconStyle())
     {
@@ -247,7 +252,7 @@ QIcon UIThemeManager::getSystrayIcon() const
     Q_UNREACHABLE_RETURN({});
 }
 
-QIcon UIThemeManager::getFlagIcon(const QString &countryIsoCode) const
+QIcon UIThemeManager::getFlagIcon(const QString& countryIsoCode) const
 {
     if (countryIsoCode.isEmpty())
         return {};
@@ -257,12 +262,12 @@ QIcon UIThemeManager::getFlagIcon(const QString &countryIsoCode) const
     if (iter != m_flags.cend())
         return *iter;
 
-    const QIcon icon {u":/icons/flags/" + key + u".svg"};
+    const QIcon icon{ u":/icons/flags/" + key + u".svg" };
     m_flags[key] = icon;
     return icon;
 }
 
-QPixmap UIThemeManager::getScaledPixmap(const QString &iconId, const int height) const
+QPixmap UIThemeManager::getScaledPixmap(const QString& iconId, const int height) const
 {
     // (workaround) svg images require the use of `QIcon()` to load and scale losslessly,
     // otherwise other image classes will convert it to pixmap first and follow-up scaling will become lossy.
@@ -281,7 +286,7 @@ QPixmap UIThemeManager::getScaledPixmap(const QString &iconId, const int height)
     return pixmap;
 }
 
-QColor UIThemeManager::getColor(const QString &id) const
+QColor UIThemeManager::getColor(const QString& id) const
 {
     const QColor color = m_themeSource->getColor(id, (isDarkTheme() ? ColorMode::Dark : ColorMode::Light));
     return color;
@@ -320,37 +325,36 @@ void UIThemeManager::applyPalette() const
         QPalette::ColorGroup colorGroup;
     };
 
-    const ColorDescriptor paletteColorDescriptors[] =
-    {
-        {u"Palette.Window"_s, QPalette::Window, QPalette::Normal},
-        {u"Palette.WindowText"_s, QPalette::WindowText, QPalette::Normal},
-        {u"Palette.Base"_s, QPalette::Base, QPalette::Normal},
-        {u"Palette.AlternateBase"_s, QPalette::AlternateBase, QPalette::Normal},
-        {u"Palette.Text"_s, QPalette::Text, QPalette::Normal},
-        {u"Palette.ToolTipBase"_s, QPalette::ToolTipBase, QPalette::All},
-        {u"Palette.ToolTipText"_s, QPalette::ToolTipText, QPalette::All},
-        {u"Palette.BrightText"_s, QPalette::BrightText, QPalette::Normal},
-        {u"Palette.Highlight"_s, QPalette::Highlight, QPalette::Normal},
-        {u"Palette.HighlightedText"_s, QPalette::HighlightedText, QPalette::Normal},
-        {u"Palette.Button"_s, QPalette::Button, QPalette::Normal},
-        {u"Palette.ButtonText"_s, QPalette::ButtonText, QPalette::Normal},
-        {u"Palette.Link"_s, QPalette::Link, QPalette::Normal},
-        {u"Palette.LinkVisited"_s, QPalette::LinkVisited, QPalette::Normal},
-        {u"Palette.Light"_s, QPalette::Light, QPalette::Normal},
-        {u"Palette.Midlight"_s, QPalette::Midlight, QPalette::Normal},
-        {u"Palette.Mid"_s, QPalette::Mid, QPalette::Normal},
-        {u"Palette.Dark"_s, QPalette::Dark, QPalette::Normal},
-        {u"Palette.Shadow"_s, QPalette::Shadow, QPalette::Normal},
-        {u"Palette.WindowTextDisabled"_s, QPalette::WindowText, QPalette::Disabled},
-        {u"Palette.TextDisabled"_s, QPalette::Text, QPalette::Disabled},
-        {u"Palette.ToolTipTextDisabled"_s, QPalette::ToolTipText, QPalette::Disabled},
-        {u"Palette.BrightTextDisabled"_s, QPalette::BrightText, QPalette::Disabled},
-        {u"Palette.HighlightedTextDisabled"_s, QPalette::HighlightedText, QPalette::Disabled},
-        {u"Palette.ButtonTextDisabled"_s, QPalette::ButtonText, QPalette::Disabled}
+    const ColorDescriptor paletteColorDescriptors[] = {
+        {                  u"Palette.Window"_s,          QPalette::Window,   QPalette::Normal },
+        {              u"Palette.WindowText"_s,      QPalette::WindowText,   QPalette::Normal },
+        {                    u"Palette.Base"_s,            QPalette::Base,   QPalette::Normal },
+        {           u"Palette.AlternateBase"_s,   QPalette::AlternateBase,   QPalette::Normal },
+        {                    u"Palette.Text"_s,            QPalette::Text,   QPalette::Normal },
+        {             u"Palette.ToolTipBase"_s,     QPalette::ToolTipBase,      QPalette::All },
+        {             u"Palette.ToolTipText"_s,     QPalette::ToolTipText,      QPalette::All },
+        {              u"Palette.BrightText"_s,      QPalette::BrightText,   QPalette::Normal },
+        {               u"Palette.Highlight"_s,       QPalette::Highlight,   QPalette::Normal },
+        {         u"Palette.HighlightedText"_s, QPalette::HighlightedText,   QPalette::Normal },
+        {                  u"Palette.Button"_s,          QPalette::Button,   QPalette::Normal },
+        {              u"Palette.ButtonText"_s,      QPalette::ButtonText,   QPalette::Normal },
+        {                    u"Palette.Link"_s,            QPalette::Link,   QPalette::Normal },
+        {             u"Palette.LinkVisited"_s,     QPalette::LinkVisited,   QPalette::Normal },
+        {                   u"Palette.Light"_s,           QPalette::Light,   QPalette::Normal },
+        {                u"Palette.Midlight"_s,        QPalette::Midlight,   QPalette::Normal },
+        {                     u"Palette.Mid"_s,             QPalette::Mid,   QPalette::Normal },
+        {                    u"Palette.Dark"_s,            QPalette::Dark,   QPalette::Normal },
+        {                  u"Palette.Shadow"_s,          QPalette::Shadow,   QPalette::Normal },
+        {      u"Palette.WindowTextDisabled"_s,      QPalette::WindowText, QPalette::Disabled },
+        {            u"Palette.TextDisabled"_s,            QPalette::Text, QPalette::Disabled },
+        {     u"Palette.ToolTipTextDisabled"_s,     QPalette::ToolTipText, QPalette::Disabled },
+        {      u"Palette.BrightTextDisabled"_s,      QPalette::BrightText, QPalette::Disabled },
+        { u"Palette.HighlightedTextDisabled"_s, QPalette::HighlightedText, QPalette::Disabled },
+        {      u"Palette.ButtonTextDisabled"_s,      QPalette::ButtonText, QPalette::Disabled }
     };
 
     QPalette palette = qApp->palette();
-    for (const ColorDescriptor &colorDescriptor : paletteColorDescriptors)
+    for (const ColorDescriptor& colorDescriptor : paletteColorDescriptors)
     {
         // For backward compatibility, the palette color overrides are read from the section of the "light mode" colors
         const QColor newColor = m_themeSource->getColor(colorDescriptor.id, ColorMode::Light);

@@ -45,9 +45,9 @@ namespace Http
         Q_DISABLE_COPY_MOVE(Server)
 
     public:
-        explicit Server(IRequestHandler *requestHandler, QObject *parent = nullptr);
+        explicit Server(IRequestHandler* requestHandler, QObject* parent = nullptr);
 
-        bool setupHttps(const QByteArray &certificates, const QByteArray &privateKey);
+        bool setupHttps(const QByteArray& certificates, const QByteArray& privateKey);
         void disableHttps();
         bool isHttps() const;
 
@@ -56,10 +56,10 @@ namespace Http
 
     private:
         void incomingConnection(qintptr socketDescriptor) override;
-        void removeConnection(Connection *connection);
+        void removeConnection(Connection* connection);
 
-        IRequestHandler *m_requestHandler = nullptr;
-        QSet<Connection *> m_connections;  // for tracking persistent connections
+        IRequestHandler* m_requestHandler = nullptr;
+        QSet<Connection*> m_connections; // for tracking persistent connections
 
         bool m_https = false;
         QSslConfiguration m_sslConfig;

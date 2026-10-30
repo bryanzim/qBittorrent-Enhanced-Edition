@@ -29,10 +29,10 @@
 
 #pragma once
 
+#include "responsewriterimpl.h"
+
 #include <QElapsedTimer>
 #include <QObject>
-
-#include "responsewriterimpl.h"
 
 class QTcpSocket;
 
@@ -47,7 +47,7 @@ namespace Http
         Q_DISABLE_COPY_MOVE(Connection)
 
     public:
-        Connection(QTcpSocket *socket, IRequestHandler *requestHandler, QObject *parent = nullptr);
+        Connection(QTcpSocket* socket, IRequestHandler* requestHandler, QObject* parent = nullptr);
 
         bool hasExpired(qint64 timeout) const;
 
@@ -55,12 +55,12 @@ namespace Http
         void closed();
 
     private:
-        void abort(const ResponseStatus &responseStatus);
+        void abort(const ResponseStatus& responseStatus);
         bool processRequest();
         void read();
 
-        QTcpSocket *m_socket = nullptr;
-        IRequestHandler *m_requestHandler = nullptr;
+        QTcpSocket* m_socket = nullptr;
+        IRequestHandler* m_requestHandler = nullptr;
         QByteArray m_receivedData;
         QElapsedTimer m_idleTimer;
         bool m_isProcessingRequest = false;

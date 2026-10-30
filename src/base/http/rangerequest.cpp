@@ -37,7 +37,7 @@ std::optional<Http::RangeRequest> Http::parseRangeHeader(const QStringView range
     if (rangeHeader.isEmpty())
         return std::nullopt;
 
-    const QRegularExpression rangeHeaderPattern {u"^bytes=(((?<rangestart>\\d+)-(?<rangeend>\\d*))|(-(?<suffixlength>\\d+)))$"_s};
+    const QRegularExpression rangeHeaderPattern{ u"^bytes=(((?<rangestart>\\d+)-(?<rangeend>\\d*))|(-(?<suffixlength>\\d+)))$"_s };
     const QRegularExpressionMatch match = rangeHeaderPattern.matchView(rangeHeader);
     if (!match.hasMatch())
         return std::nullopt;
@@ -60,7 +60,7 @@ std::optional<Http::RangeRequest> Http::parseRangeHeader(const QStringView range
         if ((end != -1) && (end < start))
             return std::nullopt;
 
-        return Range {.start = start, .end = end};
+        return Range{ .start = start, .end = end };
     }
 
     // suffix length mode

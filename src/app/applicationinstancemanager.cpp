@@ -31,19 +31,17 @@
 #include <QtSystemDetection>
 
 #ifdef Q_OS_WIN
-#include <windows.h>
-
 #include <QDebug>
 #include <QSharedMemory>
+
+#include <windows.h>
 #endif
 
 #include "base/path.h"
 #include "localpeer.h"
 
-ApplicationInstanceManager::ApplicationInstanceManager(const Path &instancePath, QObject *parent)
-    : QObject(parent)
-    , m_peer {new LocalPeer(instancePath.data(), this)}
-    , m_isFirstInstance {!m_peer->isClient()}
+ApplicationInstanceManager::ApplicationInstanceManager(const Path& instancePath, QObject* parent)
+    : QObject(parent), m_peer{ new LocalPeer(instancePath.data(), this) }, m_isFirstInstance{ !m_peer->isClient() }
 {
     // use `Qt::QueuedConnection` to shift the heavy work to the receiver side
     connect(m_peer, &LocalPeer::messageReceived, this, &ApplicationInstanceManager::messageReceived, Qt::QueuedConnection);
@@ -56,7 +54,7 @@ ApplicationInstanceManager::ApplicationInstanceManager(const Path &instancePath,
         // First instance creates shared memory and store PID
         if (sharedMem->create(sizeof(DWORD)) && sharedMem->lock())
         {
-            *(static_cast<DWORD *>(sharedMem->data())) = ::GetCurrentProcessId();
+            *(static_cast<DWORD*>(sharedMem->data())) = ::GetCurrentProcessId();
             sharedMem->unlock();
         }
     }
@@ -65,7 +63,7 @@ ApplicationInstanceManager::ApplicationInstanceManager(const Path &instancePath,
         // Later instances attach to shared memory and retrieve PID
         if (sharedMem->attach() && sharedMem->lock())
         {
-            ::AllowSetForegroundWindow(*(static_cast<DWORD *>(sharedMem->data())));
+            ::AllowSetForegroundWindow(*(static_cast<DWORD*>(sharedMem->data())));
             sharedMem->unlock();
         }
     }
@@ -80,7 +78,7 @@ bool ApplicationInstanceManager::isFirstInstance() const
     return m_isFirstInstance;
 }
 
-bool ApplicationInstanceManager::sendMessage(const QString &message, const std::chrono::milliseconds timeout)
+bool ApplicationInstanceManager::sendMessage(const QString& message, const std::chrono::milliseconds timeout)
 {
     return m_peer->sendMessage(message, timeout);
 }

@@ -28,9 +28,6 @@
 
 #include "searchdownloadhandler.h"
 
-#include <QtLogging>
-#include <QProcess>
-
 #include "base/global.h"
 #include "base/logger.h"
 #include "base/path.h"
@@ -38,21 +35,18 @@
 #include "base/utils/fs.h"
 #include "searchpluginmanager.h"
 
-SearchDownloadHandler::SearchDownloadHandler(const QString &pluginName, const QString &url, SearchPluginManager *manager)
-    : QObject(manager)
-    , m_pluginName {pluginName}
-    , m_url {url}
-    , m_manager {manager}
-    , m_downloadProcess {new QProcess(this)}
+#include <QProcess>
+#include <QtLogging>
+
+SearchDownloadHandler::SearchDownloadHandler(const QString& pluginName, const QString& url, SearchPluginManager* manager)
+    : QObject(manager), m_pluginName{ pluginName }, m_url{ url }, m_manager{ manager }, m_downloadProcess{ new QProcess(this) }
 {
     m_downloadProcess->setProcessEnvironment(m_manager->proxyEnvironment());
 #ifdef Q_OS_UNIX
     m_downloadProcess->setUnixProcessParameters(QProcess::UnixProcessFlag::CloseFileDescriptors);
 #endif
-    connect(m_downloadProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished)
-            , this, &SearchDownloadHandler::downloadProcessFinished);
-    const QStringList params
-    {
+    connect(m_downloadProcess, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &SearchDownloadHandler::downloadProcessFinished);
+    const QStringList params{
         Utils::ForeignApps::PYTHON_ISOLATE_MODE_FLAG,
         Utils::ForeignApps::PYTHON_UTF8_MODE_FLAG,
         (SearchPluginManager::engineLocation() / Path(u"nova2dl.py"_s)).toString(),
@@ -70,7 +64,8 @@ void SearchDownloadHandler::downloadProcessFinished(const int exitcode)
     {
         qWarning("%s", qUtf8Printable(errMsg));
         LogMsg(tr("Error occurred when downloading torrent via search engine. Engine: \"%1\". URL: \"%2\". Error: \"%3\".")
-            .arg(m_pluginName, m_url, errMsg), Log::WARNING);
+                   .arg(m_pluginName, m_url, errMsg),
+               Log::WARNING);
     }
 
     QString path;

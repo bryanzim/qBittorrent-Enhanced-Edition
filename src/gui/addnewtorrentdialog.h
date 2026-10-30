@@ -29,13 +29,13 @@
 
 #pragma once
 
-#include <memory>
-
-#include <QDialog>
-
 #include "base/path.h"
 #include "base/settingvalue.h"
 #include "filterpatternformat.h"
+
+#include <QDialog>
+
+#include <memory>
 
 class LineEdit;
 
@@ -57,16 +57,15 @@ class AddNewTorrentDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(AddNewTorrentDialog)
 
 public:
-    explicit AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &torrentDescr
-            , const BitTorrent::AddTorrentParams &inParams, QWidget *parent);
+    explicit AddNewTorrentDialog(const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& inParams, QWidget* parent);
     ~AddNewTorrentDialog() override;
 
     bool isDoNotDeleteTorrentChecked() const;
-    void updateMetadata(const BitTorrent::TorrentInfo &metadata);
+    void updateMetadata(const BitTorrent::TorrentInfo& metadata);
 
 signals:
-    void torrentAccepted(const BitTorrent::TorrentDescriptor &torrentDescriptor, const BitTorrent::AddTorrentParams &addTorrentParams);
-    void torrentRejected(const BitTorrent::TorrentDescriptor &torrentDescriptor);
+    void torrentAccepted(const BitTorrent::TorrentDescriptor& torrentDescriptor, const BitTorrent::AddTorrentParams& addTorrentParams);
+    void torrentRejected(const BitTorrent::TorrentDescriptor& torrentDescriptor);
 
 public slots:
     void accept() override;
@@ -75,8 +74,8 @@ public slots:
 
 private slots:
     void updateDiskSpaceLabel();
-    void onSavePathChanged(const Path &newPath);
-    void onDownloadPathChanged(const Path &newPath);
+    void onSavePathChanged(const Path& newPath);
+    void onDownloadPathChanged(const Path& newPath);
     void onUseDownloadPathChanged(bool checked);
     void TMMChanged(int index);
     void categoryChanged(int index);
@@ -86,25 +85,25 @@ private:
     class TorrentContentAdaptor;
     struct Context;
 
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent* event) override;
 
     void setCurrentContext(std::shared_ptr<Context> context);
     void updateCurrentContext();
     void populateSavePaths();
     void loadState();
     void saveState();
-    void setMetadataProgressIndicator(bool visibleIndicator, const QString &labelText = {});
+    void setMetadataProgressIndicator(bool visibleIndicator, const QString& labelText = {});
     void setupTreeview();
     void saveTorrentFile();
     void showContentFilterContextMenu();
     void setContentFilterPattern();
 
-    Ui::AddNewTorrentDialog *m_ui = nullptr;
+    Ui::AddNewTorrentDialog* m_ui = nullptr;
     std::unique_ptr<TorrentContentAdaptor> m_contentAdaptor;
     int m_savePathIndex = -1;
     int m_downloadPathIndex = -1;
     bool m_useDownloadPath = false;
-    LineEdit *m_filterLine = nullptr;
+    LineEdit* m_filterLine = nullptr;
 
     std::shared_ptr<Context> m_currentContext;
 

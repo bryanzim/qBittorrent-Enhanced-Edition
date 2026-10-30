@@ -28,10 +28,10 @@
 
 #pragma once
 
+#include "announcetimepoint.h"
+
 #include <QHash>
 #include <QString>
-
-#include "announcetimepoint.h"
 
 class QStringView;
 
@@ -48,44 +48,44 @@ namespace BitTorrent
 
     struct TrackerEndpointStatus
     {
-        QString name {};
+        QString name{};
         int btVersion = 1;
 
         bool isUpdating = false;
         TrackerEndpointState state = TrackerEndpointState::NotContacted;
-        QString message {};
+        QString message{};
 
         int numPeers = -1;
         int numSeeds = -1;
         int numLeeches = -1;
         int numDownloaded = -1;
 
-        AnnounceTimePoint nextAnnounceTime {};
-        AnnounceTimePoint minAnnounceTime {};
+        AnnounceTimePoint nextAnnounceTime{};
+        AnnounceTimePoint minAnnounceTime{};
     };
 
     struct TrackerEntryStatus
     {
-        QString url {};
+        QString url{};
         int tier = 0;
 
         bool isUpdating = false;
         TrackerEndpointState state = TrackerEndpointState::NotContacted;
-        QString message {};
+        QString message{};
 
         int numPeers = -1;
         int numSeeds = -1;
         int numLeeches = -1;
         int numDownloaded = -1;
 
-        AnnounceTimePoint nextAnnounceTime {};
-        AnnounceTimePoint minAnnounceTime {};
+        AnnounceTimePoint nextAnnounceTime{};
+        AnnounceTimePoint minAnnounceTime{};
 
-        QHash<std::pair<QString, int>, TrackerEndpointStatus> endpoints {};
+        QHash<std::pair<QString, int>, TrackerEndpointStatus> endpoints{};
 
         void clear();
     };
 
-    bool operator==(const TrackerEntryStatus &left, const TrackerEntryStatus &right);
-    std::size_t qHash(const TrackerEntryStatus &key, std::size_t seed = 0);
+    bool operator==(const TrackerEntryStatus& left, const TrackerEntryStatus& right);
+    std::size_t qHash(const TrackerEntryStatus& key, std::size_t seed = 0);
 }

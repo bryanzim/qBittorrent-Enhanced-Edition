@@ -38,6 +38,6 @@ namespace Http
     struct Response;
     struct ResponseStatus;
 
-    QByteArray serializeResponseHead(const ResponseStatus &responseStatus, const HeaderMap &responseHeaders);
-    QByteArray serializeResponse(const Response &response, const Request &request);
+    QByteArray serializeResponseHead(const ResponseStatus& responseStatus, const HeaderMap& responseHeaders);
+    QByteArray serializeResponse(const Response& response, const Request& request);
 }

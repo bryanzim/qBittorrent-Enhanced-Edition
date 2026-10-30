@@ -29,6 +29,14 @@
 
 #include "previewselectdialog.h"
 
+#include "base/bittorrent/torrent.h"
+#include "base/preferences.h"
+#include "base/utils/fs.h"
+#include "base/utils/misc.h"
+#include "previewlistdelegate.h"
+#include "ui_previewselectdialog.h"
+#include "utils.h"
+
 #include <QAction>
 #include <QDir>
 #include <QHeaderView>
@@ -38,14 +46,6 @@
 #include <QShowEvent>
 #include <QStandardItemModel>
 
-#include "base/bittorrent/torrent.h"
-#include "base/preferences.h"
-#include "base/utils/fs.h"
-#include "base/utils/misc.h"
-#include "previewlistdelegate.h"
-#include "ui_previewselectdialog.h"
-#include "utils.h"
-
 #define SETTINGS_KEY(name) u"PreviewSelectDialog/" name
 
 enum Roles
@@ -53,26 +53,22 @@ enum Roles
     SortRole = Qt::UserRole
 };
 
-PreviewSelectDialog::PreviewSelectDialog(QWidget *parent, const BitTorrent::Torrent *torrent)
-    : QDialog(parent)
-    , m_ui {new Ui::PreviewSelectDialog}
-    , m_torrent {torrent}
-    , m_storeDialogSize {SETTINGS_KEY(u"Size"_s)}
-    , m_storeTreeHeaderState {u"GUI/Qt6/" SETTINGS_KEY(u"HeaderState"_s)}
+PreviewSelectDialog::PreviewSelectDialog(QWidget* parent, const BitTorrent::Torrent* torrent)
+    : QDialog(parent), m_ui{ new Ui::PreviewSelectDialog }, m_torrent{ torrent }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }, m_storeTreeHeaderState{ u"GUI/Qt6/" SETTINGS_KEY(u"HeaderState"_s) }
 {
     m_ui->setupUi(this);
 
     m_ui->label->setText(tr("The following files from torrent \"%1\" support previewing, please select one of them:")
-        .arg(m_torrent->name()));
+                             .arg(m_torrent->name()));
 
     m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Preview"));
     connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &PreviewSelectDialog::previewButtonClicked);
     connect(m_ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     connect(m_ui->previewList, &QAbstractItemView::doubleClicked, this, &PreviewSelectDialog::previewButtonClicked);
 
-    const Preferences *pref = Preferences::instance();
+    const Preferences* pref = Preferences::instance();
     // Preview list
-    auto *previewListModel = new QStandardItemModel(0, NB_COLUMNS, this);
+    auto* previewListModel = new QStandardItemModel(0, NB_COLUMNS, this);
     previewListModel->setHeaderData(NAME, Qt::Horizontal, tr("Name"));
     previewListModel->setHeaderData(SIZE, Qt::Horizontal, tr("Size"));
     previewListModel->setHeaderData(PROGRESS, Qt::Horizontal, tr("Progress"));
@@ -81,7 +77,7 @@ PreviewSelectDialog::PreviewSelectDialog(QWidget *parent, const BitTorrent::Torr
     m_ui->previewList->setUniformRowHeights(true);
     m_ui->previewList->setModel(previewListModel);
 
-    auto *listDelegate = new PreviewListDelegate(this);
+    auto* listDelegate = new PreviewListDelegate(this);
     m_ui->previewList->setItemDelegate(listDelegate);
 
     // Fill list in
@@ -129,7 +125,8 @@ PreviewSelectDialog::~PreviewSelectDialog()
 void PreviewSelectDialog::previewButtonClicked()
 {
     const QModelIndexList selectedIndexes = m_ui->previewList->selectionModel()->selectedRows(FILE_INDEX);
-    if (selectedIndexes.isEmpty()) return;
+    if (selectedIndexes.isEmpty())
+        return;
 
     // Flush data
     m_torrent->flushCache();
@@ -141,9 +138,8 @@ void PreviewSelectDialog::previewButtonClicked()
     if (!path.exists())
     {
         const bool isSingleFile = (m_ui->previewList->model()->rowCount() == 1);
-        QWidget *parent = isSingleFile ? this->parentWidget() : this;
-        QMessageBox::critical(parent, tr("Preview impossible")
-            , tr("Sorry, we can't preview this file: \"%1\".").arg(path.toString()));
+        QWidget* parent = isSingleFile ? this->parentWidget() : this;
+        QMessageBox::critical(parent, tr("Preview impossible"), tr("Sorry, we can't preview this file: \"%1\".").arg(path.toString()));
         if (isSingleFile)
             reject();
         return;
@@ -155,12 +151,11 @@ void PreviewSelectDialog::previewButtonClicked()
 
 void PreviewSelectDialog::displayColumnHeaderMenu()
 {
-    auto *menu = new QMenu(this);
+    auto* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     menu->setToolTipsVisible(true);
 
-    QAction *resizeAction = menu->addAction(tr("Resize columns"), this, [this]()
-    {
+    QAction* resizeAction = menu->addAction(tr("Resize columns"), this, [this]() {
         for (int i = 0, count = m_ui->previewList->header()->count(); i < count; ++i)
         {
             if (!m_ui->previewList->isColumnHidden(i))
@@ -191,7 +186,7 @@ void PreviewSelectDialog::loadWindowState()
         m_headerStateInitialized = m_ui->previewList->header()->restoreState(treeHeaderState);
 }
 
-void PreviewSelectDialog::showEvent(QShowEvent *event)
+void PreviewSelectDialog::showEvent(QShowEvent* event)
 {
     // event originated from system
     if (event->spontaneous())

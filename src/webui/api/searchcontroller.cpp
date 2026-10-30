@@ -29,11 +29,7 @@
 
 #include "searchcontroller.h"
 
-#include <QHash>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QList>
-
+#include "apierror.h"
 #include "base/addtorrentmanager.h"
 #include "base/global.h"
 #include "base/interfaces/iapplication.h"
@@ -43,63 +39,65 @@
 #include "base/utils/datetime.h"
 #include "base/utils/foreignapps.h"
 #include "base/utils/string.h"
-#include "apierror.h"
 #include "isessionmanager.h"
 #include "webui/searchjobmanager.h"
+
+#include <QHash>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QList>
 
 namespace
 {
     /**
-    * Returns the search categories in JSON format.
-    *
-    * The return value is an array of dictionaries.
-    * The dictionary keys are:
-    *   - "id"
-    *   - "name"
-    */
+     * Returns the search categories in JSON format.
+     *
+     * The return value is an array of dictionaries.
+     * The dictionary keys are:
+     *   - "id"
+     *   - "name"
+     */
     QJsonArray getPluginCategories(QStringList categories)
     {
-        QJsonArray categoriesInfo
-        {QJsonObject {
-            {u"id"_s, u"all"_s},
-            {u"name"_s, SearchPluginManager::categoryFullName(u"all"_s)}
-        }};
+        QJsonArray categoriesInfo{
+            QJsonObject{
+                        { u"id"_s, u"all"_s },
+                        { u"name"_s, SearchPluginManager::categoryFullName(u"all"_s) } }
+        };
 
         categories.sort(Qt::CaseInsensitive);
-        for (const QString &category : categories)
+        for (const QString& category : categories)
         {
-            categoriesInfo << QJsonObject
-            {
-                {u"id"_s, category},
-                {u"name"_s, SearchPluginManager::categoryFullName(category)}
+            categoriesInfo << QJsonObject{
+                {   u"id"_s,                                        category },
+                { u"name"_s, SearchPluginManager::categoryFullName(category) }
             };
         }
 
         return categoriesInfo;
     }
 
-    QJsonObject jobInfoToJSON(const SearchJobManager::JobInfo &jobInfo)
+    QJsonObject jobInfoToJSON(const SearchJobManager::JobInfo& jobInfo)
     {
         return {
-            {u"id"_s, jobInfo.id},
-            {u"status"_s, jobInfo.active ? u"Running"_s : u"Stopped"_s},
-            {u"pattern"_s, jobInfo.pattern},
-            {u"category"_s, jobInfo.category},
-            {u"plugins"_s, QJsonArray::fromStringList(jobInfo.plugins)},
-            {u"total"_s, jobInfo.results.size()}
+            {       u"id"_s,                                   jobInfo.id },
+            {   u"status"_s, jobInfo.active ? u"Running"_s : u"Stopped"_s },
+            {  u"pattern"_s,                              jobInfo.pattern },
+            { u"category"_s,                             jobInfo.category },
+            {  u"plugins"_s,  QJsonArray::fromStringList(jobInfo.plugins) },
+            {    u"total"_s,                       jobInfo.results.size() }
         };
     }
 }
 
-SearchController::SearchController(SearchJobManager *searchJobManager, IApplication *app, QObject *parent)
-    : APIController(app, parent)
-    , m_searchJobManager {searchJobManager}
+SearchController::SearchController(SearchJobManager* searchJobManager, IApplication* app, QObject* parent)
+    : APIController(app, parent), m_searchJobManager{ searchJobManager }
 {
 }
 
 void SearchController::startAction()
 {
-    requireParams({u"pattern"_s, u"category"_s, u"plugins"_s});
+    requireParams({ u"pattern"_s, u"category"_s, u"plugins"_s });
 
     if (!Utils::ForeignApps::pythonInfo().isValid())
         throw APIError(APIErrorType::Conflict, tr("Python must be installed to use the Search Engine."));
@@ -128,13 +126,15 @@ void SearchController::startAction()
     if (!startSearchResult)
         throw APIError(APIErrorType::Conflict, startSearchResult.error());
 
-    const QJsonObject result = {{u"id"_s, *startSearchResult}};
+    const QJsonObject result = {
+        { u"id"_s, *startSearchResult }
+    };
     setResult(result);
 }
 
 void SearchController::stopAction()
 {
-    requireParams({u"id"_s});
+    requireParams({ u"id"_s });
 
     const int id = params()[u"id"_s].toInt();
 
@@ -154,13 +154,13 @@ void SearchController::statusAction()
         if (!jobInfo)
             throw APIError(APIErrorType::NotFound);
 
-        const QJsonArray statusArray {jobInfoToJSON(*jobInfo)};
+        const QJsonArray statusArray{ jobInfoToJSON(*jobInfo) };
         setResult(statusArray);
         return;
     }
 
     QJsonArray statusArray;
-    for (const auto &jobInfo : asConst(m_searchJobManager->getAllJobInfos()))
+    for (const auto& jobInfo : asConst(m_searchJobManager->getAllJobInfos()))
         statusArray << jobInfoToJSON(jobInfo);
 
     setResult(statusArray);
@@ -168,7 +168,7 @@ void SearchController::statusAction()
 
 void SearchController::resultsAction()
 {
-    requireParams({u"id"_s});
+    requireParams({ u"id"_s });
 
     const int id = params()[u"id"_s].toInt();
     int limit = params()[u"limit"_s].toInt();
@@ -178,7 +178,7 @@ void SearchController::resultsAction()
     if (!jobInfo)
         throw APIError(APIErrorType::NotFound);
 
-    const QList<SearchResult> &searchResults = jobInfo->results;
+    const QList<SearchResult>& searchResults = jobInfo->results;
     const qsizetype size = searchResults.size();
 
     if (offset > size)
@@ -187,7 +187,7 @@ void SearchController::resultsAction()
     // normalize values
     if (offset < 0)
         offset = size + offset;
-    if (offset < 0)  // check again
+    if (offset < 0) // check again
         throw APIError(APIErrorType::Conflict, tr("Offset is out of range"));
     if (limit <= 0)
         limit = -1;
@@ -200,7 +200,7 @@ void SearchController::resultsAction()
 
 void SearchController::deleteAction()
 {
-    requireParams({u"id"_s});
+    requireParams({ u"id"_s });
 
     const int id = params()[u"id"_s].toInt();
 
@@ -212,7 +212,7 @@ void SearchController::deleteAction()
 
 void SearchController::downloadTorrentAction()
 {
-    requireParams({u"torrentUrl"_s, u"pluginName"_s});
+    requireParams({ u"torrentUrl"_s, u"pluginName"_s });
 
     const QString torrentUrl = params()[u"torrentUrl"_s];
     const QString pluginName = params()[u"pluginName"_s];
@@ -223,10 +223,8 @@ void SearchController::downloadTorrentAction()
     }
     else
     {
-        SearchDownloadHandler *downloadHandler = SearchPluginManager::instance()->downloadTorrent(pluginName, torrentUrl);
-        connect(downloadHandler, &SearchDownloadHandler::downloadFinished, this
-            , [this, downloadHandler](const QString &source, [[maybe_unused]] const QString &errorMessage)
-        {
+        SearchDownloadHandler* downloadHandler = SearchPluginManager::instance()->downloadTorrent(pluginName, torrentUrl);
+        connect(downloadHandler, &SearchDownloadHandler::downloadFinished, this, [this, downloadHandler](const QString& source, [[maybe_unused]] const QString& errorMessage) {
             app()->addTorrentManager()->addTorrent(source);
             downloadHandler->deleteLater();
         });
@@ -243,10 +241,10 @@ void SearchController::pluginsAction()
 
 void SearchController::installPluginAction()
 {
-    requireParams({u"sources"_s});
+    requireParams({ u"sources"_s });
 
     const QStringList sources = params()[u"sources"_s].split(u'|');
-    for (const QString &source : sources)
+    for (const QString& source : sources)
         SearchPluginManager::instance()->installPlugin(source);
 
     setResult(QString());
@@ -254,10 +252,10 @@ void SearchController::installPluginAction()
 
 void SearchController::uninstallPluginAction()
 {
-    requireParams({u"names"_s});
+    requireParams({ u"names"_s });
 
     const QStringList names = params()[u"names"_s].split(u'|');
-    for (const QString &name : names)
+    for (const QString& name : names)
         SearchPluginManager::instance()->uninstallPlugin(name.trimmed());
 
     setResult(QString());
@@ -265,12 +263,12 @@ void SearchController::uninstallPluginAction()
 
 void SearchController::enablePluginAction()
 {
-    requireParams({u"names"_s, u"enable"_s});
+    requireParams({ u"names"_s, u"enable"_s });
 
     const QStringList names = params()[u"names"_s].split(u'|');
     const bool enable = Utils::String::parseBool(params()[u"enable"_s].trimmed()).value_or(false);
 
-    for (const QString &name : names)
+    for (const QString& name : names)
         SearchPluginManager::instance()->enablePlugin(name.trimmed(), enable);
 
     setResult(QString());
@@ -278,7 +276,7 @@ void SearchController::enablePluginAction()
 
 void SearchController::updatePluginsAction()
 {
-    SearchPluginManager *const pluginManager = SearchPluginManager::instance();
+    SearchPluginManager* const pluginManager = SearchPluginManager::instance();
 
     connect(pluginManager, &SearchPluginManager::checkForUpdatesFinished, this, &SearchController::checkForUpdatesFinished);
     connect(pluginManager, &SearchPluginManager::checkForUpdatesFailed, this, &SearchController::checkForUpdatesFailed);
@@ -287,7 +285,7 @@ void SearchController::updatePluginsAction()
     setResult(QString());
 }
 
-void SearchController::checkForUpdatesFinished(const QHash<QString, SearchPluginVersion> &updateInfo)
+void SearchController::checkForUpdatesFinished(const QHash<QString, SearchPluginVersion>& updateInfo)
 {
     if (updateInfo.isEmpty())
     {
@@ -297,8 +295,8 @@ void SearchController::checkForUpdatesFinished(const QHash<QString, SearchPlugin
 
     LogMsg(tr("Updating %1 plugins").arg(updateInfo.size()), Log::INFO);
 
-    SearchPluginManager *const pluginManager = SearchPluginManager::instance();
-    for (const QString &pluginName : asConst(updateInfo.keys()))
+    SearchPluginManager* const pluginManager = SearchPluginManager::instance();
+    for (const QString& pluginName : asConst(updateInfo.keys()))
     {
         LogMsg(tr("Updating plugin %1").arg(pluginName), Log::INFO);
         pluginManager->updatePlugin(pluginName);
@@ -307,7 +305,7 @@ void SearchController::checkForUpdatesFinished(const QHash<QString, SearchPlugin
     setResult(QString());
 }
 
-void SearchController::checkForUpdatesFailed(const QString &reason)
+void SearchController::checkForUpdatesFailed(const QString& reason)
 {
     LogMsg(tr("Failed to check for plugin updates: %1").arg(reason), Log::INFO);
 }
@@ -327,30 +325,28 @@ void SearchController::checkForUpdatesFailed(const QString &reason)
  *   - "descrLink"
  *   - "pubDate"
  */
-QJsonObject SearchController::getResults(const QList<SearchResult> &searchResults, const bool isSearchActive, const int totalResults) const
+QJsonObject SearchController::getResults(const QList<SearchResult>& searchResults, const bool isSearchActive, const int totalResults) const
 {
     QJsonArray searchResultsArray;
-    for (const SearchResult &searchResult : searchResults)
+    for (const SearchResult& searchResult : searchResults)
     {
-        searchResultsArray << QJsonObject
-        {
-            {u"fileName"_s, searchResult.fileName},
-            {u"fileUrl"_s, searchResult.fileUrl},
-            {u"fileSize"_s, searchResult.fileSize},
-            {u"nbSeeders"_s, searchResult.nbSeeders},
-            {u"nbLeechers"_s, searchResult.nbLeechers},
-            {u"engineName"_s, searchResult.engineName},
-            {u"siteUrl"_s, searchResult.siteUrl},
-            {u"descrLink"_s, searchResult.descrLink},
-            {u"pubDate"_s, Utils::DateTime::toSecsSinceEpoch(searchResult.pubDate)}
+        searchResultsArray << QJsonObject{
+            {   u"fileName"_s,                                   searchResult.fileName },
+            {    u"fileUrl"_s,                                    searchResult.fileUrl },
+            {   u"fileSize"_s,                                   searchResult.fileSize },
+            {  u"nbSeeders"_s,                                  searchResult.nbSeeders },
+            { u"nbLeechers"_s,                                 searchResult.nbLeechers },
+            { u"engineName"_s,                                 searchResult.engineName },
+            {    u"siteUrl"_s,                                    searchResult.siteUrl },
+            {  u"descrLink"_s,                                  searchResult.descrLink },
+            {    u"pubDate"_s, Utils::DateTime::toSecsSinceEpoch(searchResult.pubDate) }
         };
     }
 
-    const QJsonObject result =
-    {
-        {u"status"_s, isSearchActive ? u"Running"_s : u"Stopped"_s},
-        {u"results"_s, searchResultsArray},
-        {u"total"_s, totalResults}
+    const QJsonObject result = {
+        {  u"status"_s, isSearchActive ? u"Running"_s : u"Stopped"_s },
+        { u"results"_s,                           searchResultsArray },
+        {   u"total"_s,                                 totalResults }
     };
 
     return result;
@@ -369,22 +365,21 @@ QJsonObject SearchController::getResults(const QList<SearchResult> &searchResult
  *   - "iconPath"
  *   - "enabled"
  */
-QJsonArray SearchController::getPluginsInfo(const QStringList &plugins) const
+QJsonArray SearchController::getPluginsInfo(const QStringList& plugins) const
 {
     QJsonArray pluginsArray;
 
-    for (const QString &plugin : plugins)
+    for (const QString& plugin : plugins)
     {
-        const SearchPluginInfo *const pluginInfo = SearchPluginManager::instance()->pluginInfo(plugin);
+        const SearchPluginInfo* const pluginInfo = SearchPluginManager::instance()->pluginInfo(plugin);
 
-        pluginsArray << QJsonObject
-        {
-            {u"name"_s, pluginInfo->name},
-            {u"version"_s, pluginInfo->version.toString()},
-            {u"fullName"_s, pluginInfo->fullName},
-            {u"url"_s, pluginInfo->url},
-            {u"supportedCategories"_s, getPluginCategories(pluginInfo->supportedCategories)},
-            {u"enabled"_s, pluginInfo->enabled}
+        pluginsArray << QJsonObject{
+            {                u"name"_s,                                     pluginInfo->name },
+            {             u"version"_s,                       pluginInfo->version.toString() },
+            {            u"fullName"_s,                                 pluginInfo->fullName },
+            {                 u"url"_s,                                      pluginInfo->url },
+            { u"supportedCategories"_s, getPluginCategories(pluginInfo->supportedCategories) },
+            {             u"enabled"_s,                                  pluginInfo->enabled }
         };
     }
 

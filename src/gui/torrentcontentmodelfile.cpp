@@ -31,9 +31,8 @@
 
 #include "torrentcontentmodelfolder.h"
 
-TorrentContentModelFile::TorrentContentModelFile(const QString &fileName
-        , const qulonglong fileSize, const int fileIndex)
-    : m_fileIndex {fileIndex}
+TorrentContentModelFile::TorrentContentModelFile(const QString& fileName, const qulonglong fileSize, const int fileIndex)
+    : m_fileIndex{ fileIndex }
 {
     m_name = fileName;
     m_size = fileSize;

@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <QTreeView>
-
 #include "base/bittorrent/downloadpriority.h"
 #include "base/pathfwd.h"
 #include "filterpatternformat.h"
+
+#include <QTreeView>
 
 class QShortcut;
 
@@ -75,10 +75,10 @@ public:
         Locked
     };
 
-    explicit TorrentContentWidget(QWidget *parent = nullptr);
+    explicit TorrentContentWidget(QWidget* parent = nullptr);
 
-    void setContentHandler(BitTorrent::TorrentContentHandler *contentHandler);
-    BitTorrent::TorrentContentHandler *contentHandler() const;
+    void setContentHandler(BitTorrent::TorrentContentHandler* contentHandler);
+    BitTorrent::TorrentContentHandler* contentHandler() const;
     void refresh();
 
     bool openByEnterKey() const;
@@ -90,10 +90,10 @@ public:
     ColumnsVisibilityMode columnsVisibilityMode() const;
     void setColumnsVisibilityMode(ColumnsVisibilityMode mode);
 
-    int getFileIndex(const QModelIndex &index) const;
-    Path getItemPath(const QModelIndex &index) const;
+    int getFileIndex(const QModelIndex& index) const;
+    Path getItemPath(const QModelIndex& index) const;
 
-    void setFilterPattern(const QString &patternText, FilterPatternFormat format = FilterPatternFormat::Wildcards);
+    void setFilterPattern(const QString& patternText, FilterPatternFormat format = FilterPatternFormat::Wildcards);
 
     void checkAll();
     void checkNone();
@@ -105,35 +105,35 @@ signals:
     void stateChanged();
 
 private:
-    void setModel(QAbstractItemModel *model) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
-    void rowsInserted(const QModelIndex &parent, int start, int end) override;
+    void setModel(QAbstractItemModel* model) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
+    void rowsInserted(const QModelIndex& parent, int start, int end) override;
 
     QModelIndex currentNameCell() const;
     void displayColumnHeaderMenu();
     void displayContextMenu();
-    void openItem(const QModelIndex &index) const;
-    void openParentFolder(const QModelIndex &index);
-    void copyFullPath(const QModelIndex &index);
+    void openItem(const QModelIndex& index) const;
+    void openParentFolder(const QModelIndex& index);
+    void copyFullPath(const QModelIndex& index);
     void openSelectedFile();
     void renameSelectedFile();
     void batchRenameFiles();
     void applyPriorities(BitTorrent::DownloadPriority priority);
     void applyPrioritiesByOrder();
-    Path getFullPath(const QModelIndex &index) const;
-    void onItemDoubleClicked(const QModelIndex &index);
+    Path getFullPath(const QModelIndex& index) const;
+    void onItemDoubleClicked(const QModelIndex& index);
     // Expand single-item folders recursively.
     // This will trigger sorting and filtering so do it after all relevant data is loaded.
     void expandRecursively();
 
-    TorrentContentModel *m_model;
-    TorrentContentFilterModel *m_filterModel;
+    TorrentContentModel* m_model;
+    TorrentContentFilterModel* m_filterModel;
     DoubleClickAction m_doubleClickAction = DoubleClickAction::Rename;
     ColumnsVisibilityMode m_columnsVisibilityMode = ColumnsVisibilityMode::Editable;
-    QShortcut *m_openFileHotkeyEnter = nullptr;
-    QShortcut *m_openFileHotkeyReturn = nullptr;
+    QShortcut* m_openFileHotkeyEnter = nullptr;
+    QShortcut* m_openFileHotkeyReturn = nullptr;
 
     bool m_contentDragAllowed = false;
     bool m_contentDragEnabled = false;

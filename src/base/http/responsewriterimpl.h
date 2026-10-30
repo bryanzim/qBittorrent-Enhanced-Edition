@@ -28,13 +28,13 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/pathfwd.h"
 #include "headermap.h"
 #include "request.h"
 #include "response.h"
 #include "responsewriter.h"
+
+#include <QObject>
 
 class QAbstractSocket;
 
@@ -56,18 +56,18 @@ namespace Http
             Failed
         };
 
-        explicit ResponseWriterImpl(QAbstractSocket *socket, QObject *parent = nullptr);
+        explicit ResponseWriterImpl(QAbstractSocket* socket, QObject* parent = nullptr);
         ~ResponseWriterImpl() override;
 
-        void prepare(const Request &request);
+        void prepare(const Request& request);
 
         // Send entire response at once.
         // Allow response content to be gzip encoded.
-        void setResponse(const Response &response) override;
+        void setResponse(const Response& response) override;
 
         // Allow to stream file using separate IO thread for reading.
         // Support Range requests.
-        void streamFile(const Path &filePath, const HeaderMap &headers) override;
+        void streamFile(const Path& filePath, const HeaderMap& headers) override;
 
         bool isFinished() const override;
         State state() const;
@@ -76,10 +76,10 @@ namespace Http
         void fail();
         void finish();
 
-        QAbstractSocket *m_socket = nullptr;
+        QAbstractSocket* m_socket = nullptr;
         Request m_request;
 
-        AsyncFileSender *m_asyncFileSender = nullptr;
+        AsyncFileSender* m_asyncFileSender = nullptr;
 
         State m_state = State::Ready;
     };

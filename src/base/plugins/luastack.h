@@ -28,17 +28,16 @@
 
 #pragma once
 
+#include "base/bittorrent/sharelimits.h"
+#include "base/bittorrent/trackerentrystatus.h"
+#include "base/path.h"
 #include <lua/lua.hpp>
-#include <LuaBridge/LuaBridge.h>
 
+#include <LuaBridge/LuaBridge.h>
 #include <QHash>
 #include <QList>
 #include <QString>
 #include <QUrl>
-
-#include "base/bittorrent/sharelimits.h"
-#include "base/bittorrent/trackerentrystatus.h"
-#include "base/path.h"
 
 namespace luabridge
 {
@@ -46,7 +45,7 @@ namespace luabridge
     template <>
     struct Stack<QString>
     {
-        [[nodiscard]] static Result push(lua_State *luaState, const QString &str)
+        [[nodiscard]] static Result push(lua_State* luaState, const QString& str)
         {
 #if LUABRIDGE_SAFE_STACK_CHECKS
             if (!lua_checkstack(luaState, 1))
@@ -58,10 +57,10 @@ namespace luabridge
             return {};
         }
 
-        [[nodiscard]] static TypeResult<QString> get(lua_State *luaState, const int index)
+        [[nodiscard]] static TypeResult<QString> get(lua_State* luaState, const int index)
         {
             size_t len = 0;
-            const char *str = nullptr;
+            const char* str = nullptr;
 
             if (lua_type(luaState, index) == LUA_TSTRING)
             {
@@ -93,7 +92,7 @@ namespace luabridge
             return QString::fromUtf8(str, len);
         }
 
-        [[nodiscard]] static bool isInstance(lua_State *luaState, const int index)
+        [[nodiscard]] static bool isInstance(lua_State* luaState, const int index)
         {
             return lua_type(luaState, index) == LUA_TSTRING;
         }
@@ -103,17 +102,17 @@ namespace luabridge
     template <>
     struct Stack<QUrl>
     {
-        [[nodiscard]] static Result push(lua_State *luaState, const QUrl &url)
+        [[nodiscard]] static Result push(lua_State* luaState, const QUrl& url)
         {
             return Stack<QString>::push(luaState, url.toString());
         }
 
-        [[nodiscard]] static TypeResult<QUrl> get(lua_State *luaState, const int index)
+        [[nodiscard]] static TypeResult<QUrl> get(lua_State* luaState, const int index)
         {
             return QUrl(Stack<QString>::get(luaState, index).valueOr(QString()));
         }
 
-        [[nodiscard]] static bool isInstance(lua_State *luaState, const int index)
+        [[nodiscard]] static bool isInstance(lua_State* luaState, const int index)
         {
             return lua_type(luaState, index) == LUA_TSTRING;
         }
@@ -123,17 +122,17 @@ namespace luabridge
     template <>
     struct Stack<Path>
     {
-        [[nodiscard]] static Result push(lua_State *luaState, const Path &path)
+        [[nodiscard]] static Result push(lua_State* luaState, const Path& path)
         {
             return Stack<QString>::push(luaState, path.toString());
         }
 
-        [[nodiscard]] static TypeResult<Path> get(lua_State *luaState, const int index)
+        [[nodiscard]] static TypeResult<Path> get(lua_State* luaState, const int index)
         {
             return Path(Stack<QString>::get(luaState, index).valueOr(QString()));
         }
 
-        [[nodiscard]] static bool isInstance(lua_State *luaState, const int index)
+        [[nodiscard]] static bool isInstance(lua_State* luaState, const int index)
         {
             return lua_type(luaState, index) == LUA_TSTRING;
         }
@@ -145,14 +144,14 @@ namespace luabridge
     {
         using Type = QList<T>;
 
-        [[nodiscard]] static Result push(lua_State *luaState, const Type &list)
+        [[nodiscard]] static Result push(lua_State* luaState, const Type& list)
         {
 #if LUABRIDGE_SAFE_STACK_CHECKS
             if (!lua_checkstack(luaState, 3))
                 return makeErrorCode(ErrorCode::LuaStackOverflow);
 #endif
 
-            StackRestore stackRestore {luaState};
+            StackRestore stackRestore{ luaState };
 
             const qsizetype listSize = list.size();
             lua_createtable(luaState, static_cast<int>(listSize), 0);
@@ -172,12 +171,12 @@ namespace luabridge
             return {};
         }
 
-        [[nodiscard]] static TypeResult<Type> get(lua_State *luaState, const int index)
+        [[nodiscard]] static TypeResult<Type> get(lua_State* luaState, const int index)
         {
             if (!lua_istable(luaState, index))
                 return makeErrorCode(ErrorCode::InvalidTypeCast);
 
-            const StackRestore stackRestore {luaState};
+            const StackRestore stackRestore{ luaState };
 
             Type list;
             list.reserve(static_cast<qsizetype>(get_length(luaState, index)));
@@ -198,7 +197,7 @@ namespace luabridge
             return list;
         }
 
-        [[nodiscard]] static bool isInstance(lua_State *luaState, const int index)
+        [[nodiscard]] static bool isInstance(lua_State* luaState, const int index)
         {
             return lua_istable(luaState, index);
         }
@@ -210,14 +209,14 @@ namespace luabridge
     {
         using Type = QHash<K, V>;
 
-        [[nodiscard]] static Result push(lua_State *luaState, const Type &hashTable)
+        [[nodiscard]] static Result push(lua_State* luaState, const Type& hashTable)
         {
 #if LUABRIDGE_SAFE_STACK_CHECKS
             if (!lua_checkstack(luaState, 3))
                 return makeErrorCode(ErrorCode::LuaStackOverflow);
 #endif
 
-            StackRestore stackRestore {luaState};
+            StackRestore stackRestore{ luaState };
             lua_createtable(luaState, 0, static_cast<int>(hashTable.size()));
 
             for (auto it = hashTable.cbegin(); it != hashTable.cend(); ++it)
@@ -237,12 +236,12 @@ namespace luabridge
             return {};
         }
 
-        [[nodiscard]] static TypeResult<Type> get(lua_State *luaState, const int index)
+        [[nodiscard]] static TypeResult<Type> get(lua_State* luaState, const int index)
         {
             if (!lua_istable(luaState, index))
                 return makeErrorCode(ErrorCode::InvalidTypeCast);
 
-            const StackRestore stackRestore {luaState};
+            const StackRestore stackRestore{ luaState };
 
             Type hashTable;
 
@@ -266,7 +265,7 @@ namespace luabridge
             return hashTable;
         }
 
-        [[nodiscard]] static bool isInstance(lua_State *luaState, const int index)
+        [[nodiscard]] static bool isInstance(lua_State* luaState, const int index)
         {
             return lua_istable(luaState, index);
         }
@@ -274,32 +273,19 @@ namespace luabridge
 
     template <>
     struct Stack<BitTorrent::TrackerEndpointState>
-        : Enum<BitTorrent::TrackerEndpointState
-            , BitTorrent::TrackerEndpointState::NotContacted
-            , BitTorrent::TrackerEndpointState::Working
-            , BitTorrent::TrackerEndpointState::NotWorking
-            , BitTorrent::TrackerEndpointState::TrackerError
-            , BitTorrent::TrackerEndpointState::Unreachable>
+        : Enum<BitTorrent::TrackerEndpointState, BitTorrent::TrackerEndpointState::NotContacted, BitTorrent::TrackerEndpointState::Working, BitTorrent::TrackerEndpointState::NotWorking, BitTorrent::TrackerEndpointState::TrackerError, BitTorrent::TrackerEndpointState::Unreachable>
     {
     };
 
     template <>
     struct Stack<BitTorrent::ShareLimitAction>
-        : Enum<BitTorrent::ShareLimitAction
-            , BitTorrent::ShareLimitAction::Default
-            , BitTorrent::ShareLimitAction::Stop
-            , BitTorrent::ShareLimitAction::Remove
-            , BitTorrent::ShareLimitAction::RemoveWithContent
-            , BitTorrent::ShareLimitAction::EnableSuperSeeding>
+        : Enum<BitTorrent::ShareLimitAction, BitTorrent::ShareLimitAction::Default, BitTorrent::ShareLimitAction::Stop, BitTorrent::ShareLimitAction::Remove, BitTorrent::ShareLimitAction::RemoveWithContent, BitTorrent::ShareLimitAction::EnableSuperSeeding>
     {
     };
 
     template <>
     struct Stack<BitTorrent::ShareLimitsMode>
-        : Enum<BitTorrent::ShareLimitsMode
-               , BitTorrent::ShareLimitsMode::Default
-               , BitTorrent::ShareLimitsMode::MatchAny
-               , BitTorrent::ShareLimitsMode::MatchAll>
+        : Enum<BitTorrent::ShareLimitsMode, BitTorrent::ShareLimitsMode::Default, BitTorrent::ShareLimitsMode::MatchAny, BitTorrent::ShareLimitsMode::MatchAll>
     {
     };
 

@@ -36,7 +36,7 @@ namespace Utils::Thread
 {
     struct GracefulDeleter
     {
-        void operator()(QThread *thread) const;
+        void operator()(QThread* thread) const;
     };
 
     using UniquePtr = std::unique_ptr<QThread, GracefulDeleter>;

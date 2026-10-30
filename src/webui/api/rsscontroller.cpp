@@ -28,12 +28,7 @@
 
 #include "rsscontroller.h"
 
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QList>
-
+#include "apierror.h"
 #include "base/rss/rss_article.h"
 #include "base/rss/rss_autodownloader.h"
 #include "base/rss/rss_autodownloadrule.h"
@@ -41,16 +36,21 @@
 #include "base/rss/rss_folder.h"
 #include "base/rss/rss_session.h"
 #include "base/utils/string.h"
-#include "apierror.h"
+
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QList>
 
 using Utils::String::parseBool;
 
 void RSSController::addFolderAction()
 {
-    requireParams({u"path"_s});
+    requireParams({ u"path"_s });
 
     const QString path = params()[u"path"_s];
-    const nonstd::expected<RSS::Folder *, QString> result = RSS::Session::instance()->addFolder(path);
+    const nonstd::expected<RSS::Folder*, QString> result = RSS::Session::instance()->addFolder(path);
     if (!result)
         throw APIError(APIErrorType::Conflict, result.error());
 
@@ -59,12 +59,12 @@ void RSSController::addFolderAction()
 
 void RSSController::addFeedAction()
 {
-    requireParams({u"url"_s, u"path"_s});
+    requireParams({ u"url"_s, u"path"_s });
 
     const QString url = params()[u"url"_s];
     const QString path = params()[u"path"_s];
     const auto refreshInterval = std::max<qint64>(params()[u"refreshInterval"_s].toLongLong(), 0);
-    const nonstd::expected<RSS::Feed *, QString> result = RSS::Session::instance()->addFeed(url, (path.isEmpty() ? url : path), std::chrono::seconds(refreshInterval));
+    const nonstd::expected<RSS::Feed*, QString> result = RSS::Session::instance()->addFeed(url, (path.isEmpty() ? url : path), std::chrono::seconds(refreshInterval));
     if (!result)
         throw APIError(APIErrorType::Conflict, result.error());
 
@@ -73,7 +73,7 @@ void RSSController::addFeedAction()
 
 void RSSController::setFeedURLAction()
 {
-    requireParams({u"path"_s, u"url"_s});
+    requireParams({ u"path"_s, u"url"_s });
 
     const QString path = params()[u"path"_s];
     const QString url = params()[u"url"_s];
@@ -86,7 +86,7 @@ void RSSController::setFeedURLAction()
 
 void RSSController::setFeedRefreshIntervalAction()
 {
-    requireParams({u"path"_s, u"refreshInterval"_s});
+    requireParams({ u"path"_s, u"refreshInterval"_s });
 
     bool ok = false;
     const auto refreshInterval = params()[u"refreshInterval"_s].toLongLong(&ok);
@@ -94,7 +94,7 @@ void RSSController::setFeedRefreshIntervalAction()
         throw APIError(APIErrorType::BadParams, tr("Invalid 'refreshInterval' value"));
 
     const QString path = params()[u"path"_s];
-    auto *feed = qobject_cast<RSS::Feed *>(RSS::Session::instance()->itemByPath(path));
+    auto* feed = qobject_cast<RSS::Feed*>(RSS::Session::instance()->itemByPath(path));
     if (!feed)
         throw APIError(APIErrorType::Conflict, tr("Feed doesn't exist: %1.").arg(path));
 
@@ -103,7 +103,7 @@ void RSSController::setFeedRefreshIntervalAction()
 
 void RSSController::removeItemAction()
 {
-    requireParams({u"path"_s});
+    requireParams({ u"path"_s });
 
     const QString path = params()[u"path"_s];
     const nonstd::expected<void, QString> result = RSS::Session::instance()->removeItem(path);
@@ -115,7 +115,7 @@ void RSSController::removeItemAction()
 
 void RSSController::moveItemAction()
 {
-    requireParams({u"itemPath"_s, u"destPath"_s});
+    requireParams({ u"itemPath"_s, u"destPath"_s });
 
     const QString itemPath = params()[u"itemPath"_s];
     const QString destPath = params()[u"destPath"_s];
@@ -128,7 +128,7 @@ void RSSController::moveItemAction()
 
 void RSSController::itemsAction()
 {
-    const bool withData {parseBool(params()[u"withData"_s]).value_or(false)};
+    const bool withData{ parseBool(params()[u"withData"_s]).value_or(false) };
 
     const auto jsonVal = RSS::Session::instance()->rootFolder()->toJsonValue(withData);
     setResult(jsonVal.toObject());
@@ -136,21 +136,21 @@ void RSSController::itemsAction()
 
 void RSSController::markAsReadAction()
 {
-    requireParams({u"itemPath"_s});
+    requireParams({ u"itemPath"_s });
 
-    const QString itemPath {params()[u"itemPath"_s]};
-    const QString articleId {params()[u"articleId"_s]};
+    const QString itemPath{ params()[u"itemPath"_s] };
+    const QString articleId{ params()[u"articleId"_s] };
 
-    RSS::Item *item = RSS::Session::instance()->itemByPath(itemPath);
+    RSS::Item* item = RSS::Session::instance()->itemByPath(itemPath);
     if (!item)
         return;
 
     if (!articleId.isNull())
     {
-        RSS::Feed *feed = qobject_cast<RSS::Feed *>(item);
+        RSS::Feed* feed = qobject_cast<RSS::Feed*>(item);
         if (feed)
         {
-            RSS::Article *article = feed->articleByGUID(articleId);
+            RSS::Article* article = feed->articleByGUID(articleId);
             if (article)
                 article->markAsRead();
         }
@@ -165,10 +165,10 @@ void RSSController::markAsReadAction()
 
 void RSSController::refreshItemAction()
 {
-    requireParams({u"itemPath"_s});
+    requireParams({ u"itemPath"_s });
 
-    const QString itemPath {params()[u"itemPath"_s]};
-    RSS::Item *item = RSS::Session::instance()->itemByPath(itemPath);
+    const QString itemPath{ params()[u"itemPath"_s] };
+    RSS::Item* item = RSS::Session::instance()->itemByPath(itemPath);
     if (item)
         item->refresh();
 
@@ -177,10 +177,10 @@ void RSSController::refreshItemAction()
 
 void RSSController::setRuleAction()
 {
-    requireParams({u"ruleName"_s, u"ruleDef"_s});
+    requireParams({ u"ruleName"_s, u"ruleDef"_s });
 
-    const QString ruleName {params()[u"ruleName"_s]};
-    const QByteArray ruleDef {params()[u"ruleDef"_s].toUtf8()};
+    const QString ruleName{ params()[u"ruleName"_s] };
+    const QByteArray ruleDef{ params()[u"ruleDef"_s].toUtf8() };
 
     const auto jsonObj = QJsonDocument::fromJson(ruleDef).object();
     RSS::AutoDownloader::instance()->setRule(RSS::AutoDownloadRule::fromJsonObject(jsonObj, ruleName));
@@ -191,8 +191,8 @@ void RSSController::setRuleAction()
 void RSSController::exportRulesAction()
 {
     setResult(RSS::AutoDownloader::instance()->exportRules(
-        RSS::AutoDownloader::RulesFileFormat::JSON), u"application/json"_s
-        , u"rss-downloader-rules.json"_s);
+                  RSS::AutoDownloader::RulesFileFormat::JSON),
+              u"application/json"_s, u"rss-downloader-rules.json"_s);
 }
 
 void RSSController::importRulesAction()
@@ -202,10 +202,9 @@ void RSSController::importRulesAction()
 
     try
     {
-        RSS::AutoDownloader::instance()->importRules(data().cbegin().value()
-            , RSS::AutoDownloader::RulesFileFormat::JSON);
+        RSS::AutoDownloader::instance()->importRules(data().cbegin().value(), RSS::AutoDownloader::RulesFileFormat::JSON);
     }
-    catch (const RSS::ParsingError &error)
+    catch (const RSS::ParsingError& error)
     {
         throw APIError(APIErrorType::BadParams, error.message());
     }
@@ -213,10 +212,10 @@ void RSSController::importRulesAction()
 
 void RSSController::renameRuleAction()
 {
-    requireParams({u"ruleName"_s, u"newRuleName"_s});
+    requireParams({ u"ruleName"_s, u"newRuleName"_s });
 
-    const QString ruleName {params()[u"ruleName"_s]};
-    const QString newRuleName {params()[u"newRuleName"_s]};
+    const QString ruleName{ params()[u"ruleName"_s] };
+    const QString newRuleName{ params()[u"newRuleName"_s] };
 
     RSS::AutoDownloader::instance()->renameRule(ruleName, newRuleName);
 
@@ -225,10 +224,10 @@ void RSSController::renameRuleAction()
 
 void RSSController::cloneRuleAction()
 {
-    requireParams({u"sourceName"_s, u"cloneName"_s});
+    requireParams({ u"sourceName"_s, u"cloneName"_s });
 
-    const QString sourceName {params()[u"sourceName"_s]};
-    const QString cloneName {params()[u"cloneName"_s]};
+    const QString sourceName{ params()[u"sourceName"_s] };
+    const QString cloneName{ params()[u"cloneName"_s] };
 
     RSS::AutoDownloader::instance()->cloneRule(sourceName, cloneName);
 
@@ -237,9 +236,9 @@ void RSSController::cloneRuleAction()
 
 void RSSController::removeRuleAction()
 {
-    requireParams({u"ruleName"_s});
+    requireParams({ u"ruleName"_s });
 
-    const QString ruleName {params()[u"ruleName"_s]};
+    const QString ruleName{ params()[u"ruleName"_s] };
     RSS::AutoDownloader::instance()->removeRule(ruleName);
 
     setResult(QString());
@@ -247,9 +246,9 @@ void RSSController::removeRuleAction()
 
 void RSSController::rulesAction()
 {
-    const QList<RSS::AutoDownloadRule> rules {RSS::AutoDownloader::instance()->rules()};
+    const QList<RSS::AutoDownloadRule> rules{ RSS::AutoDownloader::instance()->rules() };
     QJsonObject jsonObj;
-    for (const auto &rule : rules)
+    for (const auto& rule : rules)
         jsonObj.insert(rule.name(), rule.toJsonObject());
 
     setResult(jsonObj);
@@ -257,20 +256,20 @@ void RSSController::rulesAction()
 
 void RSSController::matchingArticlesAction()
 {
-    requireParams({u"ruleName"_s});
+    requireParams({ u"ruleName"_s });
 
-    const QString ruleName {params()[u"ruleName"_s]};
+    const QString ruleName{ params()[u"ruleName"_s] };
     const RSS::AutoDownloadRule rule = RSS::AutoDownloader::instance()->ruleByName(ruleName);
 
     QJsonObject jsonObj;
-    for (const QString &feedURL : rule.feedURLs())
+    for (const QString& feedURL : rule.feedURLs())
     {
-        const RSS::Feed *feed = RSS::Session::instance()->feedByURL(feedURL);
+        const RSS::Feed* feed = RSS::Session::instance()->feedByURL(feedURL);
         if (!feed)
-            continue;        // feed doesn't exist
+            continue; // feed doesn't exist
 
         QJsonArray matchingArticles;
-        for (const RSS::Article *article : feed->articles())
+        for (const RSS::Article* article : feed->articles())
         {
             if (rule.matches(article->data()))
                 matchingArticles << article->title();

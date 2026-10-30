@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 class QSortFilterProxyModel;
 class QStringListModel;
@@ -46,19 +46,19 @@ class BanListOptionsDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(BanListOptionsDialog)
 
 public:
-    explicit BanListOptionsDialog(QWidget *parent = nullptr);
+    explicit BanListOptionsDialog(QWidget* parent = nullptr);
     ~BanListOptionsDialog() override;
 
 private slots:
     void on_buttonBox_accepted();
     void on_buttonBanIP_clicked();
     void on_buttonDeleteIP_clicked();
-    void on_txtIP_textChanged(const QString &ip);
+    void on_txtIP_textChanged(const QString& ip);
 
 private:
-    Ui::BanListOptionsDialog *m_ui = nullptr;
+    Ui::BanListOptionsDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
-    QStringListModel *m_model = nullptr;
-    QSortFilterProxyModel *m_sortFilter = nullptr;
+    QStringListModel* m_model = nullptr;
+    QSortFilterProxyModel* m_sortFilter = nullptr;
     bool m_modified = false;
 };

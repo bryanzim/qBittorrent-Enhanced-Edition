@@ -30,19 +30,16 @@
 
 #include "connection.h"
 
-#include <QMetaObject>
-#include <QTcpSocket>
-
 #include "constants.h"
 #include "environment.h"
 #include "irequesthandler.h"
 #include "requestparser.h"
 
-Http::Connection::Connection(QTcpSocket *socket, IRequestHandler *requestHandler, QObject *parent)
-    : QObject(parent)
-    , m_socket {socket}
-    , m_requestHandler {requestHandler}
-    , m_responseWriter {ResponseWriterImpl(socket)}
+#include <QMetaObject>
+#include <QTcpSocket>
+
+Http::Connection::Connection(QTcpSocket* socket, IRequestHandler* requestHandler, QObject* parent)
+    : QObject(parent), m_socket{ socket }, m_requestHandler{ requestHandler }, m_responseWriter{ ResponseWriterImpl(socket) }
 {
     Q_ASSERT(socket);
     Q_ASSERT(requestHandler);
@@ -56,26 +53,22 @@ Http::Connection::Connection(QTcpSocket *socket, IRequestHandler *requestHandler
 
     // reset timer when there are activity
     m_idleTimer.start();
-    connect(m_socket, &QIODevice::readyRead, this, [this]
-    {
+    connect(m_socket, &QIODevice::readyRead, this, [this] {
         m_idleTimer.start();
         m_isReadyRead = true;
         read();
     });
-    connect(m_socket, &QIODevice::bytesWritten, this, [this]
-    {
+    connect(m_socket, &QIODevice::bytesWritten, this, [this] {
         m_idleTimer.start();
     });
 
     connect(&m_responseWriter, &ResponseWriter::failed, m_socket, &QAbstractSocket::abort);
-    connect(&m_responseWriter, &ResponseWriter::finished, this, [this]
-    {
+    connect(&m_responseWriter, &ResponseWriter::finished, this, [this] {
         m_isProcessingRequest = false;
         if (!m_receivedData.isEmpty())
             processRequest(); // try to fetch next request
         else if (m_isReadyRead)
-            read();
-    }, Qt::QueuedConnection); // need to use `Qt::QueuedConnection` to avoid possible recursion
+            read(); }, Qt::QueuedConnection); // need to use `Qt::QueuedConnection` to avoid possible recursion
 }
 
 void Http::Connection::read()
@@ -118,30 +111,29 @@ bool Http::Connection::processRequest()
     const RequestParser::ParseResult result = RequestParser::parse(m_receivedData);
     switch (result.status)
     {
-    case RequestParser::ParseStatus::OK:
-        {
+    case RequestParser::ParseStatus::OK: {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-            m_receivedData.slice(result.frameSize);
+        m_receivedData.slice(result.frameSize);
 #else
-            m_receivedData.remove(0, result.frameSize);
+        m_receivedData.remove(0, result.frameSize);
 #endif
 
-            const Environment env {m_socket->localAddress(), m_socket->localPort(), m_socket->peerAddress(), m_socket->peerPort()};
+        const Environment env{ m_socket->localAddress(), m_socket->localPort(), m_socket->peerAddress(), m_socket->peerPort() };
 
-            m_responseWriter.prepare(result.request);
-            m_requestHandler->processRequest(result.request, env, m_responseWriter);
-            if (!m_responseWriter.isFinished())
-                m_isProcessingRequest = true;
-        }
+        m_responseWriter.prepare(result.request);
+        m_requestHandler->processRequest(result.request, env, m_responseWriter);
+        if (!m_responseWriter.isFinished())
+            m_isProcessingRequest = true;
+    }
         return true;
 
     case RequestParser::ParseStatus::Incomplete:
-        if (const long bufferLimit = RequestParser::MAX_CONTENT_SIZE * 1.1; m_receivedData.size() > bufferLimit)  // some margin for headers
+        if (const long bufferLimit = RequestParser::MAX_CONTENT_SIZE * 1.1; m_receivedData.size() > bufferLimit) // some margin for headers
         {
             qWarning("%s", qUtf8Printable(tr("Http request size exceeds limitation, closing socket. Limit: %1, IP: %2")
-                    .arg(QString::number(bufferLimit), m_socket->peerAddress().toString())));
+                                              .arg(QString::number(bufferLimit), m_socket->peerAddress().toString())));
 
-            abort({413, u"Payload Too Large"_s});
+            abort({ 413, u"Payload Too Large"_s });
         }
         else if (m_isReadyRead)
         {
@@ -152,31 +144,29 @@ bool Http::Connection::processRequest()
 
     case RequestParser::ParseStatus::BadMethod:
         qWarning("%s", qUtf8Printable(tr("Bad Http request method, closing socket. IP: %1. Method: \"%2\"")
-                .arg(m_socket->peerAddress().toString(), result.request.method)));
+                                          .arg(m_socket->peerAddress().toString(), result.request.method)));
 
-        abort({501, u"Not Implemented"_s});
+        abort({ 501, u"Not Implemented"_s });
         break;
 
     case RequestParser::ParseStatus::BadRequest:
         qWarning("%s", qUtf8Printable(tr("Bad Http request, closing socket. IP: %1")
-                .arg(m_socket->peerAddress().toString())));
+                                          .arg(m_socket->peerAddress().toString())));
 
-        abort({400, u"Bad Request"_s});
+        abort({ 400, u"Bad Request"_s });
         break;
     }
 
     return false;
 }
 
-void Http::Connection::abort(const ResponseStatus &responseStatus)
+void Http::Connection::abort(const ResponseStatus& responseStatus)
 {
-    ResponseWriterImpl(m_socket, {}).setResponse({.status = responseStatus, .headers = {{HEADER_CONNECTION, u"close"_s}}});
+    ResponseWriterImpl(m_socket, {}).setResponse({ .status = responseStatus, .headers = { { HEADER_CONNECTION, u"close"_s } } });
     m_socket->close();
 }
 
 bool Http::Connection::hasExpired(const qint64 timeout) const
 {
-    return (m_socket->bytesAvailable() == 0)
-        && (m_socket->bytesToWrite() == 0)
-        && m_idleTimer.hasExpired(timeout);
+    return (m_socket->bytesAvailable() == 0) && (m_socket->bytesToWrite() == 0) && m_idleTimer.hasExpired(timeout);
 }

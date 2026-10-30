@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 namespace Ui
 {
@@ -43,14 +43,14 @@ class SpeedLimitDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(SpeedLimitDialog)
 
 public:
-    explicit SpeedLimitDialog(QWidget *parent);
+    explicit SpeedLimitDialog(QWidget* parent);
     ~SpeedLimitDialog() override;
 
 public slots:
     void accept() override;
 
 private:
-    Ui::SpeedLimitDialog *m_ui = nullptr;
+    Ui::SpeedLimitDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
     struct
     {

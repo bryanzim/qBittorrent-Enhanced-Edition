@@ -28,25 +28,25 @@
 
 #pragma once
 
-#include <variant>
+#include "apistatus.h"
+#include "base/applicationcomponent.h"
+#include "base/path.h"
 
-#include <QtContainerFwd>
 #include <QObject>
 #include <QString>
 #include <QVariant>
+#include <QtContainerFwd>
 
-#include "base/applicationcomponent.h"
-#include "base/path.h"
-#include "apistatus.h"
+#include <variant>
 
 using DataMap = QHash<QString, QByteArray>;
 using StringMap = QHash<QString, QString>;
 
 struct RegularAPIResult
 {
-    QVariant data {};
-    QString mimeType {};
-    QString filename {};
+    QVariant data{};
+    QString mimeType{};
+    QString filename{};
     APIStatus status = APIStatus::Ok;
 };
 
@@ -63,20 +63,20 @@ class APIController : public ApplicationComponent<QObject>
     Q_DISABLE_COPY_MOVE(APIController)
 
 public:
-    explicit APIController(IApplication *app, QObject *parent = nullptr);
+    explicit APIController(IApplication* app, QObject* parent = nullptr);
 
-    APIResult run(const QString &action, const StringMap &params, const DataMap &data = {});
+    APIResult run(const QString& action, const StringMap& params, const DataMap& data = {});
 
 protected:
-    const StringMap &params() const;
-    const DataMap &data() const;
-    void requireParams(const QList<QString> &requiredParams) const;
+    const StringMap& params() const;
+    const DataMap& data() const;
+    void requireParams(const QList<QString>& requiredParams) const;
 
-    void setResult(const QString &result);
-    void setResult(const QJsonArray &result);
-    void setResult(const QJsonObject &result);
-    void setResult(const QByteArray &result, const QString &mimeType = {}, const QString &filename = {});
-    void setResult(const Path &filePath);
+    void setResult(const QString& result);
+    void setResult(const QJsonArray& result);
+    void setResult(const QJsonObject& result);
+    void setResult(const QByteArray& result, const QString& mimeType = {}, const QString& filename = {});
+    void setResult(const Path& filePath);
 
     void setStatus(APIStatus status);
 

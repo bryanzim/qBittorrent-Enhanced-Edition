@@ -28,14 +28,14 @@
 
 #pragma once
 
-#include <libtorrent/download_priority.hpp>
-
 #include "downloadpriority.h"
+
+#include <libtorrent/download_priority.hpp>
 
 namespace BitTorrent::LT
 {
     template <typename T>
-    constexpr typename T::underlying_type toUnderlyingType(const T &t) noexcept
+    constexpr typename T::underlying_type toUnderlyingType(const T& t) noexcept
     {
         return static_cast<typename T::underlying_type>(t);
     }

@@ -28,17 +28,17 @@
 
 #pragma once
 
-#include <memory>
-#include <optional>
+#include "base/3rdparty/expected.hpp"
+#include "base/pathfwd.h"
+#include "base/utils/version.h"
+#include "pluginversion.h"
 
 #include <QHash>
 #include <QObject>
 #include <QQueue>
 
-#include "base/3rdparty/expected.hpp"
-#include "base/pathfwd.h"
-#include "base/utils/version.h"
-#include "pluginversion.h"
+#include <memory>
+#include <optional>
 
 using LuaVersion = Utils::Version<3>;
 using LuaBridgeVersion = Utils::Version<2>;
@@ -67,30 +67,28 @@ class PluginsEngine final : public QObject
 public:
     static void initInstance();
     static void freeInstance();
-    static PluginsEngine *instance();
+    static PluginsEngine* instance();
 
     static LuaVersion luaVersion();
     static LuaBridgeVersion luaBridgeVersion();
 
     QHash<QString, PluginInfo> allPlugins() const;
-    std::optional<PluginInfo> pluginInfo(const QString &pluginID) const;
+    std::optional<PluginInfo> pluginInfo(const QString& pluginID) const;
 
-    bool installPlugin(const Path &pluginPath);
-    bool uninstallPlugin(const QString &pluginID);
-    void setPluginEnabled(const QString &pluginID, bool enabled);
+    bool installPlugin(const Path& pluginPath);
+    bool uninstallPlugin(const QString& pluginID);
+    void setPluginEnabled(const QString& pluginID, bool enabled);
 
-    void invokePlugin(const QString &pluginID);
+    void invokePlugin(const QString& pluginID);
 
 signals:
-    void pluginInstalled(const Path &pluginPath, const PluginInfo &pluginInfo);
-    void pluginInstallationFailed(const Path &pluginPath, const QString &reason);
-    void pluginUpdated(const Path &pluginPath, const PluginInfo &oldPluginInfo
-            , const PluginInfo &newPluginInfo);
-    void pluginUpdateFailed(const Path &pluginPath, const PluginInfo &currentPluginInfo
-            , const PluginInfo &newPluginInfo, const QString &reason);
-    void pluginUninstalled(const QString &pluginID);
-    void pluginUninstallationFailed(const QString &pluginID, const QString &reason);
-    void pluginEnabledChanged(const QString &pluginID, bool isEnabled);
+    void pluginInstalled(const Path& pluginPath, const PluginInfo& pluginInfo);
+    void pluginInstallationFailed(const Path& pluginPath, const QString& reason);
+    void pluginUpdated(const Path& pluginPath, const PluginInfo& oldPluginInfo, const PluginInfo& newPluginInfo);
+    void pluginUpdateFailed(const Path& pluginPath, const PluginInfo& currentPluginInfo, const PluginInfo& newPluginInfo, const QString& reason);
+    void pluginUninstalled(const QString& pluginID);
+    void pluginUninstallationFailed(const QString& pluginID, const QString& reason);
+    void pluginEnabledChanged(const QString& pluginID, bool isEnabled);
 
 private:
     struct PluginEntry
@@ -102,10 +100,10 @@ private:
 
     static Path pluginsPath();
 
-    explicit PluginsEngine(QObject *parent = nullptr);
+    explicit PluginsEngine(QObject* parent = nullptr);
     ~PluginsEngine() override;
 
-    nonstd::expected<PluginEntry, QString> loadPlugin(const Path &path);
+    nonstd::expected<PluginEntry, QString> loadPlugin(const Path& path);
     void installPluginDeferred();
     void installPluginImpl();
     void uninstallPluginDeferred();
@@ -115,18 +113,18 @@ private:
     void loadPlugins();
     void connectEventHandlers();
     void storeConfig() const;
-    PluginInfo getPluginInfo(const PluginEntry &pluginEntry) const;
+    PluginInfo getPluginInfo(const PluginEntry& pluginEntry) const;
 
     template <typename Signal>
-    void connectEventHandler(Signal &&signal, const char *eventHandlerName);
+    void connectEventHandler(Signal&& signal, const char* eventHandlerName);
 
     template <typename... Args>
-    void callEventHandlers(const char *eventHandlerName, Args&&... args);
+    void callEventHandlers(const char* eventHandlerName, Args&&... args);
 
     QHash<QString, PluginEntry> m_plugins;
     QQueue<Path> m_pluginsToInstall;
     QQueue<QString> m_pluginsToUninstall;
     mutable bool m_configIsDirty = false;
 
-    inline static PluginsEngine *m_instance = nullptr;
+    inline static PluginsEngine* m_instance = nullptr;
 };

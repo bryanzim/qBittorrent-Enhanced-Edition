@@ -28,9 +28,10 @@
 
 #include "keyvaluedatastorage.h"
 
-#include <concepts>
-#include <memory>
-#include <queue>
+#include "exceptions.h"
+#include "logger.h"
+#include "path.h"
+#include "profile.h"
 
 #include <QHash>
 #include <QMutex>
@@ -42,10 +43,9 @@
 #include <QThread>
 #include <QWaitCondition>
 
-#include "exceptions.h"
-#include "logger.h"
-#include "path.h"
-#include "profile.h"
+#include <concepts>
+#include <memory>
+#include <queue>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -56,7 +56,7 @@ const QString DB_COLUMN_VALUE = u"value"_s;
 
 namespace
 {
-    Path makeDBPath(const QString &storageName)
+    Path makeDBPath(const QString& storageName)
     {
         return specialFolderLocation(SpecialFolder::Data) / Path(storageName + u".db");
     }
@@ -64,9 +64,8 @@ namespace
     class Job
     {
     public:
-        explicit Job(const QString &storageName, const QString &tableName)
-            : m_storageName {storageName}
-            , m_tableName {tableName}
+        explicit Job(const QString& storageName, const QString& tableName)
+            : m_storageName{ storageName }, m_tableName{ tableName }
         {
         }
 
@@ -81,19 +80,17 @@ namespace
     class StoreValueJob final : public Job
     {
     public:
-        StoreValueJob(const QString &storageName, const QString &tableName, const QString &key, QVariant value)
-            : Job(storageName, tableName)
-            , m_key {key}
-            , m_value {std::move(value)}
+        StoreValueJob(const QString& storageName, const QString& tableName, const QString& key, QVariant value)
+            : Job(storageName, tableName), m_key{ key }, m_value{ std::move(value) }
         {
         }
 
         void perform(QSqlDatabase db) override
         {
             const QString insertStatement = u"INSERT INTO `%1` (%2, %3) VALUES (:%2, :%3) ON CONFLICT (%2) DO UPDATE SET (%2, %3) = (:%2, :%3)"_s
-                    .arg(m_tableName, DB_COLUMN_KEY, DB_COLUMN_VALUE);
+                                                .arg(m_tableName, DB_COLUMN_KEY, DB_COLUMN_VALUE);
 
-            QSqlQuery query {db};
+            QSqlQuery query{ db };
             try
             {
                 if (!query.prepare(insertStatement))
@@ -105,10 +102,11 @@ namespace
                 if (!query.exec())
                     throw RuntimeError(query.lastError().text());
             }
-            catch (const RuntimeError &err)
+            catch (const RuntimeError& err)
             {
                 LogMsg(KeyValueDataStorage::tr("Inserting (updating) database record failed. Database: %1. Error: %2")
-                        .arg(m_storageName, err.message()), Log::WARNING);
+                           .arg(m_storageName, err.message()),
+                       Log::WARNING);
             }
         }
 
@@ -120,19 +118,17 @@ namespace
     class FetchValueJob final : public Job
     {
     public:
-        explicit FetchValueJob(const QString &storageName, const QString &tableName, const QString &key, QPromise<QVariant> &&promise)
-            : Job(storageName, tableName)
-            , m_key {key}
-            , m_promise {std::move(promise)}
+        explicit FetchValueJob(const QString& storageName, const QString& tableName, const QString& key, QPromise<QVariant>&& promise)
+            : Job(storageName, tableName), m_key{ key }, m_promise{ std::move(promise) }
         {
         }
 
         void perform(QSqlDatabase db) override
         {
             const QString selectStatement = u"SELECT `%1` FROM `%2` WHERE `%3` = :%3;"_s
-                    .arg(DB_COLUMN_VALUE, m_tableName, DB_COLUMN_KEY);
+                                                .arg(DB_COLUMN_VALUE, m_tableName, DB_COLUMN_KEY);
 
-            QSqlQuery query {db};
+            QSqlQuery query{ db };
             try
             {
                 if (!query.prepare(selectStatement))
@@ -149,11 +145,12 @@ namespace
 
                 m_promise.finish();
             }
-            catch (const RuntimeError &err)
+            catch (const RuntimeError& err)
             {
                 m_promise.addResult({});
                 LogMsg(KeyValueDataStorage::tr("Fetching database record failed. Database: %1. Error: %2")
-                        .arg(m_storageName, err.message()), Log::WARNING);
+                           .arg(m_storageName, err.message()),
+                       Log::WARNING);
             }
         }
 
@@ -165,18 +162,17 @@ namespace
     class RemoveValueJob final : public Job
     {
     public:
-        explicit RemoveValueJob(const QString &storageName, const QString &tableName, const QString &key)
-            : Job(storageName, tableName)
-            , m_key {key}
+        explicit RemoveValueJob(const QString& storageName, const QString& tableName, const QString& key)
+            : Job(storageName, tableName), m_key{ key }
         {
         }
 
         void perform(QSqlDatabase db) override
         {
             const auto deleteStatement = u"DELETE FROM `%1` WHERE `%2` = :%2;"_s
-                    .arg(m_tableName, DB_COLUMN_KEY);
+                                             .arg(m_tableName, DB_COLUMN_KEY);
 
-            QSqlQuery query {db};
+            QSqlQuery query{ db };
             try
             {
                 if (!query.prepare(deleteStatement))
@@ -187,10 +183,11 @@ namespace
                 if (!query.exec())
                     throw RuntimeError(query.lastError().text());
             }
-            catch (const RuntimeError &err)
+            catch (const RuntimeError& err)
             {
                 LogMsg(KeyValueDataStorage::tr("Deleting database record failed. Database: %1. Error: %2")
-                        .arg(m_storageName, err.message()), Log::WARNING);
+                           .arg(m_storageName, err.message()),
+                       Log::WARNING);
             }
         }
 
@@ -201,7 +198,7 @@ namespace
     template <std::integral T>
     QByteArray toHex(const T value)
     {
-        return QByteArray(reinterpret_cast<const char *>(&value), sizeof(value)).toHex();
+        return QByteArray(reinterpret_cast<const char*>(&value), sizeof(value)).toHex();
     }
 }
 
@@ -210,17 +207,17 @@ class KeyValueDataStorage::Worker final : public QThread
     Q_DISABLE_COPY_MOVE(Worker)
 
 public:
-    explicit Worker(const Path &dbPath, const QString &storageName, QObject *parent = nullptr);
+    explicit Worker(const Path& dbPath, const QString& storageName, QObject* parent = nullptr);
 
     void run() override;
     void requestInterruption();
 
-    void storeValue(const QString &key, QVariant &&value);
-    void fetchValue(const QString &key, QPromise<QVariant> &&promise);
-    void removeValue(const QString &key);
+    void storeValue(const QString& key, QVariant&& value);
+    void fetchValue(const QString& key, QPromise<QVariant>&& promise);
+    void removeValue(const QString& key);
 
 private:
-    bool initDB(QSqlDatabase &db);
+    bool initDB(QSqlDatabase& db);
     void addJob(std::unique_ptr<Job> job);
 
     Path m_dbPath;
@@ -234,9 +231,8 @@ private:
     QWaitCondition m_waitCondition;
 };
 
-KeyValueDataStorage::KeyValueDataStorage(const QString &storageName, QObject *parent)
-    : QObject(parent)
-    , m_storageName {storageName}
+KeyValueDataStorage::KeyValueDataStorage(const QString& storageName, QObject* parent)
+    : QObject(parent), m_storageName{ storageName }
 {
 }
 
@@ -249,14 +245,14 @@ KeyValueDataStorage::~KeyValueDataStorage()
     }
 }
 
-QFuture<QVariant> KeyValueDataStorage::fetchValue(const QString &key) const
+QFuture<QVariant> KeyValueDataStorage::fetchValue(const QString& key) const
 {
     if (!m_asyncWorker)
     {
         const Path dbPath = makeDBPath(m_storageName);
         if (dbPath.exists())
         {
-            m_asyncWorker = new Worker(dbPath, m_storageName, const_cast<KeyValueDataStorage *>(this));
+            m_asyncWorker = new Worker(dbPath, m_storageName, const_cast<KeyValueDataStorage*>(this));
             m_asyncWorker->start();
         }
     }
@@ -271,12 +267,12 @@ QFuture<QVariant> KeyValueDataStorage::fetchValue(const QString &key) const
     return future;
 }
 
-void KeyValueDataStorage::storeValue(const QString &key, const QVariant &value)
+void KeyValueDataStorage::storeValue(const QString& key, const QVariant& value)
 {
     storeValue(key, QVariant(value));
 }
 
-void KeyValueDataStorage::storeValue(const QString &key, QVariant &&value)
+void KeyValueDataStorage::storeValue(const QString& key, QVariant&& value)
 {
     if (!m_asyncWorker)
     {
@@ -287,7 +283,7 @@ void KeyValueDataStorage::storeValue(const QString &key, QVariant &&value)
     m_asyncWorker->storeValue(key, std::move(value));
 }
 
-void KeyValueDataStorage::removeValue(const QString &key)
+void KeyValueDataStorage::removeValue(const QString& key)
 {
     if (!m_asyncWorker)
     {
@@ -303,11 +299,8 @@ void KeyValueDataStorage::removeValue(const QString &key)
         m_asyncWorker->removeValue(key);
 }
 
-KeyValueDataStorage::Worker::Worker(const Path &dbPath, const QString &storageName, QObject *parent)
-    : QThread(parent)
-    , m_dbPath {dbPath}
-    , m_storageName {storageName}
-    , m_tableName {DB_STORAGE_PREFIX + storageName}
+KeyValueDataStorage::Worker::Worker(const Path& dbPath, const QString& storageName, QObject* parent)
+    : QThread(parent), m_dbPath{ dbPath }, m_storageName{ storageName }, m_tableName{ DB_STORAGE_PREFIX + storageName }
 {
 }
 
@@ -325,7 +318,7 @@ void KeyValueDataStorage::Worker::run()
         auto db = QSqlDatabase::database(connectionName, false);
 
         {
-            const QMutexLocker jobsMutexLocker {&m_jobsMutex};
+            const QMutexLocker jobsMutexLocker{ &m_jobsMutex };
             if (!m_jobs.empty())
             {
                 m_dbLock.lockForWrite();
@@ -340,7 +333,7 @@ void KeyValueDataStorage::Worker::run()
         int64_t transactedJobsCount = 0;
         while (true)
         {
-            QMutexLocker jobsMutexLocker {&m_jobsMutex};
+            QMutexLocker jobsMutexLocker{ &m_jobsMutex };
             if (m_jobs.empty())
             {
                 if (transactedJobsCount > 0)
@@ -384,45 +377,48 @@ void KeyValueDataStorage::Worker::requestInterruption()
     m_waitCondition.wakeAll();
 }
 
-void KeyValueDataStorage::Worker::storeValue(const QString &key, QVariant &&value)
+void KeyValueDataStorage::Worker::storeValue(const QString& key, QVariant&& value)
 {
     addJob(std::make_unique<StoreValueJob>(m_storageName, m_tableName, key, std::move(value)));
 }
 
-void KeyValueDataStorage::Worker::fetchValue(const QString &key, QPromise<QVariant> &&promise)
+void KeyValueDataStorage::Worker::fetchValue(const QString& key, QPromise<QVariant>&& promise)
 {
     addJob(std::make_unique<FetchValueJob>(m_storageName, m_tableName, key, std::move(promise)));
 }
 
-void KeyValueDataStorage::Worker::removeValue(const QString &key)
+void KeyValueDataStorage::Worker::removeValue(const QString& key)
 {
     addJob(std::make_unique<RemoveValueJob>(m_storageName, m_tableName, key));
 }
 
-bool KeyValueDataStorage::Worker::initDB(QSqlDatabase &db)
+bool KeyValueDataStorage::Worker::initDB(QSqlDatabase& db)
 {
     if (!db.open())
     {
         LogMsg(tr("Opening database failed. Database: %1. Error: %2")
-                .arg(m_storageName, db.lastError().text()), Log::WARNING);
+                   .arg(m_storageName, db.lastError().text()),
+               Log::WARNING);
         return false;
     }
 
     if (!db.transaction())
     {
         LogMsg(tr("Starting database transaction failed. Database: %1. Error: %2")
-                .arg(m_storageName, db.lastError().text()), Log::WARNING);
+                   .arg(m_storageName, db.lastError().text()),
+               Log::WARNING);
         return false;
     }
 
-    QSqlQuery query {db};
+    QSqlQuery query{ db };
 
     const QString createTableQuery = u"CREATE TABLE IF NOT EXISTS `%1` (%2 INTEGER PRIMARY KEY, %3 TEXT NOT NULL UNIQUE, %4 BLOB)"_s
-            .arg(m_tableName, DB_COLUMN_ID, DB_COLUMN_KEY, DB_COLUMN_VALUE);
+                                         .arg(m_tableName, DB_COLUMN_ID, DB_COLUMN_KEY, DB_COLUMN_VALUE);
     if (!query.exec(createTableQuery))
     {
         LogMsg(tr("Creating database table failed. Database: %1. Error: %2")
-                .arg(m_storageName, db.lastError().text()), Log::WARNING);
+                   .arg(m_storageName, db.lastError().text()),
+               Log::WARNING);
         return false;
     }
 

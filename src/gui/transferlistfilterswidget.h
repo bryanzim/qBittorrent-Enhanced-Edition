@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <QtContainerFwd>
 #include <QWidget>
+#include <QtContainerFwd>
 
 class TrackersFilterWidget;
 class TransferListWidget;
@@ -47,11 +47,11 @@ class TransferListFiltersWidget final : public QWidget
     Q_DISABLE_COPY_MOVE(TransferListFiltersWidget)
 
 public:
-    TransferListFiltersWidget(QWidget *parent, TransferListWidget *transferList, bool downloadFavicon);
+    TransferListFiltersWidget(QWidget* parent, TransferListWidget* transferList, bool downloadFavicon);
     void setDownloadTrackerFavicon(bool value);
 
 private:
-    TransferListWidget *m_transferList = nullptr;
-    TrackersFilterWidget *m_trackersFilterWidget = nullptr;
+    TransferListWidget* m_transferList = nullptr;
+    TrackersFilterWidget* m_trackersFilterWidget = nullptr;
     bool m_useSeparateTrackerStatusFilter = false;
 };

@@ -28,8 +28,8 @@
 
 #include "exceptions.h"
 
-Exception::Exception(const QString &message) noexcept
-    : m_message {message}
+Exception::Exception(const QString& message) noexcept
+    : m_message{ message }
 {
 }
 

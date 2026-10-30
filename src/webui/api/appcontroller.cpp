@@ -31,22 +31,8 @@
 
 #include "appcontroller.h"
 
-#include <algorithm>
-#include <chrono>
-
-#include <QCoreApplication>
-#include <QDebug>
-#include <QDir>
-#include <QDirIterator>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QNetworkCookie>
-#include <QNetworkInterface>
-#include <QRegularExpression>
-#include <QStringList>
-#include <QTimer>
-
+#include "../webapplication.h"
+#include "apierror.h"
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "base/interfaces/iapplication.h"
@@ -68,8 +54,22 @@
 #include "base/utils/password.h"
 #include "base/utils/string.h"
 #include "base/version.h"
-#include "apierror.h"
-#include "../webapplication.h"
+
+#include <QCoreApplication>
+#include <QDebug>
+#include <QDir>
+#include <QDirIterator>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkCookie>
+#include <QNetworkInterface>
+#include <QRegularExpression>
+#include <QStringList>
+#include <QTimer>
+
+#include <algorithm>
+#include <chrono>
 
 using namespace std::chrono_literals;
 
@@ -110,24 +110,22 @@ void AppController::buildInfoAction()
         u"unknown"_s;
 #endif
 
-    const QJsonObject versions =
-    {
-        {u"qt"_s, QStringLiteral(QT_VERSION_STR)},
-        {u"libtorrent"_s, Utils::Misc::libtorrentVersionString()},
-        {u"boost"_s, Utils::Misc::boostVersionString()},
-        {u"openssl"_s, Utils::Misc::opensslVersionString()},
-        {u"zlib"_s, Utils::Misc::zlibVersionString()},
-        {u"bitness"_s, (QT_POINTER_SIZE * 8)},
-        {u"platform"_s, platformName}
+    const QJsonObject versions = {
+        {         u"qt"_s,         QStringLiteral(QT_VERSION_STR) },
+        { u"libtorrent"_s, Utils::Misc::libtorrentVersionString() },
+        {      u"boost"_s,      Utils::Misc::boostVersionString() },
+        {    u"openssl"_s,    Utils::Misc::opensslVersionString() },
+        {       u"zlib"_s,       Utils::Misc::zlibVersionString() },
+        {    u"bitness"_s,                  (QT_POINTER_SIZE * 8) },
+        {   u"platform"_s,                           platformName }
     };
     setResult(versions);
 }
 
 void AppController::processInfoAction()
 {
-    const QJsonObject info =
-    {
-        {u"launch_time"_s, app()->launchTimeSecsSinceEpoch()}
+    const QJsonObject info = {
+        { u"launch_time"_s, app()->launchTimeSecsSinceEpoch() }
     };
     setResult(info);
 }
@@ -137,8 +135,7 @@ void AppController::shutdownAction()
     // Special handling for shutdown, we
     // need to reply to the WebUI before
     // actually shutting down.
-    QTimer::singleShot(100ms, Qt::CoarseTimer, qApp, []
-    {
+    QTimer::singleShot(100ms, Qt::CoarseTimer, qApp, [] {
         QCoreApplication::exit();
     });
     setResult(QString());
@@ -146,8 +143,8 @@ void AppController::shutdownAction()
 
 void AppController::preferencesAction()
 {
-    const auto *pref = Preferences::instance();
-    const auto *session = BitTorrent::Session::instance();
+    const auto* pref = Preferences::instance();
+    const auto* session = BitTorrent::Session::instance();
 
     QJsonObject data;
 
@@ -201,12 +198,12 @@ void AppController::preferencesAction()
 
     // TODO: The following code is deprecated. Delete it once replaced by updated API method.
     // === BEGIN DEPRECATED CODE === //
-    TorrentFilesWatcher *fsWatcher = TorrentFilesWatcher::instance();
+    TorrentFilesWatcher* fsWatcher = TorrentFilesWatcher::instance();
     const QHash<Path, TorrentFilesWatcher::WatchedFolderOptions> watchedFolders = fsWatcher->folders();
     QJsonObject nativeDirs;
     for (auto i = watchedFolders.cbegin(); i != watchedFolders.cend(); ++i)
     {
-        const Path &watchedFolder = i.key();
+        const Path& watchedFolder = i.key();
         const BitTorrent::AddTorrentParams params = i.value().addTorrentParams;
         if (params.savePath.isEmpty())
             nativeDirs.insert(watchedFolder.toString(), 1);
@@ -243,7 +240,7 @@ void AppController::preferencesAction()
     data[u"listen_port"_s] = session->port();
     data[u"ssl_enabled"_s] = session->isSSLEnabled();
     data[u"ssl_listen_port"_s] = session->sslPort();
-    data[u"random_port"_s] = (session->port() == 0);  // deprecated
+    data[u"random_port"_s] = (session->port() == 0); // deprecated
     data[u"upnp"_s] = Net::PortForwarder::instance()->isEnabled();
     // Connections Limits
     data[u"max_connec"_s] = session->maxConnections();
@@ -265,7 +262,7 @@ void AppController::preferencesAction()
     data[u"i2p_outbound_length_variance"_s] = session->I2POutboundLengthVariance();
 
     // Proxy Server
-    const auto *proxyManager = Net::ProxyConfigurationManager::instance();
+    const auto* proxyManager = Net::ProxyConfigurationManager::instance();
     Net::ProxyConfiguration proxyConf = proxyManager->proxyConfiguration();
     data[u"auto_ban_unknown_peer"_s] = session->isAutoBanUnknownPeerEnabled();
     data[u"auto_ban_bt_player_peer"_s] = session->isAutoBanBTPlayerPeerEnabled();
@@ -329,7 +326,7 @@ void AppController::preferencesAction()
     data[u"slow_torrent_ul_rate_threshold"_s] = session->uploadRateForSlowTorrents();
     data[u"slow_torrent_inactive_timer"_s] = session->slowTorrentsInactivityTimer();
     // Share Ratio Limiting
-    const BitTorrent::ShareLimits &shareLimits = session->shareLimits();
+    const BitTorrent::ShareLimits& shareLimits = session->shareLimits();
     data[u"max_ratio_enabled"_s] = (shareLimits.ratioLimit >= 0.);
     data[u"max_ratio"_s] = shareLimits.ratioLimit;
     data[u"max_seeding_time_enabled"_s] = (shareLimits.seedingTimeLimit >= 0);
@@ -359,7 +356,7 @@ void AppController::preferencesAction()
     data[u"bypass_local_auth"_s] = !pref->isWebUILocalAuthEnabled();
     data[u"bypass_auth_subnet_whitelist_enabled"_s] = pref->isWebUIAuthSubnetWhitelistEnabled();
     QStringList authSubnetWhitelistStringList;
-    for (const Utils::Net::Subnet &subnet : asConst(pref->getWebUIAuthSubnetWhitelist()))
+    for (const Utils::Net::Subnet& subnet : asConst(pref->getWebUIAuthSubnetWhitelist()))
         authSubnetWhitelistStringList << Utils::Net::subnetToString(subnet);
     data[u"bypass_auth_subnet_whitelist"_s] = authSubnetWhitelistStringList.join(u'\n');
     data[u"web_ui_max_auth_fail_count"_s] = pref->getWebUIMaxAuthFailCount();
@@ -547,15 +544,14 @@ void AppController::preferencesAction()
 
 void AppController::setPreferencesAction()
 {
-    requireParams({u"json"_s});
+    requireParams({ u"json"_s });
 
-    auto *pref = Preferences::instance();
-    auto *session = BitTorrent::Session::instance();
+    auto* pref = Preferences::instance();
+    auto* session = BitTorrent::Session::instance();
     const QVariantHash m = QJsonDocument::fromJson(params()[u"json"_s].toUtf8()).toVariant().toHash();
 
     QVariantHash::ConstIterator it;
-    const auto hasKey = [&it, &m](const QString &key) -> bool
-    {
+    const auto hasKey = [&it, &m](const QString& key) -> bool {
         it = m.constFind(key);
         return (it != m.constEnd());
     };
@@ -658,16 +654,16 @@ void AppController::setPreferencesAction()
     if (hasKey(u"scan_dirs"_s))
     {
         PathList scanDirs;
-        TorrentFilesWatcher *fsWatcher = TorrentFilesWatcher::instance();
+        TorrentFilesWatcher* fsWatcher = TorrentFilesWatcher::instance();
         const PathList oldScanDirs = fsWatcher->folders().keys();
         const QVariantHash nativeDirs = it.value().toHash();
         for (auto i = nativeDirs.cbegin(); i != nativeDirs.cend(); ++i)
         {
             try
             {
-                const Path watchedFolder {i.key()};
+                const Path watchedFolder{ i.key() };
                 TorrentFilesWatcher::WatchedFolderOptions options = fsWatcher->folders().value(watchedFolder);
-                BitTorrent::AddTorrentParams &params = options.addTorrentParams;
+                BitTorrent::AddTorrentParams& params = options.addTorrentParams;
 
                 bool isInt = false;
                 const int intVal = i.value().toInt(&isInt);
@@ -681,7 +677,7 @@ void AppController::setPreferencesAction()
                 }
                 else
                 {
-                    const Path customSavePath {i.value().toString()};
+                    const Path customSavePath{ i.value().toString() };
                     params.savePath = customSavePath;
                     params.useAutoTMM = false;
                 }
@@ -695,7 +691,7 @@ void AppController::setPreferencesAction()
         }
 
         // Update deleted folders
-        for (const Path &path : oldScanDirs)
+        for (const Path& path : oldScanDirs)
         {
             if (!scanDirs.contains(path))
                 fsWatcher->removeWatchedFolder(path);
@@ -739,7 +735,7 @@ void AppController::setPreferencesAction()
 
     // Connection
     // Listening Port
-    if (hasKey(u"random_port"_s) && it.value().toBool())  // deprecated
+    if (hasKey(u"random_port"_s) && it.value().toBool()) // deprecated
     {
         session->setPort(0);
     }
@@ -789,7 +785,7 @@ void AppController::setPreferencesAction()
         session->setI2POutboundLengthVariance(it.value().toInt());
 
     // Proxy Server
-    auto *proxyManager = Net::ProxyConfigurationManager::instance();
+    auto* proxyManager = Net::ProxyConfigurationManager::instance();
     Net::ProxyConfiguration proxyConf = proxyManager->proxyConfiguration();
     if (hasKey(u"proxy_type"_s))
         proxyConf.type = Utils::String::toEnum(it.value().toString(), Net::ProxyType::None);
@@ -845,7 +841,7 @@ void AppController::setPreferencesAction()
     if (hasKey(u"alt_dl_limit"_s))
         session->setAltGlobalDownloadSpeedLimit(it.value().toInt());
     if (hasKey(u"alt_up_limit"_s))
-       session->setAltGlobalUploadSpeedLimit(it.value().toInt());
+        session->setAltGlobalUploadSpeedLimit(it.value().toInt());
     if (hasKey(u"bittorrent_protocol"_s))
         session->setBTProtocol(static_cast<BitTorrent::BTProtocol>(it.value().toInt()));
     if (hasKey(u"limit_utp_rate"_s))
@@ -857,12 +853,10 @@ void AppController::setPreferencesAction()
     // Scheduling
     if (hasKey(u"scheduler_enabled"_s))
         session->setBandwidthSchedulerEnabled(it.value().toBool());
-    if (const auto hourIter = m.constFind(u"schedule_from_hour"_s), minIter = m.constFind(u"schedule_from_min"_s)
-        ; (hourIter != m.constEnd()) && (minIter != m.constEnd()))
-        pref->setSchedulerStartTime({hourIter.value().toInt(), minIter.value().toInt()});
-    if (const auto hourIter = m.constFind(u"schedule_to_hour"_s), minIter = m.constFind(u"schedule_to_min"_s)
-        ; (hourIter != m.constEnd()) && (minIter != m.constEnd()))
-        pref->setSchedulerEndTime({hourIter.value().toInt(), minIter.value().toInt()});
+    if (const auto hourIter = m.constFind(u"schedule_from_hour"_s), minIter = m.constFind(u"schedule_from_min"_s); (hourIter != m.constEnd()) && (minIter != m.constEnd()))
+        pref->setSchedulerStartTime({ hourIter.value().toInt(), minIter.value().toInt() });
+    if (const auto hourIter = m.constFind(u"schedule_to_hour"_s), minIter = m.constFind(u"schedule_to_min"_s); (hourIter != m.constEnd()) && (minIter != m.constEnd()))
+        pref->setSchedulerEndTime({ hourIter.value().toInt(), minIter.value().toInt() });
     if (hasKey(u"scheduler_days"_s))
         pref->setSchedulerDays(static_cast<Scheduler::Days>(it.value().toInt()));
 
@@ -989,7 +983,7 @@ void AppController::setPreferencesAction()
     if (hasKey(u"web_ui_max_auth_fail_count"_s))
         pref->setWebUIMaxAuthFailCount(it.value().toInt());
     if (hasKey(u"web_ui_ban_duration"_s))
-        pref->setWebUIBanDuration(std::chrono::seconds {it.value().toInt()});
+        pref->setWebUIBanDuration(std::chrono::seconds{ it.value().toInt() });
     if (hasKey(u"web_ui_session_timeout"_s))
         pref->setWebUISessionTimeout(it.value().toInt());
     if (hasKey(u"web_ui_cookie_expiration"_s))
@@ -1061,11 +1055,10 @@ void AppController::setPreferencesAction()
     // Current network interface
     if (hasKey(u"current_network_interface"_s))
     {
-        const QString ifaceValue {it.value().toString()};
+        const QString ifaceValue{ it.value().toString() };
 
         const QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
-        const auto ifacesIter = std::ranges::find_if(ifaces, [&ifaceValue](const QNetworkInterface &iface)
-        {
+        const auto ifacesIter = std::ranges::find_if(ifaces, [&ifaceValue](const QNetworkInterface& iface) {
             return (!iface.addressEntries().isEmpty()) && (iface.name() == ifaceValue);
         });
         const QString ifaceName = (ifacesIter != ifaces.cend()) ? ifacesIter->humanReadableName() : QString();
@@ -1077,7 +1070,7 @@ void AppController::setPreferencesAction()
     // Current network interface address
     if (hasKey(u"current_interface_address"_s))
     {
-        const QHostAddress ifaceAddress {it.value().toString().trimmed()};
+        const QHostAddress ifaceAddress{ it.value().toString().trimmed() };
         session->setNetworkInterfaceAddress(ifaceAddress.isNull() ? QString() : ifaceAddress.toString());
     }
     // Save resume data interval
@@ -1260,7 +1253,7 @@ void AppController::setPreferencesAction()
         session->setAnnounceToAllTiers(it.value().toBool());
     if (hasKey(u"announce_ip"_s))
     {
-        const QHostAddress announceAddr {it.value().toString().trimmed()};
+        const QHostAddress announceAddr{ it.value().toString().trimmed() };
         session->setAnnounceIP(announceAddr.isNull() ? QString() : announceAddr.toString());
     }
     if (hasKey(u"announce_port"_s))
@@ -1308,13 +1301,13 @@ void AppController::sendTestEmailAction()
 
 void AppController::getDirectoryContentAction()
 {
-    requireParams({u"dirPath"_s});
+    requireParams({ u"dirPath"_s });
 
     const QString dirPath = params().value(u"dirPath"_s);
     if (dirPath.isEmpty() || dirPath.startsWith(u':'))
         throw APIError(APIErrorType::BadParams, tr("Invalid directory path"));
 
-    const QDir dir {dirPath};
+    const QDir dir{ dirPath };
     if (!dir.isAbsolute())
         throw APIError(APIErrorType::BadParams, tr("Invalid directory path"));
     if (!dir.exists())
@@ -1322,8 +1315,7 @@ void AppController::getDirectoryContentAction()
 
     const QString visibility = params().value(u"mode"_s, u"all"_s);
 
-    const auto parseDirectoryContentMode = [](const QString &visibility) -> QDir::Filters
-    {
+    const auto parseDirectoryContentMode = [](const QString& visibility) -> QDir::Filters {
         if (visibility == u"dirs")
             return QDir::Dirs;
         if (visibility == u"files")
@@ -1333,21 +1325,20 @@ void AppController::getDirectoryContentAction()
         throw APIError(APIErrorType::BadParams, tr("Invalid mode, allowed values: %1").arg(u"all, dirs, files"_s));
     };
 
-    const bool withMetadata {Utils::String::parseBool(params()[u"withMetadata"_s]).value_or(false)};
+    const bool withMetadata{ Utils::String::parseBool(params()[u"withMetadata"_s]).value_or(false) };
 
     QJsonArray ret;
-    QDirIterator it {dirPath, (QDir::NoDotAndDotDot | parseDirectoryContentMode(visibility))};
+    QDirIterator it{ dirPath, (QDir::NoDotAndDotDot | parseDirectoryContentMode(visibility)) };
     while (it.hasNext())
     {
         if (withMetadata)
         {
             const QFileInfo fileInfo = it.nextFileInfo();
-            QJsonObject fileObject
-            {
-                {KEY_FILE_METADATA_NAME, Path(fileInfo.fileName()).toString()},
-                {KEY_FILE_METADATA_CREATION_DATE, Utils::DateTime::toSecsSinceEpoch(fileInfo.birthTime())},
-                {KEY_FILE_METADATA_LAST_ACCESS_DATE, Utils::DateTime::toSecsSinceEpoch(fileInfo.lastRead())},
-                {KEY_FILE_METADATA_LAST_MODIFICATION_DATE, Utils::DateTime::toSecsSinceEpoch(fileInfo.lastModified())},
+            QJsonObject fileObject{
+                {                   KEY_FILE_METADATA_NAME,                       Path(fileInfo.fileName()).toString() },
+                {          KEY_FILE_METADATA_CREATION_DATE,    Utils::DateTime::toSecsSinceEpoch(fileInfo.birthTime()) },
+                {       KEY_FILE_METADATA_LAST_ACCESS_DATE,     Utils::DateTime::toSecsSinceEpoch(fileInfo.lastRead()) },
+                { KEY_FILE_METADATA_LAST_MODIFICATION_DATE, Utils::DateTime::toSecsSinceEpoch(fileInfo.lastModified()) },
             };
 
             if (fileInfo.isDir())
@@ -1372,8 +1363,8 @@ void AppController::getDirectoryContentAction()
 
 void AppController::getFreeSpaceAtPathAction()
 {
-    requireParams({u"path"_s});
-    const Path path {params().value(u"path"_s)};
+    requireParams({ u"path"_s });
+    const Path path{ params().value(u"path"_s) };
     const qint64 freeSpace = Utils::Fs::freeDiskSpaceOnPath(path);
     setResult(QString::number(freeSpace));
 }
@@ -1382,14 +1373,14 @@ void AppController::cookiesAction()
 {
     const QList<QNetworkCookie> cookies = Net::DownloadManager::instance()->allCookies();
     QJsonArray ret;
-    for (const QNetworkCookie &cookie : cookies)
+    for (const QNetworkCookie& cookie : cookies)
     {
-        ret << QJsonObject {
-            {KEY_COOKIE_NAME, QString::fromLatin1(cookie.name())},
-            {KEY_COOKIE_DOMAIN, cookie.domain()},
-            {KEY_COOKIE_PATH, cookie.path()},
-            {KEY_COOKIE_VALUE, QString::fromLatin1(cookie.value())},
-            {KEY_COOKIE_EXPIRATION_DATE, Utils::DateTime::toSecsSinceEpoch(cookie.expirationDate())},
+        ret << QJsonObject{
+            {            KEY_COOKIE_NAME,                         QString::fromLatin1(cookie.name()) },
+            {          KEY_COOKIE_DOMAIN,                                            cookie.domain() },
+            {            KEY_COOKIE_PATH,                                              cookie.path() },
+            {           KEY_COOKIE_VALUE,                        QString::fromLatin1(cookie.value()) },
+            { KEY_COOKIE_EXPIRATION_DATE, Utils::DateTime::toSecsSinceEpoch(cookie.expirationDate()) },
         };
     }
 
@@ -1398,8 +1389,8 @@ void AppController::cookiesAction()
 
 void AppController::setCookiesAction()
 {
-    requireParams({u"cookies"_s});
-    const QString cookiesParam {params()[u"cookies"_s].trimmed()};
+    requireParams({ u"cookies"_s });
+    const QString cookiesParam{ params()[u"cookies"_s].trimmed() };
 
     QJsonParseError jsonError;
     const auto cookiesJsonDocument = QJsonDocument::fromJson(cookiesParam.toUtf8(), &jsonError);
@@ -1411,7 +1402,7 @@ void AppController::setCookiesAction()
     const QJsonArray cookiesJsonArr = cookiesJsonDocument.array();
     QList<QNetworkCookie> cookies;
     cookies.reserve(cookiesJsonArr.size());
-    for (const QJsonValue &jsonVal : cookiesJsonArr)
+    for (const QJsonValue& jsonVal : cookiesJsonArr)
     {
         if (!jsonVal.isObject())
             throw APIError(APIErrorType::BadParams);
@@ -1441,16 +1432,18 @@ void AppController::rotateAPIKeyAction()
 {
     const QString key = Utils::APIKey::generate();
 
-    auto *preferences = Preferences::instance();
+    auto* preferences = Preferences::instance();
     preferences->setWebUIApiKey(key);
     preferences->apply();
 
-    setResult(QJsonObject {{u"apiKey"_s, key}});
+    setResult(QJsonObject{
+        { u"apiKey"_s, key }
+    });
 }
 
 void AppController::deleteAPIKeyAction()
 {
-    auto *preferences = Preferences::instance();
+    auto* preferences = Preferences::instance();
     preferences->setWebUIApiKey({});
     preferences->apply();
 }
@@ -1458,14 +1451,13 @@ void AppController::deleteAPIKeyAction()
 void AppController::networkInterfaceListAction()
 {
     QJsonArray ifaceList;
-    for (const QNetworkInterface &iface : asConst(QNetworkInterface::allInterfaces()))
+    for (const QNetworkInterface& iface : asConst(QNetworkInterface::allInterfaces()))
     {
         if (!iface.addressEntries().isEmpty())
         {
-            ifaceList.append(QJsonObject
-            {
-                {u"name"_s, iface.humanReadableName()},
-                {u"value"_s, iface.name()}
+            ifaceList.append(QJsonObject{
+                {  u"name"_s, iface.humanReadableName() },
+                { u"value"_s,              iface.name() }
             });
         }
     }
@@ -1475,13 +1467,12 @@ void AppController::networkInterfaceListAction()
 
 void AppController::networkInterfaceAddressListAction()
 {
-    requireParams({u"iface"_s});
+    requireParams({ u"iface"_s });
 
     const QString ifaceName = params().value(u"iface"_s);
     QJsonArray addressList;
 
-    const auto appendAddress = [&addressList](const QHostAddress &addr)
-    {
+    const auto appendAddress = [&addressList](const QHostAddress& addr) {
         if (addr.protocol() == QAbstractSocket::IPv6Protocol)
             addressList.append(Utils::Net::canonicalIPv6Addr(addr).toString());
         else
@@ -1490,13 +1481,13 @@ void AppController::networkInterfaceAddressListAction()
 
     if (ifaceName.isEmpty())
     {
-        for (const QHostAddress &addr : asConst(QNetworkInterface::allAddresses()))
+        for (const QHostAddress& addr : asConst(QNetworkInterface::allAddresses()))
             appendAddress(addr);
     }
     else
     {
         const QNetworkInterface iface = QNetworkInterface::interfaceFromName(ifaceName);
-        for (const QNetworkAddressEntry &entry : asConst(iface.addressEntries()))
+        for (const QNetworkAddressEntry& entry : asConst(iface.addressEntries()))
             appendAddress(entry.ip());
     }
 

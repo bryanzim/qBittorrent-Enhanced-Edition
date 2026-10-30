@@ -33,8 +33,7 @@
 class QString;
 
 template <typename T>
-concept Stringable = requires (T t)
-{
+concept Stringable = requires(T t) {
     requires std::constructible_from<T, QString>;
     { t.toString() } -> std::same_as<QString>;
 };

@@ -29,12 +29,12 @@
 
 #pragma once
 
-#include <memory>
-
-#include <QtContainerFwd>
-#include <QAbstractItemModel>
-
 #include "base/bittorrent/announcetimepoint.h"
+
+#include <QAbstractItemModel>
+#include <QtContainerFwd>
+
+#include <memory>
 
 class QTimer;
 
@@ -83,38 +83,38 @@ public:
         SortRole = Qt::UserRole
     };
 
-    explicit TrackerListModel(BitTorrent::Session *btSession, QObject *parent = nullptr);
+    explicit TrackerListModel(BitTorrent::Session* btSession, QObject* parent = nullptr);
     ~TrackerListModel() override;
 
-    void setTorrent(BitTorrent::Torrent *torrent);
-    BitTorrent::Torrent *torrent() const;
+    void setTorrent(BitTorrent::Torrent* torrent);
+    BitTorrent::Torrent* torrent() const;
 
-    int columnCount(const QModelIndex &parent = {}) const override;
-    int rowCount(const QModelIndex &parent = {}) const override;
+    int columnCount(const QModelIndex& parent = {}) const override;
+    int rowCount(const QModelIndex& parent = {}) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
-    QModelIndex parent(const QModelIndex &index) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
 
 private:
     struct Item;
 
     void populate();
-    std::shared_ptr<Item> createTrackerItem(const BitTorrent::TrackerEntryStatus &trackerEntryStatus);
-    void addTrackerItem(const BitTorrent::TrackerEntryStatus &trackerEntryStatus);
-    void updateTrackerItem(const std::shared_ptr<Item> &item, const BitTorrent::TrackerEntryStatus &trackerEntryStatus);
+    std::shared_ptr<Item> createTrackerItem(const BitTorrent::TrackerEntryStatus& trackerEntryStatus);
+    void addTrackerItem(const BitTorrent::TrackerEntryStatus& trackerEntryStatus);
+    void updateTrackerItem(const std::shared_ptr<Item>& item, const BitTorrent::TrackerEntryStatus& trackerEntryStatus);
     void refreshAnnounceTimes();
-    void onTrackersAdded(const QList<BitTorrent::TrackerEntry> &newTrackers);
-    void onTrackersRemoved(const QStringList &deletedTrackers);
+    void onTrackersAdded(const QList<BitTorrent::TrackerEntry>& newTrackers);
+    void onTrackersRemoved(const QStringList& deletedTrackers);
     void onTrackersChanged();
-    void onTrackersUpdated(const QHash<QString, BitTorrent::TrackerEntryStatus> &updatedTrackers);
+    void onTrackersUpdated(const QHash<QString, BitTorrent::TrackerEntryStatus>& updatedTrackers);
 
-    BitTorrent::Session *m_btSession = nullptr;
-    BitTorrent::Torrent *m_torrent = nullptr;
+    BitTorrent::Session* m_btSession = nullptr;
+    BitTorrent::Torrent* m_torrent = nullptr;
 
     class Items;
     std::unique_ptr<Items> m_items;
 
     BitTorrent::AnnounceTimePoint m_announceTimestamp;
-    QTimer *m_announceRefreshTimer = nullptr;
+    QTimer* m_announceRefreshTimer = nullptr;
 };

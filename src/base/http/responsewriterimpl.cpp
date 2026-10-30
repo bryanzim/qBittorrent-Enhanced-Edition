@@ -28,15 +28,14 @@
 
 #include "responsewriterimpl.h"
 
-#include <QAbstractSocket>
-
-#include "base/path.h"
 #include "asyncfilesender.h"
+#include "base/path.h"
 #include "responseserialization.h"
 
-Http::ResponseWriterImpl::ResponseWriterImpl(QAbstractSocket *socket, QObject *parent)
-    : ResponseWriter(parent)
-    , m_socket {socket}
+#include <QAbstractSocket>
+
+Http::ResponseWriterImpl::ResponseWriterImpl(QAbstractSocket* socket, QObject* parent)
+    : ResponseWriter(parent), m_socket{ socket }
 {
 }
 
@@ -45,7 +44,7 @@ Http::ResponseWriterImpl::~ResponseWriterImpl()
     delete m_asyncFileSender;
 }
 
-void Http::ResponseWriterImpl::prepare(const Request &request)
+void Http::ResponseWriterImpl::prepare(const Request& request)
 {
     Q_ASSERT((m_state != State::Running) && (m_state != State::Failed));
     if ((m_state == State::Running) || (m_state == State::Failed)) [[unlikely]]
@@ -55,7 +54,7 @@ void Http::ResponseWriterImpl::prepare(const Request &request)
     m_request = request;
 }
 
-void Http::ResponseWriterImpl::setResponse(const Response &response)
+void Http::ResponseWriterImpl::setResponse(const Response& response)
 {
     Q_ASSERT(m_state == State::Ready);
     if (m_state != State::Ready) [[unlikely]]
@@ -73,7 +72,7 @@ void Http::ResponseWriterImpl::setResponse(const Response &response)
     finish();
 }
 
-void Http::ResponseWriterImpl::streamFile(const Path &filePath, const HeaderMap &headers)
+void Http::ResponseWriterImpl::streamFile(const Path& filePath, const HeaderMap& headers)
 {
     Q_ASSERT(m_state == State::Ready);
     if (m_state != State::Ready) [[unlikely]]
@@ -81,15 +80,13 @@ void Http::ResponseWriterImpl::streamFile(const Path &filePath, const HeaderMap 
 
     m_asyncFileSender = new AsyncFileSender(m_request, filePath, headers, m_socket);
 
-    connect(m_asyncFileSender, &AsyncFileSender::failed, this, [this]
-    {
+    connect(m_asyncFileSender, &AsyncFileSender::failed, this, [this] {
         m_asyncFileSender->deleteLater();
         m_asyncFileSender = nullptr;
         fail();
     });
 
-    connect(m_asyncFileSender, &AsyncFileSender::finished, this, [this]
-    {
+    connect(m_asyncFileSender, &AsyncFileSender::finished, this, [this] {
         m_asyncFileSender->deleteLater();
         m_asyncFileSender = nullptr;
         finish();

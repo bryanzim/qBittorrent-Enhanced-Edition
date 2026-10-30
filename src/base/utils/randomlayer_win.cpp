@@ -26,25 +26,25 @@
  * exception statement from your version.
  */
 
-#include <limits>
-
-#include <windows.h>
+#include "base/global.h"
+#include "base/utils/os.h"
 
 #include <QtLogging>
 
-#include "base/global.h"
-#include "base/utils/os.h"
+#include <windows.h>
+
+#include <limits>
 
 namespace
 {
     class RandomLayer
     {
-    // need to satisfy UniformRandomBitGenerator requirements
+        // need to satisfy UniformRandomBitGenerator requirements
     public:
         using result_type = uint32_t;
 
         RandomLayer()
-            : m_processPrng {Utils::OS::loadWinAPI<PPROCESSPRNG>(u"BCryptPrimitives.dll"_s, "ProcessPrng")}
+            : m_processPrng{ Utils::OS::loadWinAPI<PPROCESSPRNG>(u"BCryptPrimitives.dll"_s, "ProcessPrng") }
         {
             if (!m_processPrng)
                 qFatal("Failed to load ProcessPrng().");
@@ -71,7 +71,7 @@ namespace
         }
 
     private:
-        using PPROCESSPRNG = BOOL (WINAPI *)(PBYTE, SIZE_T);
+        using PPROCESSPRNG = BOOL(WINAPI*)(PBYTE, SIZE_T);
         const PPROCESSPRNG m_processPrng = nullptr;
     };
 }

@@ -33,24 +33,24 @@
 
 #include "smtpclient.h"
 
-#include <QCryptographicHash>
-#include <QDateTime>
-#include <QDebug>
-#include <QHostInfo>
-#include <QSslSocket>
-
 #include "base/global.h"
 #include "base/logger.h"
 #include "base/preferences.h"
 #include "base/utils/string.h"
 #include "smtpencryptiontype.h"
 
+#include <QCryptographicHash>
+#include <QDateTime>
+#include <QDebug>
+#include <QHostInfo>
+#include <QSslSocket>
+
 namespace
 {
-    QByteArray hmacMD5(QByteArray key, const QByteArray &msg)
+    QByteArray hmacMD5(QByteArray key, const QByteArray& msg)
     {
-        const int blockSize = 64; // HMAC-MD5 block size
-        if (key.length() > blockSize)   // if key is longer than block size (64), reduce key length with MD5 compression
+        const int blockSize = 64;     // HMAC-MD5 block size
+        if (key.length() > blockSize) // if key is longer than block size (64), reduce key length with MD5 compression
             key = QCryptographicHash::hash(key, QCryptographicHash::Md5);
 
         QByteArray innerPadding(blockSize, char(0x36)); // initialize inner padding with char "6"
@@ -83,8 +83,7 @@ namespace
 
     bool canEncodeAsASCII(const QStringView string)
     {
-        return std::ranges::none_of(string, [](const QChar &ch)
-        {
+        return std::ranges::none_of(string, [](const QChar& ch) {
             return ch > QChar(0x7f);
         });
     }
@@ -93,7 +92,7 @@ namespace
     {
         // [rfc2822] 3.3. Date and Time Specification
         const auto now = QDateTime::currentDateTime();
-        const QLocale eng {QLocale::English};
+        const QLocale eng{ QLocale::English };
         const QString weekday = eng.dayName(now.date().dayOfWeek(), QLocale::ShortFormat);
         return (weekday + u", " + now.toString(Qt::RFC2822Date));
     }
@@ -103,7 +102,7 @@ namespace
         // Header field values must not contain control characters. [rfc5322] 2.2. Header Fields
         // Control characters are replaced rather than removed, so that removal cannot bring
         // together characters that form a new syntactic element (an encoded-word "=?", etc.).
-        for (QChar &ch : value)
+        for (QChar& ch : value)
         {
             if ((ch < QChar(0x20)) || (ch == QChar(0x7f)))
                 ch = u' ';
@@ -112,17 +111,18 @@ namespace
         return value;
     }
 
-    QByteArray encodeMimeHeader(const QString &key, const QString &rawValue, const QByteArray &prefix = {})
+    QByteArray encodeMimeHeader(const QString& key, const QString& rawValue, const QByteArray& prefix = {})
     {
         const QString value = toValidHeaderValue(rawValue);
 
         QByteArray rv = "";
         QByteArray line = key.toLatin1() + ": ";
-        if (!prefix.isEmpty()) line += prefix;
+        if (!prefix.isEmpty())
+            line += prefix;
         if (!value.contains(u"=?") && canEncodeAsASCII(value))
         {
             bool firstWord = true;
-            for (const QByteArray &word : asConst(value.toLatin1().split(' ')))
+            for (const QByteArray& word : asConst(value.toLatin1().split(' ')))
             {
                 if (line.size() > 78)
                 {
@@ -174,25 +174,18 @@ namespace
 
 const int SOCKETERROR_TYPEID = qRegisterMetaType<QAbstractSocket::SocketError>();
 
-void Net::SMTPClient::sendMail(const QString &from, const QString &to
-        , const QString &subject, const QString &body, QObject *context)
+void Net::SMTPClient::sendMail(const QString& from, const QString& to, const QString& subject, const QString& body, QObject* context)
 {
     QString normalizedTo = to;
     const QStringList groupList = normalizedTo.remove(u' ').split(u';', Qt::SkipEmptyParts);
-    for (const QString &group : groupList)
+    for (const QString& group : groupList)
     {
-        [[maybe_unused]] auto *obj = new SMTPClient(from
-            , group.split(u',', Qt::SkipEmptyParts)
-            , subject, body, context);
+        [[maybe_unused]] auto* obj = new SMTPClient(from, group.split(u',', Qt::SkipEmptyParts), subject, body, context);
     }
 }
 
-Net::SMTPClient::SMTPClient(const QString &sender, const QStringList &recipients
-        , const QString &subject, const QString &body, QObject *parent)
-    : QObject(parent)
-    , m_sender {sender}
-    , m_recipients {recipients}
-    , m_recipientsIterator {m_recipients}
+Net::SMTPClient::SMTPClient(const QString& sender, const QStringList& recipients, const QString& subject, const QString& body, QObject* parent)
+    : QObject(parent), m_sender{ sender }, m_recipients{ recipients }, m_recipientsIterator{ m_recipients }
 {
     m_socket = new QSslSocket(this);
 
@@ -201,21 +194,12 @@ Net::SMTPClient::SMTPClient(const QString &sender, const QStringList &recipients
     connect(m_socket, &QAbstractSocket::errorOccurred, this, &SMTPClient::error);
 
     // Test hmacMD5 function (http://www.faqs.org/rfcs/rfc2202.html)
-    Q_ASSERT(hmacMD5("Jefe", "what do ya want for nothing?").toHex()
-            == "750c783e6ab0b503eaa86e310a5db738");
-    Q_ASSERT(hmacMD5(QByteArray::fromHex("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"), "Hi There").toHex()
-            == "9294727a3638bb1c13f48ef8158bfc9d");
+    Q_ASSERT(hmacMD5("Jefe", "what do ya want for nothing?").toHex() == "750c783e6ab0b503eaa86e310a5db738");
+    Q_ASSERT(hmacMD5(QByteArray::fromHex("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"), "Hi There").toHex() == "9294727a3638bb1c13f48ef8158bfc9d");
 
-    const Preferences *const pref = Preferences::instance();
+    const Preferences* const pref = Preferences::instance();
 
-    m_message = "Date: " + getCurrentDateTime().toLatin1() + "\r\n"
-            + encodeMimeHeader(u"From"_s, u"qBittorrent <%1>"_s.arg(m_sender))
-            + encodeMimeHeader(u"Subject"_s, subject)
-            + encodeMimeHeader(u"To"_s, m_recipients.join(u", "_s))
-            + "MIME-Version: 1.0\r\n"
-            + "Content-Type: text/plain; charset=UTF-8\r\n"
-            + "Content-Transfer-Encoding: base64\r\n"
-            + "\r\n";
+    m_message = "Date: " + getCurrentDateTime().toLatin1() + "\r\n" + encodeMimeHeader(u"From"_s, u"qBittorrent <%1>"_s.arg(m_sender)) + encodeMimeHeader(u"Subject"_s, subject) + encodeMimeHeader(u"To"_s, m_recipients.join(u", "_s)) + "MIME-Version: 1.0\r\n" + "Content-Type: text/plain; charset=UTF-8\r\n" + "Content-Transfer-Encoding: base64\r\n" + "\r\n";
     // Encode the body in base64
     QString crlfBody = body;
     const QByteArray b = crlfBody.replace(u"\n"_s, u"\r\n"_s).toUtf8().toBase64();
@@ -231,7 +215,7 @@ Net::SMTPClient::SMTPClient(const QString &sender, const QStringList &recipients
 
     // Connect to SMTP server
     const QStringList serverEndpoint = pref->getMailNotificationSMTP().split(u':');
-    const QString &serverAddress = serverEndpoint[0];
+    const QString& serverAddress = serverEndpoint[0];
     const std::optional<int> serverPort = Utils::String::parseInt(serverEndpoint.value(1));
 
     // Decide connection method based on requested SMTP encryption type
@@ -259,13 +243,14 @@ Net::SMTPClient::~SMTPClient()
 void Net::SMTPClient::readyRead()
 {
     qDebug() << Q_FUNC_INFO;
-    const Preferences *const pref = Preferences::instance();
+    const Preferences* const pref = Preferences::instance();
     // SMTP is line-oriented
     m_buffer += m_socket->readAll();
     while (true)
     {
         const qsizetype pos = m_buffer.indexOf("\r\n");
-        if (pos < 0) return; // Loop exit condition
+        if (pos < 0)
+            return; // Loop exit condition
         const QByteArray line = m_buffer.first(pos);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         m_buffer.slice(pos + 2);
@@ -326,9 +311,12 @@ void Net::SMTPClient::readyRead()
             break;
         case AuthRequestSent:
         case AuthUsernameSent:
-            if (m_authType == AuthPlain) authPlain();
-            else if (m_authType == AuthLogin) authLogin();
-            else authCramMD5(line.mid(4));
+            if (m_authType == AuthPlain)
+                authPlain();
+            else if (m_authType == AuthLogin)
+                authLogin();
+            else
+                authCramMD5(line.mid(4));
             break;
         case AuthSent:
         case Authenticated:
@@ -431,9 +419,9 @@ void Net::SMTPClient::helo()
     m_state = HeloSent;
 }
 
-void Net::SMTPClient::parseEhloResponse(const QByteArray &code, const bool continued, const QString &line)
+void Net::SMTPClient::parseEhloResponse(const QByteArray& code, const bool continued, const QString& line)
 {
-    const Preferences *const pref = Preferences::instance();
+    const Preferences* const pref = Preferences::instance();
     if (code != "250")
     {
         // Error
@@ -478,7 +466,8 @@ void Net::SMTPClient::parseEhloResponse(const QByteArray &code, const bool conti
             m_state = EhloDone;
     }
 
-    if (m_state != EhloDone) return;
+    if (m_state != EhloDone)
+        return;
 
     const Net::SMTPEncryptionType encryptionType = pref->getMailNotificationSMTPEncryptionType();
     // Check if STARTTLS is available and should be used
@@ -502,7 +491,7 @@ void Net::SMTPClient::authenticate()
     qDebug() << Q_FUNC_INFO;
     if (!m_extensions.contains(u"AUTH"_s) ||
         m_username.isEmpty() || m_password.isEmpty())
-        {
+    {
         // Skip authentication
         qDebug() << "Skipping authentication...";
         m_state = Authenticated;
@@ -536,7 +525,8 @@ void Net::SMTPClient::authenticate()
         // Skip authentication
         logError(tr("The SMTP server does not seem to support any of the authentications modes "
                     "we support [CRAM-MD5|PLAIN|LOGIN], skipping authentication, "
-                    "knowing it is likely to fail... Server Auth Modes: %1").arg(auth.join(u'|')));
+                    "knowing it is likely to fail... Server Auth Modes: %1")
+                     .arg(auth.join(u'|')));
         m_state = Authenticated;
         // At this point the server will not send any response
         // So fill the buffer with a fake one to pass the tests
@@ -554,7 +544,7 @@ void Net::SMTPClient::startTLS()
     m_usingStartTls = true;
 }
 
-void Net::SMTPClient::authCramMD5(const QByteArray &challenge)
+void Net::SMTPClient::authCramMD5(const QByteArray& challenge)
 {
     if (m_state != AuthRequestSent)
     {
@@ -565,8 +555,7 @@ void Net::SMTPClient::authCramMD5(const QByteArray &challenge)
     }
     else
     {
-        const QByteArray response = m_username.toLatin1() + ' '
-                              + hmacMD5(m_password.toLatin1(), QByteArray::fromBase64(challenge)).toHex();
+        const QByteArray response = m_username.toLatin1() + ' ' + hmacMD5(m_password.toLatin1(), QByteArray::fromBase64(challenge)).toHex();
         m_socket->write(response.toBase64() + "\r\n");
         m_socket->flush();
         m_state = AuthSent;
@@ -616,7 +605,7 @@ void Net::SMTPClient::authLogin()
     }
 }
 
-void Net::SMTPClient::logError(const QString &msg)
+void Net::SMTPClient::logError(const QString& msg)
 {
     qDebug() << "Email Notification Error:" << msg;
     LogMsg(tr("Email Notification Error: %1").arg(msg), Log::WARNING);
@@ -624,7 +613,7 @@ void Net::SMTPClient::logError(const QString &msg)
 
 void Net::SMTPClient::error(QAbstractSocket::SocketError socketError)
 {
-    const Preferences *const pref = Preferences::instance();
+    const Preferences* const pref = Preferences::instance();
     // Getting a remote host closed error is apparently normal, even when successfully sending
     // an email
     if (socketError != QAbstractSocket::RemoteHostClosedError)

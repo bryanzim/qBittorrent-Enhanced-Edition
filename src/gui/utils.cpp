@@ -34,6 +34,7 @@
 #ifdef Q_OS_WIN
 #include <objbase.h>
 #include <shlobj.h>
+
 #include <shellapi.h>
 #endif
 
@@ -68,16 +69,16 @@
 
 namespace
 {
-    QUrl toURL(const Path &path)
+    QUrl toURL(const Path& path)
     {
         // Hack to access samba shares with QDesktopServices::openUrl
         return path.data().startsWith(u"//")
-            ? QUrl(u"file:" + path.data())
-            : QUrl::fromLocalFile(path.data());
+                   ? QUrl(u"file:" + path.data())
+                   : QUrl::fromLocalFile(path.data());
     }
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
-    void startDetached(const QString &program, const QStringList &args)
+    void startDetached(const QString& program, const QStringList& args)
     {
         QProcess proc;
         proc.setUnixProcessParameters(QProcess::UnixProcessFlag::CloseFileDescriptors);
@@ -86,7 +87,7 @@ namespace
         proc.startDetached();
     }
 
-    void invokeFileManager(const Path &path)
+    void invokeFileManager(const Path& path)
     {
         // detect and invoke file manager directly
         const int lineMaxLength = 64;
@@ -94,50 +95,45 @@ namespace
         auto lookupProc = new QProcess;
         lookupProc->setProcessChannelMode(QProcess::ForwardedErrorChannel);
         lookupProc->setUnixProcessParameters(QProcess::UnixProcessFlag::CloseFileDescriptors);
-        QObject::connect(lookupProc, &QProcess::finished, lookupProc
-            , [path, lookupProc](int, QProcess::ExitStatus)
-        {
+        QObject::connect(lookupProc, &QProcess::finished, lookupProc, [path, lookupProc](int, QProcess::ExitStatus) {
             lookupProc->deleteLater();
 
             const auto output = QString::fromLocal8Bit(lookupProc->readLine(lineMaxLength).simplified());
             if ((output == u"dolphin.desktop") || (output == u"org.kde.dolphin.desktop"))
             {
-                startDetached(u"dolphin"_s, {u"--select"_s, path.toString()});
+                startDetached(u"dolphin"_s, { u"--select"_s, path.toString() });
             }
-            else if ((output == u"nautilus.desktop") || (output == u"org.gnome.Nautilus.desktop")
-                || (output == u"nautilus-folder-handler.desktop"))
+            else if ((output == u"nautilus.desktop") || (output == u"org.gnome.Nautilus.desktop") || (output == u"nautilus-folder-handler.desktop"))
             {
                 auto deProcess = new QProcess;
                 deProcess->setProcessChannelMode(QProcess::ForwardedErrorChannel);
                 deProcess->setUnixProcessParameters(QProcess::UnixProcessFlag::CloseFileDescriptors);
-                QObject::connect(deProcess, &QProcess::finished, deProcess
-                    , [deProcess, path](int, QProcess::ExitStatus)
-                {
+                QObject::connect(deProcess, &QProcess::finished, deProcess, [deProcess, path](int, QProcess::ExitStatus) {
                     deProcess->deleteLater();
 
                     const auto nautilusVerStr = QString::fromLocal8Bit(deProcess->readLine(lineMaxLength))
-                        .remove(QRegularExpression(u"[^0-9.]"_s));
+                                                    .remove(QRegularExpression(u"[^0-9.]"_s));
                     using NautilusVersion = Utils::Version<3>;
                     const QString pathParam = (Utils::Fs::isDir(path) ? path.parentPath() : path).toString();
 
-                    if (NautilusVersion::fromString(nautilusVerStr, {1, 0, 0}) > NautilusVersion(3, 28, 0))
-                        startDetached(u"nautilus"_s, {pathParam});
+                    if (NautilusVersion::fromString(nautilusVerStr, { 1, 0, 0 }) > NautilusVersion(3, 28, 0))
+                        startDetached(u"nautilus"_s, { pathParam });
                     else
-                        startDetached(u"nautilus"_s, {u"--no-desktop"_s, pathParam});
+                        startDetached(u"nautilus"_s, { u"--no-desktop"_s, pathParam });
                 });
-                deProcess->start(u"nautilus"_s, {u"--version"_s});
+                deProcess->start(u"nautilus"_s, { u"--version"_s });
             }
             else if (output == u"nemo.desktop")
             {
-                startDetached(u"nemo"_s, {u"--no-desktop"_s, (Utils::Fs::isDir(path) ? path.parentPath() : path).toString()});
+                startDetached(u"nemo"_s, { u"--no-desktop"_s, (Utils::Fs::isDir(path) ? path.parentPath() : path).toString() });
             }
             else if ((output == u"konqueror.desktop") || (output == u"kfmclient_dir.desktop"))
             {
-                startDetached(u"konqueror"_s, {u"--select"_s, path.toString()});
+                startDetached(u"konqueror"_s, { u"--select"_s, path.toString() });
             }
             else if (output == u"thunar.desktop")
             {
-                startDetached(u"thunar"_s, {path.toString()});
+                startDetached(u"thunar"_s, { path.toString() });
             }
             else
             {
@@ -145,42 +141,42 @@ namespace
                 Utils::Gui::openPath(path.parentPath());
             }
         });
-        lookupProc->start(u"xdg-mime"_s, {u"query"_s, u"default"_s, u"inode/directory"_s});
+        lookupProc->start(u"xdg-mime"_s, { u"query"_s, u"default"_s, u"inode/directory"_s });
     }
 #endif
 }
 
-QPixmap Utils::Gui::scaledPixmap(const Path &path, const int height)
+QPixmap Utils::Gui::scaledPixmap(const Path& path, const int height)
 {
     Q_ASSERT(height >= 0);
 
-    const QPixmap pixmap {path.data()};
+    const QPixmap pixmap{ path.data() };
     return (height == 0) ? pixmap : pixmap.scaledToHeight(height, Qt::SmoothTransformation);
 }
 
-QSize Utils::Gui::smallIconSize(const QWidget *widget)
+QSize Utils::Gui::smallIconSize(const QWidget* widget)
 {
     // Get DPI scaled icon size (device-dependent), see QT source
     // under a 1080p screen is usually 16x16
     const int s = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize, nullptr, widget);
-    return {s, s};
+    return { s, s };
 }
 
-QSize Utils::Gui::mediumIconSize(const QWidget *widget)
+QSize Utils::Gui::mediumIconSize(const QWidget* widget)
 {
     // under a 1080p screen is usually 24x24
     return ((smallIconSize(widget) + largeIconSize(widget)) / 2);
 }
 
-QSize Utils::Gui::largeIconSize(const QWidget *widget)
+QSize Utils::Gui::largeIconSize(const QWidget* widget)
 {
     // Get DPI scaled icon size (device-dependent), see QT source
     // under a 1080p screen is usually 32x32
     const int s = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize, nullptr, widget);
-    return {s, s};
+    return { s, s };
 }
 
-QPoint Utils::Gui::screenCenter(const QWidget *w)
+QPoint Utils::Gui::screenCenter(const QWidget* w)
 {
     // Returns the QPoint which the widget will be placed center on screen (where parent resides)
 
@@ -188,32 +184,31 @@ QPoint Utils::Gui::screenCenter(const QWidget *w)
         return {};
 
     QRect r = QGuiApplication::primaryScreen()->availableGeometry();
-    const QPoint primaryScreenCenter {(r.x() + (r.width() - w->frameSize().width()) / 2), (r.y() + (r.height() - w->frameSize().height()) / 2)};
+    const QPoint primaryScreenCenter{ (r.x() + (r.width() - w->frameSize().width()) / 2), (r.y() + (r.height() - w->frameSize().height()) / 2) };
 
-    const QWidget *parent = w->parentWidget();
+    const QWidget* parent = w->parentWidget();
     if (!parent)
         return primaryScreenCenter;
 
-    const QWindow *window = parent->window()->windowHandle();
+    const QWindow* window = parent->window()->windowHandle();
     if (!window)
         return primaryScreenCenter;
 
-    const QScreen *screen = window->screen();
+    const QScreen* screen = window->screen();
     if (!screen)
         return primaryScreenCenter;
 
     r = screen->availableGeometry();
-    return {(r.x() + (r.width() - w->frameSize().width()) / 2), (r.y() + (r.height() - w->frameSize().height()) / 2)};
+    return { (r.x() + (r.width() - w->frameSize().width()) / 2), (r.y() + (r.height() - w->frameSize().height()) / 2) };
 }
 
 // Open the given path with an appropriate application
-void Utils::Gui::openPath(const Path &path)
+void Utils::Gui::openPath(const Path& path)
 {
     const QUrl url = toURL(path);
 
 #ifdef Q_OS_WIN
-    auto *thread = QThread::create([path]()
-    {
+    auto* thread = QThread::create([path]() {
         if (SUCCEEDED(::CoInitializeEx(NULL, (COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE))))
         {
             const std::wstring pathWStr = path.toString().toStdWString();
@@ -233,7 +228,7 @@ void Utils::Gui::openPath(const Path &path)
 
 // Open the parent directory of the given path with a file manager and select
 // (if possible) the item at the given path
-void Utils::Gui::openFolderSelect(const Path &path)
+void Utils::Gui::openFolderSelect(const Path& path)
 {
     // If the item to select doesn't exist, try to open its parent
     if (!path.exists())
@@ -243,8 +238,7 @@ void Utils::Gui::openFolderSelect(const Path &path)
     }
 
 #ifdef Q_OS_WIN
-    auto *thread = QThread::create([path]()
-    {
+    auto* thread = QThread::create([path]() {
         if (SUCCEEDED(::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
         {
             const std::wstring pathWStr = path.toString().toStdWString();
@@ -264,15 +258,13 @@ void Utils::Gui::openFolderSelect(const Path &path)
 #elif defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
 #ifdef QBT_USES_DBUS
     // rely on dbus interface
-    QDBusInterface fmInterface {u"org.freedesktop.FileManager1"_s, u"/org/freedesktop/FileManager1"_s
-        , u"org.freedesktop.FileManager1"_s, QDBusConnection::sessionBus()};
+    QDBusInterface fmInterface{ u"org.freedesktop.FileManager1"_s, u"/org/freedesktop/FileManager1"_s, u"org.freedesktop.FileManager1"_s, QDBusConnection::sessionBus() };
     if (fmInterface.isValid())
     {
-        const QStringList params = {toURL(path).toString()};
+        const QStringList params = { toURL(path).toString() };
         const QDBusPendingCall pcall = fmInterface.asyncCall(u"ShowItems"_s, params, QString());
         auto watcher = new QDBusPendingCallWatcher(pcall);
-        QObject::connect(watcher, &QDBusPendingCallWatcher::finished, watcher, [path](QDBusPendingCallWatcher *watcher)
-        {
+        QObject::connect(watcher, &QDBusPendingCallWatcher::finished, watcher, [path](QDBusPendingCallWatcher* watcher) {
             watcher->deleteLater();
 
             const QDBusPendingReply reply = *watcher;
@@ -281,19 +273,19 @@ void Utils::Gui::openFolderSelect(const Path &path)
         });
         return;
     }
-#endif  // QBT_USES_DBUS
+#endif // QBT_USES_DBUS
     invokeFileManager(path);
 #else
     openPath(path.parentPath());
 #endif
 }
 
-QString Utils::Gui::tagToWidgetText(const Tag &tag)
+QString Utils::Gui::tagToWidgetText(const Tag& tag)
 {
     return tag.toString().replace(u'&', u"&&"_s);
 }
 
-Tag Utils::Gui::widgetTextToTag(const QString &text)
+Tag Utils::Gui::widgetTextToTag(const QString& text)
 {
     // replace pairs of '&' with single '&' and remove non-paired occurrences of '&'
     QString cleanedText;

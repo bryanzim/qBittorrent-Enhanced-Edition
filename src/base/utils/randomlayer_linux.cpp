@@ -26,20 +26,20 @@
  * exception statement from your version.
  */
 
+#include <QtLogging>
+
+#include <sys/random.h>
+
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
 #include <limits>
 
-#include <sys/random.h>
-
-#include <QtLogging>
-
 namespace
 {
     class RandomLayer
     {
-    // need to satisfy UniformRandomBitGenerator requirements
+        // need to satisfy UniformRandomBitGenerator requirements
     public:
         using result_type = uint32_t;
 
@@ -94,7 +94,7 @@ namespace
             {
                 result_type buf = 0;
                 const ssize_t result = ::getrandom(&buf, sizeof(buf), 0);
-                if (result == sizeof(buf))  // success
+                if (result == sizeof(buf)) // success
                     return buf;
 
                 if (result < 0)
@@ -113,6 +113,6 @@ namespace
             qFatal("Read /dev/urandom error. Reason: \"%s\". Error code: %d.", std::strerror(errno), errno);
         }
 
-        FILE *m_randDev = nullptr;
+        FILE* m_randDev = nullptr;
     };
 }

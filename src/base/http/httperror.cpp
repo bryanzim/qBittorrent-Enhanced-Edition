@@ -30,53 +30,52 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-HTTPError::HTTPError(Http::ResponseStatus responseStatus, const QString &message)
-    : RuntimeError {message}
-    , m_responseStatus {std::move(responseStatus)}
+HTTPError::HTTPError(Http::ResponseStatus responseStatus, const QString& message)
+    : RuntimeError{ message }, m_responseStatus{ std::move(responseStatus) }
 {
 }
 
-const Http::ResponseStatus &HTTPError::status() const
+const Http::ResponseStatus& HTTPError::status() const
 {
     return m_responseStatus;
 }
 
-BadRequestHTTPError::BadRequestHTTPError(const QString &message)
-    : HTTPError({.code = 400, .text = u"Bad Request"_s}, message)
+BadRequestHTTPError::BadRequestHTTPError(const QString& message)
+    : HTTPError({ .code = 400, .text = u"Bad Request"_s }, message)
 {
 }
 
-UnauthorizedHTTPError::UnauthorizedHTTPError(const QString &message)
-    : HTTPError({.code = 401, .text = u"Unauthorized"_s}, message)
+UnauthorizedHTTPError::UnauthorizedHTTPError(const QString& message)
+    : HTTPError({ .code = 401, .text = u"Unauthorized"_s }, message)
 {
 }
 
-ForbiddenHTTPError::ForbiddenHTTPError(const QString &message)
-    : HTTPError({.code = 403, .text = u"Forbidden"_s}, message)
+ForbiddenHTTPError::ForbiddenHTTPError(const QString& message)
+    : HTTPError({ .code = 403, .text = u"Forbidden"_s }, message)
 {
 }
 
-NotFoundHTTPError::NotFoundHTTPError(const QString &message)
-    : HTTPError({.code = 404, .text = u"Not Found"_s}, message)
+NotFoundHTTPError::NotFoundHTTPError(const QString& message)
+    : HTTPError({ .code = 404, .text = u"Not Found"_s }, message)
 {
 }
 
-MethodNotAllowedHTTPError::MethodNotAllowedHTTPError(const QString &message)
-    : HTTPError({.code = 405, .text = u"Method Not Allowed"_s}, message)
+MethodNotAllowedHTTPError::MethodNotAllowedHTTPError(const QString& message)
+    : HTTPError({ .code = 405, .text = u"Method Not Allowed"_s }, message)
 {
 }
 
-ConflictHTTPError::ConflictHTTPError(const QString &message)
-    : HTTPError({.code = 409, .text = u"Conflict"_s}, message)
+ConflictHTTPError::ConflictHTTPError(const QString& message)
+    : HTTPError({ .code = 409, .text = u"Conflict"_s }, message)
 {
 }
 
-UnsupportedMediaTypeHTTPError::UnsupportedMediaTypeHTTPError(const QString &message)
-    : HTTPError({.code = 415, .text = u"Unsupported Media Type"_s}, message)
+UnsupportedMediaTypeHTTPError::UnsupportedMediaTypeHTTPError(const QString& message)
+    : HTTPError({ .code = 415, .text = u"Unsupported Media Type"_s }, message)
 {
 }
 
-InternalServerErrorHTTPError::InternalServerErrorHTTPError(const QString &message)
-    : HTTPError({.code = 500, .text = u"Internal Server Error"_s}, message)
+InternalServerErrorHTTPError::InternalServerErrorHTTPError(const QString& message)
+    : HTTPError({ .code = 500, .text = u"Internal Server Error"_s }, message)
 {
 }

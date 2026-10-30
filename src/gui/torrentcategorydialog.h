@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/path.h"
+
+#include <QDialog>
 
 namespace BitTorrent
 {
@@ -48,27 +48,27 @@ class TorrentCategoryDialog : public QDialog
     Q_DISABLE_COPY_MOVE(TorrentCategoryDialog)
 
 public:
-    static QString createCategory(QWidget *parent, const QString &parentCategoryName = {});
-    static void editCategory(QWidget *parent, const QString &categoryName);
+    static QString createCategory(QWidget* parent, const QString& parentCategoryName = {});
+    static void editCategory(QWidget* parent, const QString& categoryName);
 
-    explicit TorrentCategoryDialog(QWidget *parent = nullptr);
-    TorrentCategoryDialog(QWidget *parent, const QString &categoryName, const BitTorrent::CategoryOptions &categoryOptions);
+    explicit TorrentCategoryDialog(QWidget* parent = nullptr);
+    TorrentCategoryDialog(QWidget* parent, const QString& categoryName, const BitTorrent::CategoryOptions& categoryOptions);
     ~TorrentCategoryDialog() override;
 
     void setCategoryNameEditable(bool editable);
     QString categoryName() const;
-    void setCategoryName(const QString &categoryName);
-    void setCategoryOptions(const BitTorrent::CategoryOptions &categoryOptions);
+    void setCategoryName(const QString& categoryName);
+    void setCategoryOptions(const BitTorrent::CategoryOptions& categoryOptions);
     BitTorrent::CategoryOptions categoryOptions() const;
 
 private slots:
-    void categoryNameChanged(const QString &categoryName);
+    void categoryNameChanged(const QString& categoryName);
     void useDownloadPathChanged(int index);
 
 private:
     void resetShareLimitsWidgetDefaults();
 
-    Ui::TorrentCategoryDialog *m_ui = nullptr;
+    Ui::TorrentCategoryDialog* m_ui = nullptr;
     Path m_lastEnteredDownloadPath;
     QString m_parentCategoryName;
 };

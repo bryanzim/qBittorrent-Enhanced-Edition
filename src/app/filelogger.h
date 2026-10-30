@@ -29,11 +29,11 @@
 
 #pragma once
 
+#include "base/path.h"
+
 #include <QFile>
 #include <QObject>
 #include <QTimer>
-
-#include "base/path.h"
 
 namespace Log
 {
@@ -53,16 +53,16 @@ public:
         YEARS
     };
 
-    FileLogger(const Path &path, bool backup, int maxSize, bool deleteOld, int age, FileLogAgeType ageType);
+    FileLogger(const Path& path, bool backup, int maxSize, bool deleteOld, int age, FileLogAgeType ageType);
     ~FileLogger() override;
 
-    void setPath(const Path &newPath);
+    void setPath(const Path& newPath);
     void deleteOld(int age, FileLogAgeType ageType);
     void setBackup(bool value);
     void setMaxSize(int value);
 
 private slots:
-    void addLogMessage(const Log::Msg &msg);
+    void addLogMessage(const Log::Msg& msg);
     void flushLog();
 
 private:

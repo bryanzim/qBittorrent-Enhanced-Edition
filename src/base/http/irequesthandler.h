@@ -38,6 +38,6 @@ namespace Http
     {
     public:
         virtual ~IRequestHandler() = default;
-        virtual void processRequest(const Request &request, const Environment &env, ResponseWriter &responseWriter) = 0;
+        virtual void processRequest(const Request& request, const Environment& env, ResponseWriter& responseWriter) = 0;
     };
 }

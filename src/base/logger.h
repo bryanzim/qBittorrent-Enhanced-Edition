@@ -28,12 +28,11 @@
 
 #pragma once
 
-#include <boost/circular_buffer.hpp>
-
 #include <QObject>
 #include <QReadWriteLock>
 #include <QString>
 #include <QtContainerFwd>
+#include <boost/circular_buffer.hpp>
 
 inline const int MAX_LOG_MESSAGES = 20000;
 
@@ -77,22 +76,22 @@ class Logger final : public QObject
 public:
     static void initInstance();
     static void freeInstance();
-    static Logger *instance();
+    static Logger* instance();
 
-    void addMessage(const QString &message, const Log::MsgType &type = Log::NORMAL);
-    void addPeer(const QString &ip, bool blocked, const QString &reason = {});
+    void addMessage(const QString& message, const Log::MsgType& type = Log::NORMAL);
+    void addPeer(const QString& ip, bool blocked, const QString& reason = {});
     QList<Log::Msg> getMessages(int lastKnownId = -1) const;
     QList<Log::Peer> getPeers(int lastKnownId = -1) const;
 
 signals:
-    void newLogMessage(const Log::Msg &message);
-    void newLogPeer(const Log::Peer &peer);
+    void newLogMessage(const Log::Msg& message);
+    void newLogPeer(const Log::Peer& peer);
 
 private:
     Logger();
     ~Logger() = default;
 
-    static Logger *m_instance;
+    static Logger* m_instance;
     boost::circular_buffer_space_optimized<Log::Msg> m_messages;
     boost::circular_buffer_space_optimized<Log::Peer> m_peers;
     mutable QReadWriteLock m_lock;
@@ -101,4 +100,4 @@ private:
 };
 
 // Helper function
-void LogMsg(const QString &message, const Log::MsgType &type = Log::NORMAL);
+void LogMsg(const QString& message, const Log::MsgType& type = Log::NORMAL);

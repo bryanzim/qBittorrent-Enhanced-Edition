@@ -30,7 +30,7 @@
 
 #include <QDateTime>
 
-qint64 Utils::DateTime::toSecsSinceEpoch(const QDateTime &dateTime)
+qint64 Utils::DateTime::toSecsSinceEpoch(const QDateTime& dateTime)
 {
     return dateTime.isValid() ? dateTime.toSecsSinceEpoch() : -1;
 }

@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/settingvalue.h"
+
+#include <QObject>
 
 class QMenu;
 #ifndef Q_OS_MACOS
@@ -47,15 +47,15 @@ class DesktopIntegration final : public QObject
     Q_DISABLE_COPY_MOVE(DesktopIntegration)
 
 public:
-    explicit DesktopIntegration(QObject *parent = nullptr);
+    explicit DesktopIntegration(QObject* parent = nullptr);
     ~DesktopIntegration() override;
 
     bool isActive() const;
 
     QString toolTip() const;
-    void setToolTip(const QString &toolTip);
+    void setToolTip(const QString& toolTip);
 
-    QMenu *menu() const;
+    QMenu* menu() const;
 
     bool isNotificationsEnabled() const;
     void setNotificationsEnabled(bool value);
@@ -65,7 +65,7 @@ public:
     void setNotificationTimeout(int value);
 #endif
 
-    void showNotification(const QString &title, const QString &msg) const;
+    void showNotification(const QString& title, const QString& msg) const;
 
 signals:
     void activationRequested();
@@ -81,13 +81,13 @@ private:
 
     CachedSettingValue<bool> m_storeNotificationEnabled;
 
-    QMenu *m_menu = nullptr;
+    QMenu* m_menu = nullptr;
     QString m_toolTip;
 #ifndef Q_OS_MACOS
-    QSystemTrayIcon *m_systrayIcon = nullptr;
+    QSystemTrayIcon* m_systrayIcon = nullptr;
 #endif
 #ifdef QBT_USES_DBUS
     CachedSettingValue<int> m_storeNotificationTimeOut;
-    DBusNotifier *m_notifier = nullptr;
+    DBusNotifier* m_notifier = nullptr;
 #endif
 };

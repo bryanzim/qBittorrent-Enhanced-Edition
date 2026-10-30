@@ -28,12 +28,12 @@
 
 #pragma once
 
+#include "base/preferences.h"
+
 #include <QDateTime>
 #include <QHostAddress>
 #include <QObject>
 #include <QTimer>
-
-#include "base/preferences.h"
 
 namespace Net
 {
@@ -46,7 +46,7 @@ namespace Net
         Q_DISABLE_COPY_MOVE(DNSUpdater)
 
     public:
-        explicit DNSUpdater(QObject *parent = nullptr);
+        explicit DNSUpdater(QObject* parent = nullptr);
         ~DNSUpdater();
 
         static QUrl getRegistrationUrl(DNS::Service service);
@@ -56,9 +56,9 @@ namespace Net
 
     private slots:
         void checkPublicIP();
-        void ipRequestFinished(const DownloadResult &result);
+        void ipRequestFinished(const DownloadResult& result);
         void updateDNSService();
-        void ipUpdateFinished(const DownloadResult &result);
+        void ipUpdateFinished(const DownloadResult& result);
 
     private:
         enum State
@@ -69,7 +69,7 @@ namespace Net
         };
 
         QString getUpdateUrl() const;
-        void processIPUpdateReply(const QString &reply);
+        void processIPUpdateReply(const QString& reply);
 
         QHostAddress m_lastIP;
         QDateTime m_lastIPCheckTime;

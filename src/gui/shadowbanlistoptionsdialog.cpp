@@ -28,23 +28,20 @@
 
 #include "shadowbanlistoptionsdialog.h"
 
-#include <QHostAddress>
-#include <QMessageBox>
-#include <QSortFilterProxyModel>
-#include <QStringListModel>
-
 #include "base/bittorrent/session.h"
 #include "base/utils/net.h"
 #include "ui_shadowbanlistoptionsdialog.h"
 #include "utils.h"
 
+#include <QHostAddress>
+#include <QMessageBox>
+#include <QSortFilterProxyModel>
+#include <QStringListModel>
+
 #define SETTINGS_KEY(name) u"ShadowBanListOptionsDialog/" name
 
-ShadowBanListOptionsDialog::ShadowBanListOptionsDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::ShadowBanListOptionsDialog)
-    , m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
-    , m_model(new QStringListModel(BitTorrent::Session::instance()->shadowBannedIPs(), this))
+ShadowBanListOptionsDialog::ShadowBanListOptionsDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::ShadowBanListOptionsDialog), m_storeDialogSize(SETTINGS_KEY(u"Size"_s)), m_model(new QStringListModel(BitTorrent::Session::instance()->shadowBannedIPs(), this))
 {
     m_ui->setupUi(this);
 
@@ -120,17 +117,16 @@ void ShadowBanListOptionsDialog::on_buttonBanIP_clicked()
 void ShadowBanListOptionsDialog::on_buttonDeleteIP_clicked()
 {
     QModelIndexList selection = m_ui->bannedIPList->selectionModel()->selectedIndexes();
-    std::sort(selection.begin(), selection.end(), [](const QModelIndex &left, const QModelIndex &right)
-    {
+    std::sort(selection.begin(), selection.end(), [](const QModelIndex& left, const QModelIndex& right) {
         return (left.row() > right.row());
     });
-    for (const QModelIndex &i : selection)
+    for (const QModelIndex& i : selection)
         m_sortFilter->removeRow(i.row());
 
     m_modified = true;
 }
 
-void ShadowBanListOptionsDialog::on_txtIP_textChanged(const QString &ip)
+void ShadowBanListOptionsDialog::on_txtIP_textChanged(const QString& ip)
 {
     m_ui->buttonBanIP->setEnabled(Utils::Net::isValidIP(ip));
 }

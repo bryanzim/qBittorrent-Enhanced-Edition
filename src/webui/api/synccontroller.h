@@ -28,12 +28,12 @@
 
 #pragma once
 
-#include <QSet>
-#include <QVariantMap>
-
+#include "apicontroller.h"
 #include "base/bittorrent/infohash.h"
 #include "base/tag.h"
-#include "apicontroller.h"
+
+#include <QSet>
+#include <QVariantMap>
 
 namespace BitTorrent
 {
@@ -59,26 +59,25 @@ private:
     void makeMaindataSnapshot();
     QJsonObject generateMaindataSyncData(int id, bool fullUpdate);
 
-    void onCategoryAdded(const QString &categoryName);
-    void onCategoryRemoved(const QString &categoryName);
-    void onCategoryOptionsChanged(const QString &categoryName);
+    void onCategoryAdded(const QString& categoryName);
+    void onCategoryRemoved(const QString& categoryName);
+    void onCategoryOptionsChanged(const QString& categoryName);
     void onSubcategoriesSupportChanged();
-    void onTagAdded(const Tag &tag);
-    void onTagRemoved(const Tag &tag);
-    void onTorrentAdded(BitTorrent::Torrent *torrent);
-    void onTorrentAboutToBeRemoved(BitTorrent::Torrent *torrent);
-    void onTorrentCategoryChanged(BitTorrent::Torrent *torrent, const QString &oldCategory);
-    void onTorrentMetadataReceived(BitTorrent::Torrent *torrent);
-    void onTorrentStopped(BitTorrent::Torrent *torrent);
-    void onTorrentStarted(BitTorrent::Torrent *torrent);
-    void onTorrentSavePathChanged(BitTorrent::Torrent *torrent);
-    void onTorrentSavingModeChanged(BitTorrent::Torrent *torrent);
-    void onTorrentTagAdded(BitTorrent::Torrent *torrent, const Tag &tag);
-    void onTorrentTagRemoved(BitTorrent::Torrent *torrent, const Tag &tag);
-    void onTorrentsUpdated(const QList<BitTorrent::Torrent *> &torrents);
-    void onTorrentTrackersChanged(BitTorrent::Torrent *torrent);
-    void onTorrentTrackerEntryStatusesUpdated(const BitTorrent::Torrent *torrent
-            , const QHash<QString, BitTorrent::TrackerEntryStatus> &updatedTrackers);
+    void onTagAdded(const Tag& tag);
+    void onTagRemoved(const Tag& tag);
+    void onTorrentAdded(BitTorrent::Torrent* torrent);
+    void onTorrentAboutToBeRemoved(BitTorrent::Torrent* torrent);
+    void onTorrentCategoryChanged(BitTorrent::Torrent* torrent, const QString& oldCategory);
+    void onTorrentMetadataReceived(BitTorrent::Torrent* torrent);
+    void onTorrentStopped(BitTorrent::Torrent* torrent);
+    void onTorrentStarted(BitTorrent::Torrent* torrent);
+    void onTorrentSavePathChanged(BitTorrent::Torrent* torrent);
+    void onTorrentSavingModeChanged(BitTorrent::Torrent* torrent);
+    void onTorrentTagAdded(BitTorrent::Torrent* torrent, const Tag& tag);
+    void onTorrentTagRemoved(BitTorrent::Torrent* torrent, const Tag& tag);
+    void onTorrentsUpdated(const QList<BitTorrent::Torrent*>& torrents);
+    void onTorrentTrackersChanged(BitTorrent::Torrent* torrent);
+    void onTorrentTrackerEntryStatusesUpdated(const BitTorrent::Torrent* torrent, const QHash<QString, BitTorrent::TrackerEntryStatus>& updatedTrackers);
 
     qint64 m_freeDiskSpace = 0;
 

@@ -29,16 +29,16 @@
 
 #include "trackerstatusfilterwidget.h"
 
-#include <QCheckBox>
-#include <QIcon>
-#include <QListWidgetItem>
-#include <QMenu>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "base/preferences.h"
 #include "gui/transferlistwidget.h"
 #include "gui/uithememanager.h"
+
+#include <QCheckBox>
+#include <QIcon>
+#include <QListWidgetItem>
+#include <QMenu>
 
 namespace
 {
@@ -75,27 +75,27 @@ namespace
     }
 }
 
-TrackerStatusFilterWidget::TrackerStatusFilterWidget(QWidget *parent, TransferListWidget *transferList)
+TrackerStatusFilterWidget::TrackerStatusFilterWidget(QWidget* parent, TransferListWidget* transferList)
     : BaseFilterWidget(parent, transferList)
 {
-    auto *anyStatusItem = new QListWidgetItem(this);
+    auto* anyStatusItem = new QListWidgetItem(this);
     anyStatusItem->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"trackers"_s, u"network-server"_s));
 
-    auto *warningItem = new QListWidgetItem(this);
+    auto* warningItem = new QListWidgetItem(this);
     warningItem->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"tracker-warning"_s, u"dialog-warning"_s));
 
-    auto *trackerErrorItem = new QListWidgetItem(this);
+    auto* trackerErrorItem = new QListWidgetItem(this);
     trackerErrorItem->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"tracker-error"_s, u"dialog-error"_s));
 
-    auto *otherErrorItem = new QListWidgetItem(this);
+    auto* otherErrorItem = new QListWidgetItem(this);
     otherErrorItem->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"tracker-error"_s, u"dialog-error"_s));
 
-    const auto *btSession = BitTorrent::Session::instance();
+    const auto* btSession = BitTorrent::Session::instance();
 
-    const QList<BitTorrent::Torrent *> torrents = btSession->torrents();
+    const QList<BitTorrent::Torrent*> torrents = btSession->torrents();
     m_totalTorrents += torrents.count();
 
-    for (const BitTorrent::Torrent *torrent : torrents)
+    for (const BitTorrent::Torrent* torrent : torrents)
     {
         const BitTorrent::TorrentAnnounceStatus announceStatus = torrent->announceStatus();
 
@@ -122,35 +122,30 @@ TrackerStatusFilterWidget::TrackerStatusFilterWidget(QWidget *parent, TransferLi
     setVisible(Preferences::instance()->getTrackerStatusFilterState());
 }
 
-void TrackerStatusFilterWidget::handleTorrentTrackersRemoved(const BitTorrent::Torrent *torrent)
+void TrackerStatusFilterWidget::handleTorrentTrackersRemoved(const BitTorrent::Torrent* torrent)
 {
     refreshItems(torrent);
 }
 
-void TrackerStatusFilterWidget::handleTorrentTrackersReset(const BitTorrent::Torrent *torrent
-        , [[maybe_unused]] const QList<BitTorrent::TrackerEntryStatus> &oldEntries, [[maybe_unused]] const QList<BitTorrent::TrackerEntry> &newEntries)
+void TrackerStatusFilterWidget::handleTorrentTrackersReset(const BitTorrent::Torrent* torrent, [[maybe_unused]] const QList<BitTorrent::TrackerEntryStatus>& oldEntries, [[maybe_unused]] const QList<BitTorrent::TrackerEntry>& newEntries)
 {
     refreshItems(torrent);
 }
 
-void TrackerStatusFilterWidget::handleTorrentTrackerStatusesUpdated(const BitTorrent::Torrent *torrent)
+void TrackerStatusFilterWidget::handleTorrentTrackerStatusesUpdated(const BitTorrent::Torrent* torrent)
 {
     refreshItems(torrent);
 }
 
 void TrackerStatusFilterWidget::showMenu()
 {
-    QMenu *menu = new QMenu(this);
+    QMenu* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents")
-        , transferList(), &TransferListWidget::startVisibleTorrents);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents")
-        , transferList(), &TransferListWidget::forceStartVisibleTorrents);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents")
-        , transferList(), &TransferListWidget::stopVisibleTorrents);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents")
-        , transferList(), &TransferListWidget::deleteVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents"), transferList(), &TransferListWidget::startVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents"), transferList(), &TransferListWidget::forceStartVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents"), transferList(), &TransferListWidget::stopVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents"), transferList(), &TransferListWidget::deleteVisibleTorrents);
 
     menu->popup(QCursor::pos());
 }
@@ -177,13 +172,13 @@ void TrackerStatusFilterWidget::applyFilter(const int row)
     }
 }
 
-void TrackerStatusFilterWidget::handleTorrentsLoaded(const QList<BitTorrent::Torrent *> &torrents)
+void TrackerStatusFilterWidget::handleTorrentsLoaded(const QList<BitTorrent::Torrent*>& torrents)
 {
     m_totalTorrents += torrents.count();
     item(ANY_ROW)->setText(formatItemText(ANY_ROW, m_totalTorrents));
 }
 
-void TrackerStatusFilterWidget::refreshItems(const BitTorrent::Torrent *torrent)
+void TrackerStatusFilterWidget::refreshItems(const BitTorrent::Torrent* torrent)
 {
     const BitTorrent::TorrentAnnounceStatus announceStatus = torrent->announceStatus();
 
@@ -207,7 +202,7 @@ void TrackerStatusFilterWidget::refreshItems(const BitTorrent::Torrent *torrent)
     item(WARNING_ROW)->setText(formatItemText(WARNING_ROW, m_warnings.size()));
 }
 
-void TrackerStatusFilterWidget::torrentAboutToBeDeleted(BitTorrent::Torrent *const torrent)
+void TrackerStatusFilterWidget::torrentAboutToBeDeleted(BitTorrent::Torrent* const torrent)
 {
     m_warnings.remove(torrent);
     m_trackerErrors.remove(torrent);

@@ -29,8 +29,7 @@
 
 #include "fspathedit.h"
 
-#include <memory>
-#include <stdexcept>
+#include "fspathedit_p.h"
 
 #include <QAction>
 #include <QApplication>
@@ -40,14 +39,15 @@
 #include <QStyle>
 #include <QToolButton>
 
-#include "fspathedit_p.h"
+#include <memory>
+#include <stdexcept>
 
 namespace
 {
     struct TrStringWithComment
     {
-        const char *source = nullptr;
-        const char *comment = nullptr;
+        const char* source = nullptr;
+        const char* comment = nullptr;
 
         QString tr() const
         {
@@ -71,30 +71,25 @@ class FileSystemPathEdit::FileSystemPathEditPrivate
     Q_DISABLE_COPY_MOVE(FileSystemPathEditPrivate)
 
 private:
-    FileSystemPathEditPrivate(FileSystemPathEdit *q, Private::IFileEditorWithCompletion *editor);
+    FileSystemPathEditPrivate(FileSystemPathEdit* q, Private::IFileEditorWithCompletion* editor);
 
     void modeChanged();
     void browseActionTriggered();
     QString dialogCaptionOrDefault() const;
 
-    FileSystemPathEdit *q_ptr = nullptr;
+    FileSystemPathEdit* q_ptr = nullptr;
     std::unique_ptr<Private::IFileEditorWithCompletion> m_editor;
-    QAction *m_browseAction = nullptr;
-    QToolButton *m_browseBtn = nullptr;
+    QAction* m_browseAction = nullptr;
+    QToolButton* m_browseBtn = nullptr;
     QString m_fileNameFilter;
     Mode m_mode = FileSystemPathEdit::Mode::FileOpen;
     QString m_dialogCaption;
-    Private::FileSystemPathValidator *m_validator = nullptr;
+    Private::FileSystemPathValidator* m_validator = nullptr;
 };
 
 FileSystemPathEdit::FileSystemPathEditPrivate::FileSystemPathEditPrivate(
-                        FileSystemPathEdit *q, Private::IFileEditorWithCompletion *editor)
-    : q_ptr {q}
-    , m_editor {editor}
-    , m_browseAction {new QAction(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon), browseButtonFullText.tr(), q)}
-    , m_browseBtn {new QToolButton(q)}
-    , m_fileNameFilter {tr("Any file") + u" (*)"}
-    , m_validator {new Private::FileSystemPathValidator(q)}
+    FileSystemPathEdit* q, Private::IFileEditorWithCompletion* editor)
+    : q_ptr{ q }, m_editor{ editor }, m_browseAction{ new QAction(QApplication::style()->standardIcon(QStyle::SP_DirOpenIcon), browseButtonFullText.tr(), q) }, m_browseBtn{ new QToolButton(q) }, m_fileNameFilter{ tr("Any file") + u" (*)" }, m_validator{ new Private::FileSystemPathValidator(q) }
 {
     m_browseAction->setIconText(browseButtonBriefText.tr());
     m_browseAction->setShortcut(Qt::CTRL | Qt::Key_B);
@@ -116,8 +111,8 @@ void FileSystemPathEdit::FileSystemPathEditPrivate::browseActionTriggered()
 
     const Path currentPath = q->getResolvedPath();
     const Path initialDirectory = (m_mode == FileSystemPathEdit::Mode::DirectoryOpen) || (m_mode == FileSystemPathEdit::Mode::DirectorySave)
-            ? currentPath
-            : currentPath.parentPath();
+                                      ? currentPath
+                                      : currentPath.parentPath();
 
     QString filter = q->fileNameFilter();
     QString newPath;
@@ -132,7 +127,7 @@ void FileSystemPathEdit::FileSystemPathEditPrivate::browseActionTriggered()
     case FileSystemPathEdit::Mode::DirectoryOpen:
     case FileSystemPathEdit::Mode::DirectorySave:
         newPath = QFileDialog::getExistingDirectory(q, dialogCaptionOrDefault(),
-                                initialDirectory.data(), QFileDialog::ShowDirsOnly);
+                                                    initialDirectory.data(), QFileDialog::ShowDirsOnly);
         break;
     case FileSystemPathEdit::Mode::ReadOnly:
         throw std::logic_error("Not supported");
@@ -176,9 +171,8 @@ void FileSystemPathEdit::FileSystemPathEditPrivate::modeChanged()
     m_validator->setCheckWritePermission((m_mode == FileSystemPathEdit::Mode::FileSave) || (m_mode == FileSystemPathEdit::Mode::DirectorySave));
 }
 
-FileSystemPathEdit::FileSystemPathEdit(Private::IFileEditorWithCompletion *editor, QWidget *parent)
-    : QWidget(parent)
-    , d_ptr(new FileSystemPathEditPrivate(this, editor))
+FileSystemPathEdit::FileSystemPathEdit(Private::IFileEditorWithCompletion* editor, QWidget* parent)
+    : QWidget(parent), d_ptr(new FileSystemPathEditPrivate(this, editor))
 {
     Q_D(FileSystemPathEdit);
     editor->widget()->setParent(this);
@@ -187,7 +181,7 @@ FileSystemPathEdit::FileSystemPathEdit(Private::IFileEditorWithCompletion *edito
     // required, otherwise the button cannot be selected via keyboard tab
     setTabOrder(editor->widget(), d_ptr->m_browseBtn);
 
-    auto *layout = new QHBoxLayout(this);
+    auto* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(editor->widget());
     layout->addWidget(d->m_browseBtn);
@@ -205,7 +199,7 @@ Path FileSystemPathEdit::selectedPath() const
     return m_path;
 }
 
-void FileSystemPathEdit::setSelectedPath(const Path &path)
+void FileSystemPathEdit::setSelectedPath(const Path& path)
 {
     if (path != m_path)
         setEditWidgetText(path.toString());
@@ -216,7 +210,7 @@ Path FileSystemPathEdit::basePath() const
     return m_basePath;
 }
 
-void FileSystemPathEdit::setBasePath(const Path &basePath)
+void FileSystemPathEdit::setBasePath(const Path& basePath)
 {
     if (basePath == m_basePath)
         return;
@@ -233,7 +227,7 @@ QString FileSystemPathEdit::fileNameFilter() const
     return d->m_fileNameFilter;
 }
 
-void FileSystemPathEdit::setFileNameFilter(const QString &val)
+void FileSystemPathEdit::setFileNameFilter(const QString& val)
 {
     Q_D(FileSystemPathEdit);
     d->m_fileNameFilter = val;
@@ -270,7 +264,7 @@ QString FileSystemPathEdit::placeholder() const
     return d->m_editor->placeholder();
 }
 
-void FileSystemPathEdit::setPlaceholder(const QString &val)
+void FileSystemPathEdit::setPlaceholder(const QString& val)
 {
     Q_D(FileSystemPathEdit);
     d->m_editor->setPlaceholder(val);
@@ -290,7 +284,7 @@ void FileSystemPathEdit::setBriefBrowseButtonCaption(bool brief)
 
 void FileSystemPathEdit::onPathEdited()
 {
-    const Path newPath {editWidgetText()};
+    const Path newPath{ editWidgetText() };
     if (newPath != m_path)
     {
         m_path = newPath;
@@ -321,13 +315,13 @@ QString FileSystemPathEdit::dialogCaption() const
     return d->m_dialogCaption;
 }
 
-void FileSystemPathEdit::setDialogCaption(const QString &caption)
+void FileSystemPathEdit::setDialogCaption(const QString& caption)
 {
     Q_D(FileSystemPathEdit);
     d->m_dialogCaption = caption;
 }
 
-QWidget *FileSystemPathEdit::editWidgetImpl() const
+QWidget* FileSystemPathEdit::editWidgetImpl() const
 {
     Q_D(const FileSystemPathEdit);
     return d->m_editor->widget();
@@ -339,7 +333,7 @@ Path FileSystemPathEdit::getResolvedPath() const
 }
 
 // ------------------------- FileSystemPathLineEdit ----------------------
-FileSystemPathLineEdit::FileSystemPathLineEdit(QWidget *parent)
+FileSystemPathLineEdit::FileSystemPathLineEdit(QWidget* parent)
     : FileSystemPathEdit(new WidgetType(), parent)
 {
     connect(editWidget<WidgetType>(), &QLineEdit::editingFinished, this, &FileSystemPathLineEdit::onPathEdited);
@@ -356,13 +350,13 @@ void FileSystemPathLineEdit::clear()
     editWidget<WidgetType>()->clear();
 }
 
-void FileSystemPathLineEdit::setEditWidgetText(const QString &text)
+void FileSystemPathLineEdit::setEditWidgetText(const QString& text)
 {
     editWidget<WidgetType>()->setText(text);
 }
 
 // ----------------------- FileSystemPathComboEdit -----------------------
-FileSystemPathComboEdit::FileSystemPathComboEdit(QWidget *parent)
+FileSystemPathComboEdit::FileSystemPathComboEdit(QWidget* parent)
     : FileSystemPathEdit(new WidgetType(), parent)
 {
     editWidget<WidgetType>()->setEditable(true);
@@ -385,12 +379,12 @@ Path FileSystemPathComboEdit::item(int index) const
     return Path(editWidget<WidgetType>()->itemText(index));
 }
 
-void FileSystemPathComboEdit::addItem(const Path &path)
+void FileSystemPathComboEdit::addItem(const Path& path)
 {
     editWidget<WidgetType>()->addItem(path.toString());
 }
 
-void FileSystemPathComboEdit::insertItem(int index, const Path &path)
+void FileSystemPathComboEdit::insertItem(int index, const Path& path)
 {
     editWidget<WidgetType>()->insertItem(index, path.toString());
 }
@@ -420,7 +414,7 @@ QString FileSystemPathComboEdit::editWidgetText() const
     return editWidget<WidgetType>()->currentText();
 }
 
-void FileSystemPathComboEdit::setEditWidgetText(const QString &text)
+void FileSystemPathComboEdit::setEditWidgetText(const QString& text)
 {
     editWidget<WidgetType>()->setCurrentText(text);
 }

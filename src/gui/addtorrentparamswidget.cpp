@@ -28,8 +28,6 @@
 
 #include "addtorrentparamswidget.h"
 
-#include <QVariant>
-
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/torrent.h"
 #include "base/utils/compare.h"
@@ -39,9 +37,11 @@
 #include "torrenttagsdialog.h"
 #include "ui_addtorrentparamswidget.h"
 
+#include <QVariant>
+
 namespace
 {
-    std::optional<bool> toOptionalBool(const QVariant &data)
+    std::optional<bool> toOptionalBool(const QVariant& data)
     {
         if (!data.isValid())
             return std::nullopt;
@@ -68,9 +68,8 @@ namespace
     }
 }
 
-AddTorrentParamsWidget::AddTorrentParamsWidget(BitTorrent::AddTorrentParams addTorrentParams, QWidget *parent)
-    : QWidget(parent)
-    , m_ui {new Ui::AddTorrentParamsWidget}
+AddTorrentParamsWidget::AddTorrentParamsWidget(BitTorrent::AddTorrentParams addTorrentParams, QWidget* parent)
+    : QWidget(parent), m_ui{ new Ui::AddTorrentParamsWidget }
 {
     m_ui->setupUi(this);
 
@@ -106,19 +105,17 @@ AddTorrentParamsWidget::AddTorrentParamsWidget(BitTorrent::AddTorrentParams addT
     m_ui->addToQueueTopComboBox->addItem(tr("Yes"), true);
     m_ui->addToQueueTopComboBox->addItem(tr("No"), false);
 
-    connect(m_ui->tagsEditButton, &QAbstractButton::clicked, this, [this]
-    {
-        auto *dlg = new TorrentTagsDialog(m_addTorrentParams.tags, this);
+    connect(m_ui->tagsEditButton, &QAbstractButton::clicked, this, [this] {
+        auto* dlg = new TorrentTagsDialog(m_addTorrentParams.tags, this);
         dlg->setAttribute(Qt::WA_DeleteOnClose);
-        connect(dlg, &TorrentTagsDialog::accepted, this, [this, dlg]
-        {
+        connect(dlg, &TorrentTagsDialog::accepted, this, [this, dlg] {
             m_addTorrentParams.tags = dlg->tags();
             m_ui->tagsLineEdit->setText(Utils::String::joinIntoString(m_addTorrentParams.tags, u", "_s));
         });
         dlg->open();
     });
 
-    auto *miscParamsLayout = new FlowLayout(m_ui->miscParamsWidget);
+    auto* miscParamsLayout = new FlowLayout(m_ui->miscParamsWidget);
     miscParamsLayout->setContentsMargins(0, 0, 0, 0);
     miscParamsLayout->addWidget(m_ui->contentLayoutWidget);
     miscParamsLayout->addWidget(m_ui->seedModeCheckBox);
@@ -157,9 +154,9 @@ void AddTorrentParamsWidget::populate()
 {
     m_ui->comboTTM->disconnect(this);
     m_ui->comboTTM->setCurrentIndex(m_addTorrentParams.useAutoTMM
-            ? m_ui->comboTTM->findData(*m_addTorrentParams.useAutoTMM) : 0);
-    connect(m_ui->comboTTM, &QComboBox::currentIndexChanged, this, [this]
-    {
+                                        ? m_ui->comboTTM->findData(*m_addTorrentParams.useAutoTMM)
+                                        : 0);
+    connect(m_ui->comboTTM, &QComboBox::currentIndexChanged, this, [this] {
         m_addTorrentParams.useAutoTMM = toOptionalBool(m_ui->comboTTM->currentData());
 
         populateSavePathOptions();
@@ -172,22 +169,22 @@ void AddTorrentParamsWidget::populate()
     if (!m_addTorrentParams.category.isEmpty())
         m_ui->categoryComboBox->addItem(m_addTorrentParams.category);
     m_ui->categoryComboBox->addItem(u""_s);
-    for (const QString &category : asConst(categories))
+    for (const QString& category : asConst(categories))
     {
         if (category != m_addTorrentParams.category)
             m_ui->categoryComboBox->addItem(category);
     }
-    connect(m_ui->categoryComboBox, &QComboBox::currentIndexChanged, this, [this]
-    {
+    connect(m_ui->categoryComboBox, &QComboBox::currentIndexChanged, this, [this] {
         m_addTorrentParams.category = m_ui->categoryComboBox->currentText();
 
-        const auto *btSession = BitTorrent::Session::instance();
+        const auto* btSession = BitTorrent::Session::instance();
         const bool useAutoTMM = m_addTorrentParams.useAutoTMM.value_or(!btSession->isAutoTMMDisabledByDefault());
         if (useAutoTMM)
         {
             const auto downloadPathOption = btSession->categoryOptions(m_addTorrentParams.category).downloadPath;
             m_ui->useDownloadPathComboBox->setCurrentIndex(downloadPathOption.has_value()
-                    ? m_ui->useDownloadPathComboBox->findData(downloadPathOption->enabled) : 0);
+                                                               ? m_ui->useDownloadPathComboBox->findData(downloadPathOption->enabled)
+                                                               : 0);
         }
 
         populateDefaultPaths();
@@ -200,16 +197,13 @@ void AddTorrentParamsWidget::populate()
 
     populateSavePathOptions();
 
-    connect(m_ui->savePathEdit, &FileSystemPathLineEdit::selectedPathChanged, this, [this]
-    {
+    connect(m_ui->savePathEdit, &FileSystemPathLineEdit::selectedPathChanged, this, [this] {
         m_addTorrentParams.savePath = m_ui->savePathEdit->selectedPath();
     });
-    connect(m_ui->downloadPathEdit, &FileSystemPathLineEdit::selectedPathChanged, this, [this]
-    {
+    connect(m_ui->downloadPathEdit, &FileSystemPathLineEdit::selectedPathChanged, this, [this] {
         m_addTorrentParams.downloadPath = m_ui->downloadPathEdit->selectedPath();
     });
-    connect(m_ui->useDownloadPathComboBox, &QComboBox::currentIndexChanged, this, [this]
-    {
+    connect(m_ui->useDownloadPathComboBox, &QComboBox::currentIndexChanged, this, [this] {
         m_addTorrentParams.useDownloadPath = toOptionalBool(m_ui->useDownloadPathComboBox->currentData());
 
         loadCustomDownloadPath();
@@ -217,9 +211,9 @@ void AddTorrentParamsWidget::populate()
 
     m_ui->contentLayoutComboBox->disconnect(this);
     m_ui->contentLayoutComboBox->setCurrentIndex(m_addTorrentParams.contentLayout
-            ? m_ui->contentLayoutComboBox->findData(QVariant::fromValue(*m_addTorrentParams.contentLayout)) : 0);
-    connect(m_ui->contentLayoutComboBox, &QComboBox::currentIndexChanged, this, [this]
-    {
+                                                     ? m_ui->contentLayoutComboBox->findData(QVariant::fromValue(*m_addTorrentParams.contentLayout))
+                                                     : 0);
+    connect(m_ui->contentLayoutComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->contentLayoutComboBox->currentData();
         if (!data.isValid())
             m_addTorrentParams.contentLayout = std::nullopt;
@@ -229,9 +223,9 @@ void AddTorrentParamsWidget::populate()
 
     m_ui->stopConditionComboBox->disconnect(this);
     m_ui->stopConditionComboBox->setCurrentIndex(m_addTorrentParams.stopCondition
-            ? m_ui->stopConditionComboBox->findData(QVariant::fromValue(*m_addTorrentParams.stopCondition)) : 0);
-    connect(m_ui->stopConditionComboBox, &QComboBox::currentIndexChanged, this, [this]
-    {
+                                                     ? m_ui->stopConditionComboBox->findData(QVariant::fromValue(*m_addTorrentParams.stopCondition))
+                                                     : 0);
+    connect(m_ui->stopConditionComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->stopConditionComboBox->currentData();
         if (!data.isValid())
             m_addTorrentParams.stopCondition = std::nullopt;
@@ -243,9 +237,9 @@ void AddTorrentParamsWidget::populate()
 
     m_ui->startTorrentComboBox->disconnect(this);
     m_ui->startTorrentComboBox->setCurrentIndex(m_addTorrentParams.addStopped
-            ? m_ui->startTorrentComboBox->findData(!*m_addTorrentParams.addStopped) : 0);
-    connect(m_ui->startTorrentComboBox, &QComboBox::currentIndexChanged, this, [this]
-    {
+                                                    ? m_ui->startTorrentComboBox->findData(!*m_addTorrentParams.addStopped)
+                                                    : 0);
+    connect(m_ui->startTorrentComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->startTorrentComboBox->currentData();
         if (!data.isValid())
             m_addTorrentParams.addStopped = std::nullopt;
@@ -255,16 +249,15 @@ void AddTorrentParamsWidget::populate()
 
     m_ui->seedModeCheckBox->disconnect(this);
     m_ui->seedModeCheckBox->setChecked(m_addTorrentParams.seedMode);
-    connect(m_ui->seedModeCheckBox, &QCheckBox::toggled, this, [this]
-    {
+    connect(m_ui->seedModeCheckBox, &QCheckBox::toggled, this, [this] {
         m_addTorrentParams.seedMode = m_ui->seedModeCheckBox->isChecked();
     });
 
     m_ui->addToQueueTopComboBox->disconnect(this);
     m_ui->addToQueueTopComboBox->setCurrentIndex(m_addTorrentParams.addToQueueTop
-            ? m_ui->addToQueueTopComboBox->findData(*m_addTorrentParams.addToQueueTop) : 0);
-    connect(m_ui->addToQueueTopComboBox, &QComboBox::currentIndexChanged, this, [this]
-    {
+                                                     ? m_ui->addToQueueTopComboBox->findData(*m_addTorrentParams.addToQueueTop)
+                                                     : 0);
+    connect(m_ui->addToQueueTopComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->addToQueueTopComboBox->currentData();
         if (!data.isValid())
             m_addTorrentParams.addToQueueTop = std::nullopt;
@@ -282,13 +275,14 @@ void AddTorrentParamsWidget::populate()
 
 void AddTorrentParamsWidget::loadCustomSavePathOptions()
 {
-    [[maybe_unused]] const auto *btSession = BitTorrent::Session::instance();
+    [[maybe_unused]] const auto* btSession = BitTorrent::Session::instance();
     Q_ASSERT(!m_addTorrentParams.useAutoTMM.value_or(!btSession->isAutoTMMDisabledByDefault()));
 
     m_ui->savePathEdit->setSelectedPath(m_addTorrentParams.savePath);
 
     m_ui->useDownloadPathComboBox->setCurrentIndex(m_addTorrentParams.useDownloadPath
-            ? m_ui->useDownloadPathComboBox->findData(*m_addTorrentParams.useDownloadPath) : 0);
+                                                       ? m_ui->useDownloadPathComboBox->findData(*m_addTorrentParams.useDownloadPath)
+                                                       : 0);
 
     loadCustomDownloadPath();
 }
@@ -329,20 +323,21 @@ void AddTorrentParamsWidget::loadCustomDownloadPath()
 
 void AddTorrentParamsWidget::loadCategorySavePathOptions()
 {
-    const auto *btSession = BitTorrent::Session::instance();
+    const auto* btSession = BitTorrent::Session::instance();
     Q_ASSERT(m_addTorrentParams.useAutoTMM.value_or(!btSession->isAutoTMMDisabledByDefault()));
 
     const auto downloadPathOption = btSession->categoryOptions(m_addTorrentParams.category).downloadPath;
     m_ui->useDownloadPathComboBox->setCurrentIndex(downloadPathOption.has_value()
-            ? m_ui->useDownloadPathComboBox->findData(downloadPathOption->enabled) : 0);
+                                                       ? m_ui->useDownloadPathComboBox->findData(downloadPathOption->enabled)
+                                                       : 0);
 }
 
 void AddTorrentParamsWidget::populateDefaultPaths()
 {
-    const auto *btSession = BitTorrent::Session::instance();
+    const auto* btSession = BitTorrent::Session::instance();
 
     const Path defaultSavePath = btSession->suggestedSavePath(
-            m_ui->categoryComboBox->currentText(), toOptionalBool(m_ui->comboTTM->currentData()));
+        m_ui->categoryComboBox->currentText(), toOptionalBool(m_ui->comboTTM->currentData()));
     m_ui->savePathEdit->setPlaceholder(defaultSavePath.toString());
 
     populateDefaultDownloadPath();
@@ -350,13 +345,13 @@ void AddTorrentParamsWidget::populateDefaultPaths()
 
 void AddTorrentParamsWidget::populateDefaultDownloadPath()
 {
-    const auto *btSession = BitTorrent::Session::instance();
+    const auto* btSession = BitTorrent::Session::instance();
 
     const std::optional<bool> useDownloadPath = toOptionalBool(m_ui->useDownloadPathComboBox->currentData());
     if (useDownloadPath.value_or(btSession->isDownloadPathEnabled()))
     {
         const Path defaultDownloadPath = btSession->suggestedDownloadPath(
-                m_ui->categoryComboBox->currentText(), toOptionalBool(m_ui->comboTTM->currentData()));
+            m_ui->categoryComboBox->currentText(), toOptionalBool(m_ui->comboTTM->currentData()));
         m_ui->downloadPathEdit->setPlaceholder(defaultDownloadPath.toString());
     }
     else
@@ -379,7 +374,7 @@ void AddTorrentParamsWidget::populateSavePathOptions()
         m_ui->useDownloadPathComboBox->blockSignals(true);
         m_ui->downloadPathEdit->setSelectedPath(Path());
 
-        const auto *btSession = BitTorrent::Session::instance();
+        const auto* btSession = BitTorrent::Session::instance();
         const bool useAutoTMM = !btSession->isAutoTMMDisabledByDefault();
 
         if (useAutoTMM)
@@ -389,7 +384,7 @@ void AddTorrentParamsWidget::populateSavePathOptions()
         else
         {
             m_ui->useDownloadPathComboBox->setCurrentIndex(
-                    m_ui->useDownloadPathComboBox->findData(btSession->isDownloadPathEnabled()));
+                m_ui->useDownloadPathComboBox->findData(btSession->isDownloadPathEnabled()));
         }
     }
     else
@@ -425,7 +420,6 @@ void AddTorrentParamsWidget::populateSavePathOptions()
 
 void AddTorrentParamsWidget::resetShareLimitsWidgetDefaults()
 {
-    const auto *btSession = BitTorrent::Session::instance();
-    m_ui->torrentShareLimitsWidget->setDefaults((m_addTorrentParams.category.isEmpty() ? TorrentShareLimitsWidget::UsedDefaults::Global : TorrentShareLimitsWidget::UsedDefaults::Category)
-            , btSession->categoryShareLimits(m_addTorrentParams.category));
+    const auto* btSession = BitTorrent::Session::instance();
+    m_ui->torrentShareLimitsWidget->setDefaults((m_addTorrentParams.category.isEmpty() ? TorrentShareLimitsWidget::UsedDefaults::Global : TorrentShareLimitsWidget::UsedDefaults::Category), btSession->categoryShareLimits(m_addTorrentParams.category));
 }

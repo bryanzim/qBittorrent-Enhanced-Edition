@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 namespace Ui
 {
@@ -43,7 +43,7 @@ class SearchPluginSourceDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(SearchPluginSourceDialog)
 
 public:
-    explicit SearchPluginSourceDialog(QWidget *parent = nullptr);
+    explicit SearchPluginSourceDialog(QWidget* parent = nullptr);
     ~SearchPluginSourceDialog() override;
 
 signals:
@@ -55,6 +55,6 @@ private slots:
     void on_urlButton_clicked();
 
 private:
-    Ui::SearchPluginSourceDialog *m_ui = nullptr;
+    Ui::SearchPluginSourceDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
 };

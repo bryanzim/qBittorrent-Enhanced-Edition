@@ -28,18 +28,17 @@
 
 #pragma once
 
-#include <optional>
-
-#include <libtorrent/add_torrent_params.hpp>
-
-#include <QtContainerFwd>
-#include <QDateTime>
-#include <QMetaType>
-#include <QString>
-
 #include "base/3rdparty/expected.hpp"
 #include "base/pathfwd.h"
 #include "torrentinfo.h"
+
+#include <QDateTime>
+#include <QMetaType>
+#include <QString>
+#include <QtContainerFwd>
+#include <libtorrent/add_torrent_params.hpp>
+
+#include <optional>
 
 class QByteArray;
 class QUrl;
@@ -61,19 +60,19 @@ namespace BitTorrent
         QString comment() const;
         QList<TrackerEntry> trackers() const;
         QList<QUrl> urlSeeds() const;
-        const std::optional<TorrentInfo> &info() const;
+        const std::optional<TorrentInfo>& info() const;
 
         QString source() const;
 
         void setTorrentInfo(TorrentInfo torrentInfo);
 
-        static nonstd::expected<TorrentDescriptor, QString> load(const QByteArray &data) noexcept;
-        static nonstd::expected<TorrentDescriptor, QString> loadFromFile(const Path &path) noexcept;
-        static nonstd::expected<TorrentDescriptor, QString> parse(const QString &str) noexcept;
-        nonstd::expected<void, QString> saveToFile(const Path &path) const;
+        static nonstd::expected<TorrentDescriptor, QString> load(const QByteArray& data) noexcept;
+        static nonstd::expected<TorrentDescriptor, QString> loadFromFile(const Path& path) noexcept;
+        static nonstd::expected<TorrentDescriptor, QString> parse(const QString& str) noexcept;
+        nonstd::expected<void, QString> saveToFile(const Path& path) const;
         nonstd::expected<QByteArray, QString> saveToBuffer() const;
 
-        const lt::add_torrent_params &ltAddTorrentParams() const;
+        const lt::add_torrent_params& ltAddTorrentParams() const;
 
     private:
         explicit TorrentDescriptor(lt::add_torrent_params ltAddTorrentParams);

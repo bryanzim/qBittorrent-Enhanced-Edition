@@ -26,8 +26,7 @@
  * exception statement from your version.
  */
 
-#include <map>
-#include <unordered_map>
+#include "base/utils/dict.h"
 
 #include <QHash>
 #include <QMap>
@@ -36,7 +35,8 @@
 #include <QString>
 #include <QTest>
 
-#include "base/utils/dict.h"
+#include <map>
+#include <unordered_map>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -56,20 +56,19 @@ private slots:
 
         static_assert(!Utils::Dict::Dict<QSet<QString>>); // not an associative container
 
-        static_assert(!Utils::Dict::Dict<std::map<QString, int>>); // not a Qt associative container
+        static_assert(!Utils::Dict::Dict<std::map<QString, int>>);           // not a Qt associative container
         static_assert(!Utils::Dict::Dict<std::unordered_map<QString, int>>); // not a Qt associative container
     }
 
     void testDictGet() const
     {
         {
-            const QHash<QString, int> data =
-            {
-                {u"key1"_s, 1},
-                {u"key2"_s, 2},
-                {u"key3"_s, 3},
-                {u"key4"_s, 4},
-                {u"key5"_s, 5}
+            const QHash<QString, int> data = {
+                { u"key1"_s, 1 },
+                { u"key2"_s, 2 },
+                { u"key3"_s, 3 },
+                { u"key4"_s, 4 },
+                { u"key5"_s, 5 }
             };
 
             QVERIFY(data.contains(u"key1"_s));
@@ -88,13 +87,12 @@ private slots:
         }
 
         {
-            const QMap<QString, int> data =
-            {
-                {u"key1"_s, 1},
-                {u"key2"_s, 2},
-                {u"key3"_s, 3},
-                {u"key4"_s, 4},
-                {u"key5"_s, 5}
+            const QMap<QString, int> data = {
+                { u"key1"_s, 1 },
+                { u"key2"_s, 2 },
+                { u"key3"_s, 3 },
+                { u"key4"_s, 4 },
+                { u"key5"_s, 5 }
             };
 
             QVERIFY(data.contains(u"key1"_s));
@@ -116,13 +114,12 @@ private slots:
     void testDictTake() const
     {
         {
-            QHash<QString, int> data =
-            {
-                {u"key1"_s, 1},
-                {u"key2"_s, 2},
-                {u"key3"_s, 3},
-                {u"key4"_s, 4},
-                {u"key5"_s, 5}
+            QHash<QString, int> data = {
+                { u"key1"_s, 1 },
+                { u"key2"_s, 2 },
+                { u"key3"_s, 3 },
+                { u"key4"_s, 4 },
+                { u"key5"_s, 5 }
             };
 
             QVERIFY(data.contains(u"key1"_s));
@@ -144,13 +141,12 @@ private slots:
         }
 
         {
-            QMap<QString, int> data =
-            {
-                {u"key1"_s, 1},
-                {u"key2"_s, 2},
-                {u"key3"_s, 3},
-                {u"key4"_s, 4},
-                {u"key5"_s, 5}
+            QMap<QString, int> data = {
+                { u"key1"_s, 1 },
+                { u"key2"_s, 2 },
+                { u"key3"_s, 3 },
+                { u"key4"_s, 4 },
+                { u"key5"_s, 5 }
             };
 
             QVERIFY(data.contains(u"key1"_s));

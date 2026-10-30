@@ -29,26 +29,26 @@
 
 #include "settingsstorage.h"
 
-#include <chrono>
-#include <memory>
-
-#include <QFile>
-#include <QHash>
-#include <QMetaObject>
-#include <QOverload>
-
 #include "global.h"
 #include "logger.h"
 #include "path.h"
 #include "profile.h"
 #include "utils/fs.h"
 
+#include <QFile>
+#include <QHash>
+#include <QMetaObject>
+#include <QOverload>
+
+#include <chrono>
+#include <memory>
+
 using namespace std::chrono_literals;
 
-SettingsStorage *SettingsStorage::m_instance = nullptr;
+SettingsStorage* SettingsStorage::m_instance = nullptr;
 
 SettingsStorage::SettingsStorage()
-    : m_nativeSettingsName {u"qBittorrent"_s}
+    : m_nativeSettingsName{ u"qBittorrent"_s }
 {
     readNativeSettings();
 
@@ -74,7 +74,7 @@ void SettingsStorage::freeInstance()
     m_instance = nullptr;
 }
 
-SettingsStorage *SettingsStorage::instance()
+SettingsStorage* SettingsStorage::instance()
 {
     return m_instance;
 }
@@ -83,8 +83,9 @@ bool SettingsStorage::save()
 {
     // return `true` only when settings is different AND is saved successfully
 
-    const QWriteLocker locker(&m_lock);  // guard for `m_dirty` too
-    if (!m_dirty) return false;
+    const QWriteLocker locker(&m_lock); // guard for `m_dirty` too
+    if (!m_dirty)
+        return false;
 
     if (!writeNativeSettings())
     {
@@ -96,16 +97,16 @@ bool SettingsStorage::save()
     return true;
 }
 
-QVariant SettingsStorage::loadValueImpl(const QString &key, const QVariant &defaultValue) const
+QVariant SettingsStorage::loadValueImpl(const QString& key, const QVariant& defaultValue) const
 {
     const QReadLocker locker(&m_lock);
     return m_data.value(key, defaultValue);
 }
 
-void SettingsStorage::storeValueImpl(const QString &key, const QVariant &value)
+void SettingsStorage::storeValueImpl(const QString& key, const QVariant& value)
 {
     const QWriteLocker locker(&m_lock);
-    QVariant &currentValue = m_data[key];
+    QVariant& currentValue = m_data[key];
     if (currentValue != value)
     {
         m_dirty = true;
@@ -119,8 +120,7 @@ void SettingsStorage::readNativeSettings()
     // We return actual file names used by QSettings because
     // there is no other way to get that name except actually create a QSettings object.
     // If serialization operation was not successful we return empty string.
-    const auto deserialize = [](QVariantHash &data, const QString &nativeSettingsName) -> Path
-    {
+    const auto deserialize = [](QVariantHash& data, const QString& nativeSettingsName) -> Path {
         std::unique_ptr<QSettings> nativeSettings = Profile::instance()->applicationSettings(nativeSettingsName);
         if (nativeSettings->allKeys().isEmpty())
             return {};
@@ -128,7 +128,7 @@ void SettingsStorage::readNativeSettings()
         // Copy everything into memory. This means even keys inserted in the file manually
         // or that we don't touch directly in this code (eg disabled by ifdef). This ensures
         // that they will be copied over when save our settings to disk.
-        for (const QString &key : asConst(nativeSettings->allKeys()))
+        for (const QString& key : asConst(nativeSettings->allKeys()))
         {
             const QVariant value = nativeSettings->value(key);
             if (value.isValid())
@@ -147,13 +147,14 @@ void SettingsStorage::readNativeSettings()
         // in their final position. So assume that qbittorrent_new.ini/qbittorrent_new.conf
         // contains the most recent settings.
         LogMsg(tr("Detected unclean program exit. Using fallback file to restore settings: %1")
-               .arg(newPath.toString()), Log::WARNING);
+                   .arg(newPath.toString()),
+               Log::WARNING);
 
         QString finalPathStr = newPath.data();
         const qsizetype index = finalPathStr.lastIndexOf(u"_new", -1, Qt::CaseInsensitive);
         finalPathStr.remove(index, 4);
 
-        const Path finalPath {finalPathStr};
+        const Path finalPath{ finalPathStr };
         if (Utils::Fs::removeFile(finalPath))
             Utils::Fs::renameFile(newPath, finalPath);
     }
@@ -165,13 +166,13 @@ void SettingsStorage::readNativeSettings()
 
 bool SettingsStorage::writeNativeSettings() const
 {
-    const auto *profile = Profile::instance();
+    const auto* profile = Profile::instance();
 
     // No-op when it has no write permission
     if (const auto confPath = Path(profile->applicationSettings(m_nativeSettingsName)->fileName());
         confPath.exists() && !Utils::Fs::isWritable(confPath))
     {
-        return true;  // no need to retry saving
+        return true; // no need to retry saving
     }
 
     std::unique_ptr<QSettings> nativeSettings = profile->applicationSettings(m_nativeSettingsName + u"_new");
@@ -186,9 +187,9 @@ bool SettingsStorage::writeNativeSettings() const
 
     nativeSettings->sync(); // Important to get error status
     const QSettings::Status status = nativeSettings->status();
-    const Path newPath {nativeSettings->fileName()};
+    const Path newPath{ nativeSettings->fileName() };
 
-    nativeSettings.reset();  // close QSettings
+    nativeSettings.reset(); // close QSettings
 
     switch (status)
     {
@@ -215,12 +216,12 @@ bool SettingsStorage::writeNativeSettings() const
     const qsizetype index = finalPathStr.lastIndexOf(u"_new", -1, Qt::CaseInsensitive);
     finalPathStr.remove(index, 4);
 
-    const Path finalPath {finalPathStr};
+    const Path finalPath{ finalPathStr };
     std::ignore = Utils::Fs::removeFile(finalPath);
     return Utils::Fs::renameFile(newPath, finalPath);
 }
 
-void SettingsStorage::removeValue(const QString &key)
+void SettingsStorage::removeValue(const QString& key)
 {
     const QWriteLocker locker(&m_lock);
     if (m_data.remove(key))
@@ -230,14 +231,14 @@ void SettingsStorage::removeValue(const QString &key)
     }
 }
 
-bool SettingsStorage::hasKey(const QString &key) const
+bool SettingsStorage::hasKey(const QString& key) const
 {
-    const QReadLocker locker {&m_lock};
+    const QReadLocker locker{ &m_lock };
     return m_data.contains(key);
 }
 
 bool SettingsStorage::isEmpty() const
 {
-    const QReadLocker locker {&m_lock};
+    const QReadLocker locker{ &m_lock };
     return m_data.isEmpty();
 }

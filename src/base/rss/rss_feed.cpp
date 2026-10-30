@@ -31,18 +31,6 @@
 
 #include "rss_feed.h"
 
-#include <algorithm>
-#include <ranges>
-#include <utility>
-#include <vector>
-
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QList>
-#include <QUrl>
-
 #include "base/asyncfilestorage.h"
 #include "base/global.h"
 #include "base/logger.h"
@@ -54,6 +42,18 @@
 #include "rss_article.h"
 #include "rss_parser.h"
 #include "rss_session.h"
+
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QList>
+#include <QUrl>
+
+#include <algorithm>
+#include <ranges>
+#include <utility>
+#include <vector>
 
 const QString KEY_UID = u"uid"_s;
 const QString KEY_URL = u"url"_s;
@@ -67,12 +67,8 @@ const QString KEY_ARTICLES = u"articles"_s;
 using namespace std::chrono_literals;
 using namespace RSS;
 
-Feed::Feed(Session *session, const QUuid &uid, const QString &url, const QString &path, const std::chrono::seconds refreshInterval)
-    : Item(path)
-    , m_session {session}
-    , m_uid {uid}
-    , m_url {url}
-    , m_refreshInterval {refreshInterval}
+Feed::Feed(Session* session, const QUuid& uid, const QString& url, const QString& path, const std::chrono::seconds refreshInterval)
+    : Item(path), m_session{ session }, m_uid{ uid }, m_url{ url }, m_refreshInterval{ refreshInterval }
 {
     const auto uidHex = QString::fromLatin1(m_uid.toRfc4122().toHex());
     m_dataFileName = Path(uidHex + u".json");
@@ -114,7 +110,7 @@ Feed::~Feed()
     emit aboutToBeDestroyed(this);
 }
 
-QList<Article *> Feed::articles() const
+QList<Article*> Feed::articles() const
 {
     return m_articlesByDate;
 }
@@ -122,7 +118,7 @@ QList<Article *> Feed::articles() const
 void Feed::markAsRead()
 {
     const int oldUnreadCount = m_unreadCount;
-    for (Article *article : asConst(m_articles))
+    for (Article* article : asConst(m_articles))
     {
         if (!article->isRead())
         {
@@ -200,7 +196,7 @@ int Feed::unreadCount() const
     return m_unreadCount;
 }
 
-Article *Feed::articleByGUID(const QString &guid) const
+Article* Feed::articleByGUID(const QString& guid) const
 {
     return m_articles.value(guid);
 }
@@ -214,7 +210,7 @@ void Feed::handleMaxArticlesPerFeedChanged(const int n)
     // We don't need store articles here
 }
 
-void Feed::handleIconDownloadFinished(const Net::DownloadResult &result)
+void Feed::handleIconDownloadFinished(const Net::DownloadResult& result)
 {
     if (result.status == Net::DownloadStatus::Success)
     {
@@ -227,17 +223,16 @@ bool Feed::hasError() const
     return m_hasError;
 }
 
-void Feed::handleDownloadFinished(const Net::DownloadResult &result)
+void Feed::handleDownloadFinished(const Net::DownloadResult& result)
 {
     m_downloadHandler = nullptr; // will be deleted by DownloadManager later
 
     if (result.status == Net::DownloadStatus::Success)
     {
         LogMsg(tr("RSS feed at '%1' is successfully downloaded. Starting to parse it.")
-                .arg(result.url));
+                   .arg(result.url));
         // Parse the download RSS
-        QMetaObject::invokeMethod(m_parser, [this, data = result.data]()
-        {
+        QMetaObject::invokeMethod(m_parser, [this, data = result.data]() {
             m_parser->parse(data);
         });
     }
@@ -247,13 +242,14 @@ void Feed::handleDownloadFinished(const Net::DownloadResult &result)
         m_hasError = true;
 
         LogMsg(tr("Failed to download RSS feed at '%1'. Reason: %2")
-               .arg(result.url, result.errorString), Log::WARNING);
+                   .arg(result.url, result.errorString),
+               Log::WARNING);
 
         emit stateChanged(this);
     }
 }
 
-void Feed::handleParsingFinished(const RSS::Private::ParsingResult &result)
+void Feed::handleParsingFinished(const RSS::Private::ParsingResult& result)
 {
     m_hasError = !result.error.isEmpty();
 
@@ -279,11 +275,10 @@ void Feed::handleParsingFinished(const RSS::Private::ParsingResult &result)
 
     if (m_hasError)
     {
-        LogMsg(tr("Failed to parse RSS feed at '%1'. Reason: %2").arg(m_url, result.error)
-               , Log::WARNING);
+        LogMsg(tr("Failed to parse RSS feed at '%1'. Reason: %2").arg(m_url, result.error), Log::WARNING);
     }
     LogMsg(tr("RSS feed at '%1' updated. Added %2 new articles.")
-           .arg(url(), QString::number(newArticlesCount)));
+               .arg(url(), QString::number(newArticlesCount)));
 
     m_isLoading = false;
     emit stateChanged(this);
@@ -291,10 +286,7 @@ void Feed::handleParsingFinished(const RSS::Private::ParsingResult &result)
 
 void Feed::load()
 {
-    QMetaObject::invokeMethod(m_serializer
-            , [serializer = m_serializer, url = m_url
-                , path = (m_session->dataFileStorage()->storageDir() / m_dataFileName)]
-    {
+    QMetaObject::invokeMethod(m_serializer, [serializer = m_serializer, url = m_url, path = (m_session->dataFileStorage()->storageDir() / m_dataFileName)] {
         serializer->load(path, url);
     });
 }
@@ -310,13 +302,10 @@ void Feed::store()
     QList<QVariantHash> articlesData;
     articlesData.reserve(m_articles.size());
 
-    for (Article *article :asConst(m_articles))
+    for (Article* article : asConst(m_articles))
         articlesData.push_back(article->data());
 
-    QMetaObject::invokeMethod(m_serializer
-            , [articlesData, serializer = m_serializer
-                , path = (m_session->dataFileStorage()->storageDir() / m_dataFileName)]
-    {
+    QMetaObject::invokeMethod(m_serializer, [articlesData, serializer = m_serializer, path = (m_session->dataFileStorage()->storageDir() / m_dataFileName)] {
         serializer->store(path, articlesData);
     });
 }
@@ -327,18 +316,17 @@ void Feed::storeDeferred()
         m_savingTimer.start(5 * 1000, this);
 }
 
-bool Feed::addArticle(const QVariantHash &articleData)
+bool Feed::addArticle(const QVariantHash& articleData)
 {
     Q_ASSERT(!m_articles.contains(articleData.value(Article::KeyId).toString()));
 
     // Insertion sort
     const int maxArticles = m_session->maxArticlesPerFeed();
-    const auto lowerBound = std::lower_bound(m_articlesByDate.cbegin(), m_articlesByDate.cend()
-        , articleData.value(Article::KeyDate).toDateTime(), Article::articleDateRecentThan);
+    const auto lowerBound = std::lower_bound(m_articlesByDate.cbegin(), m_articlesByDate.cend(), articleData.value(Article::KeyDate).toDateTime(), Article::articleDateRecentThan);
     if ((lowerBound - m_articlesByDate.cbegin()) >= maxArticles)
         return false; // we reach max articles
 
-    auto *article = new Article(this, articleData);
+    auto* article = new Article(this, articleData);
     m_articles[article->guid()] = article;
     m_articlesByDate.insert(lowerBound, article);
     if (!article->isRead())
@@ -360,7 +348,7 @@ void Feed::removeOldestArticle()
 {
     Q_ASSERT(!m_articlesByDate.isEmpty());
 
-    auto *oldestArticle = m_articlesByDate.last();
+    auto* oldestArticle = m_articlesByDate.last();
     emit articleAboutToBeRemoved(oldestArticle);
 
     m_articles.remove(oldestArticle->guid());
@@ -393,16 +381,15 @@ void Feed::downloadIcon()
     const QUrl url(m_url);
     const auto iconUrl = u"%1://%2/favicon.ico"_s.arg(url.scheme(), url.host());
     Net::DownloadManager::instance()->download(
-            Net::DownloadRequest(iconUrl).saveToFile(true).destFileName(m_iconPath)
-            , Preferences::instance()->useProxyForRSS(), this, &Feed::handleIconDownloadFinished);
+        Net::DownloadRequest(iconUrl).saveToFile(true).destFileName(m_iconPath), Preferences::instance()->useProxyForRSS(), this, &Feed::handleIconDownloadFinished);
 }
 
-int Feed::updateArticles(const QList<QVariantHash> &loadedArticles)
+int Feed::updateArticles(const QList<QVariantHash>& loadedArticles)
 {
     if (loadedArticles.empty())
         return 0;
 
-    QDateTime dummyPubDate {QDateTime::currentDateTime()};
+    QDateTime dummyPubDate{ QDateTime::currentDateTime() };
     QList<QVariantHash> newArticles;
     newArticles.reserve(loadedArticles.size());
     for (QVariantHash article : loadedArticles)
@@ -410,14 +397,14 @@ int Feed::updateArticles(const QList<QVariantHash> &loadedArticles)
         // If article has no publication date we use feed update time as a fallback.
         // To prevent processing of "out-of-limit" articles we must not assign dates
         // that are earlier than the dates of existing articles.
-        const Article *existingArticle = articleByGUID(article[Article::KeyId].toString());
+        const Article* existingArticle = articleByGUID(article[Article::KeyId].toString());
         if (existingArticle)
         {
             dummyPubDate = existingArticle->date().addMSecs(-1);
             continue;
         }
 
-        QVariant &articleDate = article[Article::KeyDate];
+        QVariant& articleDate = article[Article::KeyDate];
         if (!articleDate.toDateTime().isValid())
             articleDate = dummyPubDate;
 
@@ -427,18 +414,17 @@ int Feed::updateArticles(const QList<QVariantHash> &loadedArticles)
     if (newArticles.empty())
         return 0;
 
-    using ArticleSortAdaptor = std::pair<QDateTime, const QVariantHash *>;
+    using ArticleSortAdaptor = std::pair<QDateTime, const QVariantHash*>;
     std::vector<ArticleSortAdaptor> sortData;
-    const QList<Article *> existingArticles = articles();
+    const QList<Article*> existingArticles = articles();
     sortData.reserve(existingArticles.size() + newArticles.size());
-    for (const Article *article : existingArticles)
+    for (const Article* article : existingArticles)
         sortData.push_back(std::make_pair(article->date(), nullptr));
-    for (const QVariantHash &article : asConst(newArticles))
+    for (const QVariantHash& article : asConst(newArticles))
         sortData.push_back(std::make_pair(article[Article::KeyDate].toDateTime(), &article));
 
     // Sort article list in reverse chronological order
-    std::ranges::sort(sortData, [](const ArticleSortAdaptor &a1, const ArticleSortAdaptor &a2)
-    {
+    std::ranges::sort(sortData, [](const ArticleSortAdaptor& a1, const ArticleSortAdaptor& a2) {
         return (a1.first > a2.first);
     });
 
@@ -446,7 +432,7 @@ int Feed::updateArticles(const QList<QVariantHash> &loadedArticles)
         sortData.resize(m_session->maxArticlesPerFeed());
 
     int newArticlesCount = 0;
-    for (const ArticleSortAdaptor &a : std::views::reverse(sortData))
+    for (const ArticleSortAdaptor& a : std::views::reverse(sortData))
     {
         if (a.second)
         {
@@ -477,7 +463,7 @@ void Feed::setRefreshInterval(const std::chrono::seconds refreshInterval)
     emit refreshIntervalChanged(oldRefreshInterval);
 }
 
-void Feed::setURL(const QString &url)
+void Feed::setURL(const QString& url)
 {
     const QString oldURL = m_url;
     m_url = url;
@@ -500,7 +486,7 @@ QJsonValue Feed::toJsonValue(const bool withData) const
         jsonObj.insert(KEY_HASERROR, hasError());
 
         QJsonArray jsonArr;
-        for (Article *article : asConst(m_articles))
+        for (Article* article : asConst(m_articles))
         {
             auto articleObj = QJsonObject::fromVariantHash(article->data());
             // JSON object doesn't support DateTime so we need to convert it
@@ -518,12 +504,11 @@ void Feed::handleSessionProcessingEnabledChanged(const bool enabled)
     if (enabled)
     {
         downloadIcon();
-        disconnect(m_session, &Session::processingStateChanged
-                   , this, &Feed::handleSessionProcessingEnabledChanged);
+        disconnect(m_session, &Session::processingStateChanged, this, &Feed::handleSessionProcessingEnabledChanged);
     }
 }
 
-void Feed::handleArticleRead(Article *article)
+void Feed::handleArticleRead(Article* article)
 {
     article->disconnect(this);
     decreaseUnreadCount();
@@ -545,13 +530,13 @@ void Feed::handleArticleLoadFinished(QList<QVariantHash> articles)
     m_articles.reserve(articles.size());
     m_articlesByDate.reserve(articles.size());
 
-    for (const QVariantHash &articleData : articles)
+    for (const QVariantHash& articleData : articles)
     {
         const auto articleID = articleData.value(Article::KeyId).toString();
         if (m_articles.contains(articleID)) [[unlikely]]
             continue;
 
-        auto *article = new Article(this, articleData);
+        auto* article = new Article(this, articleData);
         m_articles[articleID] = article;
         m_articlesByDate.append(article);
         if (!article->isRead())
@@ -584,7 +569,7 @@ void Feed::cleanup()
     std::ignore = Utils::Fs::removeFile(m_iconPath);
 }
 
-void Feed::timerEvent([[maybe_unused]] QTimerEvent *event)
+void Feed::timerEvent([[maybe_unused]] QTimerEvent* event)
 {
     store();
 }

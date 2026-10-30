@@ -29,17 +29,17 @@
 
 #include "bandwidthscheduler.h"
 
-#include <chrono>
-#include <utility>
+#include "base/preferences.h"
 
 #include <QDate>
 #include <QTime>
 
-#include "base/preferences.h"
+#include <chrono>
+#include <utility>
 
 using namespace std::chrono_literals;
 
-BandwidthScheduler::BandwidthScheduler(QObject *parent)
+BandwidthScheduler::BandwidthScheduler(QObject* parent)
     : QObject(parent)
 {
     connect(&m_timer, &QTimer::timeout, this, &BandwidthScheduler::onTimeout);
@@ -57,7 +57,7 @@ void BandwidthScheduler::start()
 
 bool BandwidthScheduler::isTimeForAlternative() const
 {
-    const Preferences *const pref = Preferences::instance();
+    const Preferences* const pref = Preferences::instance();
 
     QTime start = pref->getSchedulerStartTime();
     QTime end = pref->getSchedulerEndTime();
@@ -85,14 +85,13 @@ bool BandwidthScheduler::isTimeForAlternative() const
         case Scheduler::Days::Thursday:
         case Scheduler::Days::Friday:
         case Scheduler::Days::Saturday:
-        case Scheduler::Days::Sunday:
-            {
-                const int offset = static_cast<int>(Scheduler::Days::Monday) - 1;
-                const int dayOfWeek = static_cast<int>(schedulerDays) - offset;
-                if (day == dayOfWeek)
-                    alternative = !alternative;
-            }
-            break;
+        case Scheduler::Days::Sunday: {
+            const int offset = static_cast<int>(Scheduler::Days::Monday) - 1;
+            const int dayOfWeek = static_cast<int>(schedulerDays) - offset;
+            if (day == dayOfWeek)
+                alternative = !alternative;
+        }
+        break;
         case Scheduler::Days::Weekday:
             if ((day >= 1) && (day <= 5))
                 alternative = !alternative;

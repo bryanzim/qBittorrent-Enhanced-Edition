@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QSortFilterProxyModel>
-
 #include "base/utils/compare.h"
 #include "torrentcontentmodelitem.h"
+
+#include <QSortFilterProxyModel>
+#include <QtContainerFwd>
 
 class TorrentContentModel;
 
@@ -43,20 +43,20 @@ class TorrentContentFilterModel final : public QSortFilterProxyModel
     Q_DISABLE_COPY_MOVE(TorrentContentFilterModel)
 
 public:
-    explicit TorrentContentFilterModel(QObject *parent = nullptr);
+    explicit TorrentContentFilterModel(QObject* parent = nullptr);
 
-    void setSourceModel(TorrentContentModel *model);
-    TorrentContentModelItem::ItemType itemType(const QModelIndex &index) const;
-    int getFileIndex(const QModelIndex &index) const;
-    QSet<int> getFileIndexes(const QModelIndex &itemIndex) const;
-    QModelIndex parent(const QModelIndex &child) const override;
+    void setSourceModel(TorrentContentModel* model);
+    TorrentContentModelItem::ItemType itemType(const QModelIndex& index) const;
+    int getFileIndex(const QModelIndex& index) const;
+    QSet<int> getFileIndexes(const QModelIndex& itemIndex) const;
+    QModelIndex parent(const QModelIndex& child) const override;
 
 private:
     using QSortFilterProxyModel::setSourceModel;
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-    bool hasFiltered(const QModelIndex &folder) const;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+    bool hasFiltered(const QModelIndex& folder) const;
 
-    TorrentContentModel *m_model = nullptr;
+    TorrentContentModel* m_model = nullptr;
     Utils::Compare::NaturalLessThan<Qt::CaseInsensitive> m_naturalLessThan;
 };

@@ -38,12 +38,6 @@
 #include <libtorrent/load_torrent.hpp>
 #endif
 
-#include <QByteArray>
-#include <QDebug>
-#include <QFile>
-#include <QRegularExpression>
-#include <QThread>
-
 #include "base/exceptions.h"
 #include "base/global.h"
 #include "base/logger.h"
@@ -57,6 +51,12 @@
 #include "infohash.h"
 #include "loadtorrentparams.h"
 
+#include <QByteArray>
+#include <QDebug>
+#include <QFile>
+#include <QRegularExpression>
+#include <QThread>
+
 using namespace Qt::Literals::StringLiterals;
 
 namespace BitTorrent
@@ -66,11 +66,11 @@ namespace BitTorrent
         Q_DISABLE_COPY_MOVE(Worker)
 
     public:
-        explicit Worker(const Path &resumeDataDir);
+        explicit Worker(const Path& resumeDataDir);
 
-        void store(const TorrentID &id, const LoadTorrentParams &resumeData) const;
-        void remove(const TorrentID &id) const;
-        void storeQueue(const QList<TorrentID> &queue) const;
+        void store(const TorrentID& id, const LoadTorrentParams& resumeData) const;
+        void remove(const TorrentID& id) const;
+        void storeQueue(const QList<TorrentID>& queue) const;
 
     private:
         const Path m_resumeDataDir;
@@ -84,51 +84,49 @@ namespace
     const char KEY_SSL_DH_PARAMS[] = "qBt-sslDhParams";
 
     template <typename LTStr>
-    QString fromLTString(const LTStr &str)
+    QString fromLTString(const LTStr& str)
     {
         return QString::fromUtf8(str.data(), static_cast<qsizetype>(str.size()));
     }
 
     template <typename LTStr>
-    QByteArray toByteArray(const LTStr &str)
+    QByteArray toByteArray(const LTStr& str)
     {
-        return {str.data(), static_cast<qsizetype>(str.size())};
+        return { str.data(), static_cast<qsizetype>(str.size()) };
     }
 
     using ListType = lt::entry::list_type;
 
-    ListType setToEntryList(const TagSet &input)
+    ListType setToEntryList(const TagSet& input)
     {
         ListType entryList;
         entryList.reserve(input.size());
-        for (const Tag &setValue : input)
+        for (const Tag& setValue : input)
             entryList.emplace_back(setValue.toString().toStdString());
         return entryList;
     }
 }
 
-BitTorrent::BencodeResumeDataStorage::BencodeResumeDataStorage(const Path &path, QObject *parent)
-    : ResumeDataStorage(path, parent)
-    , m_ioThread {new QThread}
-    , m_asyncWorker {new Worker(path)}
+BitTorrent::BencodeResumeDataStorage::BencodeResumeDataStorage(const Path& path, QObject* parent)
+    : ResumeDataStorage(path, parent), m_ioThread{ new QThread }, m_asyncWorker{ new Worker(path) }
 {
     Q_ASSERT(path.isAbsolute());
 
     if (!path.exists() && !Utils::Fs::mkpath(path))
     {
         throw RuntimeError(tr("Cannot create torrent resume folder: \"%1\"")
-                    .arg(path.toString()));
+                               .arg(path.toString()));
     }
 
-    const QRegularExpression filenamePattern {u"^([A-Fa-f0-9]{40})\\.fastresume$"_s};
-    const QStringList filenames = QDir(path.data()).entryList({u"*.fastresume"_s}, QDir::Files);
+    const QRegularExpression filenamePattern{ u"^([A-Fa-f0-9]{40})\\.fastresume$"_s };
+    const QStringList filenames = QDir(path.data()).entryList({ u"*.fastresume"_s }, QDir::Files);
 
     m_registeredTorrents.reserve(filenames.size());
-    for (const QString &filename : filenames)
+    for (const QString& filename : filenames)
     {
-         const QRegularExpressionMatch rxMatch = filenamePattern.match(filename);
-         if (rxMatch.hasMatch())
-             m_registeredTorrents.append(TorrentID::fromString(rxMatch.captured(1)));
+        const QRegularExpressionMatch rxMatch = filenamePattern.match(filename);
+        if (rxMatch.hasMatch())
+            m_registeredTorrents.append(TorrentID::fromString(rxMatch.captured(1)));
     }
 
     loadQueue(path / Path(u"queue"_s));
@@ -146,7 +144,7 @@ QList<BitTorrent::TorrentID> BitTorrent::BencodeResumeDataStorage::registeredTor
     return m_registeredTorrents;
 }
 
-BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::load(const TorrentID &id) const
+BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::load(const TorrentID& id) const
 {
     const QString idString = id.toString();
     const Path fastresumePath = path() / Path(idString + u".fastresume");
@@ -173,19 +171,19 @@ void BitTorrent::BencodeResumeDataStorage::doLoadAll() const
 {
     qDebug() << "Loading torrents count: " << m_registeredTorrents.size();
 
-    emit const_cast<BencodeResumeDataStorage *>(this)->loadStarted(m_registeredTorrents);
+    emit const_cast<BencodeResumeDataStorage*>(this)->loadStarted(m_registeredTorrents);
 
-    for (const TorrentID &torrentID : asConst(m_registeredTorrents))
+    for (const TorrentID& torrentID : asConst(m_registeredTorrents))
         onResumeDataLoaded(torrentID, load(torrentID));
 
-    emit const_cast<BencodeResumeDataStorage *>(this)->loadFinished();
+    emit const_cast<BencodeResumeDataStorage*>(this)->loadFinished();
 }
 
-void BitTorrent::BencodeResumeDataStorage::loadQueue(const Path &queueFilename)
+void BitTorrent::BencodeResumeDataStorage::loadQueue(const Path& queueFilename)
 {
     const int lineMaxLength = 48;
 
-    QFile queueFile {queueFilename.data()};
+    QFile queueFile{ queueFilename.data() };
     if (!queueFile.exists())
         return;
 
@@ -200,7 +198,7 @@ void BitTorrent::BencodeResumeDataStorage::loadQueue(const Path &queueFilename)
     for (qsizetype i = 0; i < m_registeredTorrents.length(); ++i)
         registeredTorrentsIndexes.insert(m_registeredTorrents.at(i), i);
 
-    const QRegularExpression hashPattern {u"^([A-Fa-f0-9]{40})$"_s};
+    const QRegularExpression hashPattern{ u"^([A-Fa-f0-9]{40})$"_s };
     qsizetype queuePos = 0;
     while (true)
     {
@@ -226,13 +224,12 @@ void BitTorrent::BencodeResumeDataStorage::loadQueue(const Path &queueFilename)
     }
 }
 
-BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorrentResumeData(const QByteArray &data, const QByteArray &metadata) const
+BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorrentResumeData(const QByteArray& data, const QByteArray& metadata) const
 {
-    const auto *pref = Preferences::instance();
+    const auto* pref = Preferences::instance();
 
     lt::error_code ec;
-    const lt::bdecode_node resumeDataRoot = lt::bdecode(data, ec
-            , nullptr, pref->getBdecodeDepthLimit(), pref->getBdecodeTokenLimit());
+    const lt::bdecode_node resumeDataRoot = lt::bdecode(data, ec, nullptr, pref->getBdecodeDepthLimit(), pref->getBdecodeTokenLimit());
     if (ec)
         return nonstd::make_unexpected(tr("Cannot parse resume data: %1").arg(QString::fromStdString(ec.message())));
 
@@ -249,8 +246,8 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
     const lt::string_view ratioLimitString = resumeDataRoot.dict_find_string_value("qBt-ratioLimit");
     torrentParams.shareLimits = {
         .ratioLimit = ratioLimitString.empty()
-            ? resumeDataRoot.dict_find_int_value("qBt-ratioLimit", DEFAULT_RATIO_LIMIT * 1000) / 1000.0
-            : fromLTString(ratioLimitString).toDouble(),
+                          ? resumeDataRoot.dict_find_int_value("qBt-ratioLimit", DEFAULT_RATIO_LIMIT * 1000) / 1000.0
+                          : fromLTString(ratioLimitString).toDouble(),
         .seedingTimeLimit = static_cast<int>(resumeDataRoot.dict_find_int_value("qBt-seedingTimeLimit", DEFAULT_SEEDING_TIME_LIMIT)),
         .inactiveSeedingTimeLimit = static_cast<int>(resumeDataRoot.dict_find_int_value("qBt-inactiveSeedingTimeLimit", DEFAULT_SEEDING_TIME_LIMIT)),
         .mode = Utils::String::toEnum(fromLTString(resumeDataRoot.dict_find_string_value("qBt-shareLimitsMode")), ShareLimitsMode::Default),
@@ -258,12 +255,12 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
     };
 
     torrentParams.savePath = Profile::instance()->fromPortablePath(
-            Path(fromLTString(resumeDataRoot.dict_find_string_value("qBt-savePath"))));
+        Path(fromLTString(resumeDataRoot.dict_find_string_value("qBt-savePath"))));
     torrentParams.useAutoTMM = torrentParams.savePath.isEmpty();
     if (!torrentParams.useAutoTMM)
     {
         torrentParams.downloadPath = Profile::instance()->fromPortablePath(
-                Path(fromLTString(resumeDataRoot.dict_find_string_value("qBt-downloadPath"))));
+            Path(fromLTString(resumeDataRoot.dict_find_string_value("qBt-downloadPath"))));
     }
 
     // TODO: The following code is deprecated. Replace with the commented one after several releases in 4.4.x.
@@ -286,9 +283,8 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
     // === END REPLACEMENT CODE === //
 
     torrentParams.stopCondition = Utils::String::toEnum(
-            fromLTString(resumeDataRoot.dict_find_string_value("qBt-stopCondition")), Torrent::StopCondition::None);
-    torrentParams.sslParameters =
-    {
+        fromLTString(resumeDataRoot.dict_find_string_value("qBt-stopCondition")), Torrent::StopCondition::None);
+    torrentParams.sslParameters = {
         .certificate = QSslCertificate(toByteArray(resumeDataRoot.dict_find_string_value(KEY_SSL_CERTIFICATE))),
         .privateKey = Utils::SSLKey::load(toByteArray(resumeDataRoot.dict_find_string_value(KEY_SSL_PRIVATE_KEY))),
         .dhParams = toByteArray(resumeDataRoot.dict_find_string_value(KEY_SSL_DH_PARAMS))
@@ -299,12 +295,12 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
     {
         for (int i = 0; i < tagsNode.list_size(); ++i)
         {
-            const Tag tag {fromLTString(tagsNode.list_string_value_at(i))};
+            const Tag tag{ fromLTString(tagsNode.list_string_value_at(i)) };
             torrentParams.tags.insert(tag);
         }
     }
 
-    lt::add_torrent_params &p = torrentParams.ltAddTorrentParams;
+    lt::add_torrent_params& p = torrentParams.ltAddTorrentParams;
 
     p = lt::read_resume_data(resumeDataRoot, ec);
     if (ec)
@@ -312,8 +308,7 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
 
     if (!metadata.isEmpty())
     {
-        const lt::bdecode_node torrentInfoRoot = lt::bdecode(metadata, ec
-                , nullptr, pref->getBdecodeDepthLimit(), pref->getBdecodeTokenLimit());
+        const lt::bdecode_node torrentInfoRoot = lt::bdecode(metadata, ec, nullptr, pref->getBdecodeDepthLimit(), pref->getBdecodeTokenLimit());
         if (ec)
             return nonstd::make_unexpected(tr("Cannot parse torrent info: %1").arg(QString::fromStdString(ec.message())));
 
@@ -321,10 +316,11 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
             return nonstd::make_unexpected(tr("Cannot parse torrent info: invalid format"));
 
 #if LIBTORRENT_VERSION_NUM >= 20100
-        const lt::load_torrent_limits limits {
+        const lt::load_torrent_limits limits{
             .max_buffer_size = static_cast<int>(pref->getTorrentFileSizeLimit()),
             .max_decode_depth = pref->getBdecodeDepthLimit(),
-            .max_decode_tokens = pref->getBdecodeTokenLimit()};
+            .max_decode_tokens = pref->getBdecodeTokenLimit()
+        };
         const lt::add_torrent_params atp = lt::load_torrent_parsed(torrentInfoRoot, ec, limits);
         if (ec)
             return nonstd::make_unexpected(tr("Cannot parse torrent info: %1").arg(QString::fromStdString(ec.message())));
@@ -342,8 +338,7 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
 #endif
 
 #ifdef QBT_USES_LIBTORRENT2
-        if (((p.info_hashes.has_v1() && (p.info_hashes.v1 != p.ti->info_hashes().v1))
-                || (p.info_hashes.has_v2() && (p.info_hashes.v2 != p.ti->info_hashes().v2))))
+        if (((p.info_hashes.has_v1() && (p.info_hashes.v1 != p.ti->info_hashes().v1)) || (p.info_hashes.has_v2() && (p.info_hashes.v2 != p.ti->info_hashes().v2))))
 #else
         if (!p.info_hash.is_all_zeros() && (p.info_hash != p.ti->info_hash()))
 #endif
@@ -353,13 +348,16 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
     }
 
     p.save_path = Profile::instance()->fromPortablePath(
-                Path(fromLTString(p.save_path))).toString().toStdString();
+                                         Path(fromLTString(p.save_path)))
+                      .toString()
+                      .toStdString();
     if (p.save_path.empty())
         return nonstd::make_unexpected(tr("Corrupted resume data: %1").arg(tr("save_path is invalid")));
 
     torrentParams.stopped = (p.flags & lt::torrent_flags::paused) && !(p.flags & lt::torrent_flags::auto_managed);
     torrentParams.operatingMode = (p.flags & lt::torrent_flags::paused) || (p.flags & lt::torrent_flags::auto_managed)
-            ? TorrentOperatingMode::AutoManaged : TorrentOperatingMode::Forced;
+                                      ? TorrentOperatingMode::AutoManaged
+                                      : TorrentOperatingMode::Forced;
 
     if (p.flags & lt::torrent_flags::stop_when_ready)
     {
@@ -374,41 +372,37 @@ BitTorrent::LoadResumeDataResult BitTorrent::BencodeResumeDataStorage::loadTorre
     return torrentParams;
 }
 
-void BitTorrent::BencodeResumeDataStorage::store(const TorrentID &id, LoadTorrentParams resumeData) const
+void BitTorrent::BencodeResumeDataStorage::store(const TorrentID& id, LoadTorrentParams resumeData) const
 {
-    QMetaObject::invokeMethod(m_asyncWorker, [this, id, resumeData = std::move(resumeData)]
-    {
+    QMetaObject::invokeMethod(m_asyncWorker, [this, id, resumeData = std::move(resumeData)] {
         m_asyncWorker->store(id, resumeData);
     });
 }
 
-void BitTorrent::BencodeResumeDataStorage::remove(const TorrentID &id) const
+void BitTorrent::BencodeResumeDataStorage::remove(const TorrentID& id) const
 {
-    QMetaObject::invokeMethod(m_asyncWorker, [this, id]()
-    {
+    QMetaObject::invokeMethod(m_asyncWorker, [this, id]() {
         m_asyncWorker->remove(id);
     });
 }
 
-void BitTorrent::BencodeResumeDataStorage::storeQueue(const QList<TorrentID> &queue) const
+void BitTorrent::BencodeResumeDataStorage::storeQueue(const QList<TorrentID>& queue) const
 {
-    QMetaObject::invokeMethod(m_asyncWorker, [this, queue]()
-    {
+    QMetaObject::invokeMethod(m_asyncWorker, [this, queue]() {
         m_asyncWorker->storeQueue(queue);
     });
 }
 
-BitTorrent::BencodeResumeDataStorage::Worker::Worker(const Path &resumeDataDir)
-    : m_resumeDataDir {resumeDataDir}
+BitTorrent::BencodeResumeDataStorage::Worker::Worker(const Path& resumeDataDir)
+    : m_resumeDataDir{ resumeDataDir }
 {
 }
 
-void BitTorrent::BencodeResumeDataStorage::Worker::store(const TorrentID &id, const LoadTorrentParams &resumeData) const
+void BitTorrent::BencodeResumeDataStorage::Worker::store(const TorrentID& id, const LoadTorrentParams& resumeData) const
 {
     // We need to adjust native libtorrent resume data
     lt::add_torrent_params p = resumeData.ltAddTorrentParams;
-    p.save_path = Profile::instance()->toPortablePath(Path(p.save_path))
-            .toString().toStdString();
+    p.save_path = Profile::instance()->toPortablePath(Path(p.save_path)).toString().toStdString();
     if (resumeData.stopped)
     {
         p.flags |= lt::torrent_flags::paused;
@@ -434,9 +428,9 @@ void BitTorrent::BencodeResumeDataStorage::Worker::store(const TorrentID &id, co
     // metadata is stored in separate .torrent file
     if (p.ti)
     {
-        lt::entry::dictionary_type &dataDict = data.dict();
-        lt::entry metadata {lt::entry::dictionary_t};
-        lt::entry::dictionary_type &metadataDict = metadata.dict();
+        lt::entry::dictionary_type& dataDict = data.dict();
+        lt::entry metadata{ lt::entry::dictionary_t };
+        lt::entry::dictionary_type& metadataDict = metadata.dict();
         metadataDict.insert(dataDict.extract("info"));
         metadataDict.insert(dataDict.extract("creation date"));
         metadataDict.insert(dataDict.extract("created by"));
@@ -447,7 +441,8 @@ void BitTorrent::BencodeResumeDataStorage::Worker::store(const TorrentID &id, co
         if (!result)
         {
             LogMsg(tr("Couldn't save torrent metadata to '%1'. Error: %2.")
-                   .arg(torrentFilepath.toString(), result.error()), Log::CRITICAL);
+                       .arg(torrentFilepath.toString(), result.error()),
+                   Log::CRITICAL);
             return;
         }
     }
@@ -485,24 +480,25 @@ void BitTorrent::BencodeResumeDataStorage::Worker::store(const TorrentID &id, co
     if (!result)
     {
         LogMsg(tr("Couldn't save torrent resume data to '%1'. Error: %2.")
-               .arg(resumeFilepath.toString(), result.error()), Log::CRITICAL);
+                   .arg(resumeFilepath.toString(), result.error()),
+               Log::CRITICAL);
     }
 }
 
-void BitTorrent::BencodeResumeDataStorage::Worker::remove(const TorrentID &id) const
+void BitTorrent::BencodeResumeDataStorage::Worker::remove(const TorrentID& id) const
 {
-    const Path resumeFilename {u"%1.fastresume"_s.arg(id.toString())};
+    const Path resumeFilename{ u"%1.fastresume"_s.arg(id.toString()) };
     std::ignore = Utils::Fs::removeFile(m_resumeDataDir / resumeFilename);
 
-    const Path torrentFilename {u"%1.torrent"_s.arg(id.toString())};
+    const Path torrentFilename{ u"%1.torrent"_s.arg(id.toString()) };
     std::ignore = Utils::Fs::removeFile(m_resumeDataDir / torrentFilename);
 }
 
-void BitTorrent::BencodeResumeDataStorage::Worker::storeQueue(const QList<TorrentID> &queue) const
+void BitTorrent::BencodeResumeDataStorage::Worker::storeQueue(const QList<TorrentID>& queue) const
 {
     QByteArray data;
     data.reserve(((BitTorrent::TorrentID::length() * 2) + 1) * queue.size());
-    for (const BitTorrent::TorrentID &torrentID : queue)
+    for (const BitTorrent::TorrentID& torrentID : queue)
         data += (torrentID.toString().toLatin1() + '\n');
 
     const Path filepath = m_resumeDataDir / Path(u"queue"_s);
@@ -510,6 +506,7 @@ void BitTorrent::BencodeResumeDataStorage::Worker::storeQueue(const QList<Torren
     if (!result)
     {
         LogMsg(tr("Couldn't save data to '%1'. Error: %2")
-            .arg(filepath.toString(), result.error()), Log::CRITICAL);
+                   .arg(filepath.toString(), result.error()),
+               Log::CRITICAL);
     }
 }

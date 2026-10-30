@@ -28,17 +28,17 @@
 
 #pragma once
 
-#include <QtTypes>
 #include <QString>
+#include <QtTypes>
 
 namespace LuaFunctions
 {
-    void debug(const QString &message);
-    void log(const QString &message);
+    void debug(const QString& message);
+    void log(const QString& message);
 
-    bool exec(const QString &command);
+    bool exec(const QString& command);
 
-    void sendMail(const QString &subject, const QString &body, QObject *context);
+    void sendMail(const QString& subject, const QString& body, QObject* context);
 
     QString friendlySizeUnit1(qint64 bytes);
     QString friendlySizeUnit2(qint64 bytes, int precision);
@@ -48,6 +48,6 @@ namespace LuaFunctions
 
     QString friendlyDuration(qint64 seconds);
 
-    QString formatDateTime1(const QString &format, qint64 luaTime);
+    QString formatDateTime1(const QString& format, qint64 luaTime);
     QString formatDateTime2(qint64 luaTime);
 }

@@ -28,20 +28,19 @@
 
 #include "trackerlistitemdelegate.h"
 
-#include <QModelIndex>
-#include <QPainter>
-
 #include "trackerlistmodel.h"
 #include "trackerlistwidget.h"
 
-TrackerListItemDelegate::TrackerListItemDelegate(TrackerListWidget *view)
-    : QStyledItemDelegate(view)
-    , m_view {view}
+#include <QModelIndex>
+#include <QPainter>
+
+TrackerListItemDelegate::TrackerListItemDelegate(TrackerListWidget* view)
+    : QStyledItemDelegate(view), m_view{ view }
 {
     Q_ASSERT(m_view);
 }
 
-void TrackerListItemDelegate::initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const
+void TrackerListItemDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 {
     QStyledItemDelegate::initStyleOption(option, index);
 

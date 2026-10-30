@@ -28,15 +28,15 @@
 
 #pragma once
 
+#include "extensiondata.h"
+
 #include <libtorrent/extensions.hpp>
 #include <libtorrent/torrent_handle.hpp>
-
-#include "extensiondata.h"
 
 class NativeTorrentExtension final : public lt::torrent_plugin
 {
 public:
-    NativeTorrentExtension(const lt::torrent_handle &torrentHandle, ExtensionData *data);
+    NativeTorrentExtension(const lt::torrent_handle& torrentHandle, ExtensionData* data);
     ~NativeTorrentExtension();
 
 private:
@@ -44,5 +44,5 @@ private:
 
     lt::torrent_handle m_torrentHandle;
     lt::torrent_status::state_t m_state = lt::torrent_status::checking_resume_data;
-    ExtensionData *m_data = nullptr;
+    ExtensionData* m_data = nullptr;
 };

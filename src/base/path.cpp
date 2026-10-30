@@ -29,8 +29,8 @@
 
 #include "path.h"
 
-#include <algorithm>
-#include <ranges>
+#include "base/concepts/stringable.h"
+#include "base/utils/fs.h"
 
 #include <QDataStream>
 #include <QDir>
@@ -40,8 +40,8 @@
 #include <QRegularExpression>
 #include <QStringView>
 
-#include "base/concepts/stringable.h"
-#include "base/utils/fs.h"
+#include <algorithm>
+#include <ranges>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -49,10 +49,9 @@ const int PATHLIST_TYPEID = qRegisterMetaType<PathList>("PathList");
 
 namespace
 {
-    QString cleanPath(const QString &path)
+    QString cleanPath(const QString& path)
     {
-        const bool hasSeparator = std::ranges::any_of(path, [](const QChar c)
-        {
+        const bool hasSeparator = std::ranges::any_of(path, [](const QChar c) {
             return (c == u'/') || (c == u'\\');
         });
         return hasSeparator ? QDir::cleanPath(path) : path;
@@ -61,7 +60,7 @@ namespace
 #ifdef Q_OS_WIN
     bool hasDriveLetter(const QStringView path)
     {
-        const QRegularExpression driveLetterRegex {u"^[A-Za-z]:/"_s};
+        const QRegularExpression driveLetterRegex{ u"^[A-Za-z]:/"_s };
         return driveLetterRegex.matchView(path).hasMatch();
     }
 #endif
@@ -70,8 +69,8 @@ namespace
 // `Path` should satisfy `Stringable` concept in order to be stored in settings as string
 static_assert(Stringable<Path>);
 
-Path::Path(const QString &pathStr)
-    : m_pathStr {cleanPath(pathStr)}
+Path::Path(const QString& pathStr)
+    : m_pathStr{ cleanPath(pathStr) }
 {
 }
 
@@ -201,16 +200,15 @@ bool Path::hasExtension(const QStringView ext) const
     return m_pathStr.endsWith(ext, Qt::CaseInsensitive);
 }
 
-bool Path::hasAncestor(const Path &other, const Qt::CaseSensitivity caseSensitivity) const
+bool Path::hasAncestor(const Path& other, const Qt::CaseSensitivity caseSensitivity) const
 {
     if (other.isEmpty() || (m_pathStr.size() <= other.m_pathStr.size()))
         return false;
 
-    return (m_pathStr[other.m_pathStr.size()] == u'/')
-            && m_pathStr.startsWith(other.m_pathStr, caseSensitivity);
+    return (m_pathStr[other.m_pathStr.size()] == u'/') && m_pathStr.startsWith(other.m_pathStr, caseSensitivity);
 }
 
-Path Path::relativePathOf(const Path &childPath) const
+Path Path::relativePathOf(const Path& childPath) const
 {
     // If both paths are relative, we assume that they have the same base path
     if (isRelative() && childPath.isRelative())
@@ -253,19 +251,19 @@ QString Path::toString() const
 std::filesystem::path Path::toStdFsPath() const
 {
 #ifdef Q_OS_WIN
-    return {data().toStdWString(), std::filesystem::path::format::generic_format};
+    return { data().toStdWString(), std::filesystem::path::format::generic_format };
 #else
-    return {data().toStdString(), std::filesystem::path::format::generic_format};
+    return { data().toStdString(), std::filesystem::path::format::generic_format };
 #endif
 }
 
-Path &Path::operator/=(const Path &other)
+Path& Path::operator/=(const Path& other)
 {
     *this = *this / other;
     return *this;
 }
 
-Path &Path::operator+=(const QStringView str)
+Path& Path::operator+=(const QStringView str)
 {
     *this = *this + str;
     return *this;
@@ -281,7 +279,7 @@ Path::Iterator Path::end() const
     return Iterator(*this, {});
 }
 
-Path Path::commonPath(const Path &left, const Path &right)
+Path Path::commonPath(const Path& left, const Path& right)
 {
     if (left.isEmpty() || right.isEmpty())
         return {};
@@ -307,13 +305,13 @@ Path Path::commonPath(const Path &left, const Path &right)
     return Path::createUnchecked(left.m_pathStr.first(commonPathSize));
 }
 
-Path Path::commonPath(const PathList &filePaths)
+Path Path::commonPath(const PathList& filePaths)
 {
     if (filePaths.isEmpty())
         return {};
 
     Path commonPath = filePaths.at(0);
-    for (const Path &filePath : std::views::drop(filePaths, 1))
+    for (const Path& filePath : std::views::drop(filePaths, 1))
     {
         commonPath = Path::commonPath(commonPath, filePath);
         if (commonPath.isEmpty())
@@ -323,14 +321,14 @@ Path Path::commonPath(const PathList &filePaths)
     return commonPath;
 }
 
-Path Path::findRootFolder(const PathList &filePaths)
+Path Path::findRootFolder(const PathList& filePaths)
 {
     // find the common first level path of all `filePaths`
 
     Path rootFolder;
-    for (const Path &filePath : filePaths)
+    for (const Path& filePath : filePaths)
     {
-        Q_ASSERT(!filePath.m_pathStr.startsWith(u'/'));  // currently this function doesn't know how to handle absolute paths
+        Q_ASSERT(!filePath.m_pathStr.startsWith(u'/')); // currently this function doesn't know how to handle absolute paths
 
         const auto filePathElements = QStringView(filePath.m_pathStr).split(u'/', Qt::SkipEmptyParts);
         // if at least one file has no root folder, no common root folder exists
@@ -346,13 +344,13 @@ Path Path::findRootFolder(const PathList &filePaths)
     return rootFolder;
 }
 
-void Path::stripRootFolder(PathList &filePaths)
+void Path::stripRootFolder(PathList& filePaths)
 {
     const Path commonRootFolder = findRootFolder(filePaths);
     if (commonRootFolder.isEmpty())
         return;
 
-    for (Path &filePath : filePaths)
+    for (Path& filePath : filePaths)
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         filePath.m_pathStr.slice(commonRootFolder.m_pathStr.size() + 1);
@@ -362,15 +360,15 @@ void Path::stripRootFolder(PathList &filePaths)
     }
 }
 
-void Path::addRootFolder(PathList &filePaths, const Path &rootFolder)
+void Path::addRootFolder(PathList& filePaths, const Path& rootFolder)
 {
     Q_ASSERT(!rootFolder.isEmpty());
 
-    for (Path &filePath : filePaths)
+    for (Path& filePath : filePaths)
         filePath = rootFolder / filePath;
 }
 
-Path Path::createUnchecked(const QString &pathStr)
+Path Path::createUnchecked(const QString& pathStr)
 {
     Path path;
     path.m_pathStr = pathStr;
@@ -378,12 +376,12 @@ Path Path::createUnchecked(const QString &pathStr)
     return path;
 }
 
-bool operator==(const Path &lhs, const Path &rhs)
+bool operator==(const Path& lhs, const Path& rhs)
 {
     return (lhs.data().compare(rhs.data(), Path::CASE_SENSITIVITY) == 0);
 }
 
-Path operator/(const Path &lhs, const Path &rhs)
+Path operator/(const Path& lhs, const Path& rhs)
 {
     if (rhs.isEmpty())
         return lhs;
@@ -394,18 +392,18 @@ Path operator/(const Path &lhs, const Path &rhs)
     return Path(lhs.m_pathStr + u'/' + rhs.m_pathStr);
 }
 
-Path operator+(const Path &lhs, const QStringView rhs)
+Path operator+(const Path& lhs, const QStringView rhs)
 {
     return Path(lhs.data() + rhs);
 }
 
-QDataStream &operator<<(QDataStream &out, const Path &path)
+QDataStream& operator<<(QDataStream& out, const Path& path)
 {
     out << path.data();
     return out;
 }
 
-QDataStream &operator>>(QDataStream &in, Path &path)
+QDataStream& operator>>(QDataStream& in, Path& path)
 {
     QString pathStr;
     in >> pathStr;
@@ -413,13 +411,13 @@ QDataStream &operator>>(QDataStream &in, Path &path)
     return in;
 }
 
-std::size_t qHash(const Path &key, const std::size_t seed)
+std::size_t qHash(const Path& key, const std::size_t seed)
 {
     return ::qHash(key.data(), seed);
 }
 
-Path::Iterator::Iterator(const Path &path)
-    : m_path {path}
+Path::Iterator::Iterator(const Path& path)
+    : m_path{ path }
 {
     if (!m_path.m_pathStr.isEmpty())
     {
@@ -441,8 +439,8 @@ Path::Iterator::Iterator(const Path &path)
     }
 }
 
-Path::Iterator::Iterator(const Path &path, EndIteratorTag)
-    : m_path {path}
+Path::Iterator::Iterator(const Path& path, EndIteratorTag)
+    : m_path{ path }
 {
     if (!m_path.m_pathStr.isEmpty())
     {
@@ -467,7 +465,7 @@ Path::Iterator::pointer Path::Iterator::operator->()
     return &m_currentPath;
 }
 
-Path::Iterator &Path::Iterator::operator++()
+Path::Iterator& Path::Iterator::operator++()
 {
     ++m_depth;
     if (m_depth < m_itemsCount)
@@ -490,12 +488,12 @@ Path::Iterator Path::Iterator::operator++(int)
     return tmp;
 }
 
-bool operator==(const Path::Iterator &a, const Path::Iterator &b)
+bool operator==(const Path::Iterator& a, const Path::Iterator& b)
 {
     return (&a.m_path == &b.m_path) && (a.m_depth == b.m_depth);
 }
 
-bool operator!=(const Path::Iterator &a, const Path::Iterator &b)
+bool operator!=(const Path::Iterator& a, const Path::Iterator& b)
 {
     return !(a == b);
 }

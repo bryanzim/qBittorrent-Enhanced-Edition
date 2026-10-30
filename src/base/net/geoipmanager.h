@@ -48,15 +48,15 @@ namespace Net
     public:
         static void initInstance();
         static void freeInstance();
-        static GeoIPManager *instance();
+        static GeoIPManager* instance();
 
-        QString lookup(const QHostAddress &hostAddr) const;
+        QString lookup(const QHostAddress& hostAddr) const;
 
-        static QString CountryName(const QString &countryISOCode);
+        static QString CountryName(const QString& countryISOCode);
 
     private slots:
         void configure();
-        void downloadFinished(const DownloadResult &result);
+        void downloadFinished(const DownloadResult& result);
 
     private:
         GeoIPManager();
@@ -67,8 +67,8 @@ namespace Net
         void downloadDatabaseFile();
 
         bool m_enabled = false;
-        GeoIPDatabase *m_geoIPDatabase = nullptr;
+        GeoIPDatabase* m_geoIPDatabase = nullptr;
 
-        static GeoIPManager *m_instance;
+        static GeoIPManager* m_instance;
     };
 }

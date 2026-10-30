@@ -28,22 +28,21 @@
 
 #include "infohash.h"
 
+#include "base/global.h"
+
 #include <QHash>
 #include <QString>
 
-#include "base/global.h"
-
 const int TorrentIDTypeId = qRegisterMetaType<BitTorrent::TorrentID>();
 
-BitTorrent::InfoHash::InfoHash(const WrappedType &nativeHash)
-    : m_valid {true}
-    , m_nativeHash {nativeHash}
+BitTorrent::InfoHash::InfoHash(const WrappedType& nativeHash)
+    : m_valid{ true }, m_nativeHash{ nativeHash }
 {
 }
 
 #ifdef QBT_USES_LIBTORRENT2
-BitTorrent::InfoHash::InfoHash(const SHA1Hash &v1, const SHA256Hash &v2)
-    : InfoHash {WrappedType(v1, v2)}
+BitTorrent::InfoHash::InfoHash(const SHA1Hash& v1, const SHA256Hash& v2)
+    : InfoHash{ WrappedType(v1, v2) }
 {
 }
 #endif
@@ -67,7 +66,7 @@ SHA1Hash BitTorrent::InfoHash::v1() const
 #ifdef QBT_USES_LIBTORRENT2
     return (m_nativeHash.has_v1() ? SHA1Hash(m_nativeHash.v1) : SHA1Hash());
 #else
-    return {m_nativeHash};
+    return { m_nativeHash };
 #endif
 }
 
@@ -85,7 +84,7 @@ BitTorrent::TorrentID BitTorrent::InfoHash::toTorrentID() const
 #ifdef QBT_USES_LIBTORRENT2
     return m_nativeHash.get_best();
 #else
-    return {m_nativeHash};
+    return { m_nativeHash };
 #endif
 }
 
@@ -94,7 +93,7 @@ QString BitTorrent::InfoHash::toString() const
     // Returns a string that is suitable for logging purpose
 
     QString ret;
-    ret.reserve(40 + 64 + 2);  // v1 hash length + v2 hash length + comma
+    ret.reserve(40 + 64 + 2); // v1 hash length + v2 hash length + comma
 
     const SHA1Hash v1Hash = v1();
     const bool v1IsValid = v1Hash.isValid();
@@ -116,37 +115,37 @@ BitTorrent::InfoHash::operator WrappedType() const
     return m_nativeHash;
 }
 
-BitTorrent::TorrentID BitTorrent::TorrentID::fromString(const QString &hashString)
+BitTorrent::TorrentID BitTorrent::TorrentID::fromString(const QString& hashString)
 {
-    return {BaseType::fromString(hashString)};
+    return { BaseType::fromString(hashString) };
 }
 
-BitTorrent::TorrentID BitTorrent::TorrentID::fromInfoHash(const BitTorrent::InfoHash &infoHash)
+BitTorrent::TorrentID BitTorrent::TorrentID::fromInfoHash(const BitTorrent::InfoHash& infoHash)
 {
     return infoHash.toTorrentID();
 }
 
-BitTorrent::TorrentID BitTorrent::TorrentID::fromSHA1Hash(const SHA1Hash &hash)
+BitTorrent::TorrentID BitTorrent::TorrentID::fromSHA1Hash(const SHA1Hash& hash)
 {
-    return {hash};
+    return { hash };
 }
 
-BitTorrent::TorrentID BitTorrent::TorrentID::fromSHA256Hash(const SHA256Hash &hash)
+BitTorrent::TorrentID BitTorrent::TorrentID::fromSHA256Hash(const SHA256Hash& hash)
 {
     return BaseType::UnderlyingType(static_cast<typename SHA256Hash::UnderlyingType>(hash).data());
 }
 
-std::size_t BitTorrent::qHash(const BitTorrent::TorrentID &key, const std::size_t seed)
+std::size_t BitTorrent::qHash(const BitTorrent::TorrentID& key, const std::size_t seed)
 {
     return ::qHash(static_cast<TorrentID::BaseType>(key), seed);
 }
 
-std::size_t BitTorrent::qHash(const InfoHash &key, const std::size_t seed)
+std::size_t BitTorrent::qHash(const InfoHash& key, const std::size_t seed)
 {
     return qHashMulti(seed, key.v1(), key.v2());
 }
 
-bool BitTorrent::operator==(const BitTorrent::InfoHash &left, const BitTorrent::InfoHash &right)
+bool BitTorrent::operator==(const BitTorrent::InfoHash& left, const BitTorrent::InfoHash& right)
 {
     return (static_cast<InfoHash::WrappedType>(left) == static_cast<InfoHash::WrappedType>(right));
 }

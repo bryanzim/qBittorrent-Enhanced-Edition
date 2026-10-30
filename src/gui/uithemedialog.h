@@ -28,12 +28,12 @@
 
 #pragma once
 
+#include "base/settingvalue.h"
+#include "uithemesource.h"
+
 #include <QDialog>
 #include <QHash>
 #include <QString>
-
-#include "base/settingvalue.h"
-#include "uithemesource.h"
 
 namespace Ui
 {
@@ -49,7 +49,7 @@ class UIThemeDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(UIThemeDialog)
 
 public:
-    explicit UIThemeDialog(QWidget *parent = nullptr);
+    explicit UIThemeDialog(QWidget* parent = nullptr);
     ~UIThemeDialog() override;
 
     void accept() override;
@@ -60,12 +60,12 @@ private:
     bool storeColors();
     bool storeIcons();
 
-    Ui::UIThemeDialog *m_ui = nullptr;
+    Ui::UIThemeDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
 
     DefaultThemeSource m_defaultThemeSource;
-    QHash<QString, ColorWidget *> m_lightColorWidgets;
-    QHash<QString, ColorWidget *> m_darkColorWidgets;
-    QHash<QString, IconWidget *> m_lightIconWidgets;
-    QHash<QString, IconWidget *> m_darkIconWidgets;
+    QHash<QString, ColorWidget*> m_lightColorWidgets;
+    QHash<QString, ColorWidget*> m_darkColorWidgets;
+    QHash<QString, IconWidget*> m_lightIconWidgets;
+    QHash<QString, IconWidget*> m_darkIconWidgets;
 };

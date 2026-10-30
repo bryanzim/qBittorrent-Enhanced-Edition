@@ -29,24 +29,10 @@
 
 #include "torrentfileswatcher.h"
 
-#include <chrono>
-
-#include <QtAssert>
-#include <QDir>
-#include <QDirIterator>
-#include <QFile>
-#include <QFileSystemWatcher>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QSet>
-#include <QThread>
-#include <QTimer>
-#include <QVariant>
-
 #include "base/algorithm.h"
-#include "base/bittorrent/torrentcontentlayout.h"
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/torrent.h"
+#include "base/bittorrent/torrentcontentlayout.h"
 #include "base/exceptions.h"
 #include "base/global.h"
 #include "base/logger.h"
@@ -57,9 +43,23 @@
 #include "base/utils/io.h"
 #include "base/utils/string.h"
 
+#include <QDir>
+#include <QDirIterator>
+#include <QFile>
+#include <QFileSystemWatcher>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QSet>
+#include <QThread>
+#include <QTimer>
+#include <QVariant>
+#include <QtAssert>
+
+#include <chrono>
+
 using namespace std::chrono_literals;
 
-const std::chrono::seconds WATCH_INTERVAL {10};
+const std::chrono::seconds WATCH_INTERVAL{ 10 };
 const int MAX_FAILED_RETRIES = 5;
 const QString CONF_FILE_NAME = u"watched_folders.json"_s;
 
@@ -68,7 +68,7 @@ const QString OPTION_RECURSIVE = u"recursive"_s;
 
 namespace
 {
-    TorrentFilesWatcher::WatchedFolderOptions parseWatchedFolderOptions(const QJsonObject &jsonObj)
+    TorrentFilesWatcher::WatchedFolderOptions parseWatchedFolderOptions(const QJsonObject& jsonObj)
     {
         TorrentFilesWatcher::WatchedFolderOptions options;
         options.addTorrentParams = BitTorrent::parseAddTorrentParams(jsonObj.value(OPTION_ADDTORRENTPARAMS).toObject());
@@ -77,10 +77,12 @@ namespace
         return options;
     }
 
-    QJsonObject serializeWatchedFolderOptions(const TorrentFilesWatcher::WatchedFolderOptions &options)
+    QJsonObject serializeWatchedFolderOptions(const TorrentFilesWatcher::WatchedFolderOptions& options)
     {
-        return {{OPTION_ADDTORRENTPARAMS, BitTorrent::serializeAddTorrentParams(options.addTorrentParams)},
-                {OPTION_RECURSIVE, options.recursive}};
+        return {
+            { OPTION_ADDTORRENTPARAMS, BitTorrent::serializeAddTorrentParams(options.addTorrentParams) },
+            {        OPTION_RECURSIVE,                                               options.recursive }
+        };
     }
 }
 
@@ -90,35 +92,35 @@ class TorrentFilesWatcher::Worker final : public QObject
     Q_DISABLE_COPY_MOVE(Worker)
 
 public:
-    Worker(QFileSystemWatcher *watcher);
+    Worker(QFileSystemWatcher* watcher);
 
 public slots:
-    void setWatchedFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options);
-    void removeWatchedFolder(const Path &path);
+    void setWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options);
+    void removeWatchedFolder(const Path& path);
 
 signals:
-    void torrentFound(const BitTorrent::TorrentDescriptor &torrentDescr, const BitTorrent::AddTorrentParams &addTorrentParams);
+    void torrentFound(const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& addTorrentParams);
 
 private:
     void onTimeout();
-    void scheduleWatchedFolderProcessing(const Path &path);
-    void processWatchedFolder(const Path &path);
-    void processFolder(const Path &path, const Path &watchedFolderPath, const TorrentFilesWatcher::WatchedFolderOptions &options);
+    void scheduleWatchedFolderProcessing(const Path& path);
+    void processWatchedFolder(const Path& path);
+    void processFolder(const Path& path, const Path& watchedFolderPath, const TorrentFilesWatcher::WatchedFolderOptions& options);
     void processFailedTorrents();
-    void addWatchedFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options);
-    void updateWatchedFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options);
+    void addWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options);
+    void updateWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options);
 
-    QFileSystemWatcher *m_watcher = nullptr;
-    QTimer *m_watchTimer = nullptr;
+    QFileSystemWatcher* m_watcher = nullptr;
+    QTimer* m_watchTimer = nullptr;
     QHash<Path, TorrentFilesWatcher::WatchedFolderOptions> m_watchedFolders;
     QSet<Path> m_watchedByTimeoutFolders;
 
     // Failed torrents
-    QTimer *m_retryTorrentTimer = nullptr;
+    QTimer* m_retryTorrentTimer = nullptr;
     QHash<Path, QHash<Path, int>> m_failedTorrents;
 };
 
-TorrentFilesWatcher *TorrentFilesWatcher::m_instance = nullptr;
+TorrentFilesWatcher* TorrentFilesWatcher::m_instance = nullptr;
 
 void TorrentFilesWatcher::initInstance()
 {
@@ -132,15 +134,13 @@ void TorrentFilesWatcher::freeInstance()
     m_instance = nullptr;
 }
 
-TorrentFilesWatcher *TorrentFilesWatcher::instance()
+TorrentFilesWatcher* TorrentFilesWatcher::instance()
 {
     return m_instance;
 }
 
-TorrentFilesWatcher::TorrentFilesWatcher(QObject *parent)
-    : QObject(parent)
-    , m_ioThread {new QThread}
-    , m_asyncWorker {new TorrentFilesWatcher::Worker(new QFileSystemWatcher(this))}
+TorrentFilesWatcher::TorrentFilesWatcher(QObject* parent)
+    : QObject(parent), m_ioThread{ new QThread }, m_asyncWorker{ new TorrentFilesWatcher::Worker(new QFileSystemWatcher(this)) }
 {
     connect(m_asyncWorker, &TorrentFilesWatcher::Worker::torrentFound, this, &TorrentFilesWatcher::onTorrentFound);
 
@@ -175,27 +175,29 @@ void TorrentFilesWatcher::load()
     if (jsonError.error != QJsonParseError::NoError)
     {
         LogMsg(tr("Failed to parse Watched Folders configuration from %1. Error: \"%2\"")
-            .arg(path.toString(), jsonError.errorString()), Log::WARNING);
+                   .arg(path.toString(), jsonError.errorString()),
+               Log::WARNING);
         return;
     }
 
     if (!jsonDoc.isObject())
     {
         LogMsg(tr("Failed to load Watched Folders configuration from %1. Error: \"Invalid data format.\"")
-            .arg(path.toString()), Log::WARNING);
+                   .arg(path.toString()),
+               Log::WARNING);
         return;
     }
 
     const QJsonObject jsonObj = jsonDoc.object();
     for (auto it = jsonObj.constBegin(); it != jsonObj.constEnd(); ++it)
     {
-        const Path watchedFolder {it.key()};
+        const Path watchedFolder{ it.key() };
         const WatchedFolderOptions options = parseWatchedFolderOptions(it.value().toObject());
         try
         {
             doSetWatchedFolder(watchedFolder, options);
         }
-        catch (const InvalidArgument &err)
+        catch (const InvalidArgument& err)
         {
             LogMsg(err.message(), Log::WARNING);
         }
@@ -208,7 +210,7 @@ void TorrentFilesWatcher::loadLegacy()
 
     for (auto it = dirs.cbegin(); it != dirs.cend(); ++it)
     {
-        const Path watchedFolder {it.key()};
+        const Path watchedFolder{ it.key() };
         BitTorrent::AddTorrentParams params;
         if (it.value().userType() == QMetaType::Int)
         {
@@ -220,16 +222,16 @@ void TorrentFilesWatcher::loadLegacy()
         }
         else
         {
-            const Path customSavePath {it.value().toString()};
+            const Path customSavePath{ it.value().toString() };
             params.savePath = customSavePath;
             params.useAutoTMM = false;
         }
 
         try
         {
-            doSetWatchedFolder(watchedFolder, {params, false});
+            doSetWatchedFolder(watchedFolder, { params, false });
         }
-        catch (const InvalidArgument &err)
+        catch (const InvalidArgument& err)
         {
             LogMsg(err.message(), Log::WARNING);
         }
@@ -244,8 +246,8 @@ void TorrentFilesWatcher::store() const
     QJsonObject jsonObj;
     for (auto it = m_watchedFolders.cbegin(); it != m_watchedFolders.cend(); ++it)
     {
-        const Path &watchedFolder = it.key();
-        const WatchedFolderOptions &options = it.value();
+        const Path& watchedFolder = it.key();
+        const WatchedFolderOptions& options = it.value();
         jsonObj[watchedFolder.data()] = serializeWatchedFolderOptions(options);
     }
 
@@ -255,7 +257,8 @@ void TorrentFilesWatcher::store() const
     if (!result)
     {
         LogMsg(tr("Couldn't store Watched Folders configuration to %1. Error: %2")
-            .arg(path.toString(), result.error()), Log::WARNING);
+                   .arg(path.toString(), result.error()),
+               Log::WARNING);
     }
 }
 
@@ -264,13 +267,13 @@ QHash<Path, TorrentFilesWatcher::WatchedFolderOptions> TorrentFilesWatcher::fold
     return m_watchedFolders;
 }
 
-void TorrentFilesWatcher::setWatchedFolder(const Path &path, const WatchedFolderOptions &options)
+void TorrentFilesWatcher::setWatchedFolder(const Path& path, const WatchedFolderOptions& options)
 {
     doSetWatchedFolder(path, options);
     store();
 }
 
-void TorrentFilesWatcher::doSetWatchedFolder(const Path &path, const WatchedFolderOptions &options)
+void TorrentFilesWatcher::doSetWatchedFolder(const Path& path, const WatchedFolderOptions& options)
 {
     if (path.isEmpty())
         throw InvalidArgument(tr("Watched folder Path cannot be empty."));
@@ -280,22 +283,20 @@ void TorrentFilesWatcher::doSetWatchedFolder(const Path &path, const WatchedFold
 
     m_watchedFolders[path] = options;
 
-    QMetaObject::invokeMethod(m_asyncWorker, [this, path, options]
-    {
+    QMetaObject::invokeMethod(m_asyncWorker, [this, path, options] {
         m_asyncWorker->setWatchedFolder(path, options);
     });
 
     emit watchedFolderSet(path, options);
 }
 
-void TorrentFilesWatcher::removeWatchedFolder(const Path &path)
+void TorrentFilesWatcher::removeWatchedFolder(const Path& path)
 {
     if (m_watchedFolders.remove(path))
     {
         if (m_asyncWorker)
         {
-            QMetaObject::invokeMethod(m_asyncWorker, [this, path]()
-            {
+            QMetaObject::invokeMethod(m_asyncWorker, [this, path]() {
                 m_asyncWorker->removeWatchedFolder(path);
             });
         }
@@ -306,19 +307,15 @@ void TorrentFilesWatcher::removeWatchedFolder(const Path &path)
     }
 }
 
-void TorrentFilesWatcher::onTorrentFound(const BitTorrent::TorrentDescriptor &torrentDescr
-        , const BitTorrent::AddTorrentParams &addTorrentParams)
+void TorrentFilesWatcher::onTorrentFound(const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& addTorrentParams)
 {
     BitTorrent::Session::instance()->addTorrent(torrentDescr, addTorrentParams);
 }
 
-TorrentFilesWatcher::Worker::Worker(QFileSystemWatcher *watcher)
-    : m_watcher {watcher}
-    , m_watchTimer {new QTimer(this)}
-    , m_retryTorrentTimer {new QTimer(this)}
+TorrentFilesWatcher::Worker::Worker(QFileSystemWatcher* watcher)
+    : m_watcher{ watcher }, m_watchTimer{ new QTimer(this) }, m_retryTorrentTimer{ new QTimer(this) }
 {
-    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, [this](const QString &path)
-    {
+    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, [this](const QString& path) {
         scheduleWatchedFolderProcessing(Path(path));
     });
     connect(m_watchTimer, &QTimer::timeout, this, &Worker::onTimeout);
@@ -328,11 +325,11 @@ TorrentFilesWatcher::Worker::Worker(QFileSystemWatcher *watcher)
 
 void TorrentFilesWatcher::Worker::onTimeout()
 {
-    for (const Path &path : asConst(m_watchedByTimeoutFolders))
+    for (const Path& path : asConst(m_watchedByTimeoutFolders))
         processWatchedFolder(path);
 }
 
-void TorrentFilesWatcher::Worker::setWatchedFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options)
+void TorrentFilesWatcher::Worker::setWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     if (m_watchedFolders.contains(path))
         updateWatchedFolder(path, options);
@@ -340,7 +337,7 @@ void TorrentFilesWatcher::Worker::setWatchedFolder(const Path &path, const Torre
         addWatchedFolder(path, options);
 }
 
-void TorrentFilesWatcher::Worker::removeWatchedFolder(const Path &path)
+void TorrentFilesWatcher::Worker::removeWatchedFolder(const Path& path)
 {
     m_watchedFolders.remove(path);
 
@@ -354,15 +351,14 @@ void TorrentFilesWatcher::Worker::removeWatchedFolder(const Path &path)
         m_retryTorrentTimer->stop();
 }
 
-void TorrentFilesWatcher::Worker::scheduleWatchedFolderProcessing(const Path &path)
+void TorrentFilesWatcher::Worker::scheduleWatchedFolderProcessing(const Path& path)
 {
-    QTimer::singleShot(2s, Qt::CoarseTimer, this, [this, path]
-    {
+    QTimer::singleShot(2s, Qt::CoarseTimer, this, [this, path] {
         processWatchedFolder(path);
     });
 }
 
-void TorrentFilesWatcher::Worker::processWatchedFolder(const Path &path)
+void TorrentFilesWatcher::Worker::processWatchedFolder(const Path& path)
 {
     const TorrentFilesWatcher::WatchedFolderOptions options = m_watchedFolders.value(path);
     processFolder(path, path, options);
@@ -371,13 +367,15 @@ void TorrentFilesWatcher::Worker::processWatchedFolder(const Path &path)
         m_retryTorrentTimer->start(WATCH_INTERVAL);
 }
 
-void TorrentFilesWatcher::Worker::processFolder(const Path &path, const Path &watchedFolderPath
-                                              , const TorrentFilesWatcher::WatchedFolderOptions &options)
+void TorrentFilesWatcher::Worker::processFolder(const Path& path, const Path& watchedFolderPath, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
-    QDirIterator dirIter {path.data(), {u"*.torrent"_s, u"*.magnet"_s}, QDir::Files};
+    QDirIterator dirIter{
+        path.data(), { u"*.torrent"_s, u"*.magnet"_s },
+         QDir::Files
+    };
     while (dirIter.hasNext())
     {
-        const Path filePath {dirIter.next()};
+        const Path filePath{ dirIter.next() };
         BitTorrent::AddTorrentParams addTorrentParams = options.addTorrentParams;
         if (path != watchedFolderPath)
         {
@@ -386,7 +384,8 @@ void TorrentFilesWatcher::Worker::processFolder(const Path &path, const Path &wa
             if (useAutoTMM)
             {
                 addTorrentParams.category = addTorrentParams.category.isEmpty()
-                        ? subdirPath.data() : (addTorrentParams.category + u'/' + subdirPath.data());
+                                                ? subdirPath.data()
+                                                : (addTorrentParams.category + u'/' + subdirPath.data());
             }
             else
             {
@@ -398,7 +397,7 @@ void TorrentFilesWatcher::Worker::processFolder(const Path &path, const Path &wa
         {
             const int fileMaxSize = 100 * 1024 * 1024;
 
-            QFile file {filePath.data()};
+            QFile file{ filePath.data() };
             if (file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
                 if (file.size() <= fileMaxSize)
@@ -444,10 +443,10 @@ void TorrentFilesWatcher::Worker::processFolder(const Path &path, const Path &wa
 
     if (options.recursive)
     {
-        QDirIterator iter {path.data(), (QDir::Dirs | QDir::NoDotAndDotDot)};
+        QDirIterator iter{ path.data(), (QDir::Dirs | QDir::NoDotAndDotDot) };
         while (iter.hasNext())
         {
-            const Path folderPath {iter.next()};
+            const Path folderPath{ iter.next() };
             // Skip processing of subdirectory that is explicitly set as watched folder
             if (!m_watchedFolders.contains(folderPath))
                 processFolder(folderPath, watchedFolderPath, options);
@@ -458,11 +457,9 @@ void TorrentFilesWatcher::Worker::processFolder(const Path &path, const Path &wa
 void TorrentFilesWatcher::Worker::processFailedTorrents()
 {
     // Check which torrents are still partial
-    Algorithm::removeIf(m_failedTorrents, [this](const Path &watchedFolderPath, QHash<Path, int> &partialTorrents)
-    {
+    Algorithm::removeIf(m_failedTorrents, [this](const Path& watchedFolderPath, QHash<Path, int>& partialTorrents) {
         const TorrentFilesWatcher::WatchedFolderOptions options = m_watchedFolders.value(watchedFolderPath);
-        Algorithm::removeIf(partialTorrents, [this, &watchedFolderPath, &options](const Path &torrentPath, int &value)
-        {
+        Algorithm::removeIf(partialTorrents, [this, &watchedFolderPath, &options](const Path& torrentPath, int& value) {
             if (!torrentPath.exists())
                 return true;
 
@@ -476,7 +473,8 @@ void TorrentFilesWatcher::Worker::processFailedTorrents()
                     if (useAutoTMM)
                     {
                         addTorrentParams.category = addTorrentParams.category.isEmpty()
-                                ? subdirPath.data() : (addTorrentParams.category + u'/' + subdirPath.data());
+                                                        ? subdirPath.data()
+                                                        : (addTorrentParams.category + u'/' + subdirPath.data());
                     }
                     else
                     {
@@ -514,7 +512,7 @@ void TorrentFilesWatcher::Worker::processFailedTorrents()
         m_retryTorrentTimer->start(WATCH_INTERVAL);
 }
 
-void TorrentFilesWatcher::Worker::addWatchedFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options)
+void TorrentFilesWatcher::Worker::addWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     // Check if the `path` points to a network file system or not
     if (Utils::Fs::isNetworkFileSystem(path) || options.recursive)
@@ -534,7 +532,7 @@ void TorrentFilesWatcher::Worker::addWatchedFolder(const Path &path, const Torre
     LogMsg(tr("Watching folder: \"%1\"").arg(path.toString()));
 }
 
-void TorrentFilesWatcher::Worker::updateWatchedFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options)
+void TorrentFilesWatcher::Worker::updateWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     const bool recursiveModeChanged = (m_watchedFolders[path].recursive != options.recursive);
     if (recursiveModeChanged && !Utils::Fs::isNetworkFileSystem(path))

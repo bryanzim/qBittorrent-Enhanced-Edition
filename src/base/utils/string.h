@@ -30,24 +30,24 @@
 
 #pragma once
 
-#include <numeric>
-#include <optional>
-#include <string_view>
+#include "base/concepts/explicitlyconvertibleto.h"
+#include "base/global.h"
 
 #include <QChar>
 #include <QMetaEnum>
 #include <QString>
 #include <QtContainerFwd>
 
-#include "base/concepts/explicitlyconvertibleto.h"
-#include "base/global.h"
+#include <numeric>
+#include <optional>
+#include <string_view>
 
 namespace Utils::String
 {
-    QString wildcardToRegexPattern(const QString &pattern);
+    QString wildcardToRegexPattern(const QString& pattern);
 
     template <typename T>
-    T unquote(const T &str, const QString &quotes = u"\""_s)
+    T unquote(const T& str, const QString& quotes = u"\""_s)
     {
         if (str.length() < 2)
             return str;
@@ -61,18 +61,18 @@ namespace Utils::String
         return str;
     }
 
-    std::optional<bool> parseBool(const QString &string);
-    std::optional<int> parseInt(const QString &string);
-    std::optional<double> parseDouble(const QString &string);
+    std::optional<bool> parseBool(const QString& string);
+    std::optional<int> parseInt(const QString& string);
+    std::optional<double> parseDouble(const QString& string);
 
-    QStringList splitCommand(const QString &command);
+    QStringList splitCommand(const QString& command);
 
     QString fromDouble(double n, int precision);
     QString fromLatin1(std::string_view string);
     QString fromLocal8Bit(std::string_view string);
 
     template <typename Container>
-    QString joinIntoString(const Container &container, const QString &separator)
+    QString joinIntoString(const Container& container, const QString& separator)
         requires ExplicitlyConvertibleTo<typename Container::value_type, QString>
     {
         auto iter = container.cbegin();
@@ -80,9 +80,7 @@ namespace Utils::String
         if (iter == end)
             return {};
 
-        const qsizetype totalLength = std::accumulate(iter, end, (separator.size() * (container.size() - 1))
-            , [](const qsizetype total, const typename Container::value_type &value)
-        {
+        const qsizetype totalLength = std::accumulate(iter, end, (separator.size() * (container.size() - 1)), [](const qsizetype total, const typename Container::value_type& value) {
             return total + QString(value).size();
         });
 
@@ -101,7 +99,7 @@ namespace Utils::String
     }
 
     template <typename T>
-    QString fromEnum(const T &value)
+    QString fromEnum(const T& value)
         requires std::is_enum_v<T>
     {
         static_assert(std::is_same_v<int, typename std::underlying_type_t<T>>,
@@ -112,7 +110,7 @@ namespace Utils::String
     }
 
     template <typename T>
-    T toEnum(const QString &serializedValue, const T &defaultValue)
+    T toEnum(const QString& serializedValue, const T& defaultValue)
         requires std::is_enum_v<T>
     {
         static_assert(std::is_same_v<int, typename std::underlying_type_t<T>>,

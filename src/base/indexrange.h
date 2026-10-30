@@ -38,8 +38,7 @@ public:
     using IndexType = Index;
 
     constexpr IndexInterval(const IndexType first, const IndexType last)
-        : m_first {first}
-        , m_last {last}
+        : m_first{ first }, m_last{ last }
     {
         Q_ASSERT(first <= last);
     }
@@ -62,7 +61,7 @@ private:
 template <typename T>
 constexpr IndexInterval<T> makeInterval(const T first, const T last)
 {
-    return {first, last};
+    return { first, last };
 }
 
 // range is defined via first index and size
@@ -77,18 +76,18 @@ public:
     {
     public:
         explicit constexpr Iterator(const IndexType index)
-            : m_index {index}
+            : m_index{ index }
         {
         }
 
-        constexpr Iterator(const Iterator &) = default;
+        constexpr Iterator(const Iterator&) = default;
 
         constexpr IndexType operator*() const
         {
             return m_index;
         }
 
-        constexpr Iterator &operator++()
+        constexpr Iterator& operator++()
         {
             ++m_index;
             return *this;
@@ -96,13 +95,13 @@ public:
 
         constexpr Iterator operator++(int)
         {
-            const Iterator iter {*this};
+            const Iterator iter{ *this };
             ++(*this);
             return iter;
         }
 
         // comparing iterators from different containers is undefined behavior in C++ standard library
-        friend constexpr bool operator==(const Iterator &left, const Iterator &right)
+        friend constexpr bool operator==(const Iterator& left, const Iterator& right)
         {
             return (*left == *right);
         }
@@ -112,31 +111,28 @@ public:
     };
 
     constexpr IndexRange()
-        : m_first {0}
-        , m_size {0}
+        : m_first{ 0 }, m_size{ 0 }
     {
     }
 
     constexpr IndexRange(const IndexType first, const IndexDiffType size)
-        : m_first {first}
-        , m_size {size}
+        : m_first{ first }, m_size{ size }
     {
     }
 
-    constexpr IndexRange(const IndexInterval<IndexType> &interval)
-        : m_first {interval.first()}
-        , m_size {interval.last() - interval.first() + 1}
+    constexpr IndexRange(const IndexInterval<IndexType>& interval)
+        : m_first{ interval.first() }, m_size{ interval.last() - interval.first() + 1 }
     {
     }
 
     constexpr Iterator begin() const
     {
-        return Iterator {m_first};
+        return Iterator{ m_first };
     }
 
     constexpr Iterator end() const
     {
-        return Iterator {m_first + m_size};
+        return Iterator{ m_first + m_size };
     }
 
     constexpr IndexDiffType size() const

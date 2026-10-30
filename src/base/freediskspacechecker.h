@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/path.h"
+
+#include <QObject>
 
 class FreeDiskSpaceChecker final : public QObject
 {
@@ -39,10 +39,10 @@ class FreeDiskSpaceChecker final : public QObject
     Q_DISABLE_COPY_MOVE(FreeDiskSpaceChecker)
 
 public:
-    FreeDiskSpaceChecker(const Path &pathToCheck);
+    FreeDiskSpaceChecker(const Path& pathToCheck);
 
     Path pathToCheck() const;
-    void setPathToCheck(const Path &newPathToCheck);
+    void setPathToCheck(const Path& newPathToCheck);
 
 public slots:
     void check();

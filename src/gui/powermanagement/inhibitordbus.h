@@ -29,10 +29,10 @@
 
 #pragma once
 
+#include "inhibitor.h"
+
 #include <QDBusUnixFileDescriptor>
 #include <QObject>
-
-#include "inhibitor.h"
 
 class QDBusInterface;
 class QDBusPendingCallWatcher;
@@ -43,13 +43,13 @@ class InhibitorDBus final : public QObject, public Inhibitor
     Q_DISABLE_COPY_MOVE(InhibitorDBus)
 
 public:
-    InhibitorDBus(QObject *parent = nullptr);
+    InhibitorDBus(QObject* parent = nullptr);
 
     bool requestBusy() override;
     bool requestIdle() override;
 
 private slots:
-    void onAsyncReply(QDBusPendingCallWatcher *call);
+    void onAsyncReply(QDBusPendingCallWatcher* call);
 
 private:
     enum State
@@ -63,12 +63,12 @@ private:
 
     enum class ManagerType
     {
-        Freedesktop,  // https://www.freedesktop.org/wiki/Specifications/power-management-spec/
-        Gnome,  // https://github.com/GNOME/gnome-settings-daemon/blob/master/gnome-settings-daemon/org.gnome.SessionManager.xml
-        Systemd // https://www.freedesktop.org/software/systemd/man/org.freedesktop.login1.html
+        Freedesktop, // https://www.freedesktop.org/wiki/Specifications/power-management-spec/
+        Gnome,       // https://github.com/GNOME/gnome-settings-daemon/blob/master/gnome-settings-daemon/org.gnome.SessionManager.xml
+        Systemd      // https://www.freedesktop.org/software/systemd/man/org.freedesktop.login1.html
     };
 
-    QDBusInterface *m_busInterface = nullptr;
+    QDBusInterface* m_busInterface = nullptr;
     ManagerType m_manager = ManagerType::Gnome;
 
     enum State m_state = Error;

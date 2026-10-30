@@ -35,14 +35,14 @@ class QString;
 // boost doesn't use `std::hash` and instead use their own `boost::hash_value()`
 // so we need to provide a hash template for Qt types
 template <typename T>
-std::size_t hash_value(const T &value)
+std::size_t hash_value(const T& value)
 {
     return ::qHash(value);
 }
 
 // boost hash will sometimes confuse on Qt types, so to avoid ambiguity create specific  `hash_value()` functions below
 
-inline std::size_t hash_value(const QString &value)
+inline std::size_t hash_value(const QString& value)
 {
     return hash_value<QString>(value);
 }

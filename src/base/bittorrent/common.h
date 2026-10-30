@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QString>
-
 #include "base/global.h"
+
+#include <QString>
 
 inline const QString QB_EXT = u".!qB"_s;
 inline const QString UNWANTED_FOLDER_NAME = u".unwanted"_s;

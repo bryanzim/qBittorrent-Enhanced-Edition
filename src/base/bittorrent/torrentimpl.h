@@ -29,24 +29,6 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-
-#include <libtorrent/add_torrent_params.hpp>
-#include <libtorrent/fwd.hpp>
-#include <libtorrent/torrent_handle.hpp>
-#include <libtorrent/torrent_info.hpp>
-#include <libtorrent/torrent_status.hpp>
-
-#include <QBitArray>
-#include <QDateTime>
-#include <QHash>
-#include <QList>
-#include <QMap>
-#include <QObject>
-#include <QQueue>
-#include <QString>
-
 #include "base/path.h"
 #include "base/tagset.h"
 #include "infohash.h"
@@ -56,6 +38,23 @@
 #include "torrentcontentlayout.h"
 #include "torrentinfo.h"
 #include "trackerentrystatus.h"
+
+#include <QBitArray>
+#include <QDateTime>
+#include <QHash>
+#include <QList>
+#include <QMap>
+#include <QObject>
+#include <QQueue>
+#include <QString>
+#include <libtorrent/add_torrent_params.hpp>
+#include <libtorrent/fwd.hpp>
+#include <libtorrent/torrent_handle.hpp>
+#include <libtorrent/torrent_info.hpp>
+#include <libtorrent/torrent_status.hpp>
+
+#include <functional>
+#include <memory>
 
 namespace BitTorrent
 {
@@ -94,19 +93,19 @@ namespace BitTorrent
         Q_DISABLE_COPY_MOVE(TorrentImpl)
 
     public:
-        TorrentImpl(SessionImpl *session, const lt::torrent_handle &nativeHandle, LoadTorrentParams params);
+        TorrentImpl(SessionImpl* session, const lt::torrent_handle& nativeHandle, LoadTorrentParams params);
         ~TorrentImpl() override;
 
         bool isValid() const;
 
-        Session *session() const override;
+        Session* session() const override;
 
         InfoHash infoHash() const override;
         QString name() const override;
         QDateTime creationDate() const override;
         QString creator() const override;
         QString comment() const override;
-        void setComment(const QString &comment) override;
+        void setComment(const QString& comment) override;
         bool isPrivate() const override;
         qlonglong totalSize() const override;
         qlonglong wantedSize() const override;
@@ -118,20 +117,20 @@ namespace BitTorrent
         bool isAutoTMMEnabled() const override;
         void setAutoTMMEnabled(bool enabled) override;
         Path savePath() const override;
-        void setSavePath(const Path &path) override;
+        void setSavePath(const Path& path) override;
         Path downloadPath() const override;
-        void setDownloadPath(const Path &path) override;
+        void setDownloadPath(const Path& path) override;
         Path actualStorageLocation() const override;
         Path rootPath() const override;
         Path contentPath() const override;
         QString category() const override;
-        bool belongsToCategory(const QString &category) const override;
-        bool setCategory(const QString &category) override;
+        bool belongsToCategory(const QString& category) const override;
+        bool setCategory(const QString& category) override;
 
         TagSet tags() const override;
-        bool hasTag(const Tag &tag) const override;
-        bool addTag(const Tag &tag) override;
-        bool removeTag(const Tag &tag) override;
+        bool hasTag(const Tag& tag) const override;
+        bool addTag(const Tag& tag) override;
+        bool removeTag(const Tag& tag) override;
         void clearTags() override;
 
         int filesCount() const override;
@@ -148,7 +147,7 @@ namespace BitTorrent
         qlonglong timeSinceDownload() const override;
         qlonglong timeSinceActivity() const override;
 
-        const ShareLimits &shareLimits() const override;
+        const ShareLimits& shareLimits() const override;
         void setShareLimits(ShareLimits shareLimits) override;
         ShareLimits effectiveShareLimits() const override;
 
@@ -211,7 +210,7 @@ namespace BitTorrent
         qlonglong nextAnnounce() const override;
         TorrentAnnounceStatus announceStatus() const override;
 
-        void setName(const QString &name) override;
+        void setName(const QString& name) override;
         void setSequentialDownload(bool enable) override;
         void setFirstLastPiecePriority(bool enabled) override;
         void stop() override;
@@ -219,8 +218,8 @@ namespace BitTorrent
         void forceReannounce(int index = -1) override;
         void forceDHTAnnounce() override;
         void forceRecheck() override;
-        void renameFile(int index, const Path &path) override;
-        void prioritizeFiles(const QList<DownloadPriority> &priorities) override;
+        void renameFile(int index, const Path& path) override;
+        void prioritizeFiles(const QList<DownloadPriority>& priorities) override;
         void setUploadLimit(int limit) override;
         void setDownloadLimit(int limit) override;
         void setSuperSeeding(bool enable) override;
@@ -229,23 +228,23 @@ namespace BitTorrent
         void setLSDDisabled(bool disable) override;
         void flushCache() const override;
         void addTrackers(QList<TrackerEntry> trackers) override;
-        void removeTrackers(const QStringList &trackers) override;
+        void removeTrackers(const QStringList& trackers) override;
         void replaceTrackers(QList<TrackerEntry> trackers) override;
-        void addUrlSeeds(const QList<QUrl> &urlSeeds) override;
-        void removeUrlSeeds(const QList<QUrl> &urlSeeds) override;
-        bool connectPeer(const PeerAddress &peerAddress) override;
+        void addUrlSeeds(const QList<QUrl>& urlSeeds) override;
+        void removeUrlSeeds(const QList<QUrl>& urlSeeds) override;
+        bool connectPeer(const PeerAddress& peerAddress) override;
         void clearPeers() override;
-        void setMetadata(const TorrentInfo &torrentInfo) override;
+        void setMetadata(const TorrentInfo& torrentInfo) override;
 
         StopCondition stopCondition() const override;
         void setStopCondition(StopCondition stopCondition) override;
         SSLParameters getSSLParameters() const override;
-        void setSSLParameters(const SSLParameters &sslParams) override;
+        void setSSLParameters(const SSLParameters& sslParams) override;
         bool applySSLParameters();
 
         QString createMagnetURI() const override;
         nonstd::expected<QByteArray, QString> exportToBuffer() const override;
-        nonstd::expected<void, QString> exportToFile(const Path &path) const override;
+        nonstd::expected<void, QString> exportToFile(const Path& path) const override;
 
         QFuture<QList<PeerInfo>> fetchPeerInfo() const override;
         QFuture<QList<QUrl>> fetchURLSeeds() const override;
@@ -260,11 +259,11 @@ namespace BitTorrent
 
         int fileIndexFromNative(lt::file_index_t nativeFileIndex) const;
 
-        void handleStateUpdate(const lt::torrent_status &nativeStatus);
+        void handleStateUpdate(const lt::torrent_status& nativeStatus);
         void handleFastResumeRejected();
         void handleFileCompleted(lt::file_index_t nativeFileIndex);
         void handleFileError(FileErrorInfo fileError);
-        void handleFileRenamed(lt::file_index_t nativeFileIndex, const Path &newActualFilePath, const Path &oldActualFilePath);
+        void handleFileRenamed(lt::file_index_t nativeFileIndex, const Path& newActualFilePath, const Path& oldActualFilePath);
         void handleFileRenameFailed(lt::file_index_t nativeFileIndex);
         void handleMetadataReceived();
         void handleSaveResumeData(lt::add_torrent_params params);
@@ -276,12 +275,12 @@ namespace BitTorrent
         void handleUnwantedFolderToggled();
         void requestResumeData(lt::resume_data_flags_t flags = {});
         void deferredRequestResumeData();
-        void handleMoveStorageJobFinished(const Path &path, MoveStorageContext context, bool hasOutstandingJob);
-        TrackerEntryStatus updateTrackerEntryStatus(const lt::announce_entry &announceEntry, const QHash<lt::tcp::endpoint, QMap<int, int>> &updateInfo);
+        void handleMoveStorageJobFinished(const Path& path, MoveStorageContext context, bool hasOutstandingJob);
+        TrackerEntryStatus updateTrackerEntryStatus(const lt::announce_entry& announceEntry, const QHash<lt::tcp::endpoint, QMap<int, int>>& updateInfo);
         void resetTrackerEntryStatuses();
 
     private:
-        using EventTrigger = std::function<void ()>;
+        using EventTrigger = std::function<void()>;
 
         struct FileRenameInfo
         {
@@ -292,15 +291,15 @@ namespace BitTorrent
         struct FolderRenameInfo
         {
             int folderRenameJobID = -1;
-            Path oldFolderPath {};
-            Path newFolderPath {};
-            QHash<int, Path> renamedFiles {};
-            QList<int> failedFileIndexes {};
+            Path oldFolderPath{};
+            Path newFolderPath{};
+            QHash<int, Path> renamedFiles{};
+            QList<int> failedFileIndexes{};
         };
 
         std::shared_ptr<const lt::torrent_info> nativeTorrentInfo() const;
 
-        void updateStatus(const lt::torrent_status &nativeStatus);
+        void updateStatus(const lt::torrent_status& nativeStatus);
         void updateProgress();
         void updateState();
 
@@ -308,26 +307,26 @@ namespace BitTorrent
 
         void setAutoManaged(bool enable);
 
-        void doRenameFile(int index, const Path &path, int folderRenameJobID = -1);
-        void doRenameFolder(const Path &oldFolderPath, const Path &newFolderPath) override;
+        void doRenameFile(int index, const Path& path, int folderRenameJobID = -1);
+        void doRenameFolder(const Path& oldFolderPath, const Path& newFolderPath) override;
 
-        Path makeActualPath(int index, const Path &path) const;
-        Path makeUserPath(const Path &path) const;
+        Path makeActualPath(int index, const Path& path) const;
+        Path makeUserPath(const Path& path) const;
         void adjustStorageLocation();
-        void moveStorage(const Path &newPath, MoveStorageContext context);
+        void moveStorage(const Path& newPath, MoveStorageContext context);
         void manageActualFilePaths();
         void applyFirstLastPiecePriority(bool enabled);
 
         void prepareResumeData(lt::add_torrent_params resumeData);
-        void endReceivedMetadataHandling(const Path &savePath, const PathList &fileNames);
+        void endReceivedMetadataHandling(const Path& savePath, const PathList& fileNames);
         void reload();
 
         nonstd::expected<lt::entry, QString> exportTorrent() const;
 
         template <typename Func>
-        QFuture<std::invoke_result_t<Func>> invokeAsync(Func &&func) const;
+        QFuture<std::invoke_result_t<Func>> invokeAsync(Func&& func) const;
 
-        SessionImpl *const m_session = nullptr;
+        SessionImpl* const m_session = nullptr;
         lt::torrent_handle m_nativeHandle;
         mutable lt::torrent_status m_nativeStatus;
         TorrentState m_state = TorrentState::Unknown;

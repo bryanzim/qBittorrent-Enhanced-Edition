@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 namespace Ui
 {
@@ -43,13 +43,13 @@ class StatsDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(StatsDialog)
 
 public:
-  explicit StatsDialog(QWidget *parent);
-  ~StatsDialog() override;
+    explicit StatsDialog(QWidget* parent);
+    ~StatsDialog() override;
 
 private slots:
     void update();
 
 private:
-    Ui::StatsDialog *m_ui = nullptr;
+    Ui::StatsDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
 };

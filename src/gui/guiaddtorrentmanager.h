@@ -60,16 +60,16 @@ class GUIAddTorrentManager final : public GUIApplicationComponent<AddTorrentMana
     Q_DISABLE_COPY_MOVE(GUIAddTorrentManager)
 
 public:
-    GUIAddTorrentManager(IGUIApplication *app, BitTorrent::Session *session, QObject *parent = nullptr);
+    GUIAddTorrentManager(IGUIApplication* app, BitTorrent::Session* session, QObject* parent = nullptr);
     ~GUIAddTorrentManager() override;
 
-    bool addTorrent(const QString &source, const BitTorrent::AddTorrentParams &params = {}, AddTorrentOption option = AddTorrentOption::Default);
+    bool addTorrent(const QString& source, const BitTorrent::AddTorrentParams& params = {}, AddTorrentOption option = AddTorrentOption::Default);
 
 private:
-    void onDownloadFinished(const Net::DownloadResult &result);
-    void onMetadataDownloaded(const BitTorrent::TorrentInfo &metadata);
-    bool processTorrent(const QString &source, const BitTorrent::TorrentDescriptor &torrentDescr, const BitTorrent::AddTorrentParams &params);
+    void onDownloadFinished(const Net::DownloadResult& result);
+    void onMetadataDownloaded(const BitTorrent::TorrentInfo& metadata);
+    bool processTorrent(const QString& source, const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& params);
 
     QHash<QString, BitTorrent::AddTorrentParams> m_downloadedTorrents;
-    QHash<BitTorrent::InfoHash, AddNewTorrentDialog *> m_dialogs;
+    QHash<BitTorrent::InfoHash, AddNewTorrentDialog*> m_dialogs;
 };

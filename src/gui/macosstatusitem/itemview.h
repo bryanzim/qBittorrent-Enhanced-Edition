@@ -28,8 +28,8 @@
 
 #import <AppKit/AppKit.h>
 
-@interface ItemView: NSView
-- (BOOL)setRatesWithDownload: (int64_t)downloadRate upload: (int64_t)uploadRate;
-- (void)setVisible: (BOOL)visible;
+@interface ItemView : NSView
+- (BOOL)setRatesWithDownload:(int64_t)downloadRate upload:(int64_t)uploadRate;
+- (void)setVisible:(BOOL)visible;
 
 @end

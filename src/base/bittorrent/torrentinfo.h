@@ -28,14 +28,13 @@
 
 #pragma once
 
-#include <libtorrent/torrent_info.hpp>
-
-#include <QtContainerFwd>
-#include <QCoreApplication>
-#include <QList>
-
 #include "base/indexrange.h"
 #include "base/pathfwd.h"
+
+#include <QCoreApplication>
+#include <QList>
+#include <QtContainerFwd>
+#include <libtorrent/torrent_info.hpp>
 
 class QByteArray;
 class QDateTime;
@@ -51,11 +50,11 @@ namespace BitTorrent
     {
     public:
         TorrentInfo() = default;
-        TorrentInfo(const TorrentInfo &other) = default;
+        TorrentInfo(const TorrentInfo& other) = default;
 
-        explicit TorrentInfo(const lt::torrent_info &nativeInfo);
+        explicit TorrentInfo(const lt::torrent_info& nativeInfo);
 
-        TorrentInfo &operator=(const TorrentInfo &other);
+        TorrentInfo& operator=(const TorrentInfo& other);
 
         bool isValid() const;
         InfoHash infoHash() const;
@@ -77,19 +76,19 @@ namespace BitTorrent
         using PieceRange = IndexRange<int>;
         // returns pair of the first and the last pieces into which
         // the given file extends (maybe partially).
-        PieceRange filePieces(const Path &filePath) const;
+        PieceRange filePieces(const Path& filePath) const;
         PieceRange filePieces(int fileIndex) const;
 
         QByteArray rawData() const;
 
-        bool matchesInfoHash(const InfoHash &otherInfoHash) const;
+        bool matchesInfoHash(const InfoHash& otherInfoHash) const;
 
         std::shared_ptr<lt::torrent_info> nativeInfo() const;
         QList<lt::file_index_t> nativeIndexes() const;
 
     private:
         // returns file index or -1 if fileName is not found
-        int fileIndex(const Path &filePath) const;
+        int fileIndex(const Path& filePath) const;
 
         std::shared_ptr<const lt::torrent_info> m_nativeInfo;
 

@@ -31,12 +31,12 @@
 
 #pragma once
 
-#include <QtContainerFwd>
+#include "base/pathfwd.h"
+
 #include <QObject>
 #include <QString>
 #include <QVariantHash>
-
-#include "base/pathfwd.h"
+#include <QtContainerFwd>
 
 namespace RSS::Private
 {
@@ -48,13 +48,13 @@ namespace RSS::Private
     public:
         using QObject::QObject;
 
-        void load(const Path &dataFileName, const QString &url);
-        void store(const Path &dataFileName, const QList<QVariantHash> &articlesData);
+        void load(const Path& dataFileName, const QString& url);
+        void store(const Path& dataFileName, const QList<QVariantHash>& articlesData);
 
     signals:
-        void loadingFinished(const QList<QVariantHash> &articles);
+        void loadingFinished(const QList<QVariantHash>& articles);
 
     private:
-        QList<QVariantHash> loadArticles(const QByteArray &data, const QString &url);
+        QList<QVariantHash> loadArticles(const QByteArray& data, const QString& url);
     };
 }

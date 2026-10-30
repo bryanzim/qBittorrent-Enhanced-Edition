@@ -50,5 +50,5 @@ private:
     void setIdle();
 
     ActivityState m_state = ActivityState::Idle;
-    Inhibitor *m_inhibitor = nullptr;
+    Inhibitor* m_inhibitor = nullptr;
 };

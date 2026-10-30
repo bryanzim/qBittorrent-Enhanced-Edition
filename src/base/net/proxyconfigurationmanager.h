@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/global.h"
 #include "base/settingvalue.h"
 #include "proxytype.h"
+
+#include <QObject>
 
 namespace Net
 {
@@ -46,29 +46,29 @@ namespace Net
         QString password;
         bool hostnameLookupEnabled = true;
     };
-    bool operator==(const ProxyConfiguration &left, const ProxyConfiguration &right);
+    bool operator==(const ProxyConfiguration& left, const ProxyConfiguration& right);
 
     class ProxyConfigurationManager final : public QObject
     {
         Q_OBJECT
         Q_DISABLE_COPY_MOVE(ProxyConfigurationManager)
 
-        explicit ProxyConfigurationManager(QObject *parent = nullptr);
+        explicit ProxyConfigurationManager(QObject* parent = nullptr);
         ~ProxyConfigurationManager() = default;
 
     public:
         static void initInstance();
         static void freeInstance();
-        static ProxyConfigurationManager *instance();
+        static ProxyConfigurationManager* instance();
 
         ProxyConfiguration proxyConfiguration() const;
-        void setProxyConfiguration(const ProxyConfiguration &config);
+        void setProxyConfiguration(const ProxyConfiguration& config);
 
     signals:
         void proxyConfigurationChanged();
 
     private:
-        static ProxyConfigurationManager *m_instance;
+        static ProxyConfigurationManager* m_instance;
         ProxyConfiguration m_config;
         SettingValue<ProxyType> m_storeProxyType;
         SettingValue<QString> m_storeProxyIP;

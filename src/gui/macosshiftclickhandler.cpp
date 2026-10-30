@@ -31,18 +31,17 @@
 #include <QMouseEvent>
 #include <QTreeView>
 
-MacOSShiftClickHandler::MacOSShiftClickHandler(QTreeView *treeView)
-    : QObject(treeView)
-    , m_treeView {treeView}
+MacOSShiftClickHandler::MacOSShiftClickHandler(QTreeView* treeView)
+    : QObject(treeView), m_treeView{ treeView }
 {
     treeView->installEventFilter(this);
 }
 
-bool MacOSShiftClickHandler::eventFilter(QObject *watched, QEvent *event)
+bool MacOSShiftClickHandler::eventFilter(QObject* watched, QEvent* event)
 {
     if ((watched == m_treeView) && (event->type() == QEvent::MouseButtonPress))
     {
-        const auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        const auto* mouseEvent = static_cast<QMouseEvent*>(event);
         if (mouseEvent->button() != Qt::LeftButton)
             return false;
 

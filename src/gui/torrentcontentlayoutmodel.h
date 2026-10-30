@@ -28,10 +28,10 @@
 
 #pragma once
 
+#include "base/pathfwd.h"
+
 #include <QAbstractItemModel>
 #include <QHash>
-
-#include "base/pathfwd.h"
 
 namespace BitTorrent
 {
@@ -40,8 +40,8 @@ namespace BitTorrent
 
 class TorrentContentLayoutModel final : public QAbstractItemModel
 {
-     Q_OBJECT
-     Q_DISABLE_COPY_MOVE(TorrentContentLayoutModel)
+    Q_OBJECT
+    Q_DISABLE_COPY_MOVE(TorrentContentLayoutModel)
 
 public:
     enum Column
@@ -57,34 +57,34 @@ public:
         PATH_CHANGED_ROLE = Qt::UserRole
     };
 
-    explicit TorrentContentLayoutModel(BitTorrent::TorrentContentHandler *contentHandler, QObject *parent = nullptr);
+    explicit TorrentContentLayoutModel(BitTorrent::TorrentContentHandler* contentHandler, QObject* parent = nullptr);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
-    QModelIndex parent(const QModelIndex &index) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
 
-    int rowCount(const QModelIndex &parent = {}) const override;
-    int columnCount(const QModelIndex &parent = {}) const override;
+    int rowCount(const QModelIndex& parent = {}) const override;
+    int columnCount(const QModelIndex& parent = {}) const override;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
     bool haveChangedFilePaths() const;
     void applyChangedFilePaths();
 
 signals:
-    void renameFailed(const QString &firstErrorMessage, qsizetype errorsCount);
+    void renameFailed(const QString& firstErrorMessage, qsizetype errorsCount);
 
 private:
     int getFilesCount() const;
     Path getFilePath(int index) const;
 
     void onFileRenamed(int fileIndex);
-    void onFolderRenamed(const Path &newFolderPath, const Path &oldFolderPath, const QHash<int, Path> &renamedFiles);
-    void onFolderRenamingFailed(const Path &newFolderPath, const Path &oldFolderPath, const QHash<int, Path> &renamedFiles);
+    void onFolderRenamed(const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles);
+    void onFolderRenamingFailed(const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles);
 
-    BitTorrent::TorrentContentHandler *m_contentHandler = nullptr;
+    BitTorrent::TorrentContentHandler* m_contentHandler = nullptr;
     QHash<int, Path> m_changedFilePaths;
 };

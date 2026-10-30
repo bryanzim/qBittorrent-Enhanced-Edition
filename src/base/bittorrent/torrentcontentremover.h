@@ -28,10 +28,10 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/path.h"
 #include "torrentcontentremoveoption.h"
+
+#include <QObject>
 
 namespace BitTorrent
 {
@@ -44,10 +44,9 @@ namespace BitTorrent
         using QObject::QObject;
 
     public slots:
-        void performJob(const QString &torrentName, const Path &basePath
-                , const PathList &fileNames, TorrentContentRemoveOption option);
+        void performJob(const QString& torrentName, const Path& basePath, const PathList& fileNames, TorrentContentRemoveOption option);
 
     signals:
-        void jobFinished(const QString &torrentName, const QString &errorMessage);
+        void jobFinished(const QString& torrentName, const QString& errorMessage);
     };
 }

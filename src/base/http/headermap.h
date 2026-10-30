@@ -34,5 +34,5 @@
 
 namespace Http
 {
-    using HeaderMap = QMap<QString, QString>;  // <Header name, Header value>
+    using HeaderMap = QMap<QString, QString>; // <Header name, Header value>
 }

@@ -28,23 +28,20 @@
 
 #include "banlistoptionsdialog.h"
 
-#include <QHostAddress>
-#include <QMessageBox>
-#include <QSortFilterProxyModel>
-#include <QStringListModel>
-
 #include "base/bittorrent/session.h"
 #include "base/utils/net.h"
 #include "ui_banlistoptionsdialog.h"
 #include "utils.h"
 
+#include <QHostAddress>
+#include <QMessageBox>
+#include <QSortFilterProxyModel>
+#include <QStringListModel>
+
 #define SETTINGS_KEY(name) u"BanListOptionsDialog/" name
 
-BanListOptionsDialog::BanListOptionsDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::BanListOptionsDialog)
-    , m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
-    , m_model(new QStringListModel(BitTorrent::Session::instance()->bannedIPs(), this))
+BanListOptionsDialog::BanListOptionsDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::BanListOptionsDialog), m_storeDialogSize(SETTINGS_KEY(u"Size"_s)), m_model(new QStringListModel(BitTorrent::Session::instance()->bannedIPs(), this))
 {
     m_ui->setupUi(this);
 
@@ -121,17 +118,16 @@ void BanListOptionsDialog::on_buttonBanIP_clicked()
 void BanListOptionsDialog::on_buttonDeleteIP_clicked()
 {
     QModelIndexList selection = m_ui->bannedIPList->selectionModel()->selectedIndexes();
-    std::ranges::sort(selection, [](const QModelIndex &left, const QModelIndex &right)
-    {
+    std::ranges::sort(selection, [](const QModelIndex& left, const QModelIndex& right) {
         return (left.row() > right.row());
     });
-    for (const QModelIndex &i : selection)
+    for (const QModelIndex& i : selection)
         m_sortFilter->removeRow(i.row());
 
     m_modified = true;
 }
 
-void BanListOptionsDialog::on_txtIP_textChanged(const QString &ip)
+void BanListOptionsDialog::on_txtIP_textChanged(const QString& ip)
 {
     m_ui->buttonBanIP->setEnabled(Utils::Net::parseIPRange(ip, true).has_value());
 }

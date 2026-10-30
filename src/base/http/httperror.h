@@ -34,9 +34,9 @@
 class HTTPError : public RuntimeError
 {
 public:
-    HTTPError(Http::ResponseStatus responseStatus, const QString &message = {});
+    HTTPError(Http::ResponseStatus responseStatus, const QString& message = {});
 
-    const Http::ResponseStatus &status() const;
+    const Http::ResponseStatus& status() const;
 
 private:
     Http::ResponseStatus m_responseStatus;
@@ -45,47 +45,47 @@ private:
 class BadRequestHTTPError : public HTTPError
 {
 public:
-    explicit BadRequestHTTPError(const QString &message = {});
+    explicit BadRequestHTTPError(const QString& message = {});
 };
 
 class UnauthorizedHTTPError : public HTTPError
 {
 public:
-    explicit UnauthorizedHTTPError(const QString &message = {});
+    explicit UnauthorizedHTTPError(const QString& message = {});
 };
 
 class ForbiddenHTTPError : public HTTPError
 {
 public:
-    explicit ForbiddenHTTPError(const QString &message = {});
+    explicit ForbiddenHTTPError(const QString& message = {});
 };
 
 class NotFoundHTTPError : public HTTPError
 {
 public:
-    explicit NotFoundHTTPError(const QString &message = {});
+    explicit NotFoundHTTPError(const QString& message = {});
 };
 
 class MethodNotAllowedHTTPError : public HTTPError
 {
 public:
-    explicit MethodNotAllowedHTTPError(const QString &message = {});
+    explicit MethodNotAllowedHTTPError(const QString& message = {});
 };
 
 class ConflictHTTPError : public HTTPError
 {
 public:
-    explicit ConflictHTTPError(const QString &message = {});
+    explicit ConflictHTTPError(const QString& message = {});
 };
 
 class UnsupportedMediaTypeHTTPError : public HTTPError
 {
 public:
-    explicit UnsupportedMediaTypeHTTPError(const QString &message = {});
+    explicit UnsupportedMediaTypeHTTPError(const QString& message = {});
 };
 
 class InternalServerErrorHTTPError : public HTTPError
 {
 public:
-    explicit InternalServerErrorHTTPError(const QString &message = {});
+    explicit InternalServerErrorHTTPError(const QString& message = {});
 };

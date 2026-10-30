@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QWidget>
-
 #include "base/logger.h"
+
+#include <QWidget>
 
 namespace Ui
 {
@@ -47,14 +47,14 @@ class ExecutionLogWidget : public QWidget
     Q_DISABLE_COPY_MOVE(ExecutionLogWidget)
 
 public:
-    ExecutionLogWidget(Log::MsgTypes types, QWidget *parent);
+    ExecutionLogWidget(Log::MsgTypes types, QWidget* parent);
     ~ExecutionLogWidget();
 
     void setMessageTypes(Log::MsgTypes types);
 
 private:
-    void displayContextMenu(const LogListView *view, const BaseLogModel *model) const;
+    void displayContextMenu(const LogListView* view, const BaseLogModel* model) const;
 
-    Ui::ExecutionLogWidget *m_ui = nullptr;
-    LogFilterModel *m_messageFilterModel = nullptr;
+    Ui::ExecutionLogWidget* m_ui = nullptr;
+    LogFilterModel* m_messageFilterModel = nullptr;
 };

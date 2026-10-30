@@ -28,10 +28,10 @@
 
 #pragma once
 
-#include <QReadWriteLock>
-
 #include "base/pathfwd.h"
 #include "resumedatastorage.h"
+
+#include <QReadWriteLock>
 
 class QSqlQuery;
 
@@ -43,15 +43,15 @@ namespace BitTorrent
         Q_DISABLE_COPY_MOVE(DBResumeDataStorage)
 
     public:
-        explicit DBResumeDataStorage(const Path &dbPath, QObject *parent = nullptr);
+        explicit DBResumeDataStorage(const Path& dbPath, QObject* parent = nullptr);
         ~DBResumeDataStorage() override;
 
         QList<TorrentID> registeredTorrents() const override;
-        LoadResumeDataResult load(const TorrentID &id) const override;
+        LoadResumeDataResult load(const TorrentID& id) const override;
 
-        void store(const TorrentID &id, LoadTorrentParams resumeData) const override;
-        void remove(const TorrentID &id) const override;
-        void storeQueue(const QList<TorrentID> &queue) const override;
+        void store(const TorrentID& id, LoadTorrentParams resumeData) const override;
+        void remove(const TorrentID& id) const override;
+        void storeQueue(const QList<TorrentID>& queue) const override;
 
     private:
         void doLoadAll() const override;
@@ -59,10 +59,10 @@ namespace BitTorrent
         void createDB() const;
         void updateDB(int fromVersion) const;
         void enableWALMode() const;
-        LoadResumeDataResult parseQueryResultRow(const QSqlQuery &query) const;
+        LoadResumeDataResult parseQueryResultRow(const QSqlQuery& query) const;
 
         class Worker;
-        Worker *m_asyncWorker = nullptr;
+        Worker* m_asyncWorker = nullptr;
 
         mutable QReadWriteLock m_dbLock;
     };

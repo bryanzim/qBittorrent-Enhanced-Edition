@@ -28,21 +28,20 @@
 
 #include "speedwidget.h"
 
-#include <QDateTime>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QMenu>
-#include <QVBoxLayout>
-
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/sessionstatus.h"
 #include "base/preferences.h"
 #include "propertieswidget.h"
 #include "speedplotview.h"
 
-ComboBoxMenuButton::ComboBoxMenuButton(QWidget *parent, QMenu *menu)
-    : QComboBox(parent)
-    , m_menu(menu)
+#include <QDateTime>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QVBoxLayout>
+
+ComboBoxMenuButton::ComboBoxMenuButton(QWidget* parent, QMenu* menu)
+    : QComboBox(parent), m_menu(menu)
 {
 }
 
@@ -54,7 +53,7 @@ void ComboBoxMenuButton::showPopup()
     QComboBox::hidePopup();
 }
 
-SpeedWidget::SpeedWidget(PropertiesWidget *parent)
+SpeedWidget::SpeedWidget(PropertiesWidget* parent)
     : QWidget(parent)
 {
     m_layout = new QVBoxLayout(this);
@@ -75,8 +74,7 @@ SpeedWidget::SpeedWidget(PropertiesWidget *parent)
     m_periodCombobox->addItem(tr("12 Hours"));
     m_periodCombobox->addItem(tr("24 Hours"));
 
-    connect(m_periodCombobox, qOverload<int>(&QComboBox::currentIndexChanged)
-        , this, &SpeedWidget::onPeriodChange);
+    connect(m_periodCombobox, qOverload<int>(&QComboBox::currentIndexChanged), this, &SpeedWidget::onPeriodChange);
 
     m_graphsMenu = new QMenu(this);
     m_graphsMenu->addAction(tr("Total Upload"));
@@ -94,7 +92,7 @@ SpeedWidget::SpeedWidget(PropertiesWidget *parent)
 
     for (int id = SpeedPlotView::UP; id < SpeedPlotView::NB_GRAPHS; ++id)
     {
-        QAction *action = m_graphsMenuActions.at(id);
+        QAction* action = m_graphsMenuActions.at(id);
         action->setCheckable(true);
         action->setChecked(true);
         connect(action, &QAction::changed, this, [this, id]() { onGraphChange(id); });
@@ -128,7 +126,7 @@ SpeedWidget::~SpeedWidget()
 
 void SpeedWidget::update()
 {
-    const BitTorrent::SessionStatus &btStatus = BitTorrent::Session::instance()->status();
+    const BitTorrent::SessionStatus& btStatus = BitTorrent::Session::instance()->status();
 
     SpeedPlotView::SampleData sampleData;
     sampleData[SpeedPlotView::UP] = btStatus.uploadRate;
@@ -152,13 +150,13 @@ void SpeedWidget::onPeriodChange(int period)
 
 void SpeedWidget::onGraphChange(int id)
 {
-    QAction *action = m_graphsMenuActions.at(id);
+    QAction* action = m_graphsMenuActions.at(id);
     m_plot->setGraphEnable(static_cast<SpeedPlotView::GraphID>(id), action->isChecked());
 }
 
 void SpeedWidget::loadSettings()
 {
-    Preferences *preferences = Preferences::instance();
+    Preferences* preferences = Preferences::instance();
 
     const int periodIndex = preferences->getSpeedWidgetPeriod();
     m_periodCombobox->setCurrentIndex(periodIndex);
@@ -166,7 +164,7 @@ void SpeedWidget::loadSettings()
 
     for (int id = SpeedPlotView::UP; id < SpeedPlotView::NB_GRAPHS; ++id)
     {
-        QAction *action = m_graphsMenuActions.at(id);
+        QAction* action = m_graphsMenuActions.at(id);
         const bool enable = preferences->getSpeedWidgetGraphEnable(id);
 
         action->setChecked(enable);
@@ -176,13 +174,13 @@ void SpeedWidget::loadSettings()
 
 void SpeedWidget::saveSettings() const
 {
-    Preferences *preferences = Preferences::instance();
+    Preferences* preferences = Preferences::instance();
 
     preferences->setSpeedWidgetPeriod(m_periodCombobox->currentIndex());
 
     for (int id = SpeedPlotView::UP; id < SpeedPlotView::NB_GRAPHS; ++id)
     {
-        QAction *action = m_graphsMenuActions.at(id);
+        QAction* action = m_graphsMenuActions.at(id);
         preferences->setSpeedWidgetGraphEnable(id, action->isChecked());
     }
 }

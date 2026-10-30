@@ -29,18 +29,17 @@
 
 #pragma once
 
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/multi_index/tag.hpp>
+#include "base/bittorrent/torrent.h"
 
 #include <QAbstractListModel>
 #include <QColor>
 #include <QHash>
 #include <QIcon>
 #include <QList>
-
-#include "base/bittorrent/torrent.h"
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/random_access_index.hpp>
+#include <boost/multi_index/tag.hpp>
+#include <boost/multi_index_container.hpp>
 
 namespace BitTorrent
 {
@@ -103,37 +102,37 @@ public:
         AdditionalUnderlyingDataRole
     };
 
-    explicit TransferListModel(QObject *parent = nullptr);
+    explicit TransferListModel(QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = {}) const override;
-    int columnCount(const QModelIndex &parent = {}) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    int rowCount(const QModelIndex& parent = {}) const override;
+    int columnCount(const QModelIndex& parent = {}) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    BitTorrent::Torrent *torrentHandle(const QModelIndex &index) const;
+    BitTorrent::Torrent* torrentHandle(const QModelIndex& index) const;
 
 private slots:
-    void addTorrents(const QList<BitTorrent::Torrent *> &torrents);
-    void handleTorrentAboutToBeRemoved(BitTorrent::Torrent *torrent);
-    void handleTorrentStatusUpdated(BitTorrent::Torrent *torrent);
-    void handleTorrentsUpdated(const QList<BitTorrent::Torrent *> &torrents);
+    void addTorrents(const QList<BitTorrent::Torrent*>& torrents);
+    void handleTorrentAboutToBeRemoved(BitTorrent::Torrent* torrent);
+    void handleTorrentStatusUpdated(BitTorrent::Torrent* torrent);
+    void handleTorrentsUpdated(const QList<BitTorrent::Torrent*>& torrents);
 
 private:
-    int getTorrentRow(BitTorrent::Torrent *torrent) const;
+    int getTorrentRow(BitTorrent::Torrent* torrent) const;
 
     void configure();
     void loadUIThemeResources();
-    QString displayValue(const BitTorrent::Torrent *torrent, int column) const;
-    QVariant internalValue(const BitTorrent::Torrent *torrent, int column, bool alt) const;
+    QString displayValue(const BitTorrent::Torrent* torrent, int column) const;
+    QVariant internalValue(const BitTorrent::Torrent* torrent, int column, bool alt) const;
     QIcon getIconByState(BitTorrent::TorrentState state) const;
 
     using TorrentList = boost::multi_index_container<
-        BitTorrent::Torrent *,
+        BitTorrent::Torrent*,
         boost::multi_index::indexed_by<
             boost::multi_index::random_access<boost::multi_index::tag<struct ByIndex>>,
-            boost::multi_index::hashed_unique<boost::multi_index::tag<struct ByHandle>, boost::multi_index::identity<BitTorrent::Torrent *>>>>;
+            boost::multi_index::hashed_unique<boost::multi_index::tag<struct ByHandle>, boost::multi_index::identity<BitTorrent::Torrent*>>>>;
     TorrentList m_torrents;
     const QHash<BitTorrent::TorrentState, QString> m_statusStrings;
     // row text colors

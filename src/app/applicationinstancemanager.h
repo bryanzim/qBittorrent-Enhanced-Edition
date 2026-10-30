@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include <chrono>
+#include "base/pathfwd.h"
 
 #include <QObject>
 
-#include "base/pathfwd.h"
+#include <chrono>
 
 using namespace std::chrono_literals;
 
@@ -44,17 +44,17 @@ class ApplicationInstanceManager final : public QObject
     Q_DISABLE_COPY_MOVE(ApplicationInstanceManager)
 
 public:
-    explicit ApplicationInstanceManager(const Path &instancePath, QObject *parent = nullptr);
+    explicit ApplicationInstanceManager(const Path& instancePath, QObject* parent = nullptr);
 
     bool isFirstInstance() const;
 
 public slots:
-    bool sendMessage(const QString &message, std::chrono::milliseconds timeout = 5000ms);
+    bool sendMessage(const QString& message, std::chrono::milliseconds timeout = 5000ms);
 
 signals:
-    void messageReceived(const QString &message);
+    void messageReceived(const QString& message);
 
 private:
-    LocalPeer *m_peer = nullptr;
+    LocalPeer* m_peer = nullptr;
     const bool m_isFirstInstance;
 };

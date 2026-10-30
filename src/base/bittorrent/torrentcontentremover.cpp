@@ -28,38 +28,36 @@
 
 #include "torrentcontentremover.h"
 
-#include <QSet>
-
 #include "base/utils/fs.h"
 
-void BitTorrent::TorrentContentRemover::performJob(const QString &torrentName, const Path &basePath
-        , const PathList &fileNames, const TorrentContentRemoveOption option)
+#include <QSet>
+
+void BitTorrent::TorrentContentRemover::performJob(const QString& torrentName, const Path& basePath, const PathList& fileNames, const TorrentContentRemoveOption option)
 {
     QString errorMessage;
 
     if (!fileNames.isEmpty())
     {
-        const auto removeFileFn = [&option](const Path &filePath) -> nonstd::expected<void, QString>
-        {
+        const auto removeFileFn = [&option](const Path& filePath) -> nonstd::expected<void, QString> {
             return ((option == TorrentContentRemoveOption::MoveToTrash)
-                    ? Utils::Fs::moveFileToTrash : Utils::Fs::removeFile)(filePath);
+                        ? Utils::Fs::moveFileToTrash
+                        : Utils::Fs::removeFile)(filePath);
         };
 
         QSet<Path> topLevelFolders;
-        for (const Path &fileName : fileNames)
+        for (const Path& fileName : fileNames)
         {
             const Path rootItem = fileName.rootItem();
             if (rootItem != fileName)
                 topLevelFolders.insert(rootItem);
 
-            if (const auto result = removeFileFn(basePath / fileName)
-                    ; !result && errorMessage.isEmpty())
+            if (const auto result = removeFileFn(basePath / fileName); !result && errorMessage.isEmpty())
             {
                 errorMessage = result.error();
             }
         }
 
-        for (const Path &topLevelFolder : asConst(topLevelFolders))
+        for (const Path& topLevelFolder : asConst(topLevelFolders))
             Utils::Fs::smartRemoveEmptyFolderTree(basePath / topLevelFolder);
     }
 

@@ -38,7 +38,7 @@ class TriStateWidget final : public QWidget
     Q_DISABLE_COPY_MOVE(TriStateWidget)
 
 public:
-    TriStateWidget(const QString &text, QWidget *parent);
+    TriStateWidget(const QString& text, QWidget* parent);
 
     void setCheckState(Qt::CheckState checkState);
     void setCloseOnInteraction(bool enabled);
@@ -49,9 +49,9 @@ signals:
 private:
     QSize minimumSizeHint() const override;
 
-    void paintEvent(QPaintEvent *) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
+    void paintEvent(QPaintEvent*) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
     void toggleCheckState();
 

@@ -29,13 +29,13 @@
 
 #include "profile_p.h"
 
-#include <QCoreApplication>
-
 #include "base/global.h"
 #include "base/utils/fs.h"
 
-Private::Profile::Profile(const QString &configurationName)
-    : m_configurationName {configurationName}
+#include <QCoreApplication>
+
+Private::Profile::Profile(const QString& configurationName)
+    : m_configurationName{ configurationName }
 {
 }
 
@@ -54,8 +54,8 @@ QString Private::Profile::profileName() const
     return QCoreApplication::applicationName() + configurationSuffix();
 }
 
-Private::DefaultProfile::DefaultProfile(const QString &configurationName)
-    : Profile {configurationName}
+Private::DefaultProfile::DefaultProfile(const QString& configurationName)
+    : Profile{ configurationName }
 {
 }
 
@@ -86,12 +86,12 @@ Path Private::DefaultProfile::configLocation() const
 
 Path Private::DefaultProfile::dataLocation() const
 {
-#if defined(Q_OS_WIN) || defined (Q_OS_MACOS)
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
     return locationWithConfigurationName(QStandardPaths::AppLocalDataLocation);
 #else
     // On Linux keep using the legacy directory ~/.local/share/data/ if it exists
-    const Path genericDataPath {QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)};
-    const Path profilePath {profileName()};
+    const Path genericDataPath{ QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) };
+    const Path profilePath{ profileName() };
     const Path legacyDir = genericDataPath / Path(u"data"_s) / profilePath;
 
     const Path dataDir = genericDataPath / profilePath;
@@ -99,7 +99,7 @@ Path Private::DefaultProfile::dataLocation() const
     if (!dataDir.exists() && legacyDir.exists())
     {
         qWarning("The legacy data directory '%s' is used. It is recommended to move its content to '%s'",
-            qUtf8Printable(legacyDir.toString()), qUtf8Printable(dataDir.toString()));
+                 qUtf8Printable(legacyDir.toString()), qUtf8Printable(dataDir.toString()));
 
         return legacyDir;
     }
@@ -113,7 +113,7 @@ Path Private::DefaultProfile::downloadLocation() const
     return Path(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
 }
 
-std::unique_ptr<QSettings> Private::DefaultProfile::applicationSettings(const QString &name) const
+std::unique_ptr<QSettings> Private::DefaultProfile::applicationSettings(const QString& name) const
 {
 #if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
     return std::make_unique<QSettings>(QSettings::IniFormat, QSettings::UserScope, profileName(), name);
@@ -127,14 +127,8 @@ Path Private::DefaultProfile::locationWithConfigurationName(const QStandardPaths
     return Path(QStandardPaths::writableLocation(location) + configurationSuffix());
 }
 
-Private::CustomProfile::CustomProfile(const Path &rootPath, const QString &configurationName)
-    : Profile {configurationName}
-    , m_rootPath {rootPath}
-    , m_basePath {m_rootPath / Path(profileName())}
-    , m_cacheLocation {m_basePath / Path(u"cache"_s)}
-    , m_configLocation {m_basePath / Path(u"config"_s)}
-    , m_dataLocation {m_basePath / Path(u"data"_s)}
-    , m_downloadLocation {m_basePath / Path(u"downloads"_s)}
+Private::CustomProfile::CustomProfile(const Path& rootPath, const QString& configurationName)
+    : Profile{ configurationName }, m_rootPath{ rootPath }, m_basePath{ m_rootPath / Path(profileName()) }, m_cacheLocation{ m_basePath / Path(u"cache"_s) }, m_configLocation{ m_basePath / Path(u"config"_s) }, m_dataLocation{ m_basePath / Path(u"data"_s) }, m_downloadLocation{ m_basePath / Path(u"downloads"_s) }
 {
 }
 
@@ -168,7 +162,7 @@ Path Private::CustomProfile::downloadLocation() const
     return m_downloadLocation;
 }
 
-std::unique_ptr<QSettings> Private::CustomProfile::applicationSettings(const QString &name) const
+std::unique_ptr<QSettings> Private::CustomProfile::applicationSettings(const QString& name) const
 {
     // here we force QSettings::IniFormat format always because we need it to be portable across platforms
 #if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
@@ -180,23 +174,23 @@ std::unique_ptr<QSettings> Private::CustomProfile::applicationSettings(const QSt
     return std::make_unique<QSettings>(settingsFilePath.data(), QSettings::IniFormat);
 }
 
-Path Private::NoConvertConverter::fromPortablePath(const Path &portablePath) const
+Path Private::NoConvertConverter::fromPortablePath(const Path& portablePath) const
 {
     return portablePath;
 }
 
-Path Private::NoConvertConverter::toPortablePath(const Path &path) const
+Path Private::NoConvertConverter::toPortablePath(const Path& path) const
 {
     return path;
 }
 
-Private::Converter::Converter(const Path &basePath)
-    : m_basePath {basePath}
+Private::Converter::Converter(const Path& basePath)
+    : m_basePath{ basePath }
 {
     Q_ASSERT(basePath.isAbsolute());
 }
 
-Path Private::Converter::toPortablePath(const Path &path) const
+Path Private::Converter::toPortablePath(const Path& path) const
 {
     if (path.isEmpty())
         return path;
@@ -214,7 +208,7 @@ Path Private::Converter::toPortablePath(const Path &path) const
     return m_basePath.relativePathOf(path);
 }
 
-Path Private::Converter::fromPortablePath(const Path &portablePath) const
+Path Private::Converter::fromPortablePath(const Path& portablePath) const
 {
     if (portablePath.isEmpty() || portablePath.isAbsolute())
         return portablePath;

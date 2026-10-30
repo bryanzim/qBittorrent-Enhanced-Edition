@@ -29,11 +29,6 @@
 
 #include "trackersadditiondialog.h"
 
-#include <QList>
-#include <QMessageBox>
-#include <QSize>
-#include <QStringView>
-
 #include "base/bittorrent/torrent.h"
 #include "base/bittorrent/trackerentry.h"
 #include "base/bittorrent/trackerentrystatus.h"
@@ -44,14 +39,15 @@
 #include "gui/uithememanager.h"
 #include "ui_trackersadditiondialog.h"
 
+#include <QList>
+#include <QMessageBox>
+#include <QSize>
+#include <QStringView>
+
 #define SETTINGS_KEY(name) u"AddTrackersDialog/" name
 
-TrackersAdditionDialog::TrackersAdditionDialog(QWidget *parent, BitTorrent::Torrent *const torrent)
-    : QDialog(parent)
-    , m_ui(new Ui::TrackersAdditionDialog)
-    , m_torrent(torrent)
-    , m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
-    , m_storeTrackersListURL(SETTINGS_KEY(u"TrackersListURL"_s))
+TrackersAdditionDialog::TrackersAdditionDialog(QWidget* parent, BitTorrent::Torrent* const torrent)
+    : QDialog(parent), m_ui(new Ui::TrackersAdditionDialog), m_torrent(torrent), m_storeDialogSize(SETTINGS_KEY(u"Size"_s)), m_storeTrackersListURL(SETTINGS_KEY(u"TrackersListURL"_s))
 {
     m_ui->setupUi(this);
 
@@ -80,7 +76,7 @@ void TrackersAdditionDialog::onAccepted() const
     const int baseTier = !currentTrackers.isEmpty() ? (currentTrackers.last().tier + 1) : 0;
 
     QList<BitTorrent::TrackerEntry> entries = BitTorrent::parseTrackerEntries(m_ui->textEditTrackersList->toPlainText());
-    for (BitTorrent::TrackerEntry &entry : entries)
+    for (BitTorrent::TrackerEntry& entry : entries)
         entry.tier = Utils::Number::clampingAdd(entry.tier, baseTier);
 
     m_torrent->addTrackers(entries);
@@ -99,11 +95,10 @@ void TrackersAdditionDialog::onDownloadButtonClicked()
     m_ui->downloadButton->setEnabled(false);
     setCursor(Qt::WaitCursor);
 
-    Net::DownloadManager::instance()->download(url, Preferences::instance()->useProxyForGeneralPurposes()
-            , this, &TrackersAdditionDialog::onTorrentListDownloadFinished);
+    Net::DownloadManager::instance()->download(url, Preferences::instance()->useProxyForGeneralPurposes(), this, &TrackersAdditionDialog::onTorrentListDownloadFinished);
 }
 
-void TrackersAdditionDialog::onTorrentListDownloadFinished(const Net::DownloadResult &result)
+void TrackersAdditionDialog::onTorrentListDownloadFinished(const Net::DownloadResult& result)
 {
     // Restore the cursor, buttons...
     m_ui->downloadButton->setEnabled(true);
@@ -111,8 +106,7 @@ void TrackersAdditionDialog::onTorrentListDownloadFinished(const Net::DownloadRe
 
     if (result.status != Net::DownloadStatus::Success)
     {
-        QMessageBox::warning(this, tr("Download trackers list error")
-            , tr("Error occurred when downloading the trackers list. Reason: \"%1\"").arg(result.errorString));
+        QMessageBox::warning(this, tr("Download trackers list error"), tr("Error occurred when downloading the trackers list. Reason: \"%1\"").arg(result.errorString));
         return;
     }
 

@@ -33,9 +33,9 @@
 #include "base/utils/fs.h"
 #include "profile_p.h"
 
-Profile *Profile::m_instance = nullptr;
+Profile* Profile::m_instance = nullptr;
 
-Profile::Profile(const Path &rootProfilePath, const QString &configurationName, const bool convertPathsToProfileRelative)
+Profile::Profile(const Path& rootProfilePath, const QString& configurationName, const bool convertPathsToProfileRelative)
 {
     if (rootProfilePath.isEmpty())
         m_profileImpl = std::make_unique<Private::DefaultProfile>(configurationName);
@@ -52,8 +52,8 @@ Profile::Profile(const Path &rootProfilePath, const QString &configurationName, 
         m_pathConverterImpl = std::make_unique<Private::NoConvertConverter>();
 }
 
-void Profile::initInstance(const Path &rootProfilePath, const QString &configurationName,
-    const bool convertPathsToProfileRelative)
+void Profile::initInstance(const Path& rootProfilePath, const QString& configurationName,
+                           const bool convertPathsToProfileRelative)
 {
     if (m_instance)
         return;
@@ -66,7 +66,7 @@ void Profile::freeInstance()
     m_instance = nullptr;
 }
 
-const Profile *Profile::instance()
+const Profile* Profile::instance()
 {
     return m_instance;
 }
@@ -86,7 +86,6 @@ Path Profile::location(const SpecialFolder folder) const
 
     case SpecialFolder::Downloads:
         return m_profileImpl->downloadLocation();
-
     }
 
     Q_ASSERT_X(false, Q_FUNC_INFO, "Unknown SpecialFolder value.");
@@ -108,7 +107,7 @@ QString Profile::profileName() const
     return m_profileImpl->profileName();
 }
 
-std::unique_ptr<QSettings> Profile::applicationSettings(const QString &name) const
+std::unique_ptr<QSettings> Profile::applicationSettings(const QString& name) const
 {
     return m_profileImpl->applicationSettings(name);
 }
@@ -120,12 +119,12 @@ void Profile::ensureDirectoryExists(const SpecialFolder folder) const
         qFatal("Could not create required directory '%s'", qUtf8Printable(locationPath.toString()));
 }
 
-Path Profile::toPortablePath(const Path &absolutePath) const
+Path Profile::toPortablePath(const Path& absolutePath) const
 {
     return m_pathConverterImpl->toPortablePath(absolutePath);
 }
 
-Path Profile::fromPortablePath(const Path &portablePath) const
+Path Profile::fromPortablePath(const Path& portablePath) const
 {
     return m_pathConverterImpl->fromPortablePath(portablePath);
 }

@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QNetworkReply>
-
 #include "base/net/downloadmanager.h"
+
+#include <QNetworkReply>
 
 class QObject;
 class QUrl;
@@ -44,7 +44,7 @@ namespace Net
         Q_DISABLE_COPY_MOVE(DownloadHandlerImpl)
 
     public:
-        DownloadHandlerImpl(DownloadManager *manager, const DownloadRequest &downloadRequest, bool useProxy);
+        DownloadHandlerImpl(DownloadManager* manager, const DownloadRequest& downloadRequest, bool useProxy);
 
         void cancel() override;
 
@@ -52,21 +52,21 @@ namespace Net
         DownloadRequest downloadRequest() const;
         bool useProxy() const;
 
-        void assignNetworkReply(QNetworkReply *reply);
-        QNetworkReply *assignedNetworkReply() const;
+        void assignNetworkReply(QNetworkReply* reply);
+        QNetworkReply* assignedNetworkReply() const;
 
     private:
         void processFinishedDownload();
         void checkDownloadSize(qint64 bytesReceived, qint64 bytesTotal);
-        void handleRedirection(const QUrl &newUrl);
-        void setError(const QString &error);
+        void handleRedirection(const QUrl& newUrl);
+        void setError(const QString& error);
         void finish();
 
         static QString errorCodeToString(QNetworkReply::NetworkError status);
 
-        DownloadManager *m_manager = nullptr;
-        QNetworkReply *m_reply = nullptr;
-        DownloadHandlerImpl *m_redirectionHandler = nullptr;
+        DownloadManager* m_manager = nullptr;
+        QNetworkReply* m_reply = nullptr;
+        DownloadHandlerImpl* m_redirectionHandler = nullptr;
         const DownloadRequest m_downloadRequest;
         const bool m_useProxy = false;
         short m_redirectionCount = 0;

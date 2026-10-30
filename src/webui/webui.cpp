@@ -40,9 +40,8 @@
 #include "base/utils/password.h"
 #include "webapplication.h"
 
-WebUI::WebUI(IApplication *app, const QByteArray &tempPasswordHash)
-    : ApplicationComponent(app)
-    , m_tempPasswordHash {tempPasswordHash}
+WebUI::WebUI(IApplication* app, const QByteArray& tempPasswordHash)
+    : ApplicationComponent(app), m_tempPasswordHash{ tempPasswordHash }
 {
     configure();
     connect(Preferences::instance(), &Preferences::changed, this, &WebUI::configure);
@@ -53,7 +52,7 @@ void WebUI::configure()
     m_isErrored = false; // clear previous error state
     m_errorMsg.clear();
 
-    const Preferences *pref = Preferences::instance();
+    const Preferences* pref = Preferences::instance();
 
     m_isEnabled = pref->isWebUIEnabled();
     const QString username = pref->getWebUIUsername();
@@ -76,10 +75,10 @@ void WebUI::configure()
         const quint16 port = pref->getWebUIPort();
 
         // Port forwarding
-        auto *portForwarder = Net::PortForwarder::instance();
+        auto* portForwarder = Net::PortForwarder::instance();
         if (pref->useUPnPForWebUIPort())
         {
-            portForwarder->setPorts(portForwardingProfile, {port});
+            portForwarder->setPorts(portForwardingProfile, { port });
         }
         else
         {
@@ -89,7 +88,8 @@ void WebUI::configure()
         // http server
         const QString serverAddressString = pref->getWebUIAddress();
         const auto serverAddress = ((serverAddressString == u"*") || serverAddressString.isEmpty())
-            ? QHostAddress::Any : QHostAddress(serverAddressString);
+                                       ? QHostAddress::Any
+                                       : QHostAddress(serverAddressString);
 
         if (!m_httpServer)
         {
@@ -107,8 +107,7 @@ void WebUI::configure()
 
         if (pref->isWebUIHttpsEnabled())
         {
-            const auto readData = [](const Path &path) -> QByteArray
-            {
+            const auto readData = [](const Path& path) -> QByteArray {
                 const auto readResult = Utils::IO::readFile(path, Utils::Net::MAX_SSL_FILE_SIZE);
                 return readResult.value_or(QByteArray());
             };
@@ -136,7 +135,9 @@ void WebUI::configure()
             else
             {
                 setError(tr("Unable to bind to IP: %1, port: %2. Reason: %3")
-                        .arg(serverAddressString).arg(port).arg(m_httpServer->errorString()));
+                             .arg(serverAddressString)
+                             .arg(port)
+                             .arg(m_httpServer->errorString()));
             }
         }
 
@@ -163,7 +164,7 @@ void WebUI::configure()
     }
 }
 
-void WebUI::setError(const QString &message)
+void WebUI::setError(const QString& message)
 {
     m_isErrored = true;
     m_errorMsg = message;
@@ -192,18 +193,21 @@ QString WebUI::errorMessage() const
 
 bool WebUI::isHttps() const
 {
-    if (!m_httpServer) return false;
+    if (!m_httpServer)
+        return false;
     return m_httpServer->isHttps();
 }
 
 QHostAddress WebUI::hostAddress() const
 {
-    if (!m_httpServer) return {};
+    if (!m_httpServer)
+        return {};
     return m_httpServer->serverAddress();
 }
 
 quint16 WebUI::port() const
 {
-    if (!m_httpServer) return 0;
+    if (!m_httpServer)
+        return 0;
     return m_httpServer->serverPort();
 }

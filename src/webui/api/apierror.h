@@ -43,7 +43,7 @@ enum class APIErrorType
 class APIError : public RuntimeError
 {
 public:
-    explicit APIError(APIErrorType type, const QString &message = {});
+    explicit APIError(APIErrorType type, const QString& message = {});
 
     APIErrorType type() const;
 

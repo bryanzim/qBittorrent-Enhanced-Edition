@@ -54,17 +54,17 @@ namespace RSS::Private
         Q_DISABLE_COPY_MOVE(Parser)
 
     public:
-        explicit Parser(const QString &lastBuildDate);
-        void parse(const QByteArray &feedData);
+        explicit Parser(const QString& lastBuildDate);
+        void parse(const QByteArray& feedData);
 
     signals:
-        void finished(const RSS::Private::ParsingResult &result);
+        void finished(const RSS::Private::ParsingResult& result);
 
     private:
-        void parseRssArticle(QXmlStreamReader &xml);
-        void parseRSSChannel(QXmlStreamReader &xml);
-        void parseAtomArticle(QXmlStreamReader &xml);
-        void parseAtomChannel(QXmlStreamReader &xml);
+        void parseRssArticle(QXmlStreamReader& xml);
+        void parseRSSChannel(QXmlStreamReader& xml);
+        void parseAtomArticle(QXmlStreamReader& xml);
+        void parseAtomChannel(QXmlStreamReader& xml);
         void addArticle(QVariantHash article);
 
         QDateTime m_fallbackDate;
