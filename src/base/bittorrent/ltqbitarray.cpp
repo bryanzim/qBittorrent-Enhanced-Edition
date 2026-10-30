@@ -28,18 +28,16 @@
 
 #include "ltqbitarray.h"
 
-#include <libtorrent/bitfield.hpp>
-
 #include <QBitArray>
 #include <QVarLengthArray>
+#include <libtorrent/bitfield.hpp>
 
 namespace
 {
     unsigned char reverseByte(const unsigned char byte)
     {
         // https://graphics.stanford.edu/~seander/bithacks.html#BitReverseTable
-        static const unsigned char table[] =
-        {
+        static const unsigned char table[] = {
 #define R2(n) n, (n + (2 * 64)), (n + 64), (n + (3 * 64))
 #define R4(n) R2(n), R2(n + (2 * 16)), R2(n + 16), R2(n + (3 * 16))
 #define R6(n) R4(n), R4(n + (2 * 4)), R4(n + 4), R4(n + (3 * 4))
@@ -54,11 +52,11 @@ namespace
 
 namespace BitTorrent::LT
 {
-    QBitArray toQBitArray(const lt::bitfield &bits)
+    QBitArray toQBitArray(const lt::bitfield& bits)
     {
         const int STACK_ALLOC_SIZE = 10 * 1024;
 
-        const char *bitsData = bits.data();
+        const char* bitsData = bits.data();
         const int dataLength = (bits.size() + 7) / 8;
 
         QVarLengthArray<char, STACK_ALLOC_SIZE> tmp(dataLength);

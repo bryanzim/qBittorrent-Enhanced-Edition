@@ -28,14 +28,14 @@
 
 #pragma once
 
-#include <memory>
+#include "base/path.h"
+#include "headermap.h"
+#include "request.h"
 
 #include <QObject>
 #include <QPointer>
 
-#include "base/path.h"
-#include "headermap.h"
-#include "request.h"
+#include <memory>
 
 class QAbstractSocket;
 class QThread;
@@ -56,7 +56,7 @@ namespace Http
             Failed
         };
 
-        AsyncFileSender(const Request &request, const Path &filePath, const HeaderMap &headers, QAbstractSocket *socket, QObject *parent = nullptr);
+        AsyncFileSender(const Request& request, const Path& filePath, const HeaderMap& headers, QAbstractSocket* socket, QObject* parent = nullptr);
         ~AsyncFileSender() override;
 
         State state() const;
@@ -77,7 +77,7 @@ namespace Http
         Request m_request;
         Path m_filePath;
         HeaderMap m_headers;
-        QAbstractSocket *m_socket = nullptr;
+        QAbstractSocket* m_socket = nullptr;
 
         class DataPipe;
         std::shared_ptr<DataPipe> m_dataPipe;

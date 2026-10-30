@@ -29,17 +29,6 @@
 
 #include "searchjobwidget.h"
 
-#include <QApplication>
-#include <QClipboard>
-#include <QDesktopServices>
-#include <QHeaderView>
-#include <QKeyEvent>
-#include <QMenu>
-#include <QMessageBox>
-#include <QPalette>
-#include <QStandardItemModel>
-#include <QUrl>
-
 #include "base/logger.h"
 #include "base/preferences.h"
 #include "base/search/searchdownloadhandler.h"
@@ -51,6 +40,17 @@
 #include "gui/uithememanager.h"
 #include "searchsortmodel.h"
 #include "ui_searchjobwidget.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <QDesktopServices>
+#include <QHeaderView>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QMessageBox>
+#include <QPalette>
+#include <QStandardItemModel>
+#include <QUrl>
 
 namespace
 {
@@ -87,11 +87,8 @@ namespace
 
 using Utils::Misc::SizeUnit;
 
-SearchJobWidget::SearchJobWidget(const QString &id, IGUIApplication *app, QWidget *parent)
-    : GUIApplicationComponent(app, parent)
-    , m_nameFilteringMode {u"Search/FilteringMode"_s}
-    , m_id {id}
-    , m_ui {new Ui::SearchJobWidget}
+SearchJobWidget::SearchJobWidget(const QString& id, IGUIApplication* app, QWidget* parent)
+    : GUIApplicationComponent(app, parent), m_nameFilteringMode{ u"Search/FilteringMode"_s }, m_id{ id }, m_ui{ new Ui::SearchJobWidget }
 {
     m_ui->setupUi(this);
 
@@ -122,8 +119,7 @@ SearchJobWidget::SearchJobWidget(const QString &id, IGUIApplication *app, QWidge
     m_proxyModel->setSourceModel(m_searchListModel);
     m_proxyModel->enableNameFilter(m_nameFilteringMode.get(NameFilteringMode::OnlyNames) == NameFilteringMode::OnlyNames);
     m_proxyModel->setSeedsFilter(m_ui->minSeeds->value(), m_ui->maxSeeds->value());
-    m_proxyModel->setSizeFilter(sizeInBytes(m_ui->minSize->value(), static_cast<SizeUnit>(m_ui->minSizeUnit->currentIndex()))
-        , sizeInBytes(m_ui->maxSize->value(), static_cast<SizeUnit>(m_ui->maxSizeUnit->currentIndex())));
+    m_proxyModel->setSizeFilter(sizeInBytes(m_ui->minSize->value(), static_cast<SizeUnit>(m_ui->minSizeUnit->currentIndex())), sizeInBytes(m_ui->maxSize->value(), static_cast<SizeUnit>(m_ui->maxSizeUnit->currentIndex())));
 
     updateResultsCount();
 
@@ -189,8 +185,7 @@ SearchJobWidget::SearchJobWidget(const QString &id, IGUIApplication *app, QWidge
     connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, &SearchJobWidget::onUIThemeChanged);
 }
 
-SearchJobWidget::SearchJobWidget(const QString &id, const QString &searchPattern
-        , const QList<SearchResult> &searchResults, IGUIApplication *app, QWidget *parent)
+SearchJobWidget::SearchJobWidget(const QString& id, const QString& searchPattern, const QList<SearchResult>& searchResults, IGUIApplication* app, QWidget* parent)
     : SearchJobWidget(id, app, parent)
 {
     m_searchPattern = searchPattern;
@@ -199,7 +194,7 @@ SearchJobWidget::SearchJobWidget(const QString &id, const QString &searchPattern
     appendSearchResults(searchResults);
 }
 
-SearchJobWidget::SearchJobWidget(const QString &id, SearchHandler *searchHandler, IGUIApplication *app, QWidget *parent)
+SearchJobWidget::SearchJobWidget(const QString& id, SearchHandler* searchHandler, IGUIApplication* app, QWidget* parent)
     : SearchJobWidget(id, app, parent)
 {
     assignSearchHandler(searchHandler);
@@ -226,18 +221,18 @@ QList<SearchResult> SearchJobWidget::searchResults() const
     return m_searchResults;
 }
 
-void SearchJobWidget::onItemDoubleClicked(const QModelIndex &index)
+void SearchJobWidget::onItemDoubleClicked(const QModelIndex& index)
 {
     downloadTorrent(index);
 }
 
-QHeaderView *SearchJobWidget::header() const
+QHeaderView* SearchJobWidget::header() const
 {
     return m_ui->resultsBrowser->header();
 }
 
 // Set the color of a row in data model
-void SearchJobWidget::setRowColor(int row, const QColor &color)
+void SearchJobWidget::setRowColor(int row, const QColor& color)
 {
     for (int i = 0; i < m_proxyModel->columnCount(); ++i)
         m_proxyModel->setData(m_proxyModel->index(row, i), color, Qt::ForegroundRole);
@@ -278,12 +273,12 @@ int SearchJobWidget::visibleResultsCount() const
     return m_proxyModel->rowCount();
 }
 
-LineEdit *SearchJobWidget::lineEditSearchResultsFilter() const
+LineEdit* SearchJobWidget::lineEditSearchResultsFilter() const
 {
     return m_lineEditSearchResultsFilter;
 }
 
-void SearchJobWidget::assignSearchHandler(SearchHandler *searchHandler)
+void SearchJobWidget::assignSearchHandler(SearchHandler* searchHandler)
 {
     Q_ASSERT(searchHandler);
     if (!searchHandler) [[unlikely]]
@@ -319,7 +314,7 @@ void SearchJobWidget::cancelSearch()
 void SearchJobWidget::downloadTorrents(const AddTorrentOption option)
 {
     const QModelIndexList rows = m_ui->resultsBrowser->selectionModel()->selectedRows();
-    for (const QModelIndex &rowIndex : rows)
+    for (const QModelIndex& rowIndex : rows)
         downloadTorrent(rowIndex, option);
 }
 
@@ -329,12 +324,12 @@ void SearchJobWidget::openTorrentPages()
     qsizetype emptyLinkCount = 0;
     qsizetype badLinkCount = 0;
     QString warningEntryName;
-    for (const QModelIndex &rowIndex : rows)
+    for (const QModelIndex& rowIndex : rows)
     {
         const QString entryName = m_proxyModel->index(rowIndex.row(), SearchSortModel::NAME).data().toString();
         const QString descrLink = m_proxyModel->index(rowIndex.row(), SearchSortModel::DESC_LINK).data().toString();
 
-        const QUrl descrLinkURL {descrLink};
+        const QUrl descrLinkURL{ descrLink };
         if (descrLinkURL.isEmpty()) [[unlikely]]
         {
             if (warningEntryName.isEmpty())
@@ -348,7 +343,8 @@ void SearchJobWidget::openTorrentPages()
             ++badLinkCount;
 
             LogMsg(tr("Blocked opening search result description page URL. URL pointing to local file might be malicious behaviour. Name: \"%1\". URL: \"%2\".")
-                    .arg(entryName, descrLink), Log::WARNING);
+                       .arg(entryName, descrLink),
+                   Log::WARNING);
         }
         else [[likely]]
         {
@@ -389,13 +385,14 @@ void SearchJobWidget::copyTorrentNames() const
 
 void SearchJobWidget::copyField(const int column) const
 {
-    const QModelIndexList rows {m_ui->resultsBrowser->selectionModel()->selectedRows()};
+    const QModelIndexList rows{ m_ui->resultsBrowser->selectionModel()->selectedRows() };
     QStringList list;
 
-    for (const QModelIndex &rowIndex : rows)
+    for (const QModelIndex& rowIndex : rows)
     {
         const QString field = m_proxyModel->data(
-            m_proxyModel->index(rowIndex.row(), column)).toString();
+                                              m_proxyModel->index(rowIndex.row(), column))
+                                  .toString();
         if (!field.isEmpty())
             list << field;
     }
@@ -414,12 +411,14 @@ void SearchJobWidget::setStatus(const Status value)
     emit statusChanged();
 }
 
-void SearchJobWidget::downloadTorrent(const QModelIndex &rowIndex, const AddTorrentOption option)
+void SearchJobWidget::downloadTorrent(const QModelIndex& rowIndex, const AddTorrentOption option)
 {
     const QString torrentUrl = m_proxyModel->data(
-                m_proxyModel->index(rowIndex.row(), SearchSortModel::DL_LINK)).toString();
+                                               m_proxyModel->index(rowIndex.row(), SearchSortModel::DL_LINK))
+                                   .toString();
     const QString engineName = m_proxyModel->data(
-                m_proxyModel->index(rowIndex.row(), SearchSortModel::ENGINE_NAME)).toString();
+                                               m_proxyModel->index(rowIndex.row(), SearchSortModel::ENGINE_NAME))
+                                   .toString();
 
     if (torrentUrl.startsWith(u"magnet:", Qt::CaseInsensitive))
     {
@@ -427,10 +426,8 @@ void SearchJobWidget::downloadTorrent(const QModelIndex &rowIndex, const AddTorr
     }
     else
     {
-        SearchDownloadHandler *downloadHandler = SearchPluginManager::instance()->downloadTorrent(engineName, torrentUrl);
-        connect(downloadHandler, &SearchDownloadHandler::downloadFinished, this
-            , [this, downloadHandler, option](const QString &source, [[maybe_unused]] const QString &errorMessage)
-        {
+        SearchDownloadHandler* downloadHandler = SearchPluginManager::instance()->downloadTorrent(engineName, torrentUrl);
+        connect(downloadHandler, &SearchDownloadHandler::downloadFinished, this, [this, downloadHandler, option](const QString& source, [[maybe_unused]] const QString& errorMessage) {
             addTorrentToSession(source, option);
             downloadHandler->deleteLater();
         });
@@ -439,7 +436,7 @@ void SearchJobWidget::downloadTorrent(const QModelIndex &rowIndex, const AddTorr
     setRowVisited(rowIndex.row());
 }
 
-void SearchJobWidget::addTorrentToSession(const QString &source, const AddTorrentOption option)
+void SearchJobWidget::addTorrentToSession(const QString& source, const AddTorrentOption option)
 {
     app()->addTorrentManager()->addTorrent(source, {}, option);
 }
@@ -449,7 +446,8 @@ void SearchJobWidget::updateResultsCount()
     const int totalResults = m_searchListModel->rowCount();
     const int filteredResults = m_proxyModel->rowCount();
     m_ui->resultsLbl->setText(tr("Results (showing <i>%1</i> out of <i>%2</i>):", "i.e: Search results")
-                              .arg(filteredResults).arg(totalResults));
+                                  .arg(filteredResults)
+                                  .arg(totalResults));
 
     m_noSearchResults = (totalResults == 0);
     emit resultsCountUpdated();
@@ -475,8 +473,7 @@ void SearchJobWidget::updateSeedsFilter()
 void SearchJobWidget::updateSizeFilter()
 {
     // we update size and seeds filter parameters in the model even if they are disabled
-    m_proxyModel->setSizeFilter(sizeInBytes(m_ui->minSize->value(), static_cast<SizeUnit>(m_ui->minSizeUnit->currentIndex()))
-        , sizeInBytes(m_ui->maxSize->value(), static_cast<SizeUnit>(m_ui->maxSizeUnit->currentIndex())));
+    m_proxyModel->setSizeFilter(sizeInBytes(m_ui->minSize->value(), static_cast<SizeUnit>(m_ui->minSizeUnit->currentIndex())), sizeInBytes(m_ui->maxSize->value(), static_cast<SizeUnit>(m_ui->maxSizeUnit->currentIndex())));
 
     updateResultsCount();
 }
@@ -514,23 +511,24 @@ void SearchJobWidget::fillFilterComboBoxes()
     m_ui->filterMode->setCurrentIndex((index == -1) ? 0 : index);
 }
 
-void SearchJobWidget::filterSearchResults(const QString &name)
+void SearchJobWidget::filterSearchResults(const QString& name)
 {
     const QString pattern = (Preferences::instance()->getRegexAsFilteringPatternForSearchJob()
-        ? name : Utils::String::wildcardToRegexPattern(name));
+                                 ? name
+                                 : Utils::String::wildcardToRegexPattern(name));
     m_proxyModel->setFilterRegularExpression(QRegularExpression(pattern, QRegularExpression::CaseInsensitiveOption));
     updateResultsCount();
 }
 
 void SearchJobWidget::showFilterContextMenu()
 {
-    const Preferences *pref = Preferences::instance();
+    const Preferences* pref = Preferences::instance();
 
-    QMenu *menu = m_lineEditSearchResultsFilter->createStandardContextMenu();
+    QMenu* menu = m_lineEditSearchResultsFilter->createStandardContextMenu();
     menu->setAttribute(Qt::WA_DeleteOnClose);
     menu->addSeparator();
 
-    QAction *useRegexAct = menu->addAction(tr("Use regular expressions"));
+    QAction* useRegexAct = menu->addAction(tr("Use regular expressions"));
     useRegexAct->setCheckable(true);
     useRegexAct->setChecked(pref->getRegexAsFilteringPatternForSearchJob());
     connect(useRegexAct, &QAction::toggled, pref, &Preferences::setRegexAsFilteringPatternForSearchJob);
@@ -539,28 +537,22 @@ void SearchJobWidget::showFilterContextMenu()
     menu->popup(QCursor::pos());
 }
 
-void SearchJobWidget::contextMenuEvent(QContextMenuEvent *event)
+void SearchJobWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-    auto *menu = new QMenu(this);
+    auto* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"download"_s)
-        , tr("Open download window"), this, [this]() { downloadTorrents(AddTorrentOption::ShowDialog); });
-    menu->addAction(UIThemeManager::instance()->getIcon(u"downloading"_s, u"download"_s)
-        , tr("Download"), this, [this]() { downloadTorrents(AddTorrentOption::SkipDialog); });
+    menu->addAction(UIThemeManager::instance()->getIcon(u"download"_s), tr("Open download window"), this, [this]() { downloadTorrents(AddTorrentOption::ShowDialog); });
+    menu->addAction(UIThemeManager::instance()->getIcon(u"downloading"_s, u"download"_s), tr("Download"), this, [this]() { downloadTorrents(AddTorrentOption::SkipDialog); });
     menu->addSeparator();
-    menu->addAction(UIThemeManager::instance()->getIcon(u"application-url"_s), tr("Open description page")
-        , this, &SearchJobWidget::openTorrentPages);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"application-url"_s), tr("Open description page"), this, &SearchJobWidget::openTorrentPages);
 
-    QMenu *copySubMenu = menu->addMenu(
+    QMenu* copySubMenu = menu->addMenu(
         UIThemeManager::instance()->getIcon(u"edit-copy"_s), tr("Copy"));
 
-    copySubMenu->addAction(UIThemeManager::instance()->getIcon(u"name"_s, u"edit-copy"_s), tr("Name")
-        , this, &SearchJobWidget::copyTorrentNames);
-    copySubMenu->addAction(UIThemeManager::instance()->getIcon(u"insert-link"_s, u"edit-copy"_s), tr("Download link")
-        , this, &SearchJobWidget::copyTorrentDownloadLinks);
-    copySubMenu->addAction(UIThemeManager::instance()->getIcon(u"application-url"_s, u"edit-copy"_s), tr("Description page URL")
-        , this, &SearchJobWidget::copyTorrentURLs);
+    copySubMenu->addAction(UIThemeManager::instance()->getIcon(u"name"_s, u"edit-copy"_s), tr("Name"), this, &SearchJobWidget::copyTorrentNames);
+    copySubMenu->addAction(UIThemeManager::instance()->getIcon(u"insert-link"_s, u"edit-copy"_s), tr("Download link"), this, &SearchJobWidget::copyTorrentDownloadLinks);
+    copySubMenu->addAction(UIThemeManager::instance()->getIcon(u"application-url"_s, u"edit-copy"_s), tr("Description page URL"), this, &SearchJobWidget::copyTorrentURLs);
 
     menu->popup(event->globalPos());
 }
@@ -589,7 +581,7 @@ int SearchJobWidget::visibleColumnsCount() const
 
 void SearchJobWidget::displayColumnHeaderMenu()
 {
-    auto *menu = new QMenu(this);
+    auto* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     menu->setTitle(tr("Column visibility"));
     menu->setToolTipsVisible(true);
@@ -597,8 +589,7 @@ void SearchJobWidget::displayColumnHeaderMenu()
     for (int i = 0; i < SearchSortModel::DL_LINK; ++i)
     {
         const auto columnName = m_searchListModel->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
-        QAction *action = menu->addAction(columnName, this, [this, i](const bool checked)
-        {
+        QAction* action = menu->addAction(columnName, this, [this, i](const bool checked) {
             if (!checked && (visibleColumnsCount() <= 1))
                 return;
 
@@ -614,8 +605,7 @@ void SearchJobWidget::displayColumnHeaderMenu()
     }
 
     menu->addSeparator();
-    QAction *resizeAction = menu->addAction(tr("Resize columns"), this, [this]()
-    {
+    QAction* resizeAction = menu->addAction(tr("Resize columns"), this, [this]() {
         for (int i = 0, count = m_ui->resultsBrowser->header()->count(); i < count; ++i)
         {
             if (!m_ui->resultsBrowser->isColumnHidden(i))
@@ -638,27 +628,24 @@ void SearchJobWidget::searchFinished(bool cancelled)
         setStatus(Status::Finished);
 }
 
-void SearchJobWidget::searchFailed([[maybe_unused]] const QString &errorMessage)
+void SearchJobWidget::searchFailed([[maybe_unused]] const QString& errorMessage)
 {
     setStatus(Status::Error);
 }
 
-void SearchJobWidget::appendSearchResults(const QList<SearchResult> &results)
+void SearchJobWidget::appendSearchResults(const QList<SearchResult>& results)
 {
-    for (const SearchResult &result : results)
+    for (const SearchResult& result : results)
     {
         // Add item to search result list
         int row = m_searchListModel->rowCount();
         m_searchListModel->insertRow(row);
 
-        const auto setModelData = [this, row] (const int column, const QString &displayData
-                , const QVariant &underlyingData, const Qt::Alignment textAlignmentData = {})
-        {
-            const QMap<int, QVariant> data =
-            {
-                {Qt::DisplayRole, displayData},
-                {SearchSortModel::UnderlyingDataRole, underlyingData},
-                {Qt::TextAlignmentRole, QVariant {textAlignmentData}}
+        const auto setModelData = [this, row](const int column, const QString& displayData, const QVariant& underlyingData, const Qt::Alignment textAlignmentData = {}) {
+            const QMap<int, QVariant> data = {
+                {                     Qt::DisplayRole,                   displayData },
+                { SearchSortModel::UnderlyingDataRole,                underlyingData },
+                {               Qt::TextAlignmentRole, QVariant{ textAlignmentData } }
             };
             m_searchListModel->setItemData(m_searchListModel->index(row, column), data);
         };
@@ -678,7 +665,7 @@ void SearchJobWidget::appendSearchResults(const QList<SearchResult> &results)
     updateResultsCount();
 }
 
-void SearchJobWidget::keyPressEvent(QKeyEvent *event)
+void SearchJobWidget::keyPressEvent(QKeyEvent* event)
 {
     switch (event->key())
     {

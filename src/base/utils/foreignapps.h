@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <QString>
-
 #include "base/global.h"
 #include "base/path.h"
 #include "base/utils/version.h"
+
+#include <QString>
 
 namespace Utils::ForeignApps
 {
@@ -50,7 +50,7 @@ namespace Utils::ForeignApps
         Path executablePath;
         Version version;
 
-        inline static const Version MINIMUM_SUPPORTED_VERSION {3, 13, 0};
+        inline static const Version MINIMUM_SUPPORTED_VERSION{ 3, 13, 0 };
     };
 
     PythonInfo pythonInfo();

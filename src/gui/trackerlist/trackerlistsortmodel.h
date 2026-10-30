@@ -38,11 +38,11 @@ class TrackerListSortModel final : public QSortFilterProxyModel
     Q_DISABLE_COPY_MOVE(TrackerListSortModel)
 
 public:
-    explicit TrackerListSortModel(TrackerListModel *model, QObject *parent = nullptr);
+    explicit TrackerListSortModel(TrackerListModel* model, QObject* parent = nullptr);
 
-    void setSourceModel(TrackerListModel *model);
+    void setSourceModel(TrackerListModel* model);
 
 private:
     using QSortFilterProxyModel::setSourceModel;
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 };

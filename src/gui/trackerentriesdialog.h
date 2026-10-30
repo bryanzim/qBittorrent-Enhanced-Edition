@@ -28,10 +28,10 @@
 
 #pragma once
 
+#include "base/settingvalue.h"
+
 #include <QDialog>
 #include <QtContainerFwd>
-
-#include "base/settingvalue.h"
 
 namespace BitTorrent
 {
@@ -49,16 +49,16 @@ class TrackerEntriesDialog : public QDialog
     Q_DISABLE_COPY_MOVE(TrackerEntriesDialog)
 
 public:
-    explicit TrackerEntriesDialog(QWidget *parent);
+    explicit TrackerEntriesDialog(QWidget* parent);
     ~TrackerEntriesDialog() override;
 
-    void setTrackers(const QList<BitTorrent::TrackerEntry> &trackers);
+    void setTrackers(const QList<BitTorrent::TrackerEntry>& trackers);
     QList<BitTorrent::TrackerEntry> trackers() const;
 
 private:
     void saveSettings();
     void loadSettings();
 
-    Ui::TrackerEntriesDialog *m_ui = nullptr;
+    Ui::TrackerEntriesDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
 };

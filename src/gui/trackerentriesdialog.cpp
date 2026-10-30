@@ -28,21 +28,19 @@
 
 #include "trackerentriesdialog.h"
 
-#include <algorithm>
-
-#include <QHash>
-#include <QList>
-
 #include "base/bittorrent/trackerentry.h"
 #include "ui_trackerentriesdialog.h"
 #include "utils.h"
 
+#include <QHash>
+#include <QList>
+
+#include <algorithm>
+
 #define SETTINGS_KEY(name) u"TrackerEntriesDialog/" name
 
-TrackerEntriesDialog::TrackerEntriesDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::TrackerEntriesDialog)
-    , m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
+TrackerEntriesDialog::TrackerEntriesDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::TrackerEntriesDialog), m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
 {
     m_ui->setupUi(this);
 
@@ -59,12 +57,12 @@ TrackerEntriesDialog::~TrackerEntriesDialog()
     delete m_ui;
 }
 
-void TrackerEntriesDialog::setTrackers(const QList<BitTorrent::TrackerEntry> &trackers)
+void TrackerEntriesDialog::setTrackers(const QList<BitTorrent::TrackerEntry>& trackers)
 {
     int maxTier = -1;
-    QHash<int, QString> tiers;  // <tier, tracker URLs>
+    QHash<int, QString> tiers; // <tier, tracker URLs>
 
-    for (const BitTorrent::TrackerEntry &entry : trackers)
+    for (const BitTorrent::TrackerEntry& entry : trackers)
     {
         tiers[entry.tier] += (entry.url + u'\n');
         maxTier = std::max(maxTier, entry.tier);

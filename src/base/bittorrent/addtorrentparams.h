@@ -28,18 +28,18 @@
 
 #pragma once
 
-#include <optional>
-
-#include <QList>
-#include <QMetaType>
-#include <QString>
-
 #include "base/path.h"
 #include "base/tagset.h"
 #include "sharelimits.h"
 #include "sslparameters.h"
 #include "torrent.h"
 #include "torrentcontentlayout.h"
+
+#include <QList>
+#include <QMetaType>
+#include <QString>
+
+#include <optional>
 
 class QJsonObject;
 
@@ -61,7 +61,7 @@ namespace BitTorrent
         std::optional<bool> addToQueueTop;
         std::optional<bool> addStopped;
         std::optional<Torrent::StopCondition> stopCondition;
-        PathList filePaths; // used if TorrentInfo is set
+        PathList filePaths;                     // used if TorrentInfo is set
         QList<DownloadPriority> filePriorities; // used if TorrentInfo is set
         bool seedMode = false;
         std::optional<BitTorrent::TorrentContentLayout> contentLayout;
@@ -71,11 +71,11 @@ namespace BitTorrent
         ShareLimits shareLimits;
         SSLParameters sslParameters;
 
-        friend bool operator==(const AddTorrentParams &lhs, const AddTorrentParams &rhs) = default;
+        friend bool operator==(const AddTorrentParams& lhs, const AddTorrentParams& rhs) = default;
     };
 
-    AddTorrentParams parseAddTorrentParams(const QJsonObject &jsonObj);
-    QJsonObject serializeAddTorrentParams(const AddTorrentParams &params);
+    AddTorrentParams parseAddTorrentParams(const QJsonObject& jsonObj);
+    QJsonObject serializeAddTorrentParams(const AddTorrentParams& params);
 }
 
 Q_DECLARE_METATYPE(BitTorrent::AddTorrentParams)

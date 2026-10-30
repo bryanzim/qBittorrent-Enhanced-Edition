@@ -30,20 +30,21 @@
 
 #include <QtSystemDetection>
 #if defined(Q_OS_WIN)
-#include <windows.h>
+#include <Windows.h>
+
 #include <shellapi.h>
 #endif
+
+#include "base/logger.h"
+#include "base/net/smtpclient.h"
+#include "base/preferences.h"
+#include "base/utils/misc.h"
 
 #include <QDateTime>
 #include <QDebug>
 #include <QLocale>
 #include <QProcess>
 #include <QStringList>
-
-#include "base/logger.h"
-#include "base/net/smtpclient.h"
-#include "base/preferences.h"
-#include "base/utils/misc.h"
 
 #ifndef Q_OS_WIN
 #include "base/utils/string.h"
@@ -53,27 +54,27 @@ using namespace Qt::Literals::StringLiterals;
 
 namespace LuaFunctions
 {
-    void debug(const QString &message)
+    void debug(const QString& message)
     {
         qDebug() << qUtf8Printable(message);
     }
 
-    void log(const QString &message)
+    void log(const QString& message)
     {
         LogMsg(message);
     }
 
-    bool exec(const QString &command)
+    bool exec(const QString& command)
     {
-    // The processing sequence is different for Windows and other OS, this is intentional
-    #ifdef Q_OS_WIN
+// The processing sequence is different for Windows and other OS, this is intentional
+#ifdef Q_OS_WIN
         const std::wstring programWStr = command.toStdWString();
 
         // Need to split arguments manually because QProcess::startDetached(QString)
         // will strip off empty parameters.
         // E.g. `python.exe "1" "" "3"` will become `python.exe "1" "3"`
         int argCount = 0;
-        std::unique_ptr<LPWSTR[], decltype(&::LocalFree)> args {::CommandLineToArgvW(programWStr.c_str(), &argCount), ::LocalFree};
+        std::unique_ptr<LPWSTR[], decltype(&::LocalFree)> args{ ::CommandLineToArgvW(programWStr.c_str(), &argCount), ::LocalFree };
 
         if (argCount <= 0)
             return false;
@@ -85,8 +86,7 @@ namespace LuaFunctions
         QProcess proc;
         proc.setProgram(QString::fromWCharArray(args[0]));
         proc.setArguments(argList);
-        proc.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args)
-        {
+        proc.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* args) {
             args->flags |= CREATE_NO_WINDOW;
             args->flags &= ~(CREATE_NEW_CONSOLE | DETACHED_PROCESS);
 
@@ -102,13 +102,13 @@ namespace LuaFunctions
 
         if (proc.startDetached())
             return true;
-    #else // Q_OS_WIN
+#else // Q_OS_WIN
         QStringList args = Utils::String::splitCommand(command);
 
         if (args.isEmpty())
             return false;
 
-        for (QString &arg : args)
+        for (QString& arg : args)
         {
             // strip redundant quotes
             if (arg.startsWith(u'"') && arg.endsWith(u'"'))
@@ -123,15 +123,14 @@ namespace LuaFunctions
 
         if (proc.startDetached())
             return true;
-    #endif
+#endif
         return false;
     }
 
-    void sendMail(const QString &subject, const QString &body, QObject *context)
+    void sendMail(const QString& subject, const QString& body, QObject* context)
     {
-        const auto *pref = Preferences::instance();
-        Net::SMTPClient::sendMail(pref->getMailNotificationSender(), pref->getMailNotificationEmail()
-                , subject, body, context);
+        const auto* pref = Preferences::instance();
+        Net::SMTPClient::sendMail(pref->getMailNotificationSender(), pref->getMailNotificationEmail(), subject, body, context);
     }
 
     QString friendlySizeUnit1(const qint64 bytes)
@@ -159,7 +158,7 @@ namespace LuaFunctions
         return Utils::Misc::userFriendlyDuration(seconds);
     }
 
-    QString formatDateTime1(const QString &format, const qint64 luaTime)
+    QString formatDateTime1(const QString& format, const qint64 luaTime)
     {
         return QLocale::system().toString(QDateTime::fromSecsSinceEpoch(luaTime), format);
     }

@@ -29,13 +29,13 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QtSystemDetection>
-#include <QObject>
-
 #include "base/net/smtpencryptiontype.h"
 #include "base/pathfwd.h"
 #include "base/utils/net.h"
+
+#include <QObject>
+#include <QtContainerFwd>
+#include <QtSystemDetection>
 
 class QDateTime;
 class QNetworkCookie;
@@ -84,15 +84,15 @@ class Preferences final : public QObject
 public:
     static void initInstance();
     static void freeInstance();
-    static Preferences *instance();
+    static Preferences* instance();
 
     // General options
     QString getLocale() const;
-    void setLocale(const QString &locale);
+    void setLocale(const QString& locale);
     bool useCustomUITheme() const;
     void setUseCustomUITheme(bool use);
     Path customUIThemePath() const;
-    void setCustomUIThemePath(const Path &path);
+    void setCustomUIThemePath(const Path& path);
     bool removeTorrentContent() const;
     void setRemoveTorrentContent(bool remove);
     bool confirmOnExit() const;
@@ -126,7 +126,7 @@ public:
     bool preventFromSuspendWhenSeeding() const;
     void setPreventFromSuspendWhenSeeding(bool b);
     QString getStyle() const;
-    void setStyle(const QString &styleName);
+    void setStyle(const QString& styleName);
 #ifdef Q_OS_WIN
     bool WinStartup() const;
     void setWinStartup(bool b);
@@ -134,23 +134,23 @@ public:
 
     // Downloads
     Path getScanDirsLastPath() const;
-    void setScanDirsLastPath(const Path &path);
+    void setScanDirsLastPath(const Path& path);
     bool isMailNotificationEnabled() const;
     void setMailNotificationEnabled(bool enabled);
     QString getMailNotificationSender() const;
-    void setMailNotificationSender(const QString &mail);
+    void setMailNotificationSender(const QString& mail);
     QString getMailNotificationEmail() const;
-    void setMailNotificationEmail(const QString &mail);
+    void setMailNotificationEmail(const QString& mail);
     QString getMailNotificationSMTP() const;
-    void setMailNotificationSMTP(const QString &smtpServer);
+    void setMailNotificationSMTP(const QString& smtpServer);
     Net::SMTPEncryptionType getMailNotificationSMTPEncryptionType() const;
     void setMailNotificationSMTPEncryptionType(Net::SMTPEncryptionType mailEncryptionType);
     bool getMailNotificationSMTPAuth() const;
     void setMailNotificationSMTPAuth(bool use);
     QString getMailNotificationSMTPUsername() const;
-    void setMailNotificationSMTPUsername(const QString &username);
+    void setMailNotificationSMTPUsername(const QString& username);
     QString getMailNotificationSMTPPassword() const;
-    void setMailNotificationSMTPPassword(const QString &password);
+    void setMailNotificationSMTPPassword(const QString& password);
     int getActionOnDblClOnTorrentDl() const;
     void setActionOnDblClOnTorrentDl(int act);
     int getActionOnDblClOnTorrentFn() const;
@@ -158,9 +158,9 @@ public:
 
     // Connection options
     QTime getSchedulerStartTime() const;
-    void setSchedulerStartTime(const QTime &time);
+    void setSchedulerStartTime(const QTime& time);
     QTime getSchedulerEndTime() const;
-    void setSchedulerEndTime(const QTime &time);
+    void setSchedulerEndTime(const QTime& time);
     Scheduler::Days getSchedulerDays() const;
     void setSchedulerDays(Scheduler::Days days);
 
@@ -182,9 +182,9 @@ public:
     bool isWebUIEnabled() const;
     void setWebUIEnabled(bool enabled);
     QString getServerDomains() const;
-    void setServerDomains(const QString &str);
+    void setServerDomains(const QString& str);
     QString getWebUIAddress() const;
-    void setWebUIAddress(const QString &addr);
+    void setWebUIAddress(const QString& addr);
     quint16 getWebUIPort() const;
     void setWebUIPort(quint16 port);
     bool useUPnPForWebUIPort() const;
@@ -198,11 +198,11 @@ public:
     QList<Utils::Net::Subnet> getWebUIAuthSubnetWhitelist() const;
     void setWebUIAuthSubnetWhitelist(QStringList subnets);
     QString getWebUIUsername() const;
-    void setWebUIUsername(const QString &username);
+    void setWebUIUsername(const QString& username);
     QByteArray getWebUIPassword() const;
-    void setWebUIPassword(const QByteArray &password);
+    void setWebUIPassword(const QByteArray& password);
     QString getWebUIApiKey() const;
-    void setWebUIApiKey(const QString &apiKey);
+    void setWebUIApiKey(const QString& apiKey);
     int getWebUIMaxAuthFailCount() const;
     void setWebUIMaxAuthFailCount(int count);
     std::chrono::seconds getWebUIBanDuration() const;
@@ -217,7 +217,7 @@ public:
     void setWebUIClickjackingProtectionEnabled(bool enabled);
     bool isWebUICSRFProtectionEnabled() const;
     void setWebUICSRFProtectionEnabled(bool enabled);
-    bool isWebUISecureCookieEnabled () const;
+    bool isWebUISecureCookieEnabled() const;
     void setWebUISecureCookieEnabled(bool enabled);
     bool isWebUIHostHeaderValidationEnabled() const;
     void setWebUIHostHeaderValidationEnabled(bool enabled);
@@ -226,25 +226,25 @@ public:
     bool isWebUIHttpsEnabled() const;
     void setWebUIHttpsEnabled(bool enabled);
     Path getWebUIHttpsCertificatePath() const;
-    void setWebUIHttpsCertificatePath(const Path &path);
+    void setWebUIHttpsCertificatePath(const Path& path);
     Path getWebUIHttpsKeyPath() const;
-    void setWebUIHttpsKeyPath(const Path &path);
+    void setWebUIHttpsKeyPath(const Path& path);
     bool isAltWebUIEnabled() const;
     void setAltWebUIEnabled(bool enabled);
     Path getWebUIRootFolder() const;
-    void setWebUIRootFolder(const Path &path);
+    void setWebUIRootFolder(const Path& path);
 
     // WebUI custom HTTP headers
     bool isWebUICustomHTTPHeadersEnabled() const;
     void setWebUICustomHTTPHeadersEnabled(bool enabled);
     QString getWebUICustomHTTPHeaders() const;
-    void setWebUICustomHTTPHeaders(const QString &headers);
+    void setWebUICustomHTTPHeaders(const QString& headers);
 
     // Reverse proxy
     bool isWebUIReverseProxySupportEnabled() const;
     void setWebUIReverseProxySupportEnabled(bool enabled);
     QString getWebUITrustedReverseProxiesList() const;
-    void setWebUITrustedReverseProxiesList(const QString &addr);
+    void setWebUITrustedReverseProxiesList(const QString& addr);
 
     // Dynamic DNS
     bool isDynDNSEnabled() const;
@@ -252,26 +252,26 @@ public:
     DNS::Service getDynDNSService() const;
     void setDynDNSService(DNS::Service service);
     QString getDynDomainName() const;
-    void setDynDomainName(const QString &name);
+    void setDynDomainName(const QString& name);
     QString getDynDNSUsername() const;
-    void setDynDNSUsername(const QString &username);
+    void setDynDNSUsername(const QString& username);
     QString getDynDNSPassword() const;
-    void setDynDNSPassword(const QString &password);
+    void setDynDNSPassword(const QString& password);
 
     // Advanced settings
     QByteArray getUILockPassword() const;
-    void setUILockPassword(const QByteArray &password);
+    void setUILockPassword(const QByteArray& password);
     bool isUILocked() const;
     void setUILocked(bool locked);
 
     bool isAutoRunOnTorrentAddedEnabled() const;
     void setAutoRunOnTorrentAddedEnabled(bool enabled);
     QString getAutoRunOnTorrentAddedProgram() const;
-    void setAutoRunOnTorrentAddedProgram(const QString &program);
+    void setAutoRunOnTorrentAddedProgram(const QString& program);
     bool isAutoRunOnTorrentFinishedEnabled() const;
     void setAutoRunOnTorrentFinishedEnabled(bool enabled);
     QString getAutoRunOnTorrentFinishedProgram() const;
-    void setAutoRunOnTorrentFinishedProgram(const QString &program);
+    void setAutoRunOnTorrentFinishedProgram(const QString& program);
 #if defined(Q_OS_WIN)
     bool isAutoRunConsoleEnabled() const;
     void setAutoRunConsoleEnabled(bool enabled);
@@ -310,7 +310,7 @@ public:
     bool isIgnoreSSLErrors() const;
     void setIgnoreSSLErrors(bool enabled);
     Path getPythonExecutablePath() const;
-    void setPythonExecutablePath(const Path &path);
+    void setPythonExecutablePath(const Path& path);
 #if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
     bool isUpdateCheckEnabled() const;
     void setUpdateCheckEnabled(bool enabled);
@@ -355,47 +355,47 @@ public:
     // Stuff that don't appear in the Options GUI but are saved
     // in the same file.
     QDateTime getDNSLastUpd() const;
-    void setDNSLastUpd(const QDateTime &date);
+    void setDNSLastUpd(const QDateTime& date);
     QString getDNSLastIP() const;
-    void setDNSLastIP(const QString &ip);
+    void setDNSLastIP(const QString& ip);
     QByteArray getMainGeometry() const;
-    void setMainGeometry(const QByteArray &geometry);
+    void setMainGeometry(const QByteArray& geometry);
     bool isFiltersSidebarVisible() const;
     void setFiltersSidebarVisible(bool value);
     int getFiltersSidebarWidth() const;
     void setFiltersSidebarWidth(int value);
     Path getMainLastDir() const;
-    void setMainLastDir(const Path &path);
+    void setMainLastDir(const Path& path);
     QByteArray getPeerListState() const;
-    void setPeerListState(const QByteArray &state);
+    void setPeerListState(const QByteArray& state);
     QString getPropSplitterSizes() const;
-    void setPropSplitterSizes(const QString &sizes);
+    void setPropSplitterSizes(const QString& sizes);
     QByteArray getPropFileListState() const;
-    void setPropFileListState(const QByteArray &state);
+    void setPropFileListState(const QByteArray& state);
     int getPropCurTab() const;
     void setPropCurTab(int tab);
     bool getPropVisible() const;
     void setPropVisible(bool visible);
     QByteArray getTrackerListState() const;
-    void setTrackerListState(const QByteArray &state);
+    void setTrackerListState(const QByteArray& state);
     QStringList getRssOpenFolders() const;
-    void setRssOpenFolders(const QStringList &folders);
+    void setRssOpenFolders(const QStringList& folders);
     QByteArray getRssFeedListState() const;
-    void setRssFeedListState(const QByteArray &state);
+    void setRssFeedListState(const QByteArray& state);
     QByteArray getRssSideSplitterState() const;
-    void setRssSideSplitterState(const QByteArray &state);
+    void setRssSideSplitterState(const QByteArray& state);
     QByteArray getRssMainSplitterState() const;
-    void setRssMainSplitterState(const QByteArray &state);
+    void setRssMainSplitterState(const QByteArray& state);
     QByteArray getSearchTabHeaderState() const;
-    void setSearchTabHeaderState(const QByteArray &state);
+    void setSearchTabHeaderState(const QByteArray& state);
     bool getRegexAsFilteringPatternForSearchJob() const;
     void setRegexAsFilteringPatternForSearchJob(bool checked);
     QStringList getSearchEngDisabled() const;
-    void setSearchEngDisabled(const QStringList &engines);
+    void setSearchEngDisabled(const QStringList& engines);
     QString getTorImportLastContentDir() const;
-    void setTorImportLastContentDir(const QString &path);
+    void setTorImportLastContentDir(const QString& path);
     QByteArray getTorImportGeometry() const;
-    void setTorImportGeometry(const QByteArray &geometry);
+    void setTorImportGeometry(const QByteArray& geometry);
     bool getStatusFilterState() const;
     bool getCategoryFilterState() const;
     bool getTagFilterState() const;
@@ -408,7 +408,7 @@ public:
     bool getHideZeroStatusFilters() const;
     void setHideZeroStatusFilters(bool hide);
     QByteArray getTransHeaderState() const;
-    void setTransHeaderState(const QByteArray &state);
+    void setTransHeaderState(const QByteArray& state);
     bool getRegexAsFilteringPatternForTransferList() const;
     void setRegexAsFilteringPatternForTransferList(bool checked);
     int getToolbarTextPosition() const;
@@ -420,7 +420,7 @@ public:
 
     // Network
     QList<QNetworkCookie> getNetworkCookies() const;
-    void setNetworkCookies(const QList<QNetworkCookie> &cookies);
+    void setNetworkCookies(const QList<QNetworkCookie>& cookies);
 
     bool useProxyForBT() const;
     void setUseProxyForBT(bool value);
@@ -475,5 +475,5 @@ signals:
     void changed();
 
 private:
-    static Preferences *m_instance;
+    static Preferences* m_instance;
 };

@@ -29,9 +29,6 @@
 
 #include "statusfilterwidget.h"
 
-#include <QListWidgetItem>
-#include <QMenu>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "base/preferences.h"
@@ -39,59 +36,61 @@
 #include "gui/transferlistwidget.h"
 #include "gui/uithememanager.h"
 
-StatusFilterWidget::StatusFilterWidget(QWidget *parent, TransferListWidget *transferList)
+#include <QListWidgetItem>
+#include <QMenu>
+
+StatusFilterWidget::StatusFilterWidget(QWidget* parent, TransferListWidget* transferList)
     : BaseFilterWidget(parent, transferList)
 {
     // Add status filters
-    auto *all = new QListWidgetItem(this);
+    auto* all = new QListWidgetItem(this);
     all->setData(Qt::DisplayRole, tr("All (0)", "this is for the status filter"));
     all->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"filter-all"_s, u"filterall"_s));
-    auto *downloading = new QListWidgetItem(this);
+    auto* downloading = new QListWidgetItem(this);
     downloading->setData(Qt::DisplayRole, tr("Downloading (0)"));
     downloading->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"downloading"_s));
-    auto *seeding = new QListWidgetItem(this);
+    auto* seeding = new QListWidgetItem(this);
     seeding->setData(Qt::DisplayRole, tr("Seeding (0)"));
     seeding->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"upload"_s, u"uploading"_s));
-    auto *completed = new QListWidgetItem(this);
+    auto* completed = new QListWidgetItem(this);
     completed->setData(Qt::DisplayRole, tr("Completed (0)"));
     completed->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"checked-completed"_s, u"completed"_s));
-    auto *running = new QListWidgetItem(this);
+    auto* running = new QListWidgetItem(this);
     running->setData(Qt::DisplayRole, tr("Running (0)"));
     running->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s));
-    auto *stopped = new QListWidgetItem(this);
+    auto* stopped = new QListWidgetItem(this);
     stopped->setData(Qt::DisplayRole, tr("Stopped (0)"));
     stopped->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"stopped"_s, u"media-playback-pause"_s));
-    auto *active = new QListWidgetItem(this);
+    auto* active = new QListWidgetItem(this);
     active->setData(Qt::DisplayRole, tr("Active (0)"));
     active->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"filter-active"_s, u"filteractive"_s));
-    auto *inactive = new QListWidgetItem(this);
+    auto* inactive = new QListWidgetItem(this);
     inactive->setData(Qt::DisplayRole, tr("Inactive (0)"));
     inactive->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"filter-inactive"_s, u"filterinactive"_s));
-    auto *stalled = new QListWidgetItem(this);
+    auto* stalled = new QListWidgetItem(this);
     stalled->setData(Qt::DisplayRole, tr("Stalled (0)"));
     stalled->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"filter-stalled"_s, u"filterstalled"_s));
-    auto *stalledUploading = new QListWidgetItem(this);
+    auto* stalledUploading = new QListWidgetItem(this);
     stalledUploading->setData(Qt::DisplayRole, tr("Stalled Uploading (0)"));
     stalledUploading->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"stalledUP"_s));
-    auto *stalledDownloading = new QListWidgetItem(this);
+    auto* stalledDownloading = new QListWidgetItem(this);
     stalledDownloading->setData(Qt::DisplayRole, tr("Stalled Downloading (0)"));
     stalledDownloading->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"stalledDL"_s));
-    auto *checking = new QListWidgetItem(this);
+    auto* checking = new QListWidgetItem(this);
     checking->setData(Qt::DisplayRole, tr("Checking (0)"));
     checking->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"force-recheck"_s, u"checking"_s));
-    auto *moving = new QListWidgetItem(this);
+    auto* moving = new QListWidgetItem(this);
     moving->setData(Qt::DisplayRole, tr("Moving (0)"));
     moving->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"set-location"_s));
-    auto *errored = new QListWidgetItem(this);
+    auto* errored = new QListWidgetItem(this);
     errored->setData(Qt::DisplayRole, tr("Errored (0)"));
     errored->setData(Qt::DecorationRole, UIThemeManager::instance()->getIcon(u"error"_s));
 
-    const QList<BitTorrent::Torrent *> torrents = BitTorrent::Session::instance()->torrents();
+    const QList<BitTorrent::Torrent*> torrents = BitTorrent::Session::instance()->torrents();
     update(torrents);
-    connect(BitTorrent::Session::instance(), &BitTorrent::Session::torrentsUpdated
-            , this, &StatusFilterWidget::update);
+    connect(BitTorrent::Session::instance(), &BitTorrent::Session::torrentsUpdated, this, &StatusFilterWidget::update);
 
-    const Preferences *const pref = Preferences::instance();
+    const Preferences* const pref = Preferences::instance();
     connect(pref, &Preferences::changed, this, &StatusFilterWidget::configure);
 
     const int storedRow = pref->getTransSelFilter();
@@ -119,15 +118,15 @@ QSize StatusFilterWidget::sizeHint() const
         // Width should be exactly the width of the content
         sizeHintForColumn(0),
         // Height should be exactly the height of the content
-        static_cast<int>((sizeHintForRow(0) + 2 * spacing()) * (numVisibleItems + 0.5))};
+        static_cast<int>((sizeHintForRow(0) + 2 * spacing()) * (numVisibleItems + 0.5))
+    };
 }
 
-void StatusFilterWidget::updateTorrentStatus(const BitTorrent::Torrent *torrent)
+void StatusFilterWidget::updateTorrentStatus(const BitTorrent::Torrent* torrent)
 {
-    TorrentFilterBitset &torrentStatus = m_torrentsStatus[torrent];
+    TorrentFilterBitset& torrentStatus = m_torrentsStatus[torrent];
 
-    const auto update = [torrent, &torrentStatus](const TorrentFilter::Status status, int &counter)
-    {
+    const auto update = [torrent, &torrentStatus](const TorrentFilter::Status status, int& counter) {
         const bool hasStatus = torrentStatus[status];
         const bool needStatus = TorrentFilter(status).match(torrent);
         if (needStatus && !hasStatus)
@@ -197,9 +196,9 @@ void StatusFilterWidget::hideZeroItems()
         setCurrentRow(TorrentFilter::All, QItemSelectionModel::SelectCurrent);
 }
 
-void StatusFilterWidget::update(const QList<BitTorrent::Torrent *> &torrents)
+void StatusFilterWidget::update(const QList<BitTorrent::Torrent*>& torrents)
 {
-    for (const BitTorrent::Torrent *torrent : torrents)
+    for (const BitTorrent::Torrent* torrent : torrents)
         updateTorrentStatus(torrent);
 
     updateTexts();
@@ -213,17 +212,13 @@ void StatusFilterWidget::update(const QList<BitTorrent::Torrent *> &torrents)
 
 void StatusFilterWidget::showMenu()
 {
-    QMenu *menu = new QMenu(this);
+    QMenu* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents")
-        , transferList(), &TransferListWidget::startVisibleTorrents);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents")
-        , transferList(), &TransferListWidget::forceStartVisibleTorrents);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents")
-        , transferList(), &TransferListWidget::stopVisibleTorrents);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents")
-        , transferList(), &TransferListWidget::deleteVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents"), transferList(), &TransferListWidget::startVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents"), transferList(), &TransferListWidget::forceStartVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents"), transferList(), &TransferListWidget::stopVisibleTorrents);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents"), transferList(), &TransferListWidget::deleteVisibleTorrents);
 
     menu->popup(QCursor::pos());
 }
@@ -233,12 +228,12 @@ void StatusFilterWidget::applyFilter(int row)
     transferList()->applyStatusFilter(row);
 }
 
-void StatusFilterWidget::handleTorrentsLoaded(const QList<BitTorrent::Torrent *> &torrents)
+void StatusFilterWidget::handleTorrentsLoaded(const QList<BitTorrent::Torrent*>& torrents)
 {
     update(torrents);
 }
 
-void StatusFilterWidget::torrentAboutToBeDeleted(BitTorrent::Torrent *const torrent)
+void StatusFilterWidget::torrentAboutToBeDeleted(BitTorrent::Torrent* const torrent)
 {
     const TorrentFilterBitset status = m_torrentsStatus.take(torrent);
 

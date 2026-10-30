@@ -39,7 +39,7 @@ class TransferListFiltersWidgetItem final : public QWidget
     Q_DISABLE_COPY_MOVE(TransferListFiltersWidgetItem)
 
 public:
-    TransferListFiltersWidgetItem(const QString &caption, QWidget *filterWidget, QWidget *parent = nullptr);
+    TransferListFiltersWidgetItem(const QString& caption, QWidget* filterWidget, QWidget* parent = nullptr);
 
     bool isChecked() const;
     void setChecked(bool value);
@@ -48,6 +48,6 @@ signals:
     void toggled(bool checked);
 
 private:
-    QCheckBox *m_caption = nullptr;
-    QWidget *m_filterWidget = nullptr;
+    QCheckBox* m_caption = nullptr;
+    QWidget* m_filterWidget = nullptr;
 };

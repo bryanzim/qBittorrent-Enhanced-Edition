@@ -28,9 +28,9 @@
 
 #include "torrentsharelimitswidget.h"
 
-#include <limits>
-
 #include "ui_torrentsharelimitswidget.h"
+
+#include <limits>
 
 namespace
 {
@@ -101,9 +101,8 @@ namespace
     }
 }
 
-TorrentShareLimitsWidget::TorrentShareLimitsWidget(QWidget *parent)
-    : QWidget(parent)
-    , m_ui {new Ui::TorrentShareLimitsWidget}
+TorrentShareLimitsWidget::TorrentShareLimitsWidget(QWidget* parent)
+    : QWidget(parent), m_ui{ new Ui::TorrentShareLimitsWidget }
 {
     m_ui->setupUi(this);
 
@@ -148,21 +147,15 @@ TorrentShareLimitsWidget::TorrentShareLimitsWidget(QWidget *parent)
     m_ui->spinBoxInactiveSeedingTimeValue->clear();
 
     int prevIndex = UninitializedComboModeIndex;
-    connect(m_ui->comboBoxRatioMode, &QComboBox::currentIndexChanged, this
-            , [this, prevIndex](const int currentIndex) mutable
-    {
+    connect(m_ui->comboBoxRatioMode, &QComboBox::currentIndexChanged, this, [this, prevIndex](const int currentIndex) mutable {
         onRatioLimitModeChanged(currentIndex, prevIndex);
         prevIndex = currentIndex;
     });
-    connect(m_ui->comboBoxSeedingTimeMode, &QComboBox::currentIndexChanged, this
-            , [this, prevIndex](const int currentIndex) mutable
-    {
+    connect(m_ui->comboBoxSeedingTimeMode, &QComboBox::currentIndexChanged, this, [this, prevIndex](const int currentIndex) mutable {
         onSeedingTimeLimitModeChanged(currentIndex, prevIndex);
         prevIndex = currentIndex;
     });
-    connect(m_ui->comboBoxInactiveSeedingTimeMode, &QComboBox::currentIndexChanged, this
-            , [this, prevIndex](const int currentIndex) mutable
-    {
+    connect(m_ui->comboBoxInactiveSeedingTimeMode, &QComboBox::currentIndexChanged, this, [this, prevIndex](const int currentIndex) mutable {
         onInactiveSeedingTimeLimitModeChanged(currentIndex, prevIndex);
         prevIndex = currentIndex;
     });
@@ -264,7 +257,7 @@ void TorrentShareLimitsWidget::setShareLimitsMode(const BitTorrent::ShareLimitsM
     }
 }
 
-void TorrentShareLimitsWidget::setDefaults(UsedDefaults usedDefaults, const BitTorrent::ShareLimits &shareLimits)
+void TorrentShareLimitsWidget::setDefaults(UsedDefaults usedDefaults, const BitTorrent::ShareLimits& shareLimits)
 {
     m_defaultRatioLimit = shareLimits.ratioLimit;
     if (m_ui->comboBoxRatioMode->currentIndex() == DefaultComboModeIndex)
@@ -471,15 +464,13 @@ void TorrentShareLimitsWidget::resetDefaultItemsText()
         m_ui->comboBoxSeedingTimeMode->setItemText(DefaultComboModeIndex, tr("Default"));
         m_ui->comboBoxInactiveSeedingTimeMode->setItemText(DefaultComboModeIndex, tr("Default"));
 
-        m_ui->comboBoxAction->setItemText(DefaultActionIndex
-                , (m_defaultShareLimitAction == BitTorrent::ShareLimitAction::Default)
-                        ? tr("Default")
-                        : tr("Default (%1)", "Default (share limit action)").arg(shareLimitActionName(m_defaultShareLimitAction)));
+        m_ui->comboBoxAction->setItemText(DefaultActionIndex, (m_defaultShareLimitAction == BitTorrent::ShareLimitAction::Default)
+                                                                  ? tr("Default")
+                                                                  : tr("Default (%1)", "Default (share limit action)").arg(shareLimitActionName(m_defaultShareLimitAction)));
 
-        m_ui->comboBoxMode->setItemText(DefaultModeIndex
-                , (m_defaultShareLimitsMode == BitTorrent::ShareLimitsMode::Default)
-                        ? tr("Default")
-                        : tr("Default (%1)", "Default (share limits mode)").arg(shareLimitsModeName(m_defaultShareLimitsMode)));
+        m_ui->comboBoxMode->setItemText(DefaultModeIndex, (m_defaultShareLimitsMode == BitTorrent::ShareLimitsMode::Default)
+                                                              ? tr("Default")
+                                                              : tr("Default (%1)", "Default (share limits mode)").arg(shareLimitsModeName(m_defaultShareLimitsMode)));
     }
     else // TorrentOptions
     {
@@ -487,14 +478,12 @@ void TorrentShareLimitsWidget::resetDefaultItemsText()
         m_ui->comboBoxSeedingTimeMode->setItemText(DefaultComboModeIndex, tr("From category"));
         m_ui->comboBoxInactiveSeedingTimeMode->setItemText(DefaultComboModeIndex, tr("From category"));
 
-        m_ui->comboBoxAction->setItemText(DefaultActionIndex
-                , (m_defaultShareLimitAction == BitTorrent::ShareLimitAction::Default)
-                        ? tr("From category")
-                        : tr("From category (%1)", "From category (share limit action)").arg(shareLimitActionName(m_defaultShareLimitAction)));
+        m_ui->comboBoxAction->setItemText(DefaultActionIndex, (m_defaultShareLimitAction == BitTorrent::ShareLimitAction::Default)
+                                                                  ? tr("From category")
+                                                                  : tr("From category (%1)", "From category (share limit action)").arg(shareLimitActionName(m_defaultShareLimitAction)));
 
-        m_ui->comboBoxMode->setItemText(DefaultModeIndex
-                , (m_defaultShareLimitsMode == BitTorrent::ShareLimitsMode::Default)
-                        ? tr("From category")
-                        : tr("From category (%1)", "From category (share limits mode)").arg(shareLimitsModeName(m_defaultShareLimitsMode)));
+        m_ui->comboBoxMode->setItemText(DefaultModeIndex, (m_defaultShareLimitsMode == BitTorrent::ShareLimitsMode::Default)
+                                                              ? tr("From category")
+                                                              : tr("From category (%1)", "From category (share limits mode)").arg(shareLimitsModeName(m_defaultShareLimitsMode)));
     }
 }

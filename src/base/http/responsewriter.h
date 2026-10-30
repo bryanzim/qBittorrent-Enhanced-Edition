@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/pathfwd.h"
 #include "headermap.h"
 #include "response.h"
+
+#include <QObject>
 
 namespace Http
 {
@@ -46,11 +46,11 @@ namespace Http
 
         // Send entire response at once.
         // Allow response content to be gzip encoded.
-        virtual void setResponse(const Response &response) = 0;
+        virtual void setResponse(const Response& response) = 0;
 
         // Allow to stream file using separate IO thread for reading.
         // Support Range requests.
-        virtual void streamFile(const Path &filePath, const HeaderMap &headers) = 0;
+        virtual void streamFile(const Path& filePath, const HeaderMap& headers) = 0;
 
         virtual bool isFinished() const = 0;
 

@@ -38,8 +38,7 @@ namespace Utils::Dict
     // Qt associative containers, whose iterators return
     // a value of the mapped type when dereferencing.
     template <typename T>
-    concept Dict = requires
-    {
+    concept Dict = requires {
         typename T::key_type;
         typename T::mapped_type;
         typename T::iterator;
@@ -47,7 +46,7 @@ namespace Utils::Dict
     };
 
     template <Dict T>
-    std::optional<typename T::mapped_type> get(const T &dict, const typename T::key_type &key)
+    std::optional<typename T::mapped_type> get(const T& dict, const typename T::key_type& key)
     {
         const auto it = dict.find(key);
         if (it != dict.cend())
@@ -57,7 +56,7 @@ namespace Utils::Dict
     }
 
     template <Dict T>
-    std::optional<typename T::mapped_type> take(T &dict, const typename T::key_type &key)
+    std::optional<typename T::mapped_type> take(T& dict, const typename T::key_type& key)
     {
         auto it = dict.find(key);
         if (it != dict.end())

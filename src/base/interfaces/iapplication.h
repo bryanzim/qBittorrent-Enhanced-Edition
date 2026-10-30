@@ -30,9 +30,9 @@
 
 #pragma once
 
-#include <QtSystemDetection>
-
 #include "base/pathfwd.h"
+
+#include <QtSystemDetection>
 
 class QString;
 
@@ -63,9 +63,9 @@ public:
     virtual ~IApplication() = default;
 
     virtual QString instanceName() const = 0;
-    virtual void setInstanceName(const QString &name) = 0;
+    virtual void setInstanceName(const QString& name) = 0;
 
-    virtual bool loadTranslation(const QString &locale) = 0;
+    virtual bool loadTranslation(const QString& locale) = 0;
 
     virtual qint64 launchTimeSecsSinceEpoch() const = 0;
 
@@ -73,7 +73,7 @@ public:
     virtual bool isFileLoggerEnabled() const = 0;
     virtual void setFileLoggerEnabled(bool value) = 0;
     virtual Path fileLoggerPath() const = 0;
-    virtual void setFileLoggerPath(const Path &path) = 0;
+    virtual void setFileLoggerPath(const Path& path) = 0;
     virtual bool isFileLoggerBackup() const = 0;
     virtual void setFileLoggerBackup(bool value) = 0;
     virtual bool isFileLoggerDeleteOld() const = 0;
@@ -95,8 +95,8 @@ public:
     virtual void setProcessMemoryPriority(MemoryPriority priority) = 0;
 #endif
 
-    virtual AddTorrentManager *addTorrentManager() const = 0;
+    virtual AddTorrentManager* addTorrentManager() const = 0;
 #ifndef DISABLE_WEBUI
-    virtual WebUI *webUI() const = 0;
+    virtual WebUI* webUI() const = 0;
 #endif
 };

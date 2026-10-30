@@ -26,18 +26,18 @@
  * exception statement from your version.
  */
 
+#include "base/bittorrent/peeraddress.h"
+
 #include <QObject>
 #include <QTest>
-
-#include "base/bittorrent/peeraddress.h"
 
 using namespace Qt::Literals::StringLiterals;
 
 namespace
 {
-    const BitTorrent::PeerAddress ipv4 {.ip = QHostAddress(u"127.0.0.1"_s), .port = 8080};
+    const BitTorrent::PeerAddress ipv4{ .ip = QHostAddress(u"127.0.0.1"_s), .port = 8080 };
     const QString ipv4Str = u"127.0.0.1:8080"_s;
-    const BitTorrent::PeerAddress ipv6 {.ip = QHostAddress(u"::1"_s), .port = 8080};
+    const BitTorrent::PeerAddress ipv6{ .ip = QHostAddress(u"::1"_s), .port = 8080 };
     const QString ipv6Str = u"[::1]:8080"_s;
 }
 
@@ -77,23 +77,23 @@ private slots:
         QCOMPARE_EQ((ipv4 < ipv4), false);
 
         {
-            const BitTorrent::PeerAddress left {.ip = QHostAddress(u"127.0.0.1"_s), .port = 80};
-            const BitTorrent::PeerAddress right {.ip = QHostAddress(u"127.0.0.2"_s), .port = 80};
+            const BitTorrent::PeerAddress left{ .ip = QHostAddress(u"127.0.0.1"_s), .port = 80 };
+            const BitTorrent::PeerAddress right{ .ip = QHostAddress(u"127.0.0.2"_s), .port = 80 };
             QCOMPARE_EQ((left < right), true);
         }
         {
-            const BitTorrent::PeerAddress left {.ip = QHostAddress(u"127.0.0.1"_s), .port = 79};
-            const BitTorrent::PeerAddress right {.ip = QHostAddress(u"127.0.0.1"_s), .port = 80};
+            const BitTorrent::PeerAddress left{ .ip = QHostAddress(u"127.0.0.1"_s), .port = 79 };
+            const BitTorrent::PeerAddress right{ .ip = QHostAddress(u"127.0.0.1"_s), .port = 80 };
             QCOMPARE_EQ((left < right), true);
         }
         {
-            const BitTorrent::PeerAddress left {.ip = QHostAddress(u"127.0.0.2"_s), .port = 80};
-            const BitTorrent::PeerAddress right {.ip = QHostAddress(u"127.0.0.1"_s), .port = 80};
+            const BitTorrent::PeerAddress left{ .ip = QHostAddress(u"127.0.0.2"_s), .port = 80 };
+            const BitTorrent::PeerAddress right{ .ip = QHostAddress(u"127.0.0.1"_s), .port = 80 };
             QCOMPARE_EQ((left < right), false);
         }
         {
-            const BitTorrent::PeerAddress left {.ip = QHostAddress(u"127.0.0.1"_s), .port = 80};
-            const BitTorrent::PeerAddress right {.ip = QHostAddress(u"127.0.0.1"_s), .port = 79};
+            const BitTorrent::PeerAddress left{ .ip = QHostAddress(u"127.0.0.1"_s), .port = 80 };
+            const BitTorrent::PeerAddress right{ .ip = QHostAddress(u"127.0.0.1"_s), .port = 79 };
             QCOMPARE_EQ((left < right), false);
         }
     }
@@ -106,10 +106,10 @@ private slots:
         QVERIFY(!(ipv6 != ipv6));
 
         QCOMPARE_NE(ipv4, ipv6);
-        QCOMPARE_NE(ipv4, (BitTorrent::PeerAddress {.ip = ipv4.ip, .port = 1234}));
+        QCOMPARE_NE(ipv4, (BitTorrent::PeerAddress{ .ip = ipv4.ip, .port = 1234 }));
 
         QCOMPARE_NE(ipv6, ipv4);
-        QCOMPARE_NE(ipv6, (BitTorrent::PeerAddress {.ip = ipv6.ip, .port = 1234}));
+        QCOMPARE_NE(ipv6, (BitTorrent::PeerAddress{ .ip = ipv6.ip, .port = 1234 }));
     }
 };
 

@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <QWidget>
-
 #include "base/settingvalue.h"
 #include "gui/guiaddtorrentmanager.h"
 #include "gui/guiapplicationcomponent.h"
+
+#include <QWidget>
 
 #define ENGINE_URL_COLUMN 4
 #define URL_COLUMN 5
@@ -47,7 +47,8 @@ class SearchHandler;
 class SearchSortModel;
 struct SearchResult;
 
-template <typename T> class SettingValue;
+template <typename T>
+class SettingValue;
 
 namespace Ui
 {
@@ -77,8 +78,8 @@ public:
         NoResults
     };
 
-    SearchJobWidget(const QString &id, const QString &searchPattern, const QList<SearchResult> &searchResults, IGUIApplication *app, QWidget *parent = nullptr);
-    SearchJobWidget(const QString &id, SearchHandler *searchHandler, IGUIApplication *app, QWidget *parent = nullptr);
+    SearchJobWidget(const QString& id, const QString& searchPattern, const QList<SearchResult>& searchResults, IGUIApplication* app, QWidget* parent = nullptr);
+    SearchJobWidget(const QString& id, SearchHandler* searchHandler, IGUIApplication* app, QWidget* parent = nullptr);
     ~SearchJobWidget() override;
 
     QString id() const;
@@ -86,9 +87,9 @@ public:
     QList<SearchResult> searchResults() const;
     Status status() const;
     int visibleResultsCount() const;
-    LineEdit *lineEditSearchResultsFilter() const;
+    LineEdit* lineEditSearchResultsFilter() const;
 
-    void assignSearchHandler(SearchHandler *searchHandler);
+    void assignSearchHandler(SearchHandler* searchHandler);
     void cancelSearch();
 
 signals:
@@ -96,34 +97,34 @@ signals:
     void statusChanged();
 
 protected:
-    void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
 private slots:
     void displayColumnHeaderMenu();
 
 private:
-    SearchJobWidget(const QString &id, IGUIApplication *app, QWidget *parent);
+    SearchJobWidget(const QString& id, IGUIApplication* app, QWidget* parent);
 
     void loadSettings();
     void saveSettings() const;
     void updateNameFilter();
     void updateSeedsFilter();
     void updateSizeFilter();
-    void filterSearchResults(const QString &name);
+    void filterSearchResults(const QString& name);
     void showFilterContextMenu();
-    void contextMenuEvent(QContextMenuEvent *event) override;
-    void onItemDoubleClicked(const QModelIndex &index);
+    void contextMenuEvent(QContextMenuEvent* event) override;
+    void onItemDoubleClicked(const QModelIndex& index);
     void searchFinished(bool cancelled);
-    void searchFailed(const QString &errorMessage);
-    void appendSearchResults(const QList<SearchResult> &results);
+    void searchFailed(const QString& errorMessage);
+    void appendSearchResults(const QList<SearchResult>& results);
     void updateResultsCount();
     void setStatus(Status value);
-    void downloadTorrent(const QModelIndex &rowIndex, AddTorrentOption option = AddTorrentOption::Default);
-    void addTorrentToSession(const QString &source, AddTorrentOption option = AddTorrentOption::Default);
+    void downloadTorrent(const QModelIndex& rowIndex, AddTorrentOption option = AddTorrentOption::Default);
+    void addTorrentToSession(const QString& source, AddTorrentOption option = AddTorrentOption::Default);
     void fillFilterComboBoxes();
-    QHeaderView *header() const;
+    QHeaderView* header() const;
     int visibleColumnsCount() const;
-    void setRowColor(int row, const QColor &color);
+    void setRowColor(int row, const QColor& color);
     void setRowVisited(int row);
     void onUIThemeChanged();
 
@@ -139,11 +140,11 @@ private:
     QString m_id;
     QString m_searchPattern;
     QList<SearchResult> m_searchResults;
-    Ui::SearchJobWidget *m_ui = nullptr;
-    SearchHandler *m_searchHandler = nullptr;
-    QStandardItemModel *m_searchListModel = nullptr;
-    SearchSortModel *m_proxyModel = nullptr;
-    LineEdit *m_lineEditSearchResultsFilter = nullptr;
+    Ui::SearchJobWidget* m_ui = nullptr;
+    SearchHandler* m_searchHandler = nullptr;
+    QStandardItemModel* m_searchListModel = nullptr;
+    SearchSortModel* m_proxyModel = nullptr;
+    LineEdit* m_lineEditSearchResultsFilter = nullptr;
     Status m_status = Status::Ready;
     bool m_noSearchResults = true;
 };

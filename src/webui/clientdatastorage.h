@@ -28,10 +28,10 @@
 
 #pragma once
 
-#include <QJsonObject>
-
 #include "base/3rdparty/expected.hpp"
 #include "base/path.h"
+
+#include <QJsonObject>
 
 class ClientDataStorage final : public QObject
 {
@@ -39,11 +39,11 @@ class ClientDataStorage final : public QObject
     Q_DISABLE_COPY_MOVE(ClientDataStorage)
 
 public:
-    ClientDataStorage(QObject *parent = nullptr);
+    ClientDataStorage(QObject* parent = nullptr);
 
-    nonstd::expected<void, QString> storeData(const QJsonObject &object);
+    nonstd::expected<void, QString> storeData(const QJsonObject& object);
     QJsonObject loadData() const;
-    QJsonObject loadData(const QStringList &keys) const;
+    QJsonObject loadData(const QStringList& keys) const;
 
 private:
     Path m_clientDataFilePath;

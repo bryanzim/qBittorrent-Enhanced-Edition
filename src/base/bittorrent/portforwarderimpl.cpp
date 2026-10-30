@@ -28,14 +28,12 @@
 
 #include "portforwarderimpl.h"
 
-#include <utility>
-
 #include "base/bittorrent/sessionimpl.h"
 
-PortForwarderImpl::PortForwarderImpl(BitTorrent::SessionImpl *provider, QObject *parent)
-    : Net::PortForwarder(parent)
-    , m_storeActive {u"Network/PortForwardingEnabled"_s, true}
-    , m_provider {provider}
+#include <utility>
+
+PortForwarderImpl::PortForwarderImpl(BitTorrent::SessionImpl* provider, QObject* parent)
+    : Net::PortForwarder(parent), m_storeActive{ u"Network/PortForwardingEnabled"_s, true }, m_provider{ provider }
 {
     if (isEnabled())
         start();
@@ -63,7 +61,7 @@ void PortForwarderImpl::setEnabled(const bool enabled)
     m_storeActive = enabled;
 }
 
-void PortForwarderImpl::setPorts(const QString &profile, QSet<quint16> ports)
+void PortForwarderImpl::setPorts(const QString& profile, QSet<quint16> ports)
 {
     const QSet<quint16> oldForwardedPorts = std::accumulate(m_portProfiles.cbegin(), m_portProfiles.cend(), QSet<quint16>());
 
@@ -74,7 +72,7 @@ void PortForwarderImpl::setPorts(const QString &profile, QSet<quint16> ports)
     m_provider->addMappedPorts(newForwardedPorts - oldForwardedPorts);
 }
 
-void PortForwarderImpl::removePorts(const QString &profile)
+void PortForwarderImpl::removePorts(const QString& profile)
 {
     setPorts(profile, {});
 }
@@ -82,7 +80,7 @@ void PortForwarderImpl::removePorts(const QString &profile)
 void PortForwarderImpl::start()
 {
     m_provider->enablePortMapping();
-    for (const QSet<quint16> &ports : asConst(m_portProfiles))
+    for (const QSet<quint16>& ports : asConst(m_portProfiles))
         m_provider->addMappedPorts(ports);
 }
 

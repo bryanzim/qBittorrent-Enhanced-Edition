@@ -29,10 +29,10 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-
-#include "base/search/searchpluginmanager.h"
 #include "apicontroller.h"
+#include "base/search/searchpluginmanager.h"
+
+#include <QtContainerFwd>
 
 class QJsonArray;
 class QJsonObject;
@@ -46,7 +46,7 @@ class SearchController : public APIController
     Q_DISABLE_COPY_MOVE(SearchController)
 
 public:
-    SearchController(SearchJobManager *searchJobManager, IApplication *app, QObject *parent = nullptr);
+    SearchController(SearchJobManager* searchJobManager, IApplication* app, QObject* parent = nullptr);
 
 private slots:
     void startAction();
@@ -62,10 +62,10 @@ private slots:
     void updatePluginsAction();
 
 private:
-    void checkForUpdatesFinished(const QHash<QString, SearchPluginVersion> &updateInfo);
-    void checkForUpdatesFailed(const QString &reason);
-    QJsonObject getResults(const QList<SearchResult> &searchResults, bool isSearchActive, int totalResults) const;
-    QJsonArray getPluginsInfo(const QStringList &plugins) const;
+    void checkForUpdatesFinished(const QHash<QString, SearchPluginVersion>& updateInfo);
+    void checkForUpdatesFailed(const QString& reason);
+    QJsonObject getResults(const QList<SearchResult>& searchResults, bool isSearchActive, int totalResults) const;
+    QJsonArray getPluginsInfo(const QStringList& plugins) const;
 
-    SearchJobManager *m_searchJobManager = nullptr;
+    SearchJobManager* m_searchJobManager = nullptr;
 };

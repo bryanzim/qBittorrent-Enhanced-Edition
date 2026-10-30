@@ -28,10 +28,10 @@
 
 #include "reverseresolution.h"
 
+#include "base/utils/hashvalue.h"
+
 #include <QHostInfo>
 #include <QString>
-
-#include "base/utils/hashvalue.h"
 
 const int CACHE_SIZE = 2048;
 
@@ -39,13 +39,13 @@ using namespace Net;
 
 namespace
 {
-    bool isUsefulHostName(const QString &hostname, const QHostAddress &ip)
+    bool isUsefulHostName(const QString& hostname, const QHostAddress& ip)
     {
         return (!hostname.isEmpty() && (hostname != ip.toString()));
     }
 }
 
-ReverseResolution *ReverseResolution::m_instance = nullptr;
+ReverseResolution* ReverseResolution::m_instance = nullptr;
 
 void ReverseResolution::initInstance()
 {
@@ -59,7 +59,7 @@ void ReverseResolution::freeInstance()
     m_instance = nullptr;
 }
 
-ReverseResolution *ReverseResolution::instance()
+ReverseResolution* ReverseResolution::instance()
 {
     return m_instance;
 }
@@ -72,28 +72,28 @@ ReverseResolution::ReverseResolution()
 ReverseResolution::~ReverseResolution()
 {
     // abort on-going lookups instead of waiting them
-    for (const LookupRequest &data : m_lookups)
+    for (const LookupRequest& data : m_lookups)
         QHostInfo::abortHostLookup(data.id);
 }
 
-QString ReverseResolution::resolve(const QHostAddress &ip)
+QString ReverseResolution::resolve(const QHostAddress& ip)
 {
-    const QString *hostname = m_cache.object(ip);
+    const QString* hostname = m_cache.object(ip);
     if (hostname)
         return *hostname;
 
     // in-flight requests
-    if (const auto &byAddress = m_lookups.get<ByAddress>(); byAddress.find(ip) != byAddress.end())
+    if (const auto& byAddress = m_lookups.get<ByAddress>(); byAddress.find(ip) != byAddress.end())
         return {};
 
     // do reverse lookup: IP -> hostname
     const int lookupId = QHostInfo::lookupHost(ip.toString(), this, &ReverseResolution::hostResolved);
-    m_lookups.insert({.id = lookupId, .address = ip});
+    m_lookups.insert({ .id = lookupId, .address = ip });
 
     return {};
 }
 
-void ReverseResolution::hostResolved(const QHostInfo &host)
+void ReverseResolution::hostResolved(const QHostInfo& host)
 {
     const QHostAddress ip = m_lookups.get<ByLookupID>().extract(host.lookupId()).value().address;
 
@@ -104,8 +104,8 @@ void ReverseResolution::hostResolved(const QHostInfo &host)
     }
 
     const QString hostname = isUsefulHostName(host.hostName(), ip)
-        ? host.hostName()
-        : QString();
+                                 ? host.hostName()
+                                 : QString();
     m_cache.insert(ip, new QString(hostname));
     emit ipResolved(ip, hostname);
 }

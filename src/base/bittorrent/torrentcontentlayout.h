@@ -28,10 +28,10 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QMetaEnum>
-
 #include "base/path.h"
+
+#include <QMetaEnum>
+#include <QtContainerFwd>
 
 namespace BitTorrent
 {

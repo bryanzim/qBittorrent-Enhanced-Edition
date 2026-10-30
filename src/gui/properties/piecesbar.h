@@ -49,18 +49,18 @@ class PiecesBar : public QWidget
     using base = QWidget;
 
 public:
-    explicit PiecesBar(QWidget *parent = nullptr);
+    explicit PiecesBar(QWidget* parent = nullptr);
 
-    void setTorrent(const BitTorrent::Torrent *torrent);
+    void setTorrent(const BitTorrent::Torrent* torrent);
 
     virtual void clear();
 
 protected:
-    bool event(QEvent *e) override;
-    void enterEvent(QEnterEvent *e) override;
-    void leaveEvent(QEvent *e) override;
-    void mouseMoveEvent(QMouseEvent *e) override;
-    void paintEvent(QPaintEvent *e) override;
+    bool event(QEvent* e) override;
+    void enterEvent(QEnterEvent* e) override;
+    void leaveEvent(QEvent* e) override;
+    void mouseMoveEvent(QMouseEvent* e) override;
+    void paintEvent(QPaintEvent* e) override;
 
     virtual void updateColors();
     void redraw();
@@ -71,7 +71,7 @@ protected:
     QColor highlightedPieceColor() const;
     QColor colorBoxBorderColor() const;
 
-    const QList<QRgb> &pieceColors() const;
+    const QList<QRgb>& pieceColors() const;
 
     // mix two colors by light model, ratio <0, 1>
     static QRgb mixTwoColors(QRgb rgb1, QRgb rgb2, float ratio);
@@ -87,7 +87,7 @@ private:
 
     void updateColorsImpl();
 
-    const BitTorrent::Torrent *m_torrent = nullptr;
+    const BitTorrent::Torrent* m_torrent = nullptr;
     QImage m_image;
     // buffered 256 levels gradient from bg_color to piece_color
     QList<QRgb> m_pieceColors;

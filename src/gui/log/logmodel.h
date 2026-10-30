@@ -30,13 +30,12 @@
 
 #pragma once
 
-#include <boost/circular_buffer.hpp>
+#include "base/logger.h"
 
 #include <QAbstractListModel>
 #include <QColor>
 #include <QHash>
-
-#include "base/logger.h"
+#include <boost/circular_buffer.hpp>
 
 class BaseLogModel : public QAbstractListModel
 {
@@ -52,18 +51,18 @@ public:
         TypeRole
     };
 
-    explicit BaseLogModel(QObject *parent = nullptr);
+    explicit BaseLogModel(QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = {}) const override;
-    int columnCount(const QModelIndex &parent = {}) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex& parent = {}) const override;
+    int columnCount(const QModelIndex& parent = {}) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     void reset();
 
 protected:
     class Message
     {
     public:
-        Message(const QString &time, const QString &message, Log::MsgType type);
+        Message(const QString& time, const QString& message, Log::MsgType type);
 
         QString time() const;
         QString message() const;
@@ -75,8 +74,8 @@ protected:
         Log::MsgType m_type;
     };
 
-    void addNewMessage(const Message &message);
-    virtual QColor messageForeground(const Message &message) const = 0;
+    void addNewMessage(const Message& message);
+    virtual QColor messageForeground(const Message& message) const = 0;
     virtual void onUIThemeChanged();
 
 private:
@@ -92,13 +91,13 @@ class LogMessageModel : public BaseLogModel
     Q_DISABLE_COPY_MOVE(LogMessageModel)
 
 public:
-    explicit LogMessageModel(QObject *parent = nullptr);
+    explicit LogMessageModel(QObject* parent = nullptr);
 
 private slots:
-    void handleNewMessage(const Log::Msg &message);
+    void handleNewMessage(const Log::Msg& message);
 
 private:
-    QColor messageForeground(const Message &message) const override;
+    QColor messageForeground(const Message& message) const override;
     void onUIThemeChanged() override;
     void loadColors();
 
@@ -111,13 +110,13 @@ class LogPeerModel : public BaseLogModel
     Q_DISABLE_COPY_MOVE(LogPeerModel)
 
 public:
-    explicit LogPeerModel(QObject *parent = nullptr);
+    explicit LogPeerModel(QObject* parent = nullptr);
 
 private slots:
-    void handleNewMessage(const Log::Peer &peer);
+    void handleNewMessage(const Log::Peer& peer);
 
 private:
-    QColor messageForeground(const Message &message) const override;
+    QColor messageForeground(const Message& message) const override;
     void onUIThemeChanged() override;
     void loadColors();
 

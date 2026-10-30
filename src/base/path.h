@@ -29,13 +29,13 @@
 
 #pragma once
 
-#include <filesystem>
-#include <iterator>
+#include "pathfwd.h"
 
 #include <QMetaType>
 #include <QString>
 
-#include "pathfwd.h"
+#include <filesystem>
+#include <iterator>
 
 class QStringView;
 
@@ -52,7 +52,7 @@ public:
 
     Path() = default;
 
-    explicit Path(const QString &pathStr);
+    explicit Path(const QString& pathStr);
     explicit Path(std::string_view pathStr);
 
     bool isValid() const;
@@ -74,32 +74,32 @@ public:
     void removeExtension(QStringView ext);
     Path removedExtension(QStringView ext) const;
 
-    bool hasAncestor(const Path &other, Qt::CaseSensitivity caseSensitivity = CASE_SENSITIVITY) const;
-    Path relativePathOf(const Path &childPath) const;
+    bool hasAncestor(const Path& other, Qt::CaseSensitivity caseSensitivity = CASE_SENSITIVITY) const;
+    Path relativePathOf(const Path& childPath) const;
 
     QString data() const;
     QString toString() const;
     std::filesystem::path toStdFsPath() const;
 
-    Path &operator/=(const Path &other);
-    Path &operator+=(QStringView str);
+    Path& operator/=(const Path& other);
+    Path& operator+=(QStringView str);
 
     Iterator begin() const;
     Iterator end() const;
 
-    static Path commonPath(const Path &left, const Path &right);
-    static Path commonPath(const PathList &filePaths);
+    static Path commonPath(const Path& left, const Path& right);
+    static Path commonPath(const PathList& filePaths);
 
-    static Path findRootFolder(const PathList &filePaths);
-    static void stripRootFolder(PathList &filePaths);
-    static void addRootFolder(PathList &filePaths, const Path &rootFolder);
+    static Path findRootFolder(const PathList& filePaths);
+    static void stripRootFolder(PathList& filePaths);
+    static void addRootFolder(PathList& filePaths, const Path& rootFolder);
 
-    friend Path operator/(const Path &lhs, const Path &rhs);
+    friend Path operator/(const Path& lhs, const Path& rhs);
 
 private:
     // this constructor doesn't perform any checks
     // so it's intended for internal use only
-    static Path createUnchecked(const QString &pathStr);
+    static Path createUnchecked(const QString& pathStr);
 
     QString m_pathStr;
 };
@@ -112,35 +112,37 @@ public:
     using iterator_category = std::input_iterator_tag;
     using difference_type = qsizetype;
     using value_type = Path;
-    using const_pointer = const value_type *;
+    using const_pointer = const value_type*;
     using pointer = const_pointer;
-    using const_reference = const value_type &;
+    using const_reference = const value_type&;
     using reference = const_reference;
 
-    struct EndIteratorTag {};
+    struct EndIteratorTag
+    {
+    };
 
-    Iterator(const Path &path);
-    Iterator(const Path &path, EndIteratorTag);
+    Iterator(const Path& path);
+    Iterator(const Path& path, EndIteratorTag);
 
     reference operator*() const;
     pointer operator->();
-    Iterator &operator++();
+    Iterator& operator++();
     Iterator operator++(int);
 
-    friend bool operator==(const Iterator &a, const Iterator &b);
-    friend bool operator!=(const Iterator &a, const Iterator &b);
+    friend bool operator==(const Iterator& a, const Iterator& b);
+    friend bool operator!=(const Iterator& a, const Iterator& b);
 
 private:
-    const Path &m_path;
+    const Path& m_path;
     qsizetype m_depth = 0;
     qsizetype m_itemsCount = 0;
     Path m_currentPath;
 };
 
-bool operator==(const Path &lhs, const Path &rhs);
-Path operator+(const Path &lhs, QStringView rhs);
+bool operator==(const Path& lhs, const Path& rhs);
+Path operator+(const Path& lhs, QStringView rhs);
 
-QDataStream &operator<<(QDataStream &out, const Path &path);
-QDataStream &operator>>(QDataStream &in, Path &path);
+QDataStream& operator<<(QDataStream& out, const Path& path);
+QDataStream& operator>>(QDataStream& in, Path& path);
 
-std::size_t qHash(const Path &key, std::size_t seed = 0);
+std::size_t qHash(const Path& key, std::size_t seed = 0);

@@ -30,18 +30,17 @@
 
 #include <QApplication>
 #include <QMouseEvent>
-#include <QPainter>
 #include <QPaintEvent>
+#include <QPainter>
 #include <QString>
 #include <QStyle>
 #include <QStyleOptionMenuItem>
 
-TriStateWidget::TriStateWidget(const QString &text, QWidget *parent)
-    : QWidget {parent}
-    , m_text {text}
+TriStateWidget::TriStateWidget(const QString& text, QWidget* parent)
+    : QWidget{ parent }, m_text{ text }
 {
-    setMouseTracking(true);  // for visual effects via mouse navigation
-    setFocusPolicy(Qt::TabFocus);  // for visual effects via keyboard navigation
+    setMouseTracking(true);       // for visual effects via mouse navigation
+    setFocusPolicy(Qt::TabFocus); // for visual effects via keyboard navigation
 }
 
 void TriStateWidget::setCheckState(const Qt::CheckState checkState)
@@ -63,7 +62,7 @@ QSize TriStateWidget::minimumSizeHint() const
     return style()->sizeFromContents(QStyle::CT_MenuItem, &opt, contentSize, this);
 }
 
-void TriStateWidget::paintEvent(QPaintEvent *)
+void TriStateWidget::paintEvent(QPaintEvent*)
 {
     QStyleOptionMenuItem opt;
     opt.initFrom(this);
@@ -85,20 +84,19 @@ void TriStateWidget::paintEvent(QPaintEvent *)
         break;
     };
 
-    if ((opt.state & QStyle::State_HasFocus)
-        || rect().contains(mapFromGlobal(QCursor::pos())))
-        {
+    if ((opt.state & QStyle::State_HasFocus) || rect().contains(mapFromGlobal(QCursor::pos())))
+    {
         opt.state |= QStyle::State_Selected;
 
         if (QApplication::mouseButtons() != Qt::NoButton)
             opt.state |= QStyle::State_Sunken;
     }
 
-    QPainter painter {this};
+    QPainter painter{ this };
     style()->drawControl(QStyle::CE_MenuItem, &opt, &painter, this);
 }
 
-void TriStateWidget::mouseReleaseEvent(QMouseEvent *event)
+void TriStateWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     toggleCheckState();
 
@@ -115,11 +113,10 @@ void TriStateWidget::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void TriStateWidget::keyPressEvent(QKeyEvent *event)
+void TriStateWidget::keyPressEvent(QKeyEvent* event)
 {
-    if ((event->key() == Qt::Key_Return)
-        || (event->key() == Qt::Key_Enter))
-        {
+    if ((event->key() == Qt::Key_Return) || (event->key() == Qt::Key_Enter))
+    {
         toggleCheckState();
 
         if (!m_closeOnInteraction)

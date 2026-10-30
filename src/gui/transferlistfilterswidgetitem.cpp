@@ -43,15 +43,14 @@ namespace
         using QCheckBox::QCheckBox;
 
     private:
-        void paintEvent(QPaintEvent *) override
+        void paintEvent(QPaintEvent*) override
         {
-            QPainter painter {this};
+            QPainter painter{ this };
 
             QStyleOptionViewItem indicatorOption;
             indicatorOption.initFrom(this);
             indicatorOption.rect = style()->subElementRect(QStyle::SE_CheckBoxIndicator, &indicatorOption, this);
-            indicatorOption.state |= (QStyle::State_Children
-                | (isChecked() ? QStyle::State_Open : QStyle::State_None));
+            indicatorOption.state |= (QStyle::State_Children | (isChecked() ? QStyle::State_Open : QStyle::State_None));
             style()->drawPrimitive(QStyle::PE_IndicatorBranch, &indicatorOption, &painter, this);
 
             QStyleOptionButton labelOption;
@@ -62,17 +61,15 @@ namespace
     };
 }
 
-TransferListFiltersWidgetItem::TransferListFiltersWidgetItem(const QString &caption, QWidget *filterWidget, QWidget *parent)
-    : QWidget(parent)
-    , m_caption {new ArrowCheckBox(caption, this)}
-    , m_filterWidget {filterWidget}
+TransferListFiltersWidgetItem::TransferListFiltersWidgetItem(const QString& caption, QWidget* filterWidget, QWidget* parent)
+    : QWidget(parent), m_caption{ new ArrowCheckBox(caption, this) }, m_filterWidget{ filterWidget }
 {
     QFont font;
     font.setBold(true);
     font.setCapitalization(QFont::AllUppercase);
     m_caption->setFont(font);
 
-    auto *layout = new QVBoxLayout(this);
+    auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 2, 0, 0);
     layout->setSpacing(2);
     layout->setAlignment(Qt::AlignLeft | Qt::AlignTop);

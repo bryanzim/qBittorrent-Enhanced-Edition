@@ -30,15 +30,15 @@
 
 #include "cmdoptions.h"
 
-#include <cstdio>
-#include <ranges>
-
 #include <QCoreApplication>
 #include <QDebug>
 #include <QFileInfo>
 #include <QList>
 #include <QProcessEnvironment>
 #include <QStringView>
+
+#include <cstdio>
+#include <ranges>
 
 #if defined(Q_OS_WIN) && !defined(DISABLE_GUI)
 #include <QMessageBox>
@@ -74,8 +74,7 @@ namespace
     {
     protected:
         explicit constexpr Option(const QStringView name, const QChar shortcut = QChar::Null)
-            : m_name {name}
-            , m_shortcut {shortcut}
+            : m_name{ name }, m_shortcut{ shortcut }
         {
         }
 
@@ -96,12 +95,11 @@ namespace
 
         QString envVarName() const
         {
-            return u"QBT_"
-                   + m_name.toString().toUpper().replace(u'-', u'_');
+            return u"QBT_" + m_name.toString().toUpper().replace(u'-', u'_');
         }
 
     public:
-        static QString padUsageText(const QString &usage)
+        static QString padUsageText(const QString& usage)
         {
             QString res = QString(USAGE_INDENTATION, u' ') + usage;
 
@@ -121,11 +119,11 @@ namespace
     {
     public:
         explicit constexpr BoolOption(const QStringView name, const QChar shortcut = QChar::Null)
-            : Option {name, shortcut}
+            : Option{ name, shortcut }
         {
         }
 
-        bool value(const QProcessEnvironment &env) const
+        bool value(const QProcessEnvironment& env) const
         {
             const QString val = env.value(envVarName());
             // we accept "1" and "true" (upper or lower cased) as boolean 'true' values
@@ -141,10 +139,9 @@ namespace
             return padUsageText(res);
         }
 
-        friend bool operator==(const BoolOption &option, const QStringView arg)
+        friend bool operator==(const BoolOption& option, const QStringView arg)
         {
-            return (option.hasShortcut() && ((arg.size() == 2) && (option.shortcutParameter() == arg)))
-                   || (option.fullParameter() == arg);
+            return (option.hasShortcut() && ((arg.size() == 2) && (option.shortcutParameter() == arg))) || (option.fullParameter() == arg);
         }
     };
 
@@ -153,7 +150,7 @@ namespace
     {
     public:
         explicit constexpr StringOption(const QStringView name)
-            : Option {name, QChar::Null}
+            : Option{ name, QChar::Null }
         {
         }
 
@@ -162,25 +159,25 @@ namespace
             const qsizetype index = arg.indexOf(u'=');
             if (index == -1)
                 throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "Parameter '%1' must follow syntax '%1=%2'",
-                                                        "e.g. Parameter '--webui-port' must follow syntax '--webui-port=value'")
-                                            .arg(fullParameter(), u"<value>"_s));
+                                                                            "e.g. Parameter '--webui-port' must follow syntax '--webui-port=value'")
+                                                    .arg(fullParameter(), u"<value>"_s));
 
             const QStringView val = QStringView(arg).sliced(index + 1);
             return Utils::String::unquote(val, u"'\""_s).toString();
         }
 
-        QString value(const QProcessEnvironment &env, const QString &defaultValue = {}) const
+        QString value(const QProcessEnvironment& env, const QString& defaultValue = {}) const
         {
             QString val = env.value(envVarName());
             return val.isEmpty() ? defaultValue : Utils::String::unquote(val, u"'\""_s);
         }
 
-        QString usage(const QString &valueName) const
+        QString usage(const QString& valueName) const
         {
             return padUsageText(parameterAssignment() + u'<' + valueName + u'>');
         }
 
-        friend bool operator==(const StringOption &option, const QStringView arg)
+        friend bool operator==(const StringOption& option, const QStringView arg)
         {
             return (arg == option.fullParameter()) || arg.startsWith(option.parameterAssignment());
         }
@@ -197,7 +194,7 @@ namespace
     {
     public:
         explicit constexpr IntOption(const QStringView name)
-            : StringOption {name}
+            : StringOption{ name }
         {
         }
 
@@ -211,29 +208,30 @@ namespace
             if (!ok)
             {
                 throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "Parameter '%1' must follow syntax '%1=%2'",
-                                                            "e.g. Parameter '--webui-port' must follow syntax '--webui-port=<value>'")
-                                                .arg(fullParameter(), u"<integer value>"_s));
+                                                                            "e.g. Parameter '--webui-port' must follow syntax '--webui-port=<value>'")
+                                                    .arg(fullParameter(), u"<integer value>"_s));
             }
             return res;
         }
 
-        int value(const QProcessEnvironment &env, int defaultValue) const
+        int value(const QProcessEnvironment& env, int defaultValue) const
         {
             QString val = env.value(envVarName());
-            if (val.isEmpty()) return defaultValue;
+            if (val.isEmpty())
+                return defaultValue;
 
             bool ok;
             int res = val.toInt(&ok);
             if (!ok)
             {
                 qDebug() << QCoreApplication::translate("CMD Options", "Expected integer number in environment variable '%1', but got '%2'")
-                    .arg(envVarName(), val);
+                                .arg(envVarName(), val);
                 return defaultValue;
             }
             return res;
         }
 
-        friend bool operator==(const IntOption &option, const QStringView arg)
+        friend bool operator==(const IntOption& option, const QStringView arg)
         {
             return (static_cast<StringOption>(option) == arg);
         }
@@ -245,8 +243,7 @@ namespace
     {
     public:
         constexpr TriStateBoolOption(const QStringView name, const bool defaultValue)
-            : Option {name, QChar::Null}
-            , m_defaultValue(defaultValue)
+            : Option{ name, QChar::Null }, m_defaultValue(defaultValue)
         {
         }
 
@@ -272,12 +269,12 @@ namespace
             }
 
             throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "Parameter '%1' must follow syntax '%1=%2'",
-                                                        "e.g. Parameter '--add-stopped' must follow syntax "
-                                                        "'--add-stopped=<true|false>'")
-                                            .arg(fullParameter(), u"<true|false>"_s));
+                                                                        "e.g. Parameter '--add-stopped' must follow syntax "
+                                                                        "'--add-stopped=<true|false>'")
+                                                .arg(fullParameter(), u"<true|false>"_s));
         }
 
-        std::optional<bool> value(const QProcessEnvironment &env) const
+        std::optional<bool> value(const QProcessEnvironment& env) const
         {
             const QString val = env.value(envVarName(), u"-1"_s);
 
@@ -291,11 +288,11 @@ namespace
                 return false;
 
             qDebug() << QCoreApplication::translate("CMD Options", "Expected %1 in environment variable '%2', but got '%3'")
-                .arg(u"true|false"_s, envVarName(), val);
+                            .arg(u"true|false"_s, envVarName(), val);
             return std::nullopt;
         }
 
-        friend bool operator==(const TriStateBoolOption &option, const QStringView arg)
+        friend bool operator==(const TriStateBoolOption& option, const QStringView arg)
         {
             const QString param = option.fullParameter();
             return (arg.size() > param.size()) && arg.startsWith(param) && (arg.at(param.size()) == u'=');
@@ -305,41 +302,40 @@ namespace
         bool m_defaultValue = false;
     };
 
-    constexpr const BoolOption SHOW_HELP_OPTION {u"help", u'h'};
+    constexpr const BoolOption SHOW_HELP_OPTION{ u"help", u'h' };
 #if !defined(Q_OS_WIN) || defined(DISABLE_GUI)
-    constexpr const BoolOption SHOW_VERSION_OPTION {u"version", u'v'};
+    constexpr const BoolOption SHOW_VERSION_OPTION{ u"version", u'v' };
 #endif
-    constexpr const BoolOption CONFIRM_LEGAL_NOTICE {u"confirm-legal-notice"};
+    constexpr const BoolOption CONFIRM_LEGAL_NOTICE{ u"confirm-legal-notice" };
 #if defined(DISABLE_GUI) && !defined(Q_OS_WIN)
-    constexpr const BoolOption DAEMON_OPTION {u"daemon", u'd'};
+    constexpr const BoolOption DAEMON_OPTION{ u"daemon", u'd' };
 #else
-    constexpr const BoolOption NO_SPLASH_OPTION {u"no-splash"};
+    constexpr const BoolOption NO_SPLASH_OPTION{ u"no-splash" };
 #endif
-    constexpr const IntOption WEBUI_PORT_OPTION {u"webui-port"};
-    constexpr const IntOption TORRENTING_PORT_OPTION {u"torrenting-port"};
-    constexpr const StringOption PROFILE_OPTION {u"profile"};
-    constexpr const StringOption CONFIGURATION_OPTION {u"configuration"};
-    constexpr const BoolOption RELATIVE_FASTRESUME {u"relative-fastresume"};
-    constexpr const StringOption SAVE_PATH_OPTION {u"save-path"};
-    constexpr const TriStateBoolOption STOPPED_OPTION {u"add-stopped", true};
-    constexpr const BoolOption SEED_MODE_OPTION {u"seed-mode"};
-    constexpr const StringOption CATEGORY_OPTION {u"category"};
-    constexpr const BoolOption SEQUENTIAL_OPTION {u"sequential"};
-    constexpr const BoolOption FIRST_AND_LAST_OPTION {u"first-and-last"};
-    constexpr const TriStateBoolOption SKIP_DIALOG_OPTION {u"skip-dialog", true};
+    constexpr const IntOption WEBUI_PORT_OPTION{ u"webui-port" };
+    constexpr const IntOption TORRENTING_PORT_OPTION{ u"torrenting-port" };
+    constexpr const StringOption PROFILE_OPTION{ u"profile" };
+    constexpr const StringOption CONFIGURATION_OPTION{ u"configuration" };
+    constexpr const BoolOption RELATIVE_FASTRESUME{ u"relative-fastresume" };
+    constexpr const StringOption SAVE_PATH_OPTION{ u"save-path" };
+    constexpr const TriStateBoolOption STOPPED_OPTION{ u"add-stopped", true };
+    constexpr const BoolOption SEED_MODE_OPTION{ u"seed-mode" };
+    constexpr const StringOption CATEGORY_OPTION{ u"category" };
+    constexpr const BoolOption SEQUENTIAL_OPTION{ u"sequential" };
+    constexpr const BoolOption FIRST_AND_LAST_OPTION{ u"first-and-last" };
+    constexpr const TriStateBoolOption SKIP_DIALOG_OPTION{ u"skip-dialog", true };
 
     QString wrapText(const QStringView text, const int initialIndentation = USAGE_TEXT_COLUMN, const int wrapAtColumn = WRAP_AT_COLUMN)
     {
         Q_ASSERT(!text.isEmpty());
 
         const QList<QStringView> words = text.split(u' ');
-        QStringList lines = {words.first().toString()};
+        QStringList lines = { words.first().toString() };
         int currentLineMaxLength = wrapAtColumn - initialIndentation;
 
         for (const QStringView word : std::views::drop(words, 1))
         {
-            if (QString &lastStr = lines.last()
-                ; (lastStr.length() + word.length() + 1) < currentLineMaxLength)
+            if (QString& lastStr = lines.last(); (lastStr.length() + word.length() + 1) < currentLineMaxLength)
             {
                 lastStr.append(u' ' + word);
             }
@@ -353,9 +349,9 @@ namespace
         return lines.join(u'\n');
     }
 
-    QString makeUsage(const QString &prgName)
+    QString makeUsage(const QString& prgName)
     {
-        const QString indentation {USAGE_INDENTATION, u' '};
+        const QString indentation{ USAGE_INDENTATION, u' ' };
 
 #if defined(Q_OS_WIN)
         const QString noSplashCommand = u"set QBT_NO_SPLASH=1 && " + prgName;
@@ -363,77 +359,51 @@ namespace
         const QString noSplashCommand = u"QBT_NO_SPLASH=1 " + prgName;
 #endif
 
-        const QString text = QCoreApplication::translate("CMD Options", "Usage:") + u'\n'
-            + indentation + prgName + u' ' + QCoreApplication::translate("CMD Options", "[options] [(<filename> | <url>)...]") + u'\n'
+        const QString text = QCoreApplication::translate("CMD Options", "Usage:") + u'\n' + indentation + prgName + u' ' + QCoreApplication::translate("CMD Options", "[options] [(<filename> | <url>)...]") + u'\n'
 
-            + QCoreApplication::translate("CMD Options", "Options:") + u'\n'
-            + SHOW_HELP_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Display this help message and exit")) + u'\n'
+                             + QCoreApplication::translate("CMD Options", "Options:") + u'\n' + SHOW_HELP_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Display this help message and exit")) + u'\n'
 #if !defined(Q_OS_WIN) || defined(DISABLE_GUI)
-            + SHOW_VERSION_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Display program version and exit")) + u'\n'
+                             + SHOW_VERSION_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Display program version and exit")) + u'\n'
 #endif
-            + CONFIRM_LEGAL_NOTICE.usage() + wrapText(QCoreApplication::translate("CMD Options", "Confirm the legal notice")) + u'\n'
-            + WEBUI_PORT_OPTION.usage(QCoreApplication::translate("CMD Options", "port"))
-            + wrapText(QCoreApplication::translate("CMD Options", "Change the WebUI port"))
-            + u'\n'
-            + TORRENTING_PORT_OPTION.usage(QCoreApplication::translate("CMD Options", "port"))
-            + wrapText(QCoreApplication::translate("CMD Options", "Change the torrenting port"))
-            + u'\n'
+                             + CONFIRM_LEGAL_NOTICE.usage() + wrapText(QCoreApplication::translate("CMD Options", "Confirm the legal notice")) + u'\n' + WEBUI_PORT_OPTION.usage(QCoreApplication::translate("CMD Options", "port")) + wrapText(QCoreApplication::translate("CMD Options", "Change the WebUI port")) + u'\n' + TORRENTING_PORT_OPTION.usage(QCoreApplication::translate("CMD Options", "port")) + wrapText(QCoreApplication::translate("CMD Options", "Change the torrenting port")) + u'\n'
 #ifndef DISABLE_GUI
-            + NO_SPLASH_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Disable splash screen")) + u'\n'
+                             + NO_SPLASH_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Disable splash screen")) + u'\n'
 #elif !defined(Q_OS_WIN)
-            + DAEMON_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Run in daemon-mode (background)")) + u'\n'
+                             + DAEMON_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Run in daemon-mode (background)")) + u'\n'
 #endif
-        //: Use appropriate short form or abbreviation of "directory"
-            + PROFILE_OPTION.usage(QCoreApplication::translate("CMD Options", "dir"))
-            + wrapText(QCoreApplication::translate("CMD Options", "Store configuration files in <dir>")) + u'\n'
-            + CONFIGURATION_OPTION.usage(QCoreApplication::translate("CMD Options", "name"))
-            + wrapText(QCoreApplication::translate("CMD Options", "Store configuration files in directories qBittorrent_<name>")) + u'\n'
-            + RELATIVE_FASTRESUME.usage()
-            + wrapText(QCoreApplication::translate("CMD Options", "Hack into libtorrent fastresume files and make file paths relative "
-                                    "to the profile directory")) + u'\n'
-            + Option::padUsageText(QCoreApplication::translate("CMD Options", "files or URLs"))
-            + wrapText(QCoreApplication::translate("CMD Options", "Download the torrents passed by the user")) + u'\n'
-            + u'\n'
+                             //: Use appropriate short form or abbreviation of "directory"
+                             + PROFILE_OPTION.usage(QCoreApplication::translate("CMD Options", "dir")) + wrapText(QCoreApplication::translate("CMD Options", "Store configuration files in <dir>")) + u'\n' + CONFIGURATION_OPTION.usage(QCoreApplication::translate("CMD Options", "name")) + wrapText(QCoreApplication::translate("CMD Options", "Store configuration files in directories qBittorrent_<name>")) + u'\n' + RELATIVE_FASTRESUME.usage() + wrapText(QCoreApplication::translate("CMD Options", "Hack into libtorrent fastresume files and make file paths relative "
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "to the profile directory")) +
+                             u'\n' + Option::padUsageText(QCoreApplication::translate("CMD Options", "files or URLs")) + wrapText(QCoreApplication::translate("CMD Options", "Download the torrents passed by the user")) + u'\n' + u'\n'
 
-            + wrapText(QCoreApplication::translate("CMD Options", "Options when adding new torrents:"), 0) + u'\n'
-            + SAVE_PATH_OPTION.usage(QCoreApplication::translate("CMD Options", "path")) + wrapText(QCoreApplication::translate("CMD Options", "Torrent save path")) + u'\n'
-                             + STOPPED_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Add torrents as running or stopped")) + u'\n'
-            + SEED_MODE_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Seed mode")) + u'\n'
-            + CATEGORY_OPTION.usage(QCoreApplication::translate("CMD Options", "name"))
-            + wrapText(QCoreApplication::translate("CMD Options", "Assign torrents to category. If the category doesn't exist, it will be "
-                                    "created.")) + u'\n'
-            + SEQUENTIAL_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Download files in sequential order")) + u'\n'
-            + FIRST_AND_LAST_OPTION.usage()
-            + wrapText(QCoreApplication::translate("CMD Options", "Download first and last pieces first")) + u'\n'
-            + SKIP_DIALOG_OPTION.usage()
-            + wrapText(QCoreApplication::translate("CMD Options", "Specify whether the \"Add New Torrent\" dialog opens when adding a "
-                                    "torrent.")) + u'\n'
-            + u'\n'
+                             + wrapText(QCoreApplication::translate("CMD Options", "Options when adding new torrents:"), 0) + u'\n' + SAVE_PATH_OPTION.usage(QCoreApplication::translate("CMD Options", "path")) + wrapText(QCoreApplication::translate("CMD Options", "Torrent save path")) + u'\n' + STOPPED_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Add torrents as running or stopped")) + u'\n' + SEED_MODE_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Seed mode")) + u'\n' + CATEGORY_OPTION.usage(QCoreApplication::translate("CMD Options", "name")) + wrapText(QCoreApplication::translate("CMD Options", "Assign torrents to category. If the category doesn't exist, it will be "
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "created.")) +
+                             u'\n' + SEQUENTIAL_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Download files in sequential order")) + u'\n' + FIRST_AND_LAST_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Download first and last pieces first")) + u'\n' + SKIP_DIALOG_OPTION.usage() + wrapText(QCoreApplication::translate("CMD Options", "Specify whether the \"Add New Torrent\" dialog opens when adding a "
+                                                                                                                                                                                                                                                                                                                                                                                              "torrent.")) +
+                             u'\n' + u'\n'
 
-            + wrapText(QCoreApplication::translate("CMD Options", "Option values may be supplied via environment variables. For option named "
-                                    "'parameter-name', environment variable name is 'QBT_PARAMETER_NAME' (in upper "
-                                    "case, '-' replaced with '_'). To pass flag values, set the variable to '1' or "
-                                    "'TRUE'. For example, to disable the splash screen: "), 0) + u'\n'
-            + noSplashCommand + u'\n'
-            + wrapText(QCoreApplication::translate("CMD Options", "Command line parameters take precedence over environment variables"), 0) + u'\n';
+                             + wrapText(QCoreApplication::translate("CMD Options", "Option values may be supplied via environment variables. For option named "
+                                                                                   "'parameter-name', environment variable name is 'QBT_PARAMETER_NAME' (in upper "
+                                                                                   "case, '-' replaced with '_'). To pass flag values, set the variable to '1' or "
+                                                                                   "'TRUE'. For example, to disable the splash screen: "),
+                                        0) +
+                             u'\n' + noSplashCommand + u'\n' + wrapText(QCoreApplication::translate("CMD Options", "Command line parameters take precedence over environment variables"), 0) + u'\n';
 
         return text;
     }
 }
 
-QBtCommandLineParameters::QBtCommandLineParameters(const QProcessEnvironment &env)
-    : confirmLegalNotice(CONFIRM_LEGAL_NOTICE.value(env))
-    , relativeFastresumePaths(RELATIVE_FASTRESUME.value(env))
+QBtCommandLineParameters::QBtCommandLineParameters(const QProcessEnvironment& env)
+    : confirmLegalNotice(CONFIRM_LEGAL_NOTICE.value(env)), relativeFastresumePaths(RELATIVE_FASTRESUME.value(env))
 #ifndef DISABLE_GUI
-    , noSplash(NO_SPLASH_OPTION.value(env))
+      ,
+      noSplash(NO_SPLASH_OPTION.value(env))
 #elif !defined(Q_OS_WIN)
-    , shouldDaemonize(DAEMON_OPTION.value(env))
+      ,
+      shouldDaemonize(DAEMON_OPTION.value(env))
 #endif
-    , webUIPort(WEBUI_PORT_OPTION.value(env, -1))
-    , torrentingPort(TORRENTING_PORT_OPTION.value(env, -1))
-    , skipDialog(SKIP_DIALOG_OPTION.value(env))
-    , profileDir(Utils::Fs::toAbsolutePath(Path(PROFILE_OPTION.value(env))))
-    , configurationName(CONFIGURATION_OPTION.value(env))
+      ,
+      webUIPort(WEBUI_PORT_OPTION.value(env, -1)), torrentingPort(TORRENTING_PORT_OPTION.value(env, -1)), skipDialog(SKIP_DIALOG_OPTION.value(env)), profileDir(Utils::Fs::toAbsolutePath(Path(PROFILE_OPTION.value(env)))), configurationName(CONFIGURATION_OPTION.value(env))
 {
     addTorrentParams.savePath = Path(SAVE_PATH_OPTION.value(env));
     addTorrentParams.category = CATEGORY_OPTION.value(env);
@@ -443,14 +413,13 @@ QBtCommandLineParameters::QBtCommandLineParameters(const QProcessEnvironment &en
     addTorrentParams.addStopped = STOPPED_OPTION.value(env);
 }
 
-QBtCommandLineParameters parseCommandLine(const QStringList &args)
+QBtCommandLineParameters parseCommandLine(const QStringList& args)
 {
-    QBtCommandLineParameters result {QProcessEnvironment::systemEnvironment()};
+    QBtCommandLineParameters result{ QProcessEnvironment::systemEnvironment() };
 
-    for (const QString &arg : std::views::drop(args, 1))
+    for (const QString& arg : std::views::drop(args, 1))
     {
-        if ((arg.startsWith(u"--") && !arg.endsWith(u".torrent"))
-            || (arg.startsWith(u'-') && (arg.size() == 2)))
+        if ((arg.startsWith(u"--") && !arg.endsWith(u".torrent")) || (arg.startsWith(u'-') && (arg.size() == 2)))
         {
             // Parse known parameters
             if (arg == SHOW_HELP_OPTION)
@@ -472,7 +441,7 @@ QBtCommandLineParameters parseCommandLine(const QStringList &args)
                 result.webUIPort = WEBUI_PORT_OPTION.value(arg);
                 if ((result.webUIPort < 1) || (result.webUIPort > 65535))
                     throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "%1 must specify a valid port (1 to 65535).")
-                                                    .arg(u"--webui-port"_s));
+                                                        .arg(u"--webui-port"_s));
             }
             else if (arg == TORRENTING_PORT_OPTION)
             {
@@ -480,7 +449,7 @@ QBtCommandLineParameters parseCommandLine(const QStringList &args)
                 if ((result.torrentingPort < 1) || (result.torrentingPort > 65535))
                 {
                     throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "%1 must specify a valid port (1 to 65535).")
-                                                    .arg(u"--torrenting-port"_s));
+                                                        .arg(u"--torrenting-port"_s));
                 }
             }
 #ifndef DISABLE_GUI
@@ -553,7 +522,7 @@ QBtCommandLineParameters parseCommandLine(const QStringList &args)
     return result;
 }
 
-void displayUsage(const QString &prgName)
+void displayUsage(const QString& prgName)
 {
 #if defined(Q_OS_WIN) && !defined(DISABLE_GUI)
     QMessageBox msgBox(QMessageBox::Information, QCoreApplication::translate("CMD Options", "Help"), makeUsage(prgName), QMessageBox::Ok);

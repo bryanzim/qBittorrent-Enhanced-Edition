@@ -46,7 +46,7 @@ using InhibitorImpl = Inhibitor;
 #endif
 
 PowerManagement::PowerManagement()
-    : m_inhibitor {new InhibitorImpl}
+    : m_inhibitor{ new InhibitorImpl }
 {
 }
 

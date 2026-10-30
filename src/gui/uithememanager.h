@@ -30,18 +30,18 @@
 
 #pragma once
 
-#include <QtSystemDetection>
-#include <QtVersionChecks>
+#include "base/settingvalue.h"
+#include "trayiconstyle.h"
+#include "uithemesource.h"
+
 #include <QColor>
 #include <QHash>
 #include <QIcon>
 #include <QObject>
 #include <QPixmap>
 #include <QString>
-
-#include "base/settingvalue.h"
-#include "trayiconstyle.h"
-#include "uithemesource.h"
+#include <QtSystemDetection>
+#include <QtVersionChecks>
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 8, 0))
 #define QBT_HAS_COLORSCHEME_OPTION
@@ -59,7 +59,7 @@ class UIThemeManager final : public QObject
 public:
     static void initInstance();
     static void freeInstance();
-    static UIThemeManager *instance();
+    static UIThemeManager* instance();
 
 #ifdef QBT_HAS_COLORSCHEME_OPTION
     ColorScheme colorScheme() const;
@@ -68,12 +68,12 @@ public:
     TrayIconStyle trayIconStyle() const;
     void setTrayIconStyle(TrayIconStyle value);
 
-    QIcon getIcon(const QString &iconId, const QString &fallback = {}) const;
+    QIcon getIcon(const QString& iconId, const QString& fallback = {}) const;
     QIcon getSystrayIcon() const;
-    QIcon getFlagIcon(const QString &countryIsoCode) const;
-    QPixmap getScaledPixmap(const QString &iconId, int height) const;
+    QIcon getFlagIcon(const QString& countryIsoCode) const;
+    QPixmap getScaledPixmap(const QString& iconId, int height) const;
 
-    QColor getColor(const QString &id) const;
+    QColor getColor(const QString& id) const;
 
 #ifdef Q_OS_WIN
     void updateSystemColorMode();
@@ -93,9 +93,9 @@ private:
     void applyColorScheme() const;
 #endif
 
-    QIcon getIcon(const QString &iconId, const QString &fallback, ColorMode colorMode) const;
+    QIcon getIcon(const QString& iconId, const QString& fallback, ColorMode colorMode) const;
 
-    static UIThemeManager *m_instance;
+    static UIThemeManager* m_instance;
     const bool m_useCustomTheme;
 #ifdef QBT_HAS_COLORSCHEME_OPTION
     SettingValue<ColorScheme> m_colorSchemeSetting;

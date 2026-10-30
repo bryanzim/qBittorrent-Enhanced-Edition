@@ -30,10 +30,10 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/path.h"
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 class QThreadPool;
 
@@ -54,9 +54,9 @@ class TorrentCreatorDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(TorrentCreatorDialog)
 
 public:
-    TorrentCreatorDialog(QWidget *parent = nullptr, const Path &defaultPath = {});
+    TorrentCreatorDialog(QWidget* parent = nullptr, const Path& defaultPath = {});
     ~TorrentCreatorDialog() override;
-    void updateInputPath(const Path &path);
+    void updateInputPath(const Path& path);
 
 private slots:
     void updateProgressBar(int progress);
@@ -64,12 +64,12 @@ private slots:
     void onCreateButtonClicked();
     void onAddFileButtonClicked();
     void onAddFolderButtonClicked();
-    void handleCreationFailure(const QString &msg);
-    void handleCreationSuccess(const BitTorrent::TorrentCreatorResult &result);
+    void handleCreationFailure(const QString& msg);
+    void handleCreationSuccess(const BitTorrent::TorrentCreatorResult& result);
 
 private:
-    void dropEvent(QDropEvent *event) override;
-    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
 
     void saveSettings();
     void loadSettings();
@@ -82,8 +82,8 @@ private:
     int getPaddedFileSizeLimit() const;
 #endif
 
-    Ui::TorrentCreatorDialog *m_ui = nullptr;
-    QThreadPool *m_threadPool = nullptr;
+    Ui::TorrentCreatorDialog* m_ui = nullptr;
+    QThreadPool* m_threadPool = nullptr;
 
     // settings
     SettingValue<QSize> m_storeDialogSize;

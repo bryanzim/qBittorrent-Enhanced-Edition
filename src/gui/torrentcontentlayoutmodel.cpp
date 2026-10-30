@@ -29,23 +29,18 @@
 #include "torrentcontentlayoutmodel.h"
 
 #include "base/bittorrent/torrentcontenthandler.h"
-
 #include "base/exceptions.h"
 #include "base/global.h"
 #include "base/path.h"
 
-TorrentContentLayoutModel::TorrentContentLayoutModel(BitTorrent::TorrentContentHandler *contentHandler, QObject *parent)
-    : QAbstractItemModel(parent)
-    , m_contentHandler {contentHandler}
+TorrentContentLayoutModel::TorrentContentLayoutModel(BitTorrent::TorrentContentHandler* contentHandler, QObject* parent)
+    : QAbstractItemModel(parent), m_contentHandler{ contentHandler }
 {
     Q_ASSERT(m_contentHandler);
 
-    connect(m_contentHandler, &BitTorrent::TorrentContentHandler::fileRenamed
-            , this, &TorrentContentLayoutModel::onFileRenamed);
-    connect(m_contentHandler, &BitTorrent::TorrentContentHandler::folderRenamed
-            , this, &TorrentContentLayoutModel::onFolderRenamed);
-    connect(m_contentHandler, &BitTorrent::TorrentContentHandler::folderRenamingFailed
-            , this, &TorrentContentLayoutModel::onFolderRenamingFailed);
+    connect(m_contentHandler, &BitTorrent::TorrentContentHandler::fileRenamed, this, &TorrentContentLayoutModel::onFileRenamed);
+    connect(m_contentHandler, &BitTorrent::TorrentContentHandler::folderRenamed, this, &TorrentContentLayoutModel::onFolderRenamed);
+    connect(m_contentHandler, &BitTorrent::TorrentContentHandler::folderRenamingFailed, this, &TorrentContentLayoutModel::onFolderRenamingFailed);
 }
 
 QVariant TorrentContentLayoutModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
@@ -65,11 +60,10 @@ QVariant TorrentContentLayoutModel::headerData(const int section, const Qt::Orie
     return {};
 }
 
-QModelIndex TorrentContentLayoutModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex TorrentContentLayoutModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (parent.isValid() // no items with valid parent
-        || (row < 0) || (row >= getFilesCount())
-        || (column < 0) || (column >= NB_COLUMNS))
+        || (row < 0) || (row >= getFilesCount()) || (column < 0) || (column >= NB_COLUMNS))
     {
         return {};
     }
@@ -77,12 +71,12 @@ QModelIndex TorrentContentLayoutModel::index(int row, int column, const QModelIn
     return createIndex(row, column);
 }
 
-QModelIndex TorrentContentLayoutModel::parent([[maybe_unused]] const QModelIndex &index) const
+QModelIndex TorrentContentLayoutModel::parent([[maybe_unused]] const QModelIndex& index) const
 {
     return {};
 }
 
-int TorrentContentLayoutModel::rowCount(const QModelIndex &parent) const
+int TorrentContentLayoutModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
         return 0;
@@ -90,12 +84,12 @@ int TorrentContentLayoutModel::rowCount(const QModelIndex &parent) const
     return getFilesCount();
 }
 
-int TorrentContentLayoutModel::columnCount([[maybe_unused]] const QModelIndex &parent) const
+int TorrentContentLayoutModel::columnCount([[maybe_unused]] const QModelIndex& parent) const
 {
     return NB_COLUMNS;
 }
 
-QVariant TorrentContentLayoutModel::data(const QModelIndex &index, int role) const
+QVariant TorrentContentLayoutModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || (index.row() >= getFilesCount()))
         return {};
@@ -131,7 +125,7 @@ QVariant TorrentContentLayoutModel::data(const QModelIndex &index, int role) con
     return {};
 }
 
-bool TorrentContentLayoutModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool TorrentContentLayoutModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (role != Qt::EditRole)
         return false;
@@ -139,7 +133,7 @@ bool TorrentContentLayoutModel::setData(const QModelIndex &index, const QVariant
     if (index.column() == COL_PATH)
     {
         const int fileIndex = index.row();
-        Path filePath {value.toString()};
+        Path filePath{ value.toString() };
         if (getFilePath(fileIndex) != filePath)
         {
             if (filePath == m_contentHandler->filePath(fileIndex))
@@ -165,14 +159,14 @@ void TorrentContentLayoutModel::applyChangedFilePaths()
 {
     QString firstErrorMessage;
     qsizetype failedCount = 0;
-    for (const auto &[index, changedFilePath] : asConst(m_changedFilePaths).asKeyValueRange())
+    for (const auto& [index, changedFilePath] : asConst(m_changedFilePaths).asKeyValueRange())
     {
         try
         {
             const Path currentFilePath = m_contentHandler->filePath(index);
             m_contentHandler->renameFile(currentFilePath, changedFilePath);
         }
-        catch (const RuntimeError &error)
+        catch (const RuntimeError& error)
         {
             if (failedCount == 0)
                 firstErrorMessage = error.message();
@@ -212,21 +206,19 @@ void TorrentContentLayoutModel::onFileRenamed(const int fileIndex)
     }
 }
 
-void TorrentContentLayoutModel::onFolderRenamed([[maybe_unused]] const Path &newFolderPath
-        , [[maybe_unused]] const Path &oldFolderPath, const QHash<int, Path> &renamedFiles)
+void TorrentContentLayoutModel::onFolderRenamed([[maybe_unused]] const Path& newFolderPath, [[maybe_unused]] const Path& oldFolderPath, const QHash<int, Path>& renamedFiles)
 {
     for (auto iter = renamedFiles.keyBegin(); iter != renamedFiles.keyEnd(); ++iter)
         onFileRenamed(*iter);
 }
 
-void TorrentContentLayoutModel::onFolderRenamingFailed([[maybe_unused]] const Path &newFolderPath
-        , [[maybe_unused]] const Path &oldFolderPath, const QHash<int, Path> &renamedFiles)
+void TorrentContentLayoutModel::onFolderRenamingFailed([[maybe_unused]] const Path& newFolderPath, [[maybe_unused]] const Path& oldFolderPath, const QHash<int, Path>& renamedFiles)
 {
     for (auto iter = renamedFiles.keyBegin(); iter != renamedFiles.keyEnd(); ++iter)
         onFileRenamed(*iter);
 }
 
-Qt::ItemFlags TorrentContentLayoutModel::flags(const QModelIndex &index) const
+Qt::ItemFlags TorrentContentLayoutModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;

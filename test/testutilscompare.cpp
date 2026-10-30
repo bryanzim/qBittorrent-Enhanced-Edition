@@ -26,11 +26,11 @@
  * exception statement from your version.
  */
 
+#include "base/global.h"
+
 #include <QLocale>
 #include <QObject>
 #include <QTest>
-
-#include "base/global.h"
 
 // only test qbt own implementation, not QCollator
 #define QBT_USE_QCOLLATOR 0
@@ -53,51 +53,50 @@ namespace
         CompareResult caseSensitiveResult = CompareResult::Equal;
     };
 
-    const TestData testData[] =
-    {
-        {u""_s, u""_s, CompareResult::Equal, CompareResult::Equal},
-        {u""_s, u"a"_s, CompareResult::Less, CompareResult::Less},
-        {u"a"_s, u""_s, CompareResult::Greater, CompareResult::Greater},
+    const TestData testData[] = {
+        {          u""_s,          u""_s,   CompareResult::Equal,   CompareResult::Equal },
+        {          u""_s,         u"a"_s,    CompareResult::Less,    CompareResult::Less },
+        {         u"a"_s,          u""_s, CompareResult::Greater, CompareResult::Greater },
 
-        {u"a"_s, u"a"_s, CompareResult::Equal, CompareResult::Equal},
-        {u"A"_s, u"a"_s, CompareResult::Equal, CompareResult::Greater},
-        {u"a"_s, u"A"_s, CompareResult::Equal, CompareResult::Less},
+        {         u"a"_s,         u"a"_s,   CompareResult::Equal,   CompareResult::Equal },
+        {         u"A"_s,         u"a"_s,   CompareResult::Equal, CompareResult::Greater },
+        {         u"a"_s,         u"A"_s,   CompareResult::Equal,    CompareResult::Less },
 
-        {u"0"_s, u"0"_s, CompareResult::Equal, CompareResult::Equal},
-        {u"1"_s, u"0"_s, CompareResult::Greater, CompareResult::Greater},
-        {u"0"_s, u"1"_s, CompareResult::Less, CompareResult::Less},
+        {         u"0"_s,         u"0"_s,   CompareResult::Equal,   CompareResult::Equal },
+        {         u"1"_s,         u"0"_s, CompareResult::Greater, CompareResult::Greater },
+        {         u"0"_s,         u"1"_s,    CompareResult::Less,    CompareResult::Less },
 
-        {u"😀"_s, u"😀"_s, CompareResult::Equal, CompareResult::Equal},
-        {u"😀"_s, u"😁"_s, CompareResult::Less, CompareResult::Less},
-        {u"😁"_s, u"😀"_s, CompareResult::Greater, CompareResult::Greater},
+        {        u"😀"_s,        u"😀"_s,   CompareResult::Equal,   CompareResult::Equal },
+        {        u"😀"_s,        u"😁"_s,    CompareResult::Less,    CompareResult::Less },
+        {        u"😁"_s,        u"😀"_s, CompareResult::Greater, CompareResult::Greater },
 
-        {u"a1"_s, u"a1"_s, CompareResult::Equal, CompareResult::Equal},
-        {u"A1"_s, u"a1"_s, CompareResult::Equal, CompareResult::Greater},
-        {u"a1"_s, u"A1"_s, CompareResult::Equal, CompareResult::Less},
+        {        u"a1"_s,        u"a1"_s,   CompareResult::Equal,   CompareResult::Equal },
+        {        u"A1"_s,        u"a1"_s,   CompareResult::Equal, CompareResult::Greater },
+        {        u"a1"_s,        u"A1"_s,   CompareResult::Equal,    CompareResult::Less },
 
-        {u"a1"_s, u"a2"_s, CompareResult::Less, CompareResult::Less},
-        {u"A1"_s, u"a2"_s, CompareResult::Less, CompareResult::Greater},
-        {u"a1"_s, u"A2"_s, CompareResult::Less, CompareResult::Less},
-        {u"A1"_s, u"A2"_s, CompareResult::Less, CompareResult::Less},
+        {        u"a1"_s,        u"a2"_s,    CompareResult::Less,    CompareResult::Less },
+        {        u"A1"_s,        u"a2"_s,    CompareResult::Less, CompareResult::Greater },
+        {        u"a1"_s,        u"A2"_s,    CompareResult::Less,    CompareResult::Less },
+        {        u"A1"_s,        u"A2"_s,    CompareResult::Less,    CompareResult::Less },
 
-        {u"abc100"_s, u"abc99"_s, CompareResult::Greater, CompareResult::Greater},
-        {u"ABC100"_s, u"abc99"_s, CompareResult::Greater, CompareResult::Greater},
-        {u"abc100"_s, u"ABC99"_s, CompareResult::Greater, CompareResult::Less},
-        {u"ABC100"_s, u"ABC99"_s, CompareResult::Greater, CompareResult::Greater},
+        {    u"abc100"_s,     u"abc99"_s, CompareResult::Greater, CompareResult::Greater },
+        {    u"ABC100"_s,     u"abc99"_s, CompareResult::Greater, CompareResult::Greater },
+        {    u"abc100"_s,     u"ABC99"_s, CompareResult::Greater,    CompareResult::Less },
+        {    u"ABC100"_s,     u"ABC99"_s, CompareResult::Greater, CompareResult::Greater },
 
-        {u"100abc"_s, u"99abc"_s, CompareResult::Greater, CompareResult::Greater},
-        {u"100ABC"_s, u"99abc"_s, CompareResult::Greater, CompareResult::Greater},
-        {u"100abc"_s, u"99ABC"_s, CompareResult::Greater, CompareResult::Greater},
-        {u"100ABC"_s, u"99ABC"_s, CompareResult::Greater, CompareResult::Greater},
+        {    u"100abc"_s,     u"99abc"_s, CompareResult::Greater, CompareResult::Greater },
+        {    u"100ABC"_s,     u"99abc"_s, CompareResult::Greater, CompareResult::Greater },
+        {    u"100abc"_s,     u"99ABC"_s, CompareResult::Greater, CompareResult::Greater },
+        {    u"100ABC"_s,     u"99ABC"_s, CompareResult::Greater, CompareResult::Greater },
 
-        {u"😀😀😀99"_s, u"😀😀😀100"_s, CompareResult::Less, CompareResult::Less},
-        {u"😀😀😀100"_s, u"😀😀😀99"_s, CompareResult::Greater, CompareResult::Greater}
+        {  u"😀😀😀99"_s, u"😀😀😀100"_s,    CompareResult::Less,    CompareResult::Less },
+        { u"😀😀😀100"_s,  u"😀😀😀99"_s, CompareResult::Greater, CompareResult::Greater }
     };
 
-    void testCompare(const TestData &data, const int actual, const CompareResult expected)
+    void testCompare(const TestData& data, const int actual, const CompareResult expected)
     {
         const auto errorMessage = u"Wrong result. LHS: \"%1\". RHS: \"%2\". Result: %3"_s
-            .arg(data.lhs, data.rhs, QString::number(actual));
+                                      .arg(data.lhs, data.rhs, QString::number(actual));
 
         switch (expected)
         {
@@ -116,10 +115,10 @@ namespace
         }
     }
 
-    void testLessThan(const TestData &data, const bool actual, const CompareResult expected)
+    void testLessThan(const TestData& data, const bool actual, const CompareResult expected)
     {
         const auto errorMessage = u"Wrong result. LHS: \"%1\". RHS: \"%2\". Result: %3"_s
-            .arg(data.lhs, data.rhs, QString::number(actual));
+                                      .arg(data.lhs, data.rhs, QString::number(actual));
 
         switch (expected)
         {
@@ -163,7 +162,7 @@ private slots:
     {
         const Utils::Compare::NaturalCompare<Qt::CaseInsensitive> cmp;
 
-        for (const TestData &data : testData)
+        for (const TestData& data : testData)
             testCompare(data, cmp(data.lhs, data.rhs), data.caseInsensitiveResult);
     }
 
@@ -171,23 +170,23 @@ private slots:
     {
         const Utils::Compare::NaturalCompare<Qt::CaseSensitive> cmp;
 
-        for (const TestData &data : testData)
+        for (const TestData& data : testData)
             testCompare(data, cmp(data.lhs, data.rhs), data.caseSensitiveResult);
     }
 
     void testNaturalLessThanCaseInsensitive() const
     {
-        const Utils::Compare::NaturalLessThan<Qt::CaseInsensitive> cmp {};
+        const Utils::Compare::NaturalLessThan<Qt::CaseInsensitive> cmp{};
 
-        for (const TestData &data : testData)
+        for (const TestData& data : testData)
             testLessThan(data, cmp(data.lhs, data.rhs), data.caseInsensitiveResult);
     }
 
     void testNaturalLessThanCaseSensitive() const
     {
-        const Utils::Compare::NaturalLessThan<Qt::CaseSensitive> cmp {};
+        const Utils::Compare::NaturalLessThan<Qt::CaseSensitive> cmp{};
 
-        for (const TestData &data : testData)
+        for (const TestData& data : testData)
             testLessThan(data, cmp(data.lhs, data.rhs), data.caseSensitiveResult);
     }
 };

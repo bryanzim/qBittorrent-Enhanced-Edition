@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QMenu>
-
 #include "filterpatternformat.h"
+
+#include <QMenu>
 
 class FilterPatternFormatMenu final : public QMenu
 {
@@ -38,7 +38,7 @@ class FilterPatternFormatMenu final : public QMenu
     Q_DISABLE_COPY_MOVE(FilterPatternFormatMenu)
 
 public:
-    explicit FilterPatternFormatMenu(FilterPatternFormat format, QWidget *parent = nullptr);
+    explicit FilterPatternFormatMenu(FilterPatternFormat format, QWidget* parent = nullptr);
 
 signals:
     void patternFormatChanged(FilterPatternFormat format);

@@ -28,16 +28,15 @@
 
 #include "peersadditiondialog.h"
 
-#include <QHostAddress>
-#include <QMessageBox>
-
 #include "base/bittorrent/peeraddress.h"
 #include "base/global.h"
 #include "ui_peersadditiondialog.h"
 
-PeersAdditionDialog::PeersAdditionDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::PeersAdditionDialog())
+#include <QHostAddress>
+#include <QMessageBox>
+
+PeersAdditionDialog::PeersAdditionDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::PeersAdditionDialog())
 {
     m_ui->setupUi(this);
 
@@ -50,7 +49,7 @@ PeersAdditionDialog::~PeersAdditionDialog()
     delete m_ui;
 }
 
-QList<BitTorrent::PeerAddress> PeersAdditionDialog::askForPeers(QWidget *parent)
+QList<BitTorrent::PeerAddress> PeersAdditionDialog::askForPeers(QWidget* parent)
 {
     PeersAdditionDialog dlg(parent);
     dlg.exec();
@@ -62,11 +61,11 @@ void PeersAdditionDialog::validateInput()
     if (m_ui->textEditPeers->toPlainText().trimmed().isEmpty())
     {
         QMessageBox::warning(this, tr("No peer entered"),
-                    tr("Please type at least one peer."),
-                    QMessageBox::Ok);
+                             tr("Please type at least one peer."),
+                             QMessageBox::Ok);
         return;
     }
-    for (const QString &peer : asConst(m_ui->textEditPeers->toPlainText().trimmed().split(u'\n')))
+    for (const QString& peer : asConst(m_ui->textEditPeers->toPlainText().trimmed().split(u'\n')))
     {
         const BitTorrent::PeerAddress addr = BitTorrent::PeerAddress::parse(peer);
         if (!addr.ip.isNull())
@@ -76,8 +75,8 @@ void PeersAdditionDialog::validateInput()
         else
         {
             QMessageBox::warning(this, tr("Invalid peer"),
-                    tr("The peer '%1' is invalid.").arg(peer),
-                    QMessageBox::Ok);
+                                 tr("The peer '%1' is invalid.").arg(peer),
+                                 QMessageBox::Ok);
             m_peersList.clear();
             return;
         }

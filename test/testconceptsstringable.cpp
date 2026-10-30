@@ -26,11 +26,11 @@
  * exception statement from your version.
  */
 
+#include "base/concepts/stringable.h"
+
 #include <QObject>
 #include <QString>
 #include <QTest>
-
-#include "base/concepts/stringable.h"
 
 class TestConceptsStringable final : public QObject
 {

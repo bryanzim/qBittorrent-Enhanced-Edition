@@ -28,10 +28,10 @@
 
 #pragma once
 
+#include "base/types.h"
+
 #include <QDialog>
 #include <QTimer>
-
-#include "base/types.h"
 
 namespace Ui
 {
@@ -44,13 +44,13 @@ class ShutdownConfirmDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(ShutdownConfirmDialog)
 
 public:
-    ShutdownConfirmDialog(QWidget *parent, const ShutdownDialogAction &action);
+    ShutdownConfirmDialog(QWidget* parent, const ShutdownDialogAction& action);
     ~ShutdownConfirmDialog();
 
-    static bool askForConfirmation(QWidget *parent, const ShutdownDialogAction &action);
+    static bool askForConfirmation(QWidget* parent, const ShutdownDialogAction& action);
 
 protected:
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent* event) override;
 
 private slots:
     void updateSeconds();
@@ -62,7 +62,7 @@ private:
     void updateText();
 
     // Vars
-    Ui::ShutdownConfirmDialog *m_ui = nullptr;
+    Ui::ShutdownConfirmDialog* m_ui = nullptr;
     QTimer m_timer;
     int m_timeout = 15;
     ShutdownDialogAction m_action;

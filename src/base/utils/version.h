@@ -29,13 +29,13 @@
 
 #pragma once
 
-#include <array>
-#include <type_traits>
-
 #include <QList>
 #include <QMetaType>
 #include <QString>
 #include <QStringView>
+
+#include <array>
+#include <type_traits>
 
 namespace Utils
 {
@@ -59,10 +59,10 @@ namespace Utils
             *this = fromString(string);
         }
 
-        template <typename ... Ts>
-        constexpr Version(Ts ... params)
+        template <typename... Ts>
+        constexpr Version(Ts... params)
             requires std::conjunction_v<std::is_convertible<Ts, int>...>
-            : m_components {{params ...}}
+            : m_components{ { params... } }
         {
             static_assert((sizeof...(Ts) <= N), "Too many parameters provided");
             static_assert((sizeof...(Ts) >= Mandatory), "Not enough parameters provided");
@@ -119,8 +119,8 @@ namespace Utils
             while ((lastSignificantIndex > 0) && (m_components[lastSignificantIndex] == 0))
                 --lastSignificantIndex;
 
-            if ((lastSignificantIndex + 1) < Mandatory)   // lastSignificantIndex >= 0
-                lastSignificantIndex = Mandatory - 1;     // and Mandatory >= 1
+            if ((lastSignificantIndex + 1) < Mandatory) // lastSignificantIndex >= 0
+                lastSignificantIndex = Mandatory - 1;   // and Mandatory >= 1
 
             QString res = QString::number(m_components[0]);
             for (int i = 1; i <= lastSignificantIndex; ++i)
@@ -128,17 +128,17 @@ namespace Utils
             return res;
         }
 
-        friend constexpr bool operator==(const ThisType &left, const ThisType &right)
+        friend constexpr bool operator==(const ThisType& left, const ThisType& right)
         {
             return (left.m_components == right.m_components);
         }
 
-        friend constexpr bool operator<(const ThisType &left, const ThisType &right)
+        friend constexpr bool operator<(const ThisType& left, const ThisType& right)
         {
             return (left.m_components < right.m_components);
         }
 
-        static Version fromString(const QStringView string, const Version &defaultVersion = {})
+        static Version fromString(const QStringView string, const Version& defaultVersion = {})
         {
             const QList<QStringView> stringParts = string.split(u'.');
             const qsizetype count = stringParts.size();
@@ -159,23 +159,23 @@ namespace Utils
         }
 
     private:
-        std::array<int, N> m_components {{}};
+        std::array<int, N> m_components{ {} };
     };
 
     template <int N, int Mandatory>
-    constexpr bool operator>(const Version<N, Mandatory> &left, const Version<N, Mandatory> &right)
+    constexpr bool operator>(const Version<N, Mandatory>& left, const Version<N, Mandatory>& right)
     {
         return (right < left);
     }
 
     template <int N, int Mandatory>
-    constexpr bool operator<=(const Version<N, Mandatory> &left, const Version<N, Mandatory> &right)
+    constexpr bool operator<=(const Version<N, Mandatory>& left, const Version<N, Mandatory>& right)
     {
         return !(left > right);
     }
 
     template <int N, int Mandatory>
-    constexpr bool operator>=(const Version<N, Mandatory> &left, const Version<N, Mandatory> &right)
+    constexpr bool operator>=(const Version<N, Mandatory>& left, const Version<N, Mandatory>& right)
     {
         return !(left < right);
     }

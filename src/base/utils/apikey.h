@@ -33,5 +33,5 @@ class QString;
 namespace Utils::APIKey
 {
     QString generate();
-    bool isValid(const QString &key);
+    bool isValid(const QString& key);
 }

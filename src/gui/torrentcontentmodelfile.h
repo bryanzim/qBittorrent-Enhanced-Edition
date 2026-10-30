@@ -39,7 +39,7 @@ namespace BitTorrent
 class TorrentContentModelFile final : public TorrentContentModelItem
 {
 public:
-    TorrentContentModelFile(const QString &fileName, qulonglong fileSize, int fileIndex);
+    TorrentContentModelFile(const QString& fileName, qulonglong fileSize, int fileIndex);
 
     int fileIndex() const;
     void setPriority(BitTorrent::DownloadPriority newPriority, bool updateParent = true) override;

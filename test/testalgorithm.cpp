@@ -26,16 +26,16 @@
  * exception statement from your version.
  */
 
-#include <map>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
+#include "base/algorithm.h"
+#include "base/global.h"
 
 #include <QObject>
 #include <QTest>
 
-#include "base/algorithm.h"
-#include "base/global.h"
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 
 class TestAlgorithm final : public QObject
 {
@@ -61,16 +61,14 @@ private slots:
     void testMappedTypeRemoveIf() const
     {
         {
-            QMap<int, char> data =
-            {
-                {0, 'a'},
-                {1, 'b'},
-                {2, 'c'},
-                {3, 'b'},
-                {4, 'd'}
+            QMap<int, char> data = {
+                { 0, 'a' },
+                { 1, 'b' },
+                { 2, 'c' },
+                { 3, 'b' },
+                { 4, 'd' }
             };
-            Algorithm::removeIf(data, []([[maybe_unused]] const int key, const char value)
-            {
+            Algorithm::removeIf(data, []([[maybe_unused]] const int key, const char value) {
                 return (value == 'b');
             });
             QCOMPARE(data.size(), 3);
@@ -82,8 +80,7 @@ private slots:
         }
         {
             QHash<int, char> data;
-            Algorithm::removeIf(data, []([[maybe_unused]] const int key, const char value)
-            {
+            Algorithm::removeIf(data, []([[maybe_unused]] const int key, const char value) {
                 return (value == 'b');
             });
             QVERIFY(data.empty());
@@ -92,8 +89,8 @@ private slots:
 
     void testSorted() const
     {
-        const QStringList list = {u"c"_s, u"b"_s, u"a"_s};
-        const QStringList sortedList = {u"a"_s, u"b"_s, u"c"_s};
+        const QStringList list = { u"c"_s, u"b"_s, u"a"_s };
+        const QStringList sortedList = { u"a"_s, u"b"_s, u"c"_s };
         QCOMPARE(Algorithm::sorted(list), sortedList);
     }
 };

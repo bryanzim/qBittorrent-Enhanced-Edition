@@ -28,12 +28,13 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/pathfwd.h"
 #include "downloadpriority.h"
 
-template <typename T> class QFuture;
+#include <QObject>
+
+template <typename T>
+class QFuture;
 
 namespace BitTorrent
 {
@@ -61,21 +62,20 @@ namespace BitTorrent
          */
         virtual QFuture<QList<qreal>> fetchAvailableFileFractions() const = 0;
 
-        virtual void renameFile(int index, const Path &newPath) = 0;
-        virtual void prioritizeFiles(const QList<DownloadPriority> &priorities) = 0;
+        virtual void renameFile(int index, const Path& newPath) = 0;
+        virtual void prioritizeFiles(const QList<DownloadPriority>& priorities) = 0;
         virtual void flushCache() const = 0;
 
-        void renameFile(const Path &oldPath, const Path &newPath);
-        void renameFolder(const Path &oldFolderPath, const Path &newFolderPath);
+        void renameFile(const Path& oldPath, const Path& newPath);
+        void renameFolder(const Path& oldFolderPath, const Path& newFolderPath);
 
     signals:
         void metadataReceived();
-        void fileRenamed(int index, const Path &oldFilePath);
-        void folderRenamed(const Path &newFolderPath, const Path &oldFolderPath, const QHash<int, Path> &renamedFiles);
-        void folderRenamingFailed(const Path &newFolderPath, const Path &oldFolderPath
-                , const QHash<int, Path> &renamedFiles, const QList<int> &failedFileIndexes);
+        void fileRenamed(int index, const Path& oldFilePath);
+        void folderRenamed(const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles);
+        void folderRenamingFailed(const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles, const QList<int>& failedFileIndexes);
 
     protected:
-        virtual void doRenameFolder(const Path &oldFolderPath, const Path &newFolderPath) = 0;
+        virtual void doRenameFolder(const Path& oldFolderPath, const Path& newFolderPath) = 0;
     };
 }

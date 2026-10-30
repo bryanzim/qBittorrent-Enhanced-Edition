@@ -26,11 +26,11 @@
  * exception statement from your version.
  */
 
-#include <QtSystemDetection>
+#include "base/path.h"
+
 #include <QObject>
 #include <QTest>
-
-#include "base/path.h"
+#include <QtSystemDetection>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -420,7 +420,7 @@ private slots:
         }
 
         {
-            const Path path {u"/usr/bin/qbittorrent"_s};
+            const Path path{ u"/usr/bin/qbittorrent"_s };
 
             QCOMPARE_NE(path.begin(), path.end());
 
@@ -438,7 +438,7 @@ private slots:
         }
 
         {
-            const Path path {u"some/path/qbittorrent"_s};
+            const Path path{ u"some/path/qbittorrent"_s };
 
             QCOMPARE_NE(path.begin(), path.end());
 
@@ -457,7 +457,7 @@ private slots:
 
 #ifdef Q_OS_WIN
         {
-            const Path path {u"C:\\qBittorrent\\qbittorrent.exe"_s};
+            const Path path{ u"C:\\qBittorrent\\qbittorrent.exe"_s };
 
             QCOMPARE_NE(path.begin(), path.end());
 
@@ -476,7 +476,7 @@ private slots:
 #endif
 
         {
-            const Path path {u"some//path"_s};
+            const Path path{ u"some//path"_s };
 
             QCOMPARE_NE(path.begin(), path.end());
 
@@ -495,11 +495,11 @@ private slots:
     void testFindRootFolder() const
     {
         QCOMPARE(Path::findRootFolder({}), {});
-        QCOMPARE(Path::findRootFolder({Path(u"a"_s)}), {});
-        QCOMPARE(Path::findRootFolder({Path(u"a"_s), Path(u"b"_s)}), {});
-        QCOMPARE(Path::findRootFolder({Path(u"a/b"_s)}), Path(u"a"_s));
-        QCOMPARE(Path::findRootFolder({Path(u"a/b"_s), Path(u"b/c"_s)}), {});
-        QCOMPARE(Path::findRootFolder({Path(u"a/b"_s), Path(u"a/b/c"_s), Path(u"a/b/d"_s)}), Path(u"a"_s));
+        QCOMPARE(Path::findRootFolder({ Path(u"a"_s) }), {});
+        QCOMPARE(Path::findRootFolder({ Path(u"a"_s), Path(u"b"_s) }), {});
+        QCOMPARE(Path::findRootFolder({ Path(u"a/b"_s) }), Path(u"a"_s));
+        QCOMPARE(Path::findRootFolder({ Path(u"a/b"_s), Path(u"b/c"_s) }), {});
+        QCOMPARE(Path::findRootFolder({ Path(u"a/b"_s), Path(u"a/b/c"_s), Path(u"a/b/d"_s) }), Path(u"a"_s));
     }
 
     // TODO: add tests for remaining methods

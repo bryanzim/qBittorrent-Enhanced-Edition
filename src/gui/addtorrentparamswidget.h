@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QWidget>
-
 #include "base/bittorrent/addtorrentparams.h"
+
+#include <QWidget>
 
 namespace Ui
 {
@@ -43,7 +43,7 @@ class AddTorrentParamsWidget final : public QWidget
     Q_DISABLE_COPY_MOVE(AddTorrentParamsWidget)
 
 public:
-    explicit AddTorrentParamsWidget(BitTorrent::AddTorrentParams addTorrentParams = {}, QWidget *parent = nullptr);
+    explicit AddTorrentParamsWidget(BitTorrent::AddTorrentParams addTorrentParams = {}, QWidget* parent = nullptr);
     ~AddTorrentParamsWidget() override;
 
     void setAddTorrentParams(BitTorrent::AddTorrentParams addTorrentParams);
@@ -59,6 +59,6 @@ private:
     void populateSavePathOptions();
     void resetShareLimitsWidgetDefaults();
 
-    Ui::AddTorrentParamsWidget *m_ui;
+    Ui::AddTorrentParamsWidget* m_ui;
     BitTorrent::AddTorrentParams m_addTorrentParams;
 };

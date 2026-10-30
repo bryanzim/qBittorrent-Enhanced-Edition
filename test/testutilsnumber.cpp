@@ -26,11 +26,11 @@
  * exception statement from your version.
  */
 
-#include <limits>
+#include "base/utils/number.h"
 
 #include <QTest>
 
-#include "base/utils/number.h"
+#include <limits>
 
 class TestUtilsNumber final : public QObject
 {

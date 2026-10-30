@@ -41,9 +41,9 @@ class ProgressBarPainter : public QObject
     Q_DISABLE_COPY_MOVE(ProgressBarPainter)
 
 public:
-    explicit ProgressBarPainter(QObject *parent = nullptr);
+    explicit ProgressBarPainter(QObject* parent = nullptr);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QString &text, int progress, const QColor &color = {}) const;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QString& text, int progress, const QColor& color = {}) const;
 
 private:
     void applyUITheme();

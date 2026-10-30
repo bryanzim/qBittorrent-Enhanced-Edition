@@ -28,23 +28,23 @@
 
 #pragma once
 
-#include <QSortFilterProxyModel>
-
 #include "base/utils/compare.h"
+
+#include <QSortFilterProxyModel>
 
 class QString;
 
 class CategoryFilterProxyModel final : public QSortFilterProxyModel
 {
 public:
-    explicit CategoryFilterProxyModel(QObject *parent = nullptr);
+    explicit CategoryFilterProxyModel(QObject* parent = nullptr);
 
     // CategoryFilterModel methods which we need to relay
-    QModelIndex index(const QString &categoryName) const;
-    QString categoryName(const QModelIndex &index) const;
+    QModelIndex index(const QString& categoryName) const;
+    QString categoryName(const QModelIndex& index) const;
 
 protected:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
 private:
     // we added another overload of index(), hence this using directive:

@@ -28,21 +28,21 @@
 
 #include "peeraddress.h"
 
+#include "base/utils/net.h"
+
 #include <QString>
 #include <QStringView>
 
-#include "base/utils/net.h"
-
 namespace BitTorrent
 {
-    bool operator<(const BitTorrent::PeerAddress &left, const BitTorrent::PeerAddress &right)
+    bool operator<(const BitTorrent::PeerAddress& left, const BitTorrent::PeerAddress& right)
     {
         return (left.ip != right.ip)
-            ? Utils::Net::lessThan(left.ip, right.ip)
-            : (left.port < right.port);
+                   ? Utils::Net::lessThan(left.ip, right.ip)
+                   : (left.port < right.port);
     }
 
-    std::size_t qHash(const BitTorrent::PeerAddress &addr, const std::size_t seed)
+    std::size_t qHash(const BitTorrent::PeerAddress& addr, const std::size_t seed)
     {
         return qHashMulti(seed, addr.ip, addr.port);
     }
@@ -60,9 +60,9 @@ PeerAddress PeerAddress::parse(const QStringView address)
 
         ipPort = address.split(u"]:");
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-        ipPort[0].slice(1);  // chop '['
+        ipPort[0].slice(1); // chop '['
 #else
-        ipPort[0] = ipPort[0].sliced(1);  // chop '['
+        ipPort[0] = ipPort[0].sliced(1); // chop '['
 #endif
     }
     else if (address.contains(u':'))
@@ -78,15 +78,15 @@ PeerAddress PeerAddress::parse(const QStringView address)
         return {};
     }
 
-    const QHostAddress ip {ipPort[0].toString()};
+    const QHostAddress ip{ ipPort[0].toString() };
     if (ip.isNull())
         return {};
 
-    const ushort port {ipPort[1].toUShort()};
+    const ushort port{ ipPort[1].toUShort() };
     if (port == 0)
         return {};
 
-    return {.ip = ip, .port = port};
+    return { .ip = ip, .port = port };
 }
 
 QString PeerAddress::toString() const
@@ -95,7 +95,7 @@ QString PeerAddress::toString() const
         return {};
 
     const QString ipStr = (ip.protocol() == QAbstractSocket::IPv6Protocol)
-        ? (u'[' + ip.toString() + u']')
-        : ip.toString();
+                              ? (u'[' + ip.toString() + u']')
+                              : ip.toString();
     return (ipStr + u':' + QString::number(port));
 }

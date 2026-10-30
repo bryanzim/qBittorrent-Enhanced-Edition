@@ -30,7 +30,8 @@
 
 #pragma once
 
-#include <memory>
+#include "base/path.h"
+#include "uithemecommon.h"
 
 #include <QColor>
 #include <QCoreApplication>
@@ -38,8 +39,7 @@
 #include <QIcon>
 #include <QString>
 
-#include "base/path.h"
-#include "uithemecommon.h"
+#include <memory>
 
 enum class ColorMode
 {
@@ -54,8 +54,8 @@ class UIThemeSource
 public:
     virtual ~UIThemeSource() = default;
 
-    virtual QColor getColor(const QString &colorId, ColorMode colorMode) const = 0;
-    virtual Path getIconPath(const QString &iconId, ColorMode colorMode) const = 0;
+    virtual QColor getColor(const QString& colorId, ColorMode colorMode) const = 0;
+    virtual Path getIconPath(const QString& iconId, ColorMode colorMode) const = 0;
     virtual QByteArray readStyleSheet() = 0;
 };
 
@@ -67,9 +67,9 @@ public:
     DefaultThemeSource();
 
     QByteArray readStyleSheet() override;
-    QColor getColor(const QString &colorId, ColorMode colorMode) const override;
-    Path getIconPath(const QString &iconId, ColorMode colorMode) const override;
-    Path getDefaultIconPath(const QString &iconId, ColorMode colorMode) const;
+    QColor getColor(const QString& colorId, ColorMode colorMode) const override;
+    Path getIconPath(const QString& iconId, ColorMode colorMode) const override;
+    Path getDefaultIconPath(const QString& iconId, ColorMode colorMode) const;
 
 private:
     void loadColors();
@@ -84,14 +84,14 @@ class CustomThemeSource : public UIThemeSource
     Q_DECLARE_TR_FUNCTIONS(CustomThemeSource)
 
 public:
-    QColor getColor(const QString &colorId, ColorMode colorMode) const override;
-    Path getIconPath(const QString &iconId, ColorMode colorMode) const override;
+    QColor getColor(const QString& colorId, ColorMode colorMode) const override;
+    Path getIconPath(const QString& iconId, ColorMode colorMode) const override;
     QByteArray readStyleSheet() override;
 
 protected:
-    explicit CustomThemeSource(const Path &themeRootPath);
+    explicit CustomThemeSource(const Path& themeRootPath);
 
-    DefaultThemeSource *defaultThemeSource() const;
+    DefaultThemeSource* defaultThemeSource() const;
 
 private:
     Path themeRootPath() const;
@@ -112,7 +112,7 @@ public:
 class FolderThemeSource : public CustomThemeSource
 {
 public:
-    explicit FolderThemeSource(const Path &folderPath);
+    explicit FolderThemeSource(const Path& folderPath);
 
     QByteArray readStyleSheet() override;
 

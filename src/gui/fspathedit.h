@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QWidget>
-
 #include "base/path.h"
+
+#include <QWidget>
 
 namespace Private
 {
@@ -61,11 +61,11 @@ public:
 
     enum class Mode
     {
-        FileOpen,        //!< opening files, shows open file dialog
-        FileSave,        //!< saving files, shows save file dialog
-        DirectoryOpen,   //!< selecting existing directories
-        DirectorySave,   //!< selecting directories for saving
-        ReadOnly         //!< no browse button and no dialog, only validate path and check read permission
+        FileOpen,      //!< opening files, shows open file dialog
+        FileSave,      //!< saving files, shows save file dialog
+        DirectoryOpen, //!< selecting existing directories
+        DirectorySave, //!< selecting directories for saving
+        ReadOnly       //!< no browse button and no dialog, only validate path and check read permission
     };
     Q_ENUM(Mode)
 
@@ -73,36 +73,36 @@ public:
     void setMode(Mode mode);
 
     Path selectedPath() const;
-    void setSelectedPath(const Path &path);
+    void setSelectedPath(const Path& path);
 
     Path basePath() const;
-    void setBasePath(const Path &basePath);
+    void setBasePath(const Path& basePath);
 
     QString fileNameFilter() const;
-    void setFileNameFilter(const QString &val);
+    void setFileNameFilter(const QString& val);
 
     QString placeholder() const;
-    void setPlaceholder(const QString &val);
+    void setPlaceholder(const QString& val);
 
     /// The browse button caption is "..." if true, and "Browse" otherwise
     bool briefBrowseButtonCaption() const;
     void setBriefBrowseButtonCaption(bool brief);
 
     QString dialogCaption() const;
-    void setDialogCaption(const QString &caption);
+    void setDialogCaption(const QString& caption);
 
     virtual void clear() = 0;
 
 signals:
-    void selectedPathChanged(const Path &path);
+    void selectedPathChanged(const Path& path);
 
 protected:
-    explicit FileSystemPathEdit(Private::IFileEditorWithCompletion *editor, QWidget *parent);
+    explicit FileSystemPathEdit(Private::IFileEditorWithCompletion* editor, QWidget* parent);
 
     template <class Widget>
-    Widget *editWidget() const
+    Widget* editWidget() const
     {
-        return static_cast<Widget *>(editWidgetImpl());
+        return static_cast<Widget*>(editWidgetImpl());
     }
 
 protected slots:
@@ -112,12 +112,12 @@ private:
     Q_DECLARE_PRIVATE(FileSystemPathEdit)
 
     virtual QString editWidgetText() const = 0;
-    virtual void setEditWidgetText(const QString &text) = 0;
+    virtual void setEditWidgetText(const QString& text) = 0;
 
-    QWidget *editWidgetImpl() const;
+    QWidget* editWidgetImpl() const;
     Path getResolvedPath() const;
 
-    FileSystemPathEditPrivate *d_ptr = nullptr;
+    FileSystemPathEditPrivate* d_ptr = nullptr;
 
     Path m_path;
     Path m_basePath;
@@ -130,13 +130,13 @@ class FileSystemPathLineEdit final : public FileSystemPathEdit
     using WidgetType = Private::FileLineEdit;
 
 public:
-    explicit FileSystemPathLineEdit(QWidget *parent = nullptr);
+    explicit FileSystemPathLineEdit(QWidget* parent = nullptr);
 
     void clear() override;
 
 private:
     QString editWidgetText() const override;
-    void setEditWidgetText(const QString &text) override;
+    void setEditWidgetText(const QString& text) override;
 };
 
 /// Widget which uses QComboBox for path editing
@@ -146,14 +146,14 @@ class FileSystemPathComboEdit final : public FileSystemPathEdit
     using WidgetType = Private::FileComboEdit;
 
 public:
-    explicit FileSystemPathComboEdit(QWidget *parent = nullptr);
+    explicit FileSystemPathComboEdit(QWidget* parent = nullptr);
 
     void clear() override;
 
     int count() const;
     Path item(int index) const;
-    void addItem(const Path &path);
-    void insertItem(int index, const Path &path);
+    void addItem(const Path& path);
+    void insertItem(int index, const Path& path);
 
     int currentIndex() const;
     void setCurrentIndex(int index);
@@ -163,5 +163,5 @@ public:
 
 private:
     QString editWidgetText() const override;
-    void setEditWidgetText(const QString &text) override;
+    void setEditWidgetText(const QString& text) override;
 };

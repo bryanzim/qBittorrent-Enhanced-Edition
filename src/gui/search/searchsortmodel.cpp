@@ -31,7 +31,7 @@
 
 #include "base/global.h"
 
-SearchSortModel::SearchSortModel(QObject *parent)
+SearchSortModel::SearchSortModel(QObject* parent)
     : base(parent)
 {
     setSortRole(UnderlyingDataRole);
@@ -53,7 +53,7 @@ void SearchSortModel::enableNameFilter(const bool enabled)
 #endif
 }
 
-void SearchSortModel::setNameFilter(const QString &searchTerm)
+void SearchSortModel::setNameFilter(const QString& searchTerm)
 {
     if (m_searchTerm == searchTerm)
         return;
@@ -169,31 +169,29 @@ qint64 SearchSortModel::maxSize() const
     return m_maxSize;
 }
 
-bool SearchSortModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool SearchSortModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
     switch (sortColumn())
     {
     case NAME:
-    case ENGINE_URL:
-        {
-            const QString strL = left.data().toString();
-            const QString strR = right.data().toString();
-            return m_naturalLessThan(strL, strR);
-        }
-        break;
+    case ENGINE_URL: {
+        const QString strL = left.data().toString();
+        const QString strR = right.data().toString();
+        return m_naturalLessThan(strL, strR);
+    }
     default:
         return base::lessThan(left, right);
     };
 }
 
-bool SearchSortModel::filterAcceptsRow(const int sourceRow, const QModelIndex &sourceParent) const
+bool SearchSortModel::filterAcceptsRow(const int sourceRow, const QModelIndex& sourceParent) const
 {
-    const QAbstractItemModel *const sourceModel = this->sourceModel();
+    const QAbstractItemModel* const sourceModel = this->sourceModel();
 
     if (m_isNameFilterEnabled && !m_searchTerm.isEmpty())
     {
         const QString name = sourceModel->data(sourceModel->index(sourceRow, NAME, sourceParent), UnderlyingDataRole).toString();
-        for (const QString &word : asConst(m_searchTermWords))
+        for (const QString& word : asConst(m_searchTermWords))
         {
             if (!name.contains(word, Qt::CaseInsensitive))
                 return false;
@@ -203,24 +201,21 @@ bool SearchSortModel::filterAcceptsRow(const int sourceRow, const QModelIndex &s
     if ((m_minSize > 0) || (m_maxSize >= 0))
     {
         const qlonglong size = sourceModel->data(sourceModel->index(sourceRow, SIZE, sourceParent), UnderlyingDataRole).toLongLong();
-        if (((m_minSize > 0) && (size < m_minSize))
-            || ((m_maxSize > 0) && (size > m_maxSize)))
+        if (((m_minSize > 0) && (size < m_minSize)) || ((m_maxSize > 0) && (size > m_maxSize)))
             return false;
     }
 
     if ((m_minSeeds > 0) || (m_maxSeeds >= 0))
     {
         const int seeds = sourceModel->data(sourceModel->index(sourceRow, SEEDS, sourceParent), UnderlyingDataRole).toInt();
-        if (((m_minSeeds > 0) && (seeds < m_minSeeds))
-            || ((m_maxSeeds > 0) && (seeds > m_maxSeeds)))
+        if (((m_minSeeds > 0) && (seeds < m_minSeeds)) || ((m_maxSeeds > 0) && (seeds > m_maxSeeds)))
             return false;
     }
 
     if ((m_minLeeches > 0) || (m_maxLeeches >= 0))
     {
         const int leeches = sourceModel->data(sourceModel->index(sourceRow, LEECHES, sourceParent), UnderlyingDataRole).toInt();
-        if (((m_minLeeches > 0) && (leeches < m_minLeeches))
-            || ((m_maxLeeches > 0) && (leeches > m_maxLeeches)))
+        if (((m_minLeeches > 0) && (leeches < m_minLeeches)) || ((m_maxLeeches > 0) && (leeches > m_maxLeeches)))
             return false;
     }
 

@@ -33,5 +33,5 @@ class QSslKey;
 
 namespace Utils::SSLKey
 {
-    QSslKey load(const QByteArray &data);
+    QSslKey load(const QByteArray& data);
 }

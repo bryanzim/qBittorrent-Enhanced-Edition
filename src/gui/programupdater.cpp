@@ -29,24 +29,23 @@
 
 #include "programupdater.h"
 
-#include <libtorrent/version.hpp>
-
-#include <QtCore/qconfig.h>
-#include <QtSystemDetection>
-#include <QDebug>
-#include <QDesktopServices>
-#include <QRegularExpression>
-#include <QXmlStreamReader>
-
 #include "base/global.h"
 #include "base/net/downloadmanager.h"
 #include "base/preferences.h"
 #include "base/utils/version.h"
 #include "base/version.h"
 
+#include <QDebug>
+#include <QDesktopServices>
+#include <QRegularExpression>
+#include <QXmlStreamReader>
+#include <QtCore/qconfig.h>
+#include <QtSystemDetection>
+#include <libtorrent/version.hpp>
+
 namespace
 {
-    bool isVersionMoreRecent(const QString &remoteVersion)
+    bool isVersionMoreRecent(const QString& remoteVersion)
     {
         using Version = Utils::Version<4, 3>;
 
@@ -54,11 +53,10 @@ namespace
         if (!newVersion.isValid())
             return false;
 
-        const Version currentVersion {QBT_VERSION_MAJOR, QBT_VERSION_MINOR, QBT_VERSION_BUGFIX, QBT_VERSION_BUILD};
+        const Version currentVersion{ QBT_VERSION_MAJOR, QBT_VERSION_MINOR, QBT_VERSION_BUGFIX, QBT_VERSION_BUILD };
         if (newVersion == currentVersion)
         {
-            const bool isDevVersion = QStringLiteral(QBT_VERSION_STATUS).contains(
-                QRegularExpression(u"(alpha|beta|rc)"_s));
+            const bool isDevVersion = QStringLiteral(QBT_VERSION_STATUS).contains(QRegularExpression(u"(alpha|beta|rc)"_s));
             if (isDevVersion)
                 return true;
         }
@@ -72,8 +70,7 @@ void ProgramUpdater::checkForUpdates() const
     // Don't change this User-Agent. In case our updater goes haywire,
     // the filehost can identify it and contact us.
     Net::DownloadManager::instance()->download(
-            Net::DownloadRequest(RSS_URL).userAgent(QStringLiteral("qBittorrent Enhanced/" QBT_VERSION_2 " ProgramUpdater (git.io/qbit)"))
-            , Preferences::instance()->useProxyForGeneralPurposes(), this, &ProgramUpdater::rssDownloadFinished);
+        Net::DownloadRequest(RSS_URL).userAgent(QStringLiteral("qBittorrent Enhanced/" QBT_VERSION_2 " ProgramUpdater (git.io/qbit)")), Preferences::instance()->useProxyForGeneralPurposes(), this, &ProgramUpdater::rssDownloadFinished);
 }
 
 QString ProgramUpdater::getNewVersion() const
@@ -83,15 +80,15 @@ QString ProgramUpdater::getNewVersion() const
 
 QString ProgramUpdater::getNewContent() const
 {
-  return m_content;
+    return m_content;
 }
 
 QString ProgramUpdater::getNextUpdate() const
 {
-  return m_nextUpdate;
+    return m_nextUpdate;
 }
 
-void ProgramUpdater::rssDownloadFinished(const Net::DownloadResult &result)
+void ProgramUpdater::rssDownloadFinished(const Net::DownloadResult& result)
 {
     if (result.status != Net::DownloadStatus::Success)
     {
@@ -102,12 +99,11 @@ void ProgramUpdater::rssDownloadFinished(const Net::DownloadResult &result)
 
     qDebug("Finished downloading the new qBittorrent updates RSS");
 
-    const auto getStringValue = [](QXmlStreamReader &xml) -> QString
-    {
+    const auto getStringValue = [](QXmlStreamReader& xml) -> QString {
         xml.readNext();
         return (xml.isCharacters() && !xml.isWhitespace())
-            ? xml.text().toString()
-            : QString {};
+                   ? xml.text().toString()
+                   : QString{};
     };
 
 #ifdef Q_OS_MACOS

@@ -26,10 +26,10 @@
  * exception statement from your version.
  */
 
+#include "base/utils/misc.h"
+
 #include <QObject>
 #include <QTest>
-
-#include "base/utils/misc.h"
 
 class TestUtilsMisc final : public QObject
 {

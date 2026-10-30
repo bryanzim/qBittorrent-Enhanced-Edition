@@ -29,12 +29,12 @@
 
 #pragma once
 
-#include <QHash>
-
 #include "base/bittorrent/addtorrentparams.h"
 #include "base/bittorrent/torrentdescriptor.h"
 #include "base/path.h"
 #include "base/utils/thread.h"
+
+#include <QHash>
 
 /*
  * Watches the configured directories for new .torrent files in order
@@ -55,34 +55,34 @@ public:
 
     static void initInstance();
     static void freeInstance();
-    static TorrentFilesWatcher *instance();
+    static TorrentFilesWatcher* instance();
 
     QHash<Path, WatchedFolderOptions> folders() const;
-    void setWatchedFolder(const Path &path, const WatchedFolderOptions &options);
-    void removeWatchedFolder(const Path &path);
+    void setWatchedFolder(const Path& path, const WatchedFolderOptions& options);
+    void removeWatchedFolder(const Path& path);
 
 signals:
-    void watchedFolderSet(const Path &path, const WatchedFolderOptions &options);
-    void watchedFolderRemoved(const Path &path);
+    void watchedFolderSet(const Path& path, const WatchedFolderOptions& options);
+    void watchedFolderRemoved(const Path& path);
 
 private slots:
-    void onTorrentFound(const BitTorrent::TorrentDescriptor &torrentDescr, const BitTorrent::AddTorrentParams &addTorrentParams);
+    void onTorrentFound(const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& addTorrentParams);
 
 private:
-    explicit TorrentFilesWatcher(QObject *parent = nullptr);
+    explicit TorrentFilesWatcher(QObject* parent = nullptr);
 
     void load();
     void loadLegacy();
     void store() const;
 
-    void doSetWatchedFolder(const Path &path, const WatchedFolderOptions &options);
+    void doSetWatchedFolder(const Path& path, const WatchedFolderOptions& options);
 
-    static TorrentFilesWatcher *m_instance;
+    static TorrentFilesWatcher* m_instance;
 
     QHash<Path, WatchedFolderOptions> m_watchedFolders;
 
     Utils::Thread::UniquePtr m_ioThread;
 
     class Worker;
-    Worker *m_asyncWorker = nullptr;
+    Worker* m_asyncWorker = nullptr;
 };

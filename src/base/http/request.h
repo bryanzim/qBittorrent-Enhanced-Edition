@@ -29,19 +29,19 @@
 
 #pragma once
 
+#include "headermap.h"
+
 #include <QByteArray>
 #include <QHash>
 #include <QList>
 #include <QString>
-
-#include "headermap.h"
 
 namespace Http
 {
     struct UploadedFile
     {
         QString filename;
-        QString type;  // MIME type
+        QString type; // MIME type
         QByteArray data;
     };
 

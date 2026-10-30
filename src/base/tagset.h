@@ -29,16 +29,16 @@
 
 #pragma once
 
-#include <QMetaType>
-
 #include "orderedset.h"
 #include "tag.h"
 #include "utils/compare.h"
 
+#include <QMetaType>
+
 class TagLessThan
 {
 public:
-    bool operator()(const Tag &left, const Tag &right) const;
+    bool operator()(const Tag& left, const Tag& right) const;
 
 private:
     Utils::Compare::NaturalCompare<Qt::CaseInsensitive> m_compare;

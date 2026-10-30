@@ -53,24 +53,19 @@ void showLegalNotice(const bool isInteractive)
 
     if (!isInteractive)
     {
-        const QString legalNotice = u"\n*** %1 ***\n"_s.arg(noticeTitle)
-            + noticeBody + u"\n\n"
-            + QCoreApplication::translate("LegalNotice", "If you have read the legal notice, you can use command line option `--confirm-legal-notice` to suppress this message.");
+        const QString legalNotice = u"\n*** %1 ***\n"_s.arg(noticeTitle) + noticeBody + u"\n\n" + QCoreApplication::translate("LegalNotice", "If you have read the legal notice, you can use command line option `--confirm-legal-notice` to suppress this message.");
         printf("%s\n\n", qUtf8Printable(legalNotice));
         return;
     }
 
 #ifdef DISABLE_GUI
-    const QString legalNotice = u"\n*** %1 ***\n"_s.arg(noticeTitle)
-        + noticeBody + u"\n\n"
-        + noticeEnd + u"\n\n"
-        + QCoreApplication::translate("LegalNotice", "Press 'Enter' key to continue...");
+    const QString legalNotice = u"\n*** %1 ***\n"_s.arg(noticeTitle) + noticeBody + u"\n\n" + noticeEnd + u"\n\n" + QCoreApplication::translate("LegalNotice", "Press 'Enter' key to continue...");
     printf("%s", qUtf8Printable(legalNotice));
     getchar();
-#else // DISABLE_GUI
+#else  // DISABLE_GUI
     const QString messageBody = noticeBody + u"\n\n" + noticeEnd;
-    QMessageBox msgBox {QMessageBox::NoIcon, noticeTitle, messageBody, QMessageBox::Ok};
-    msgBox.show();  // Need to be shown first or moveToCenter does not work
+    QMessageBox msgBox{ QMessageBox::NoIcon, noticeTitle, messageBody, QMessageBox::Ok };
+    msgBox.show(); // Need to be shown first or moveToCenter does not work
     msgBox.move(Utils::Gui::screenCenter(&msgBox));
     msgBox.exec();
 #endif // DISABLE_GUI

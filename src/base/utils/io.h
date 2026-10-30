@@ -28,15 +28,14 @@
 
 #pragma once
 
-#include <iterator>
-#include <memory>
-
-#include <libtorrent/fwd.hpp>
-
-#include <QIODevice>
-
 #include "base/3rdparty/expected.hpp"
 #include "base/pathfwd.h"
+
+#include <QIODevice>
+#include <libtorrent/fwd.hpp>
+
+#include <iterator>
+#include <memory>
 
 class QByteArray;
 class QFileDevice;
@@ -55,30 +54,31 @@ namespace Utils::IO
         using pointer = void;
         using reference = void;
 
-        explicit FileDeviceOutputIterator(QFileDevice &device, int bufferSize = (4 * 1024));
-        FileDeviceOutputIterator(const FileDeviceOutputIterator &other) = default;
+        explicit FileDeviceOutputIterator(QFileDevice& device, int bufferSize = (4 * 1024));
+        FileDeviceOutputIterator(const FileDeviceOutputIterator& other) = default;
+        FileDeviceOutputIterator& operator=(const FileDeviceOutputIterator&) = default;
         ~FileDeviceOutputIterator();
 
         // mimic std::ostream_iterator behavior
-        FileDeviceOutputIterator &operator=(char c);
+        FileDeviceOutputIterator& operator=(char c);
 
-        constexpr FileDeviceOutputIterator &operator*()
+        constexpr FileDeviceOutputIterator& operator*()
         {
             return *this;
         }
 
-        constexpr FileDeviceOutputIterator &operator++()
+        constexpr FileDeviceOutputIterator& operator++()
         {
             return *this;
         }
 
-        constexpr FileDeviceOutputIterator &operator++(int)
+        constexpr FileDeviceOutputIterator& operator++(int)
         {
             return *this;
         }
 
     private:
-        QFileDevice *m_device = nullptr;
+        QFileDevice* m_device = nullptr;
         std::shared_ptr<QByteArray> m_buffer;
         int m_bufferSize = 0;
     };
@@ -89,7 +89,7 @@ namespace Utils::IO
         {
             NotExist,
             ExceedSize,
-            Failed,  // `read()` operation failed
+            Failed, // `read()` operation failed
             SizeMismatch
         };
 
@@ -99,10 +99,10 @@ namespace Utils::IO
 
     // TODO: define a specific type for `additionalMode`
     // providing `size` is explicit and is strongly recommended
-    nonstd::expected<QByteArray, ReadError> readFile(const Path &path, qint64 size, QIODevice::OpenMode additionalMode = {});
+    nonstd::expected<QByteArray, ReadError> readFile(const Path& path, qint64 size, QIODevice::OpenMode additionalMode = {});
 
-    nonstd::expected<void, QString> saveToFile(const Path &path, const QByteArray &data);
-    nonstd::expected<void, QString> saveToFile(const Path &path, const lt::entry &data);
-    nonstd::expected<Path, QString> saveToTempFile(const QByteArray &data);
-    nonstd::expected<Path, QString> saveToTempFile(const lt::entry &data);
+    nonstd::expected<void, QString> saveToFile(const Path& path, const QByteArray& data);
+    nonstd::expected<void, QString> saveToFile(const Path& path, const lt::entry& data);
+    nonstd::expected<Path, QString> saveToTempFile(const QByteArray& data);
+    nonstd::expected<Path, QString> saveToTempFile(const lt::entry& data);
 }

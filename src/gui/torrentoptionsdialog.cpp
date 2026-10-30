@@ -31,12 +31,6 @@
 
 #include "torrentoptionsdialog.h"
 
-#include <algorithm>
-
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QString>
-
 #include "base/bittorrent/infohash.h"
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/torrent.h"
@@ -45,11 +39,17 @@
 #include "ui_torrentoptionsdialog.h"
 #include "utils.h"
 
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QString>
+
+#include <algorithm>
+
 #define SETTINGS_KEY(name) u"TorrentOptionsDialog/" name
 
 namespace
 {
-    void updateSliderValue(QSlider *slider, const int value)
+    void updateSliderValue(QSlider* slider, const int value)
     {
         if (value > slider->maximum())
             slider->setMaximum(value);
@@ -57,11 +57,8 @@ namespace
     }
 }
 
-TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorrent::Torrent *> &torrents)
-    : QDialog {parent}
-    , m_ui {new Ui::TorrentOptionsDialog}
-    , m_storeDialogSize {SETTINGS_KEY(u"Size"_s)}
-    , m_currentCategoriesString {u"--%1--"_s.arg(tr("Currently used categories"))}
+TorrentOptionsDialog::TorrentOptionsDialog(QWidget* parent, const QList<BitTorrent::Torrent*>& torrents)
+    : QDialog{ parent }, m_ui{ new Ui::TorrentOptionsDialog }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }, m_currentCategoriesString{ u"--%1--"_s.arg(tr("Currently used categories")) }
 {
     Q_ASSERT(!torrents.empty());
 
@@ -75,7 +72,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
     m_ui->downloadPath->setMode(FileSystemPathEdit::Mode::DirectorySave);
     m_ui->downloadPath->setDialogCaption(tr("Choose save path"));
 
-    const auto *session = BitTorrent::Session::instance();
+    const auto* session = BitTorrent::Session::instance();
     bool allSameUpLimit = true;
     bool allSameDownLimit = true;
     bool allSameRatio = true;
@@ -101,7 +98,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
     const int firstTorrentUpLimit = std::max(0, torrents[0]->uploadLimit());
     const int firstTorrentDownLimit = std::max(0, torrents[0]->downloadLimit());
 
-    const BitTorrent::ShareLimits &firstTorrentShareLimits = torrents[0]->shareLimits();
+    const BitTorrent::ShareLimits& firstTorrentShareLimits = torrents[0]->shareLimits();
 
     const bool isFirstTorrentDHTDisabled = torrents[0]->isDHTDisabled();
     const bool isFirstTorrentPEXDisabled = torrents[0]->isPEXDisabled();
@@ -110,7 +107,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
     const bool isFirstTorrentFirstLastPiecesEnabled = torrents[0]->hasFirstLastPiecePriority();
 
     m_torrentIDs.reserve(torrents.size());
-    for (const BitTorrent::Torrent *torrent : torrents)
+    for (const BitTorrent::Torrent* torrent : torrents)
     {
         m_torrentIDs << torrent->id();
 
@@ -145,7 +142,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
                 allSameDownLimit = false;
         }
 
-        const BitTorrent::ShareLimits &shareLimits = torrent->shareLimits();
+        const BitTorrent::ShareLimits& shareLimits = torrent->shareLimits();
         if (allSameRatio)
         {
             if (shareLimits.ratioLimit != firstTorrentShareLimits.ratioLimit)
@@ -236,7 +233,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
 
     m_categories = session->categories();
     std::ranges::sort(m_categories, Utils::Compare::NaturalLessThan<Qt::CaseInsensitive>());
-    for (const QString &category : asConst(m_categories))
+    for (const QString& category : asConst(m_categories))
     {
         if (m_allSameCategory && (category == firstTorrentCategory))
             continue;
@@ -246,11 +243,11 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
 
     const bool isAltLimitEnabled = session->isAltGlobalSpeedLimitEnabled();
     const int globalUploadLimit = isAltLimitEnabled
-            ? (session->altGlobalUploadSpeedLimit() / 1024)
-            : (session->globalUploadSpeedLimit() / 1024);
+                                      ? (session->altGlobalUploadSpeedLimit() / 1024)
+                                      : (session->globalUploadSpeedLimit() / 1024);
     const int globalDownloadLimit = isAltLimitEnabled
-            ? (session->altGlobalDownloadSpeedLimit() / 1024)
-            : (session->globalDownloadSpeedLimit() / 1024);
+                                        ? (session->altGlobalDownloadSpeedLimit() / 1024)
+                                        : (session->globalDownloadSpeedLimit() / 1024);
 
     const int uploadVal = std::max(0, (firstTorrentUpLimit / 1024));
     const int downloadVal = std::max(0, (firstTorrentDownLimit / 1024));
@@ -274,8 +271,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
         m_ui->spinUploadLimit->setSpecialValueText(C_INEQUALITY);
         m_ui->spinUploadLimit->setMinimum(-1);
         m_ui->spinUploadLimit->setValue(-1);
-        connect(m_ui->spinUploadLimit, qOverload<int>(&QSpinBox::valueChanged)
-                           , this, &TorrentOptionsDialog::handleUpSpeedLimitChanged);
+        connect(m_ui->spinUploadLimit, qOverload<int>(&QSpinBox::valueChanged), this, &TorrentOptionsDialog::handleUpSpeedLimitChanged);
     }
 
     m_ui->sliderDownloadLimit->setMaximum(maxDownload);
@@ -289,14 +285,12 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
         m_ui->spinDownloadLimit->setSpecialValueText(C_INEQUALITY);
         m_ui->spinDownloadLimit->setMinimum(-1);
         m_ui->spinDownloadLimit->setValue(-1);
-        connect(m_ui->spinDownloadLimit, qOverload<int>(&QSpinBox::valueChanged)
-                           , this, &TorrentOptionsDialog::handleDownSpeedLimitChanged);
+        connect(m_ui->spinDownloadLimit, qOverload<int>(&QSpinBox::valueChanged), this, &TorrentOptionsDialog::handleDownSpeedLimitChanged);
     }
 
     if (m_allSameCategory)
     {
-        m_ui->torrentShareLimitsWidget->setDefaults((firstTorrentCategory.isEmpty() ? TorrentShareLimitsWidget::UsedDefaults::Global : TorrentShareLimitsWidget::UsedDefaults::Category)
-                , session->categoryShareLimits(firstTorrentCategory));
+        m_ui->torrentShareLimitsWidget->setDefaults((firstTorrentCategory.isEmpty() ? TorrentShareLimitsWidget::UsedDefaults::Global : TorrentShareLimitsWidget::UsedDefaults::Category), session->categoryShareLimits(firstTorrentCategory));
     }
     if (allSameRatio)
         m_ui->torrentShareLimitsWidget->setRatioLimit(firstTorrentShareLimits.ratioLimit);
@@ -351,8 +345,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
     else
         m_ui->checkFirstLastPieces->setCheckState(Qt::PartiallyChecked);
 
-    m_initialValues =
-    {
+    m_initialValues = {
         .savePath = m_ui->savePath->selectedPath(),
         .downloadPath = m_ui->downloadPath->selectedPath(),
         .category = m_ui->comboCategory->currentText(),
@@ -383,10 +376,8 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorre
     // Sync up/down speed limit sliders with their corresponding spinboxes
     connect(m_ui->sliderUploadLimit, &QSlider::valueChanged, m_ui->spinUploadLimit, &QSpinBox::setValue);
     connect(m_ui->sliderDownloadLimit, &QSlider::valueChanged, m_ui->spinDownloadLimit, &QSpinBox::setValue);
-    connect(m_ui->spinUploadLimit, qOverload<int>(&QSpinBox::valueChanged)
-            , this, [this](const int value) { updateSliderValue(m_ui->sliderUploadLimit, value); });
-    connect(m_ui->spinDownloadLimit, qOverload<int>(&QSpinBox::valueChanged)
-            , this, [this](const int value) { updateSliderValue(m_ui->sliderDownloadLimit, value); });
+    connect(m_ui->spinUploadLimit, qOverload<int>(&QSpinBox::valueChanged), this, [this](const int value) { updateSliderValue(m_ui->sliderUploadLimit, value); });
+    connect(m_ui->spinDownloadLimit, qOverload<int>(&QSpinBox::valueChanged), this, [this](const int value) { updateSliderValue(m_ui->sliderDownloadLimit, value); });
 
     m_ui->scrollArea->widget()->adjustSize();
 
@@ -414,11 +405,12 @@ QSize TorrentOptionsDialog::sizeHint() const
 
 void TorrentOptionsDialog::accept()
 {
-    auto *session = BitTorrent::Session::instance();
-    for (const BitTorrent::TorrentID &id : asConst(m_torrentIDs))
+    auto* session = BitTorrent::Session::instance();
+    for (const BitTorrent::TorrentID& id : asConst(m_torrentIDs))
     {
-        BitTorrent::Torrent *torrent = session->getTorrent(id);
-        if (!torrent) continue;
+        BitTorrent::Torrent* torrent = session->getTorrent(id);
+        if (!torrent)
+            continue;
 
         if (m_initialValues.autoTMM != m_ui->checkAutoTMM->checkState())
             torrent->setAutoTMMEnabled(m_ui->checkAutoTMM->isChecked());
@@ -460,19 +452,19 @@ void TorrentOptionsDialog::accept()
         BitTorrent::ShareLimits shareLimits = torrent->shareLimits();
 
         if (const std::optional<qreal> ratioLimit = m_ui->torrentShareLimitsWidget->ratioLimit();
-                m_initialValues.ratio != ratioLimit)
+            m_initialValues.ratio != ratioLimit)
         {
             shareLimits.ratioLimit = ratioLimit.value();
         }
 
         if (const std::optional<int> seedingTimeLimit = m_ui->torrentShareLimitsWidget->seedingTimeLimit();
-                m_initialValues.seedingTime != seedingTimeLimit)
+            m_initialValues.seedingTime != seedingTimeLimit)
         {
             shareLimits.seedingTimeLimit = seedingTimeLimit.value();
         }
 
         if (const std::optional<int> inactiveSeedingTimeLimit = m_ui->torrentShareLimitsWidget->inactiveSeedingTimeLimit();
-                m_initialValues.inactiveSeedingTime != inactiveSeedingTimeLimit)
+            m_initialValues.inactiveSeedingTime != inactiveSeedingTimeLimit)
         {
             shareLimits.inactiveSeedingTimeLimit = inactiveSeedingTimeLimit.value();
         }
@@ -484,7 +476,7 @@ void TorrentOptionsDialog::accept()
         }
 
         if (const std::optional<BitTorrent::ShareLimitAction> shareLimitAction = m_ui->torrentShareLimitsWidget->shareLimitAction();
-                m_initialValues.shareLimitAction != shareLimitAction)
+            m_initialValues.shareLimitAction != shareLimitAction)
         {
             shareLimits.action = shareLimitAction.value();
         }
@@ -512,7 +504,7 @@ void TorrentOptionsDialog::accept()
 
 void TorrentOptionsDialog::handleCategoryChanged([[maybe_unused]] const int index)
 {
-    const auto *btSession = BitTorrent::Session::instance();
+    const auto* btSession = BitTorrent::Session::instance();
 
     if (!m_allSameCategory && (m_ui->comboCategory->currentIndex() == 0))
     {
@@ -522,7 +514,7 @@ void TorrentOptionsDialog::handleCategoryChanged([[maybe_unused]] const int inde
         m_ui->comboCategory->clearEditText();
         m_ui->comboCategory->lineEdit()->setPlaceholderText(m_currentCategoriesString);
 
-        const BitTorrent::ShareLimits defaultShareLimits {
+        const BitTorrent::ShareLimits defaultShareLimits{
             .ratioLimit = BitTorrent::DEFAULT_RATIO_LIMIT,
             .seedingTimeLimit = BitTorrent::DEFAULT_SEEDING_TIME_LIMIT,
             .inactiveSeedingTimeLimit = BitTorrent::DEFAULT_SEEDING_TIME_LIMIT,
@@ -544,8 +536,7 @@ void TorrentOptionsDialog::handleCategoryChanged([[maybe_unused]] const int inde
         }
 
         m_ui->comboCategory->lineEdit()->setPlaceholderText(QString());
-        m_ui->torrentShareLimitsWidget->setDefaults((categoryName.isEmpty() ? TorrentShareLimitsWidget::UsedDefaults::Global : TorrentShareLimitsWidget::UsedDefaults::Category)
-                , btSession->categoryShareLimits(categoryName));
+        m_ui->torrentShareLimitsWidget->setDefaults((categoryName.isEmpty() ? TorrentShareLimitsWidget::UsedDefaults::Global : TorrentShareLimitsWidget::UsedDefaults::Category), btSession->categoryShareLimits(categoryName));
     }
 }
 
@@ -599,14 +590,12 @@ void TorrentOptionsDialog::handleUpSpeedLimitChanged()
 {
     m_ui->spinUploadLimit->setMinimum(0);
     m_ui->spinUploadLimit->setSpecialValueText(C_INFINITY);
-    disconnect(m_ui->spinUploadLimit, qOverload<int>(&QSpinBox::valueChanged)
-                   , this, &TorrentOptionsDialog::handleUpSpeedLimitChanged);
+    disconnect(m_ui->spinUploadLimit, qOverload<int>(&QSpinBox::valueChanged), this, &TorrentOptionsDialog::handleUpSpeedLimitChanged);
 }
 
 void TorrentOptionsDialog::handleDownSpeedLimitChanged()
 {
     m_ui->spinDownloadLimit->setMinimum(0);
     m_ui->spinDownloadLimit->setSpecialValueText(C_INFINITY);
-    disconnect(m_ui->spinDownloadLimit, qOverload<int>(&QSpinBox::valueChanged)
-                   , this, &TorrentOptionsDialog::handleDownSpeedLimitChanged);
+    disconnect(m_ui->spinDownloadLimit, qOverload<int>(&QSpinBox::valueChanged), this, &TorrentOptionsDialog::handleDownSpeedLimitChanged);
 }

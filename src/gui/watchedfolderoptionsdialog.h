@@ -28,10 +28,10 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
 #include "base/torrentfileswatcher.h"
+
+#include <QDialog>
 
 namespace Ui
 {
@@ -46,7 +46,7 @@ class WatchedFolderOptionsDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(WatchedFolderOptionsDialog)
 
 public:
-    explicit WatchedFolderOptionsDialog(const TorrentFilesWatcher::WatchedFolderOptions &watchedFolderOptions, QWidget *parent);
+    explicit WatchedFolderOptionsDialog(const TorrentFilesWatcher::WatchedFolderOptions& watchedFolderOptions, QWidget* parent);
     ~WatchedFolderOptionsDialog() override;
 
     TorrentFilesWatcher::WatchedFolderOptions watchedFolderOptions() const;
@@ -58,7 +58,7 @@ private:
     void onTMMChanged(int index);
     void onCategoryChanged(int index);
 
-    Ui::WatchedFolderOptionsDialog *m_ui = nullptr;
-    AddTorrentParamsWidget *m_addTorrentParamsWidget = nullptr;
+    Ui::WatchedFolderOptionsDialog* m_ui = nullptr;
+    AddTorrentParamsWidget* m_addTorrentParamsWidget = nullptr;
     SettingValue<QSize> m_storeDialogSize;
 };

@@ -28,16 +28,15 @@
 
 #pragma once
 
-#include <memory>
-
-#include <lua/lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-
-#include <QObject>
-
 #include "base/3rdparty/expected.hpp"
 #include "base/pathfwd.h"
 #include "pluginversion.h"
+#include <lua/lua.hpp>
+
+#include <LuaBridge/LuaBridge.h>
+#include <QObject>
+
+#include <memory>
 
 class QString;
 struct lua_State;
@@ -48,7 +47,7 @@ class Plugin final : public QObject
     Q_DISABLE_COPY_MOVE(Plugin)
 
 public:
-    static nonstd::expected<std::shared_ptr<Plugin>, QString> load(const Path &pluginPath);
+    static nonstd::expected<std::shared_ptr<Plugin>, QString> load(const Path& pluginPath);
 
     ~Plugin() override;
 
@@ -59,7 +58,7 @@ public:
     void invoke() const;
 
     template <typename... Args>
-    void call(const char *funcName, Args&&... args)
+    void call(const char* funcName, Args&&... args)
     {
         const luabridge::LuaRef func = luabridge::getGlobal(m_luaState, funcName);
         if (func.isFunction())
@@ -70,11 +69,11 @@ public:
     }
 
 private:
-    Plugin(lua_State *luaState, const QString &name, const PluginVersion &version);
+    Plugin(lua_State* luaState, const QString& name, const PluginVersion& version);
 
     void resetLuaDeadline() const;
 
-    lua_State *m_luaState = nullptr;
+    lua_State* m_luaState = nullptr;
     QString m_name;
     PluginVersion m_version;
     bool m_isInvocable = false;

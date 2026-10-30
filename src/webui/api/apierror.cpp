@@ -28,9 +28,8 @@
 
 #include "apierror.h"
 
-APIError::APIError(APIErrorType type, const QString &message)
-    : RuntimeError {message}
-    , m_type {type}
+APIError::APIError(APIErrorType type, const QString& message)
+    : RuntimeError{ message }, m_type{ type }
 {
 }
 

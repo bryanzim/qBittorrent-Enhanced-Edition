@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 class CookiesModel;
 
@@ -45,7 +45,7 @@ class CookiesDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(CookiesDialog)
 
 public:
-    explicit CookiesDialog(QWidget *parent = nullptr);
+    explicit CookiesDialog(QWidget* parent = nullptr);
     ~CookiesDialog();
 
 public slots:
@@ -56,8 +56,8 @@ private slots:
     void onButtonDeleteClicked();
 
 private:
-    Ui::CookiesDialog *m_ui = nullptr;
-    CookiesModel *m_cookiesModel = nullptr;
+    Ui::CookiesDialog* m_ui = nullptr;
+    CookiesModel* m_cookiesModel = nullptr;
 
     SettingValue<QSize> m_storeDialogSize;
     SettingValue<QByteArray> m_storeViewState;

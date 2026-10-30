@@ -26,14 +26,14 @@
  * exception statement from your version.
  */
 
-#include <algorithm>
+#include "base/bittorrent/trackerentry.h"
+#include "base/global.h"
 
 #include <QList>
 #include <QObject>
 #include <QTest>
 
-#include "base/bittorrent/trackerentry.h"
-#include "base/global.h"
+#include <algorithm>
 
 class TestBittorrentTrackerEntry final : public QObject
 {
@@ -48,13 +48,9 @@ private slots:
     {
         using Entries = QList<BitTorrent::TrackerEntry>;
 
-        const auto isEqual = [](const Entries &left, const Entries &right) -> bool
-        {
-            return std::equal(left.begin(), left.end(), right.begin(), right.end()
-                , [](const BitTorrent::TrackerEntry &leftEntry, const BitTorrent::TrackerEntry &rightEntry)
-            {
-                return (leftEntry.url == rightEntry.url)
-                    && (leftEntry.tier == rightEntry.tier);
+        const auto isEqual = [](const Entries& left, const Entries& right) -> bool {
+            return std::equal(left.begin(), left.end(), right.begin(), right.end(), [](const BitTorrent::TrackerEntry& leftEntry, const BitTorrent::TrackerEntry& rightEntry) {
+                return (leftEntry.url == rightEntry.url) && (leftEntry.tier == rightEntry.tier);
             });
         };
 
@@ -66,74 +62,77 @@ private slots:
 
         {
             const QString input = u"http://localhost:1234"_s;
-            const Entries output = {{u"http://localhost:1234"_s, 0}};
+            const Entries output = {
+                { u"http://localhost:1234"_s, 0 }
+            };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"  http://localhost:1234     "_s;
-            const Entries output = {{u"http://localhost:1234"_s, 0}};
+            const Entries output = {
+                { u"http://localhost:1234"_s, 0 }
+            };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"\nhttp://localhost:1234"_s;
-            const Entries output = {{u"http://localhost:1234"_s, 1}};
+            const Entries output = {
+                { u"http://localhost:1234"_s, 1 }
+            };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"http://localhost:1234\n"_s;
-            const Entries output = {{u"http://localhost:1234"_s, 0}};
+            const Entries output = {
+                { u"http://localhost:1234"_s, 0 }
+            };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"http://localhost:1234 \n http://[::1]:4567"_s;
-            const Entries output =
-            {
-                {u"http://localhost:1234"_s, 0},
-                {u"http://[::1]:4567"_s, 0}
+            const Entries output = {
+                { u"http://localhost:1234"_s, 0 },
+                {     u"http://[::1]:4567"_s, 0 }
             };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"\n http://localhost:1234 \n http://[::1]:4567"_s;
-            const Entries output =
-            {
-                {u"http://localhost:1234"_s, 1},
-                {u"http://[::1]:4567"_s, 1}
+            const Entries output = {
+                { u"http://localhost:1234"_s, 1 },
+                {     u"http://[::1]:4567"_s, 1 }
             };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"http://localhost:1234 \n http://[::1]:4567 \n \n \n"_s;
-            const Entries output =
-            {
-                {u"http://localhost:1234"_s, 0},
-                {u"http://[::1]:4567"_s, 0}
+            const Entries output = {
+                { u"http://localhost:1234"_s, 0 },
+                {     u"http://[::1]:4567"_s, 0 }
             };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"http://localhost:1234 \n \n http://[::1]:4567"_s;
-            const Entries output =
-            {
-                {u"http://localhost:1234"_s, 0},
-                {u"http://[::1]:4567"_s, 1}
+            const Entries output = {
+                { u"http://localhost:1234"_s, 0 },
+                {     u"http://[::1]:4567"_s, 1 }
             };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }
 
         {
             const QString input = u"\n \n \n http://localhost:1234 \n \n \n \n http://[::1]:4567 \n \n \n"_s;
-            const Entries output =
-            {
-                {u"http://localhost:1234"_s, 3},
-                {u"http://[::1]:4567"_s, 6}
+            const Entries output = {
+                { u"http://localhost:1234"_s, 3 },
+                {     u"http://[::1]:4567"_s, 6 }
             };
             QVERIFY(isEqual(BitTorrent::parseTrackerEntries(input), output));
         }

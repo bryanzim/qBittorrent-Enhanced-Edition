@@ -29,18 +29,18 @@
 
 #include "torrentcreatorcontroller.h"
 
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QStringList>
-#include <QUrl>
-
-#include "base/global.h"
+#include "apierror.h"
 #include "base/bittorrent/torrentcreationmanager.h"
+#include "base/global.h"
 #include "base/preferences.h"
 #include "base/utils/datetime.h"
 #include "base/utils/io.h"
 #include "base/utils/string.h"
-#include "apierror.h"
+
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QStringList>
+#include <QUrl>
 
 const QString KEY_COMMENT = u"comment"_s;
 const QString KEY_ERROR_MESSAGE = u"errorMessage"_s;
@@ -68,7 +68,7 @@ namespace
     using Utils::String::parseInt;
 
 #ifdef QBT_USES_LIBTORRENT2
-    BitTorrent::TorrentFormat parseTorrentFormat(const QString &str)
+    BitTorrent::TorrentFormat parseTorrentFormat(const QString& str)
     {
         if (str == u"v1")
             return BitTorrent::TorrentFormat::V1;
@@ -91,13 +91,13 @@ namespace
     }
 #endif
 
-    QStringList parseUrls(const QString &urlsParam)
+    QStringList parseUrls(const QString& urlsParam)
     {
         // Empty lines are preserved because they indicate new tracker tier and will be ignored in url seeds.
         const QStringList encodedUrls = urlsParam.split(u'|');
         QStringList urls;
         urls.reserve(encodedUrls.size());
-        for (const QString &urlStr : encodedUrls)
+        for (const QString& urlStr : encodedUrls)
             urls << QUrl::fromPercentEncoding(urlStr.toLatin1());
         return urls;
     }
@@ -120,18 +120,16 @@ namespace
     }
 }
 
-TorrentCreatorController::TorrentCreatorController(BitTorrent::TorrentCreationManager *torrentCreationManager, IApplication *app, QObject *parent)
-    : APIController(app, parent)
-    , m_torrentCreationManager {torrentCreationManager}
+TorrentCreatorController::TorrentCreatorController(BitTorrent::TorrentCreationManager* torrentCreationManager, IApplication* app, QObject* parent)
+    : APIController(app, parent), m_torrentCreationManager{ torrentCreationManager }
 {
 }
 
 void TorrentCreatorController::addTaskAction()
 {
-    requireParams({KEY_SOURCE_PATH});
+    requireParams({ KEY_SOURCE_PATH });
 
-    const BitTorrent::TorrentCreatorParams createTorrentParams
-    {
+    const BitTorrent::TorrentCreatorParams createTorrentParams{
         .ignoreDotfiles = parseBool(params()[KEY_IGNORE_DOTFILES]).value_or(true),
         .isPrivate = parseBool(params()[KEY_PRIVATE]).value_or(false),
 #ifdef QBT_USES_LIBTORRENT2
@@ -155,7 +153,9 @@ void TorrentCreatorController::addTaskAction()
     if (!task)
         throw APIError(APIErrorType::Conflict, tr("Too many active tasks"));
 
-    setResult(QJsonObject {{KEY_TASK_ID, task->id()}});
+    setResult(QJsonObject{
+        { KEY_TASK_ID, task->id() }
+    });
 }
 
 void TorrentCreatorController::statusAction()
@@ -167,25 +167,25 @@ void TorrentCreatorController::statusAction()
         throw APIError(APIErrorType::NotFound);
 
     const QList<std::shared_ptr<BitTorrent::TorrentCreationTask>> tasks = id.isEmpty()
-            ? m_torrentCreationManager->tasks()
-            : QList<std::shared_ptr<BitTorrent::TorrentCreationTask>> {singleTask};
+                                                                              ? m_torrentCreationManager->tasks()
+                                                                              : QList<std::shared_ptr<BitTorrent::TorrentCreationTask>>{ singleTask };
     QJsonArray statusArray;
-    for (const auto &task : tasks)
+    for (const auto& task : tasks)
     {
-        QJsonObject taskJson {
-            {KEY_TASK_ID, task->id()},
-            {KEY_SOURCE_PATH, task->params().sourcePath.toString()},
-            {KEY_PIECE_SIZE, task->params().pieceSize},
-            {KEY_IGNORE_DOTFILES, task->params().ignoreDotfiles},
-            {KEY_PRIVATE, task->params().isPrivate},
-            {KEY_TIME_ADDED, Utils::DateTime::toSecsSinceEpoch(task->timeAdded())},
+        QJsonObject taskJson{
+            {         KEY_TASK_ID,                                           task->id() },
+            {     KEY_SOURCE_PATH,                 task->params().sourcePath.toString() },
+            {      KEY_PIECE_SIZE,                             task->params().pieceSize },
+            { KEY_IGNORE_DOTFILES,                        task->params().ignoreDotfiles },
+            {         KEY_PRIVATE,                             task->params().isPrivate },
+            {      KEY_TIME_ADDED, Utils::DateTime::toSecsSinceEpoch(task->timeAdded()) },
 #ifdef QBT_USES_LIBTORRENT2
-            {KEY_FORMAT, torrentFormatToString(task->params().torrentFormat)},
+            {          KEY_FORMAT,  torrentFormatToString(task->params().torrentFormat) },
 #else
-            {KEY_OPTIMIZE_ALIGNMENT, task->params().isAlignmentOptimized},
-            {KEY_PADDED_FILE_SIZE_LIMIT, task->params().paddedFileSizeLimit},
+            { KEY_OPTIMIZE_ALIGNMENT, task->params().isAlignmentOptimized },
+            { KEY_PADDED_FILE_SIZE_LIMIT, task->params().paddedFileSizeLimit },
 #endif
-            {KEY_STATUS, taskStatusString(task)},
+            {          KEY_STATUS,                               taskStatusString(task) },
         };
 
         if (!task->params().comment.isEmpty())
@@ -233,7 +233,7 @@ void TorrentCreatorController::statusAction()
 
 void TorrentCreatorController::torrentFileAction()
 {
-    requireParams({KEY_TASK_ID});
+    requireParams({ KEY_TASK_ID });
     const QString id = params()[KEY_TASK_ID];
 
     const auto task = m_torrentCreationManager->getTask(id);
@@ -260,7 +260,7 @@ void TorrentCreatorController::torrentFileAction()
 
 void TorrentCreatorController::deleteTaskAction()
 {
-    requireParams({KEY_TASK_ID});
+    requireParams({ KEY_TASK_ID });
     const QString id = params()[KEY_TASK_ID];
 
     if (!m_torrentCreationManager->deleteTask(id))

@@ -44,13 +44,13 @@ public:
     explicit HtmlBrowser(QWidget* parent = nullptr);
     ~HtmlBrowser() = default;
 
-    QVariant loadResource(int type, const QUrl &name) override;
+    QVariant loadResource(int type, const QUrl& name) override;
 
 protected:
-    QNetworkAccessManager *m_netManager = nullptr;
-    QNetworkDiskCache *m_diskCache = nullptr;
+    QNetworkAccessManager* m_netManager = nullptr;
+    QNetworkDiskCache* m_diskCache = nullptr;
     QHash<QUrl, bool> m_activeRequests;
 
 protected slots:
-    void resourceLoaded(QNetworkReply *reply);
+    void resourceLoaded(QNetworkReply* reply);
 };

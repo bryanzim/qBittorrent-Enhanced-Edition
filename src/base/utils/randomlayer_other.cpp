@@ -26,24 +26,23 @@
  * exception statement from your version.
  */
 
-#include <limits>
+#include <QtLogging>
 
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
-
-#include <QtLogging>
+#include <limits>
 
 namespace
 {
     class RandomLayer
     {
-    // need to satisfy UniformRandomBitGenerator requirements
+        // need to satisfy UniformRandomBitGenerator requirements
     public:
         using result_type = uint32_t;
 
         RandomLayer()
-            : m_randDev {fopen("/dev/urandom", "rb")}
+            : m_randDev{ fopen("/dev/urandom", "rb") }
         {
             if (!m_randDev)
                 qFatal("Failed to open /dev/urandom. Reason: \"%s\". Error code: %d.", std::strerror(errno), errno);
@@ -74,6 +73,6 @@ namespace
         }
 
     private:
-        FILE *m_randDev = nullptr;
+        FILE* m_randDev = nullptr;
     };
 }

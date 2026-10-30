@@ -80,15 +80,15 @@ public:
 
     using SampleData = std::array<quint64, NB_GRAPHS>;
 
-    explicit SpeedPlotView(QWidget *parent = nullptr);
+    explicit SpeedPlotView(QWidget* parent = nullptr);
 
     void setGraphEnable(GraphID id, bool enable);
     void setPeriod(TimePeriod period);
 
-    void pushPoint(const SampleData &point);
+    void pushPoint(const SampleData& point);
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
 
 private:
     struct Sample
@@ -104,24 +104,24 @@ private:
     public:
         Averager(milliseconds duration, milliseconds resolution);
 
-        bool push(const SampleData &sampleData); // returns true if there is new data to display
+        bool push(const SampleData& sampleData); // returns true if there is new data to display
 
-        const DataCircularBuffer &data() const;
+        const DataCircularBuffer& data() const;
 
     private:
         const milliseconds m_resolution;
         const milliseconds m_maxDuration;
-        milliseconds m_currentDuration {0};
+        milliseconds m_currentDuration{ 0 };
         int m_counter = 0;
-        SampleData m_accumulator {};
-        DataCircularBuffer m_sink {};
+        SampleData m_accumulator{};
+        DataCircularBuffer m_sink{};
         QElapsedTimer m_lastSampleTime;
     };
 
     struct GraphProperties
     {
         GraphProperties();
-        GraphProperties(const QString &name, const QPen &pen, bool enable = false);
+        GraphProperties(const QString& graphName, const QPen& graphPen, bool graphEnabled = false);
 
         QString name;
         QPen pen;
@@ -129,15 +129,15 @@ private:
     };
 
     quint64 maxYValue() const;
-    const DataCircularBuffer &currentData() const;
+    const DataCircularBuffer& currentData() const;
 
-    Averager m_averager5Min {5min, 1s};
-    Averager m_averager30Min {30min, 6s};
-    Averager m_averager6Hour {6h, 36s};
-    Averager m_averager12Hour {12h, 72s};
-    Averager m_averager24Hour {24h, 144s};
-    Averager *m_currentAverager {&m_averager5Min};
+    Averager m_averager5Min{ 5min, 1s };
+    Averager m_averager30Min{ 30min, 6s };
+    Averager m_averager6Hour{ 6h, 36s };
+    Averager m_averager12Hour{ 12h, 72s };
+    Averager m_averager24Hour{ 24h, 144s };
+    Averager* m_currentAverager{ &m_averager5Min };
 
     QMap<GraphID, GraphProperties> m_properties;
-    milliseconds m_currentMaxDuration {0};
+    milliseconds m_currentMaxDuration{ 0 };
 };

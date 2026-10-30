@@ -28,17 +28,17 @@
 
 #include "torrentcontentlayoutdialog.h"
 
+#include "base/bittorrent/torrentcontenthandler.h"
+#include "raisedmessagebox.h"
+#include "torrentcontentlayoutmodel.h"
+#include "ui_torrentcontentlayoutdialog.h"
+#include "uithememanager.h"
+#include "utils.h"
+
 #include <QCursor>
 #include <QMenu>
 #include <QPushButton>
 #include <QStyledItemDelegate>
-
-#include "base/bittorrent/torrentcontenthandler.h"
-#include "raisedmessagebox.h"
-#include "torrentcontentlayoutmodel.h"
-#include "uithememanager.h"
-#include "utils.h"
-#include "ui_torrentcontentlayoutdialog.h"
 
 #define SETTINGS_KEY(name) u"GUI/TorrentContentLayoutDialog/" name
 
@@ -52,7 +52,7 @@ class TorrentContentLayoutItemDelegate final : public QStyledItemDelegate
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
 
-    void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
     {
         QStyledItemDelegate::initStyleOption(option, index);
 
@@ -63,25 +63,22 @@ public:
     }
 };
 
-TorrentContentLayoutDialog::TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler *contentHandler, QWidget *parent)
+TorrentContentLayoutDialog::TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler* contentHandler, QWidget* parent)
     : TorrentContentLayoutDialog(contentHandler, {}, parent)
 {
 }
 
-TorrentContentLayoutDialog::TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler *contentHandler, const QSet<int> &selectedIndexes, QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::TorrentContentLayoutDialog}
-    , m_storeDialogSize {SETTINGS_KEY(u"Size"_s)}
-    , m_storeViewState {SETTINGS_KEY(u"ViewState"_s)}
+TorrentContentLayoutDialog::TorrentContentLayoutDialog(BitTorrent::TorrentContentHandler* contentHandler, const QSet<int>& selectedIndexes, QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::TorrentContentLayoutDialog }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }, m_storeViewState{ SETTINGS_KEY(u"ViewState"_s) }
 {
     m_ui->setupUi(this);
 
     m_ui->buttonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 
-    connect(m_ui->buttonBox, &QDialogButtonBox::clicked, this, [this](const QAbstractButton *button)
-    {
+    connect(m_ui->buttonBox, &QDialogButtonBox::clicked, this, [this](const QAbstractButton* button) {
         (button == m_ui->buttonBox->button(QDialogButtonBox::Apply))
-                ? apply() : reject();
+            ? apply()
+            : reject();
     });
 
     setWindowIcon(UIThemeManager::instance()->getIcon(u"edit-rename"_s));
@@ -95,32 +92,26 @@ TorrentContentLayoutDialog::TorrentContentLayoutDialog(BitTorrent::TorrentConten
             for (const int fileIndex : selectedIndexes)
             {
                 const QModelIndex itemIndex = m_model->index(fileIndex, 0);
-                m_ui->pathListView->selectionModel()->select(itemIndex
-                        , (QItemSelectionModel::Select | QItemSelectionModel::Rows));
+                m_ui->pathListView->selectionModel()->select(itemIndex, (QItemSelectionModel::Select | QItemSelectionModel::Rows));
             }
         }
         else
         {
-            m_ui->pathListView->selectionModel()->setCurrentIndex(m_model->index(0, 0)
-                    , (QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows));
+            m_ui->pathListView->selectionModel()->setCurrentIndex(m_model->index(0, 0), (QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows));
         }
     }
 
     populateCommonPath();
 
-    connect(m_model, &QAbstractItemModel::dataChanged, this, [this]
-    {
+    connect(m_model, &QAbstractItemModel::dataChanged, this, [this] {
         m_ui->buttonBox->button(QDialogButtonBox::Apply)->setEnabled(m_model->haveChangedFilePaths());
     });
 
-    connect(m_model, &TorrentContentLayoutModel::renameFailed, this
-            , [this](const QString &firstErrorMessage, const qsizetype errorsCount)
-    {
+    connect(m_model, &TorrentContentLayoutModel::renameFailed, this, [this](const QString& firstErrorMessage, const qsizetype errorsCount) {
         QString errorMessage = firstErrorMessage;
         if (errorsCount > 1)
         {
-            errorMessage.append(u'\n' + tr("There are %n more renaming error(s)."
-                    , "There are 5 more renaming errors.", (errorsCount - 1)));
+            errorMessage.append(u'\n' + tr("There are %n more renaming error(s).", "There are 5 more renaming errors.", (errorsCount - 1)));
         }
 
         RaisedMessageBox::warning(this, tr("Rename error"), errorMessage, QMessageBox::Ok);
@@ -149,12 +140,11 @@ TorrentContentLayoutDialog::~TorrentContentLayoutDialog()
 
 void TorrentContentLayoutDialog::showColumnHeaderMenu()
 {
-    auto *menu = new QMenu(this);
+    auto* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     menu->setToolTipsVisible(true);
 
-    QAction *resizeAction = menu->addAction(tr("Resize columns"), this, [this]()
-    {
+    QAction* resizeAction = menu->addAction(tr("Resize columns"), this, [this]() {
         for (int i = 0, count = m_ui->pathListView->header()->count(); i < count; ++i)
         {
             if (!m_ui->pathListView->isColumnHidden(i))
@@ -176,7 +166,7 @@ PathList TorrentContentLayoutDialog::selectedPaths() const
 
     PathList selectedPaths;
     selectedPaths.reserve(selectedRows.size());
-    for (const QModelIndex &rowIndex : selectedRows)
+    for (const QModelIndex& rowIndex : selectedRows)
         selectedPaths.append(Path(rowIndex.data().toString()));
 
     return selectedPaths;
@@ -200,7 +190,7 @@ void TorrentContentLayoutDialog::populateCommonPath()
     }
 }
 
-void TorrentContentLayoutDialog::onCommonPathEdited(const QString &pathStr)
+void TorrentContentLayoutDialog::onCommonPathEdited(const QString& pathStr)
 {
     const Path oldCommonPath = m_commonPath;
     m_commonPath = Path(pathStr);
@@ -209,9 +199,9 @@ void TorrentContentLayoutDialog::onCommonPathEdited(const QString &pathStr)
     if (selectedRows.isEmpty())
         return;
 
-    for (const QModelIndex &rowIndex : selectedRows)
+    for (const QModelIndex& rowIndex : selectedRows)
     {
-        const Path oldPath {rowIndex.data().toString()};
+        const Path oldPath{ rowIndex.data().toString() };
         const Path newPath = m_commonPath / oldCommonPath.relativePathOf(oldPath);
         m_model->setData(rowIndex, newPath.toString());
     }

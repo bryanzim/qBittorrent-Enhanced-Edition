@@ -38,12 +38,12 @@ class ClientDataController final : public APIController
     Q_DISABLE_COPY_MOVE(ClientDataController)
 
 public:
-    ClientDataController(ClientDataStorage *clientDataStorage, IApplication *app, QObject *parent = nullptr);
+    ClientDataController(ClientDataStorage* clientDataStorage, IApplication* app, QObject* parent = nullptr);
 
 private slots:
     void loadAction();
     void storeAction();
 
 private:
-    ClientDataStorage *m_clientDataStorage = nullptr;
+    ClientDataStorage* m_clientDataStorage = nullptr;
 };

@@ -30,23 +30,23 @@
 
 #include <QActionGroup>
 
-FilterPatternFormatMenu::FilterPatternFormatMenu(const FilterPatternFormat format, QWidget *parent)
+FilterPatternFormatMenu::FilterPatternFormatMenu(const FilterPatternFormat format, QWidget* parent)
     : QMenu(parent)
 {
     setTitle(tr("Pattern Format"));
 
-    auto *patternFormatGroup = new QActionGroup(this);
+    auto* patternFormatGroup = new QActionGroup(this);
     patternFormatGroup->setExclusive(true);
 
-    QAction *plainTextAction = addAction(tr("Plain text"));
+    QAction* plainTextAction = addAction(tr("Plain text"));
     plainTextAction->setCheckable(true);
     patternFormatGroup->addAction(plainTextAction);
 
-    QAction *wildcardsAction = addAction(tr("Wildcards"));
+    QAction* wildcardsAction = addAction(tr("Wildcards"));
     wildcardsAction->setCheckable(true);
     patternFormatGroup->addAction(wildcardsAction);
 
-    QAction *regexAction = addAction(tr("Regular expression"));
+    QAction* regexAction = addAction(tr("Regular expression"));
     regexAction->setCheckable(true);
     patternFormatGroup->addAction(regexAction);
 
@@ -64,18 +64,15 @@ FilterPatternFormatMenu::FilterPatternFormatMenu(const FilterPatternFormat forma
         break;
     }
 
-    connect(plainTextAction, &QAction::toggled, this, [this](const bool checked)
-    {
+    connect(plainTextAction, &QAction::toggled, this, [this](const bool checked) {
         if (checked)
             emit patternFormatChanged(FilterPatternFormat::PlainText);
     });
-    connect(wildcardsAction, &QAction::toggled, this, [this](const bool checked)
-    {
+    connect(wildcardsAction, &QAction::toggled, this, [this](const bool checked) {
         if (checked)
             emit patternFormatChanged(FilterPatternFormat::Wildcards);
     });
-    connect(regexAction, &QAction::toggled, this, [this](const bool checked)
-    {
+    connect(regexAction, &QAction::toggled, this, [this](const bool checked) {
         if (checked)
             emit patternFormatChanged(FilterPatternFormat::Regex);
     });

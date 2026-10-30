@@ -29,10 +29,10 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QSet>
-
 #include "basefilterwidget.h"
+
+#include <QSet>
+#include <QtContainerFwd>
 
 class TransferListWidget;
 
@@ -42,25 +42,24 @@ class TrackerStatusFilterWidget final : public BaseFilterWidget
     Q_DISABLE_COPY_MOVE(TrackerStatusFilterWidget)
 
 public:
-    TrackerStatusFilterWidget(QWidget *parent, TransferListWidget *transferList);
+    TrackerStatusFilterWidget(QWidget* parent, TransferListWidget* transferList);
 
 private:
     // These 4 methods are virtual slots in the base class.
     // No need to redeclare them here as slots.
     void showMenu() override;
     void applyFilter(int row) override;
-    void handleTorrentsLoaded(const QList<BitTorrent::Torrent *> &torrents) override;
-    void torrentAboutToBeDeleted(BitTorrent::Torrent *torrent) override;
+    void handleTorrentsLoaded(const QList<BitTorrent::Torrent*>& torrents) override;
+    void torrentAboutToBeDeleted(BitTorrent::Torrent* torrent) override;
 
-    void handleTorrentTrackersRemoved(const BitTorrent::Torrent *torrent);
-    void handleTorrentTrackersReset(const BitTorrent::Torrent *torrent, const QList<BitTorrent::TrackerEntryStatus> &oldEntries
-            , const QList<BitTorrent::TrackerEntry> &newEntries);
-    void handleTorrentTrackerStatusesUpdated(const BitTorrent::Torrent *torrent);
+    void handleTorrentTrackersRemoved(const BitTorrent::Torrent* torrent);
+    void handleTorrentTrackersReset(const BitTorrent::Torrent* torrent, const QList<BitTorrent::TrackerEntryStatus>& oldEntries, const QList<BitTorrent::TrackerEntry>& newEntries);
+    void handleTorrentTrackerStatusesUpdated(const BitTorrent::Torrent* torrent);
 
-    void refreshItems(const BitTorrent::Torrent *torrent);
+    void refreshItems(const BitTorrent::Torrent* torrent);
 
-    QSet<const BitTorrent::Torrent *> m_errors;
-    QSet<const BitTorrent::Torrent *> m_trackerErrors;
-    QSet<const BitTorrent::Torrent *> m_warnings;
+    QSet<const BitTorrent::Torrent*> m_errors;
+    QSet<const BitTorrent::Torrent*> m_trackerErrors;
+    QSet<const BitTorrent::Torrent*> m_warnings;
     int m_totalTorrents = 0;
 };

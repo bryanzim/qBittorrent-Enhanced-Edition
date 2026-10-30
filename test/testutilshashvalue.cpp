@@ -26,13 +26,12 @@
  * exception statement from your version.
  */
 
-#include <boost/unordered_set.hpp>
+#include "base/utils/hashvalue.h"
 
 #include <QObject>
 #include <QString>
 #include <QTest>
-
-#include "base/utils/hashvalue.h"
+#include <boost/unordered_set.hpp>
 
 using namespace Qt::Literals::StringLiterals;
 

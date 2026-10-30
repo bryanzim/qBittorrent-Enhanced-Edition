@@ -30,18 +30,17 @@
 
 #pragma once
 
-#include <libtorrent/entry.hpp>
-
-#include <QtTypes>
-#include <QHash>
-#include <QObject>
-#include <QSet>
-
 #include "base/bittorrent/infohash.h"
 #include "base/http/environment.h"
 #include "base/http/irequesthandler.h"
 #include "base/http/request.h"
 #include "base/http/response.h"
+
+#include <QHash>
+#include <QObject>
+#include <QSet>
+#include <QtTypes>
+#include <libtorrent/entry.hpp>
 
 namespace Http
 {
@@ -53,7 +52,7 @@ namespace BitTorrent
     struct Peer
     {
         QByteArray peerId;
-        ushort port = 0;  // self-claimed by peer, might not be the same as socket port
+        ushort port = 0; // self-claimed by peer, might not be the same as socket port
         bool isSeeder = false;
 
         // caching precomputed values
@@ -63,8 +62,8 @@ namespace BitTorrent
         QByteArray uniqueID() const;
     };
 
-    bool operator==(const Peer &left, const Peer &right);
-    std::size_t qHash(const Peer &key, std::size_t seed = 0);
+    bool operator==(const Peer& left, const Peer& right);
+    std::size_t qHash(const Peer& key, std::size_t seed = 0);
 
     // *Basic* Bittorrent tracker implementation
     // [BEP-3] The BitTorrent Protocol Specification
@@ -81,24 +80,24 @@ namespace BitTorrent
             qint64 seeders = 0;
             QSet<Peer> peers;
 
-            void setPeer(const Peer &peer);
-            bool removePeer(const Peer &peer);
+            void setPeer(const Peer& peer);
+            bool removePeer(const Peer& peer);
         };
 
     public:
-        explicit Tracker(QObject *parent = nullptr);
+        explicit Tracker(QObject* parent = nullptr);
 
         bool start();
 
     private:
-        void processRequest(const Http::Request &request, const Http::Environment &env, Http::ResponseWriter &responseWriter) override;
+        void processRequest(const Http::Request& request, const Http::Environment& env, Http::ResponseWriter& responseWriter) override;
         void processAnnounceRequest();
 
-        void registerPeer(const TrackerAnnounceRequest &announceReq);
-        void unregisterPeer(const TrackerAnnounceRequest &announceReq);
-        void prepareAnnounceResponse(const TrackerAnnounceRequest &announceReq);
+        void registerPeer(const TrackerAnnounceRequest& announceReq);
+        void unregisterPeer(const TrackerAnnounceRequest& announceReq);
+        void prepareAnnounceResponse(const TrackerAnnounceRequest& announceReq);
 
-        Http::Server *m_server = nullptr;
+        Http::Server* m_server = nullptr;
         Http::Request m_request;
         Http::Environment m_env;
         Http::Response m_response;

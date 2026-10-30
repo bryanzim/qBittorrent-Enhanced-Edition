@@ -29,27 +29,6 @@
 
 #include "addnewtorrentdialog.h"
 
-#include <algorithm>
-#include <functional>
-
-#include <QtVersionChecks>
-#include <QAction>
-#include <QByteArray>
-#include <QDateTime>
-#include <QDebug>
-#include <QDir>
-#include <QFileDialog>
-#include <QFuture>
-#include <QList>
-#include <QMenu>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QShortcut>
-#include <QSignalBlocker>
-#include <QSize>
-#include <QString>
-#include <QUrl>
-
 #include "base/bittorrent/addtorrentparams.h"
 #include "base/bittorrent/downloadpriority.h"
 #include "base/bittorrent/infohash.h"
@@ -70,8 +49,28 @@
 #include "filterpatternformatmenu.h"
 #include "lineedit.h"
 #include "torrenttagsdialog.h"
-
 #include "ui_addnewtorrentdialog.h"
+
+#include <QAction>
+#include <QByteArray>
+#include <QDateTime>
+#include <QDebug>
+#include <QDir>
+#include <QFileDialog>
+#include <QFuture>
+#include <QList>
+#include <QMenu>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QShortcut>
+#include <QSignalBlocker>
+#include <QSize>
+#include <QString>
+#include <QUrl>
+#include <QtVersionChecks>
+
+#include <algorithm>
+#include <functional>
 
 namespace
 {
@@ -80,13 +79,13 @@ namespace
     const QString KEY_DOWNLOADPATHHISTORY = SETTINGS_KEY(u"DownloadPathHistory"_s);
 
     // just a shortcut
-    inline SettingsStorage *settings()
+    inline SettingsStorage* settings()
     {
         return SettingsStorage::instance();
     }
 
     // savePath is a folder, not an absolute file path
-    int indexOfPath(const FileSystemPathComboEdit *fsPathEdit, const Path &savePath)
+    int indexOfPath(const FileSystemPathComboEdit* fsPathEdit, const Path& savePath)
     {
         for (qsizetype i = 0; i < fsPathEdit->count(); ++i)
         {
@@ -96,7 +95,7 @@ namespace
         return -1;
     }
 
-    void setPath(FileSystemPathComboEdit *fsPathEdit, const Path &newPath)
+    void setPath(FileSystemPathComboEdit* fsPathEdit, const Path& newPath)
     {
         int existingIndex = indexOfPath(fsPathEdit, newPath);
         if (existingIndex < 0)
@@ -109,7 +108,7 @@ namespace
         fsPathEdit->setCurrentIndex(existingIndex);
     }
 
-    void updatePathHistory(const QString &settingsKey, const Path &path, const qsizetype maxLength)
+    void updatePathHistory(const QString& settingsKey, const Path& path, const qsizetype maxLength)
     {
         // Add last used save path to the front of history
 
@@ -131,8 +130,7 @@ namespace
 class AddNewTorrentDialog::TorrentContentAdaptor final : public BitTorrent::TorrentContentHandler
 {
 public:
-    TorrentContentAdaptor(const BitTorrent::TorrentInfo &torrentInfo, PathList &filePaths
-            , QList<BitTorrent::DownloadPriority> &filePriorities, std::function<void ()> onFilePrioritiesChanged);
+    TorrentContentAdaptor(const BitTorrent::TorrentInfo& torrentInfo, PathList& filePaths, QList<BitTorrent::DownloadPriority>& filePriorities, std::function<void()> onFilePrioritiesChanged);
 
     bool hasMetadata() const override;
     int filesCount() const override;
@@ -146,18 +144,18 @@ public:
     Path actualFilePath(int fileIndex) const override;
     void flushCache() const override;
 
-    void renameFile(int index, const Path &newFilePath) override;
+    void renameFile(int index, const Path& newFilePath) override;
     void applyContentLayout(const BitTorrent::TorrentContentLayout contentLayout);
-    void prioritizeFiles(const QList<BitTorrent::DownloadPriority> &priorities) override;
+    void prioritizeFiles(const QList<BitTorrent::DownloadPriority>& priorities) override;
 
 private:
-    void doRenameFolder(const Path &oldFolderPath, const Path &newFolderPath) override;
-    void doRenameFile(int index, const Path &newFilePath);
+    void doRenameFolder(const Path& oldFolderPath, const Path& newFolderPath) override;
+    void doRenameFile(int index, const Path& newFilePath);
 
-    const BitTorrent::TorrentInfo &m_torrentInfo;
-    PathList &m_filePaths;
-    QList<BitTorrent::DownloadPriority> &m_filePriorities;
-    std::function<void ()> m_onFilePrioritiesChanged;
+    const BitTorrent::TorrentInfo& m_torrentInfo;
+    PathList& m_filePaths;
+    QList<BitTorrent::DownloadPriority>& m_filePriorities;
+    std::function<void()> m_onFilePrioritiesChanged;
     Path m_originalRootFolder;
     BitTorrent::TorrentContentLayout m_currentContentLayout;
 };
@@ -168,17 +166,8 @@ struct AddNewTorrentDialog::Context
     BitTorrent::AddTorrentParams torrentParams;
 };
 
-AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &torrentDescr
-        , const BitTorrent::AddTorrentParams &inParams, QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::AddNewTorrentDialog}
-    , m_filterLine {new LineEdit(this)}
-    , m_storeDialogSize {SETTINGS_KEY(u"DialogSize"_s)}
-    , m_storeDefaultCategory {SETTINGS_KEY(u"DefaultCategory"_s)}
-    , m_storeRememberLastSavePath {SETTINGS_KEY(u"RememberLastSavePath"_s)}
-    , m_storeTreeHeaderState {u"GUI/Qt6/" SETTINGS_KEY(u"TreeHeaderState"_s)}
-    , m_storeSplitterState {u"GUI/Qt6/" SETTINGS_KEY(u"SplitterState"_s)}
-    , m_storeFilterPatternFormat {u"GUI/" SETTINGS_KEY(u"FilterPatternFormat"_s)}
+AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& inParams, QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::AddNewTorrentDialog }, m_filterLine{ new LineEdit(this) }, m_storeDialogSize{ SETTINGS_KEY(u"DialogSize"_s) }, m_storeDefaultCategory{ SETTINGS_KEY(u"DefaultCategory"_s) }, m_storeRememberLastSavePath{ SETTINGS_KEY(u"RememberLastSavePath"_s) }, m_storeTreeHeaderState{ u"GUI/Qt6/" SETTINGS_KEY(u"TreeHeaderState"_s) }, m_storeSplitterState{ u"GUI/Qt6/" SETTINGS_KEY(u"SplitterState"_s) }, m_storeFilterPatternFormat{ u"GUI/" SETTINGS_KEY(u"FilterPatternFormat"_s) }
 {
     m_ui->setupUi(this);
 
@@ -194,11 +183,7 @@ AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &to
     m_ui->downloadPath->setMaxVisibleItems(20);
 
     m_ui->stopConditionComboBox->setToolTip(
-            u"<html><body><p><b>" + tr("None") + u"</b> - " + tr("No stop condition is set.") + u"</p><p><b>"
-            + tr("Metadata received") + u"</b> - " + tr("Torrent will stop after metadata is received.")
-            + u" <em>" + tr("Torrents that have metadata initially will be added as stopped.") + u"</em></p><p><b>"
-            + tr("Files checked") + u"</b> - " + tr("Torrent will stop after files are initially checked.")
-            + u" <em>" + tr("This will also download metadata if it wasn't there initially.") + u"</em></p></body></html>");
+        u"<html><body><p><b>" + tr("None") + u"</b> - " + tr("No stop condition is set.") + u"</p><p><b>" + tr("Metadata received") + u"</b> - " + tr("Torrent will stop after metadata is received.") + u" <em>" + tr("Torrents that have metadata initially will be added as stopped.") + u"</em></p><p><b>" + tr("Files checked") + u"</b> - " + tr("Torrent will stop after files are initially checked.") + u" <em>" + tr("This will also download metadata if it wasn't there initially.") + u"</em></p></body></html>");
     m_ui->stopConditionComboBox->addItem(tr("None"), QVariant::fromValue(BitTorrent::Torrent::StopCondition::None));
     m_ui->stopConditionComboBox->addItem(tr("Files checked"), QVariant::fromValue(BitTorrent::Torrent::StopCondition::FilesChecked));
 
@@ -211,9 +196,8 @@ AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &to
     m_filterLine->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_filterLine, &QWidget::customContextMenuRequested, this, &AddNewTorrentDialog::showContentFilterContextMenu);
     m_ui->contentFilterLayout->insertWidget(3, m_filterLine);
-    const auto *focusSearchHotkey = new QShortcut(QKeySequence::Find, this);
-    connect(focusSearchHotkey, &QShortcut::activated, this, [this]()
-    {
+    const auto* focusSearchHotkey = new QShortcut(QKeySequence::Find, this);
+    connect(focusSearchHotkey, &QShortcut::activated, this, [this]() {
         m_filterLine->setFocus();
         m_filterLine->selectAll();
     });
@@ -236,19 +220,16 @@ AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &to
     connect(m_ui->downloadPath, &FileSystemPathEdit::selectedPathChanged, this, &AddNewTorrentDialog::onDownloadPathChanged);
     connect(m_ui->groupBoxDownloadPath, &QGroupBox::toggled, this, &AddNewTorrentDialog::onUseDownloadPathChanged);
     connect(m_ui->comboTMM, &QComboBox::currentIndexChanged, this, &AddNewTorrentDialog::TMMChanged);
-    connect(m_ui->startTorrentCheckBox, &QCheckBox::toggled, this, [this](const bool checked)
-    {
+    connect(m_ui->startTorrentCheckBox, &QCheckBox::toggled, this, [this](const bool checked) {
         m_ui->stopConditionLabel->setEnabled(checked);
         m_ui->stopConditionComboBox->setEnabled(checked);
     });
     connect(m_ui->contentLayoutComboBox, &QComboBox::currentIndexChanged, this, &AddNewTorrentDialog::contentLayoutChanged);
     connect(m_ui->categoryComboBox, &QComboBox::currentIndexChanged, this, &AddNewTorrentDialog::categoryChanged);
-    connect(m_ui->tagsEditButton, &QAbstractButton::clicked, this, [this]
-    {
-        auto *dlg = new TorrentTagsDialog(m_currentContext->torrentParams.tags, this);
+    connect(m_ui->tagsEditButton, &QAbstractButton::clicked, this, [this] {
+        auto* dlg = new TorrentTagsDialog(m_currentContext->torrentParams.tags, this);
         dlg->setAttribute(Qt::WA_DeleteOnClose);
-        connect(dlg, &TorrentTagsDialog::accepted, this, [this, dlg]
-        {
+        connect(dlg, &TorrentTagsDialog::accepted, this, [this, dlg] {
             m_currentContext->torrentParams.tags = dlg->tags();
             m_ui->tagsLineEdit->setText(Utils::String::joinIntoString(m_currentContext->torrentParams.tags, u", "_s));
         });
@@ -257,13 +238,12 @@ AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &to
     connect(m_filterLine, &LineEdit::textUpdated, this, &AddNewTorrentDialog::setContentFilterPattern);
     connect(m_ui->buttonSelectAll, &QPushButton::clicked, m_ui->contentTreeView, &TorrentContentWidget::checkAll);
     connect(m_ui->buttonSelectNone, &QPushButton::clicked, m_ui->contentTreeView, &TorrentContentWidget::checkNone);
-    connect(Preferences::instance(), &Preferences::changed, this, []
-    {
+    connect(Preferences::instance(), &Preferences::changed, this, [] {
         const int length = Preferences::instance()->addNewTorrentDialogSavePathHistoryLength();
         settings()->storeValue(KEY_SAVEPATHHISTORY, settings()->loadValue<QStringList>(KEY_SAVEPATHHISTORY).mid(0, length));
     });
 
-    setCurrentContext(std::make_shared<Context>(Context {torrentDescr, inParams}));
+    setCurrentContext(std::make_shared<Context>(Context{ torrentDescr, inParams }));
 }
 
 AddNewTorrentDialog::~AddNewTorrentDialog()
@@ -290,7 +270,7 @@ void AddNewTorrentDialog::saveState()
     if (!m_currentContext) [[unlikely]]
         return;
 
-    const BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    const BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     const bool hasMetadata = torrentDescr.info().has_value();
 
     m_storeDialogSize = size();
@@ -299,7 +279,7 @@ void AddNewTorrentDialog::saveState()
         m_storeTreeHeaderState = m_ui->contentTreeView->header()->saveState();
 }
 
-void AddNewTorrentDialog::showEvent(QShowEvent *event)
+void AddNewTorrentDialog::showEvent(QShowEvent* event)
 {
     QDialog::showEvent(event);
     if (!Preferences::instance()->isAddNewTorrentDialogTopLevel())
@@ -317,13 +297,13 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
 
     m_currentContext = context;
 
-    const QSignalBlocker comboTMMSignalBlocker {m_ui->comboTMM};
-    const QSignalBlocker startTorrentCheckBoxSignalBlocker {m_ui->startTorrentCheckBox};
-    const QSignalBlocker contentLayoutComboBoxSignalBlocker {m_ui->contentLayoutComboBox};
-    const QSignalBlocker categoryComboBoxSignalBlocker {m_ui->categoryComboBox};
+    const QSignalBlocker comboTMMSignalBlocker{ m_ui->comboTMM };
+    const QSignalBlocker startTorrentCheckBoxSignalBlocker{ m_ui->startTorrentCheckBox };
+    const QSignalBlocker contentLayoutComboBoxSignalBlocker{ m_ui->contentLayoutComboBox };
+    const QSignalBlocker categoryComboBoxSignalBlocker{ m_ui->categoryComboBox };
 
-    const BitTorrent::AddTorrentParams &addTorrentParams = m_currentContext->torrentParams;
-    const auto *session = BitTorrent::Session::instance();
+    const BitTorrent::AddTorrentParams& addTorrentParams = m_currentContext->torrentParams;
+    const auto* session = BitTorrent::Session::instance();
 
     // TODO: set dialog file properties using m_torrentParams.filePriorities
 
@@ -333,7 +313,7 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
     m_ui->stopConditionLabel->setEnabled(m_ui->startTorrentCheckBox->isChecked());
     m_ui->stopConditionComboBox->setEnabled(m_ui->startTorrentCheckBox->isChecked());
     m_ui->contentLayoutComboBox->setCurrentIndex(
-            static_cast<int>(addTorrentParams.contentLayout.value_or(session->torrentContentLayout())));
+        static_cast<int>(addTorrentParams.contentLayout.value_or(session->torrentContentLayout())));
     m_ui->sequentialCheckBox->setChecked(addTorrentParams.sequential);
     m_ui->firstLastCheckBox->setChecked(addTorrentParams.firstLastPiecePriority);
     m_ui->seedModeCheckBox->setChecked(addTorrentParams.seedMode);
@@ -350,7 +330,7 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
         m_ui->categoryComboBox->addItem(defaultCategory);
     m_ui->categoryComboBox->addItem(u""_s);
 
-    for (const QString &category : asConst(categories))
+    for (const QString& category : asConst(categories))
     {
         if ((category != defaultCategory) && (category != addTorrentParams.category))
             m_ui->categoryComboBox->addItem(category);
@@ -365,7 +345,7 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
     else
         m_ui->categoryComboBox->setFocus();
 
-    const BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    const BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     const BitTorrent::InfoHash infoHash = torrentDescr.infoHash();
     const bool hasMetadata = torrentDescr.info().has_value();
 
@@ -416,7 +396,7 @@ void AddNewTorrentDialog::updateCurrentContext()
     if (!m_currentContext) [[unlikely]]
         return;
 
-    BitTorrent::AddTorrentParams &addTorrentParams = m_currentContext->torrentParams;
+    BitTorrent::AddTorrentParams& addTorrentParams = m_currentContext->torrentParams;
 
     addTorrentParams.seedMode = m_ui->seedModeCheckBox->isChecked();
 
@@ -470,7 +450,7 @@ void AddNewTorrentDialog::updateDiskSpaceLabel()
     if (!m_currentContext) [[unlikely]]
         return;
 
-    const BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    const BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     const bool hasMetadata = torrentDescr.info().has_value();
 
     // Determine torrent size
@@ -478,7 +458,7 @@ void AddNewTorrentDialog::updateDiskSpaceLabel()
     if (hasMetadata)
     {
         const auto torrentInfo = *torrentDescr.info();
-        const QList<BitTorrent::DownloadPriority> &priorities = m_contentAdaptor->filePriorities();
+        const QList<BitTorrent::DownloadPriority>& priorities = m_contentAdaptor->filePriorities();
         Q_ASSERT(priorities.size() == torrentInfo.filesCount());
         for (qsizetype i = 0; i < priorities.size(); ++i)
         {
@@ -488,20 +468,18 @@ void AddNewTorrentDialog::updateDiskSpaceLabel()
     }
 
     const QString freeSpace = Utils::Misc::friendlyUnit(Utils::Fs::freeDiskSpaceOnPath(m_ui->savePath->selectedPath()));
-    const QString sizeString = tr("%1 (Free space on disk: %2)").arg(
-        ((torrentSize > 0) ? Utils::Misc::friendlyUnit(torrentSize) : tr("Not available", "This size is unavailable."))
-        , freeSpace);
+    const QString sizeString = tr("%1 (Free space on disk: %2)").arg(((torrentSize > 0) ? Utils::Misc::friendlyUnit(torrentSize) : tr("Not available", "This size is unavailable.")), freeSpace);
     m_ui->labelSizeData->setText(sizeString);
 }
 
-void AddNewTorrentDialog::onSavePathChanged([[maybe_unused]] const Path &newPath)
+void AddNewTorrentDialog::onSavePathChanged([[maybe_unused]] const Path& newPath)
 {
     // Remember index
     m_savePathIndex = m_ui->savePath->currentIndex();
     updateDiskSpaceLabel();
 }
 
-void AddNewTorrentDialog::onDownloadPathChanged([[maybe_unused]] const Path &newPath)
+void AddNewTorrentDialog::onDownloadPathChanged([[maybe_unused]] const Path& newPath)
 {
     // Remember index
     const int currentPathIndex = m_ui->downloadPath->currentIndex();
@@ -519,7 +497,7 @@ void AddNewTorrentDialog::categoryChanged([[maybe_unused]] const int index)
 {
     if (m_ui->comboTMM->currentIndex() == 1)
     {
-        const auto *btSession = BitTorrent::Session::instance();
+        const auto* btSession = BitTorrent::Session::instance();
         const QString categoryName = m_ui->categoryComboBox->currentText();
 
         const Path savePath = btSession->categorySavePath(categoryName);
@@ -540,7 +518,7 @@ void AddNewTorrentDialog::contentLayoutChanged()
     if (!m_currentContext) [[unlikely]]
         return;
 
-    const BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    const BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     const bool hasMetadata = torrentDescr.info().has_value();
 
     if (!hasMetadata)
@@ -556,7 +534,7 @@ void AddNewTorrentDialog::saveTorrentFile()
     if (!m_currentContext) [[unlikely]]
         return;
 
-    const BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    const BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     const bool hasMetadata = torrentDescr.info().has_value();
 
     Q_ASSERT(hasMetadata);
@@ -565,11 +543,9 @@ void AddNewTorrentDialog::saveTorrentFile()
 
     const auto torrentInfo = *torrentDescr.info();
 
-    const QString filter {tr("Torrent file (*%1)").arg(TORRENT_FILE_EXTENSION)};
+    const QString filter{ tr("Torrent file (*%1)").arg(TORRENT_FILE_EXTENSION) };
 
-    Path path {QFileDialog::getSaveFileName(this, tr("Save as torrent file")
-            , QDir::home().absoluteFilePath(torrentInfo.name() + TORRENT_FILE_EXTENSION)
-            , filter)};
+    Path path{ QFileDialog::getSaveFileName(this, tr("Save as torrent file"), QDir::home().absoluteFilePath(torrentInfo.name() + TORRENT_FILE_EXTENSION), filter) };
     if (path.isEmpty())
         return;
 
@@ -578,18 +554,16 @@ void AddNewTorrentDialog::saveTorrentFile()
 
     if (const auto result = torrentDescr.saveToFile(path); !result)
     {
-        QMessageBox::critical(this, tr("I/O Error")
-                , tr("Couldn't export torrent metadata file '%1'. Reason: %2.").arg(path.toString(), result.error()));
+        QMessageBox::critical(this, tr("I/O Error"), tr("Couldn't export torrent metadata file '%1'. Reason: %2.").arg(path.toString(), result.error()));
     }
 }
 
 void AddNewTorrentDialog::showContentFilterContextMenu()
 {
-    QMenu *menu = m_filterLine->createStandardContextMenu();
+    QMenu* menu = m_filterLine->createStandardContextMenu();
 
-    auto *formatMenu = new FilterPatternFormatMenu(m_storeFilterPatternFormat.get(FilterPatternFormat::Wildcards), menu);
-    connect(formatMenu, &FilterPatternFormatMenu::patternFormatChanged, this, [this](const FilterPatternFormat format)
-    {
+    auto* formatMenu = new FilterPatternFormatMenu(m_storeFilterPatternFormat.get(FilterPatternFormat::Wildcards), menu);
+    connect(formatMenu, &FilterPatternFormatMenu::patternFormatChanged, this, [this](const FilterPatternFormat format) {
         m_storeFilterPatternFormat = format;
         setContentFilterPattern();
     });
@@ -611,15 +585,15 @@ void AddNewTorrentDialog::populateSavePaths()
     if (!m_currentContext) [[unlikely]]
         return;
 
-    const BitTorrent::AddTorrentParams &addTorrentParams = m_currentContext->torrentParams;
-    const auto *btSession = BitTorrent::Session::instance();
+    const BitTorrent::AddTorrentParams& addTorrentParams = m_currentContext->torrentParams;
+    const auto* btSession = BitTorrent::Session::instance();
 
     m_ui->savePath->blockSignals(true);
     m_ui->savePath->clear();
     const auto savePathHistory = settings()->loadValue<QStringList>(KEY_SAVEPATHHISTORY);
     if (savePathHistory.size() > 0)
     {
-        for (const QString &path : savePathHistory)
+        for (const QString& path : savePathHistory)
             m_ui->savePath->addItem(Path(path));
     }
     else
@@ -650,7 +624,7 @@ void AddNewTorrentDialog::populateSavePaths()
     const auto downloadPathHistory = settings()->loadValue<QStringList>(KEY_DOWNLOADPATHHISTORY);
     if (downloadPathHistory.size() > 0)
     {
-        for (const QString &path : downloadPathHistory)
+        for (const QString& path : downloadPathHistory)
             m_ui->downloadPath->addItem(Path(path));
     }
     else
@@ -714,7 +688,7 @@ void AddNewTorrentDialog::reject()
 
     emit torrentRejected(m_currentContext->torrentDescr);
 
-    const BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    const BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     const bool hasMetadata = torrentDescr.info().has_value();
     if (!hasMetadata)
     {
@@ -731,7 +705,7 @@ void AddNewTorrentDialog::done(const int result)
     QDialog::done(result);
 }
 
-void AddNewTorrentDialog::updateMetadata(const BitTorrent::TorrentInfo &metadata)
+void AddNewTorrentDialog::updateMetadata(const BitTorrent::TorrentInfo& metadata)
 {
     Q_ASSERT(m_currentContext);
     if (!m_currentContext) [[unlikely]]
@@ -741,7 +715,7 @@ void AddNewTorrentDialog::updateMetadata(const BitTorrent::TorrentInfo &metadata
     if (!metadata.isValid()) [[unlikely]]
         return;
 
-    BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     if (torrentDescr.info())
         return;
 
@@ -756,14 +730,13 @@ void AddNewTorrentDialog::updateMetadata(const BitTorrent::TorrentInfo &metadata
     setupTreeview();
     setMetadataProgressIndicator(false, tr("Metadata retrieval complete"));
 
-    if (const auto stopCondition = m_ui->stopConditionComboBox->currentData().value<BitTorrent::Torrent::StopCondition>()
-            ; stopCondition == BitTorrent::Torrent::StopCondition::MetadataReceived)
+    if (const auto stopCondition = m_ui->stopConditionComboBox->currentData().value<BitTorrent::Torrent::StopCondition>(); stopCondition == BitTorrent::Torrent::StopCondition::MetadataReceived)
     {
         m_ui->startTorrentCheckBox->setChecked(false);
 
         const auto index = m_ui->stopConditionComboBox->currentIndex();
         m_ui->stopConditionComboBox->setCurrentIndex(m_ui->stopConditionComboBox->findData(
-                QVariant::fromValue(BitTorrent::Torrent::StopCondition::None)));
+            QVariant::fromValue(BitTorrent::Torrent::StopCondition::None)));
         m_ui->stopConditionComboBox->removeItem(index);
     }
 
@@ -775,7 +748,7 @@ void AddNewTorrentDialog::updateMetadata(const BitTorrent::TorrentInfo &metadata
     }
 }
 
-void AddNewTorrentDialog::setMetadataProgressIndicator(bool visibleIndicator, const QString &labelText)
+void AddNewTorrentDialog::setMetadataProgressIndicator(bool visibleIndicator, const QString& labelText)
 {
     // Always show info label when waiting for metadata
     m_ui->lblMetaLoading->setVisible(true);
@@ -789,7 +762,7 @@ void AddNewTorrentDialog::setupTreeview()
     if (!m_currentContext) [[unlikely]]
         return;
 
-    const BitTorrent::TorrentDescriptor &torrentDescr = m_currentContext->torrentDescr;
+    const BitTorrent::TorrentDescriptor& torrentDescr = m_currentContext->torrentDescr;
     const bool hasMetadata = torrentDescr.info().has_value();
 
     Q_ASSERT(hasMetadata);
@@ -803,9 +776,9 @@ void AddNewTorrentDialog::setupTreeview()
     m_ui->labelCommentData->setText(Utils::Misc::parseHtmlLinks(torrentDescr.comment().toHtmlEscaped()));
     m_ui->labelDateData->setText(!torrentDescr.creationDate().isNull() ? QLocale().toString(torrentDescr.creationDate(), QLocale::ShortFormat) : tr("Not available"));
 
-    const auto &torrentInfo = *torrentDescr.info();
+    const auto& torrentInfo = *torrentDescr.info();
 
-    BitTorrent::AddTorrentParams &addTorrentParams = m_currentContext->torrentParams;
+    BitTorrent::AddTorrentParams& addTorrentParams = m_currentContext->torrentParams;
     if (addTorrentParams.filePaths.isEmpty())
         addTorrentParams.filePaths = torrentInfo.filePaths();
 
@@ -830,8 +803,7 @@ void AddNewTorrentDialog::setupTreeview()
         }
     }
 
-    m_contentAdaptor = std::make_unique<TorrentContentAdaptor>(torrentInfo, addTorrentParams.filePaths
-            , addTorrentParams.filePriorities, [this] { updateDiskSpaceLabel(); });
+    m_contentAdaptor = std::make_unique<TorrentContentAdaptor>(torrentInfo, addTorrentParams.filePaths, addTorrentParams.filePriorities, [this] { updateDiskSpaceLabel(); });
 
     const auto contentLayout = static_cast<BitTorrent::TorrentContentLayout>(m_ui->contentLayoutComboBox->currentIndex());
     m_contentAdaptor->applyContentLayout(contentLayout);
@@ -860,7 +832,7 @@ void AddNewTorrentDialog::TMMChanged(int index)
     }
     else
     {
-        const auto *session = BitTorrent::Session::instance();
+        const auto* session = BitTorrent::Session::instance();
 
         m_ui->groupBoxSavePath->setEnabled(false);
 
@@ -881,19 +853,15 @@ void AddNewTorrentDialog::TMMChanged(int index)
     updateDiskSpaceLabel();
 }
 
-AddNewTorrentDialog::TorrentContentAdaptor::TorrentContentAdaptor(const BitTorrent::TorrentInfo &torrentInfo
-        , PathList &filePaths, QList<BitTorrent::DownloadPriority> &filePriorities, std::function<void ()> onFilePrioritiesChanged)
-    : m_torrentInfo {torrentInfo}
-    , m_filePaths {filePaths}
-    , m_filePriorities {filePriorities}
-    , m_onFilePrioritiesChanged {std::move(onFilePrioritiesChanged)}
+AddNewTorrentDialog::TorrentContentAdaptor::TorrentContentAdaptor(const BitTorrent::TorrentInfo& torrentInfo, PathList& filePaths, QList<BitTorrent::DownloadPriority>& filePriorities, std::function<void()> onFilePrioritiesChanged)
+    : m_torrentInfo{ torrentInfo }, m_filePaths{ filePaths }, m_filePriorities{ filePriorities }, m_onFilePrioritiesChanged{ std::move(onFilePrioritiesChanged) }
 {
     Q_ASSERT(filePaths.isEmpty() || (filePaths.size() == m_torrentInfo.filesCount()));
 
     m_originalRootFolder = Path::findRootFolder(m_torrentInfo.filePaths());
     m_currentContentLayout = (m_originalRootFolder.isEmpty()
-            ? BitTorrent::TorrentContentLayout::NoSubfolder
-            : BitTorrent::TorrentContentLayout::Subfolder);
+                                  ? BitTorrent::TorrentContentLayout::NoSubfolder
+                                  : BitTorrent::TorrentContentLayout::Subfolder);
 
     if (const int fileCount = filesCount(); !m_filePriorities.isEmpty() && (fileCount >= 0))
         m_filePriorities.resize(fileCount, BitTorrent::DownloadPriority::Normal);
@@ -929,8 +897,8 @@ PathList AddNewTorrentDialog::TorrentContentAdaptor::filePaths() const
 QList<BitTorrent::DownloadPriority> AddNewTorrentDialog::TorrentContentAdaptor::filePriorities() const
 {
     return m_filePriorities.isEmpty()
-            ? QList<BitTorrent::DownloadPriority>(filesCount(), BitTorrent::DownloadPriority::Normal)
-            : m_filePriorities;
+               ? QList<BitTorrent::DownloadPriority>(filesCount(), BitTorrent::DownloadPriority::Normal)
+               : m_filePriorities;
 }
 
 QList<qreal> AddNewTorrentDialog::TorrentContentAdaptor::filesProgress() const
@@ -938,7 +906,7 @@ QList<qreal> AddNewTorrentDialog::TorrentContentAdaptor::filesProgress() const
     return QList<qreal>(filesCount(), 0);
 }
 
-QFuture<QList<qreal> > AddNewTorrentDialog::TorrentContentAdaptor::fetchAvailableFileFractions() const
+QFuture<QList<qreal>> AddNewTorrentDialog::TorrentContentAdaptor::fetchAvailableFileFractions() const
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 6, 0))
     return QtFuture::makeReadyValueFuture(QList<qreal>(filesCount(), 0));
@@ -961,7 +929,7 @@ void AddNewTorrentDialog::TorrentContentAdaptor::flushCache() const
 {
 }
 
-void AddNewTorrentDialog::TorrentContentAdaptor::renameFile(const int index, const Path &newFilePath)
+void AddNewTorrentDialog::TorrentContentAdaptor::renameFile(const int index, const Path& newFilePath)
 {
     Q_ASSERT((index >= 0) && (index < filesCount()));
     if (!((index >= 0) && (index < filesCount()))) [[unlikely]]
@@ -984,10 +952,11 @@ void AddNewTorrentDialog::TorrentContentAdaptor::applyContentLayout(const BitTor
     Q_ASSERT(!m_filePaths.isEmpty());
 
     const auto originalContentLayout = (m_originalRootFolder.isEmpty()
-            ? BitTorrent::TorrentContentLayout::NoSubfolder
-            : BitTorrent::TorrentContentLayout::Subfolder);
+                                            ? BitTorrent::TorrentContentLayout::NoSubfolder
+                                            : BitTorrent::TorrentContentLayout::Subfolder);
     const auto newContentLayout = ((contentLayout == BitTorrent::TorrentContentLayout::Original)
-            ? originalContentLayout : contentLayout);
+                                       ? originalContentLayout
+                                       : contentLayout);
     if (newContentLayout != m_currentContentLayout)
     {
         const PathList oldFilePaths = m_filePaths;
@@ -999,7 +968,8 @@ void AddNewTorrentDialog::TorrentContentAdaptor::applyContentLayout(const BitTor
         else
         {
             const auto rootFolder = ((originalContentLayout == BitTorrent::TorrentContentLayout::Subfolder)
-                    ? m_originalRootFolder : m_filePaths.at(0).removedExtension());
+                                         ? m_originalRootFolder
+                                         : m_filePaths.at(0).removedExtension());
             Path::addRootFolder(m_filePaths, rootFolder);
         }
 
@@ -1011,7 +981,7 @@ void AddNewTorrentDialog::TorrentContentAdaptor::applyContentLayout(const BitTor
     }
 }
 
-void AddNewTorrentDialog::TorrentContentAdaptor::prioritizeFiles(const QList<BitTorrent::DownloadPriority> &priorities)
+void AddNewTorrentDialog::TorrentContentAdaptor::prioritizeFiles(const QList<BitTorrent::DownloadPriority>& priorities)
 {
     Q_ASSERT(priorities.size() == filesCount());
     m_filePriorities = priorities;
@@ -1019,7 +989,7 @@ void AddNewTorrentDialog::TorrentContentAdaptor::prioritizeFiles(const QList<Bit
         m_onFilePrioritiesChanged();
 }
 
-void AddNewTorrentDialog::TorrentContentAdaptor::doRenameFile(const int index, const Path &newFilePath)
+void AddNewTorrentDialog::TorrentContentAdaptor::doRenameFile(const int index, const Path& newFilePath)
 {
     if (m_filePaths.isEmpty())
         m_filePaths = m_torrentInfo.filePaths();
@@ -1027,7 +997,7 @@ void AddNewTorrentDialog::TorrentContentAdaptor::doRenameFile(const int index, c
     m_filePaths[index] = newFilePath;
 }
 
-void AddNewTorrentDialog::TorrentContentAdaptor::doRenameFolder(const Path &oldFolderPath, const Path &newFolderPath)
+void AddNewTorrentDialog::TorrentContentAdaptor::doRenameFolder(const Path& oldFolderPath, const Path& newFolderPath)
 {
     QHash<int, Path> renamedFiles;
     renamedFiles.reserve(filesCount());

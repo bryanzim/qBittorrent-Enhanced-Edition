@@ -34,8 +34,8 @@ class QButtonGroup;
 
 class PropTabBar : public QHBoxLayout
 {
-  Q_OBJECT
-  Q_DISABLE_COPY_MOVE(PropTabBar)
+    Q_OBJECT
+    Q_DISABLE_COPY_MOVE(PropTabBar)
 
 public:
     enum PropertyTab
@@ -48,7 +48,7 @@ public:
         SpeedTab
     };
 
-    explicit PropTabBar(QWidget *parent = nullptr);
+    explicit PropTabBar(QWidget* parent = nullptr);
 
     int currentIndex() const;
 
@@ -60,6 +60,6 @@ public slots:
     void setCurrentIndex(int index);
 
 private:
-    QButtonGroup *m_btnGroup = nullptr;
+    QButtonGroup* m_btnGroup = nullptr;
     int m_currentIndex = -1;
 };

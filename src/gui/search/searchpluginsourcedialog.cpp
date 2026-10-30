@@ -33,10 +33,8 @@
 
 #define SETTINGS_KEY(name) u"SearchPluginSourceDialog/" name
 
-SearchPluginSourceDialog::SearchPluginSourceDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::SearchPluginSourceDialog}
-    , m_storeDialogSize {SETTINGS_KEY(u"Size"_s)}
+SearchPluginSourceDialog::SearchPluginSourceDialog(QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::SearchPluginSourceDialog }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }
 {
     m_ui->setupUi(this);
 

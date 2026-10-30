@@ -30,13 +30,13 @@
 
 #pragma once
 
-#include <atomic>
+#include "base/path.h"
 
 #include <QObject>
 #include <QRunnable>
 #include <QStringList>
 
-#include "base/path.h"
+#include <atomic>
 
 namespace BitTorrent
 {
@@ -81,17 +81,17 @@ namespace BitTorrent
         Q_DISABLE_COPY_MOVE(TorrentCreator)
 
     public:
-        explicit TorrentCreator(const TorrentCreatorParams &params, QObject *parent = nullptr);
+        explicit TorrentCreator(const TorrentCreatorParams& params, QObject* parent = nullptr);
 
-        const TorrentCreatorParams &params() const;
+        const TorrentCreatorParams& params() const;
         bool isInterruptionRequested() const;
 
         void run() override;
 
 #ifdef QBT_USES_LIBTORRENT2
-        static int calculateTotalPieces(const Path &inputPath, int pieceSize, bool ignoreDotfiles, TorrentFormat torrentFormat);
+        static int calculateTotalPieces(const Path& inputPath, int pieceSize, bool ignoreDotfiles, TorrentFormat torrentFormat);
 #else
-        static int calculateTotalPieces(const Path &inputPath, int pieceSize, bool ignoreDotfiles, bool isAlignmentOptimized, int paddedFileSizeLimit);
+        static int calculateTotalPieces(const Path& inputPath, int pieceSize, bool ignoreDotfiles, bool isAlignmentOptimized, int paddedFileSizeLimit);
 #endif
 
     public slots:
@@ -99,8 +99,8 @@ namespace BitTorrent
 
     signals:
         void started();
-        void creationFailure(const QString &msg);
-        void creationSuccess(const TorrentCreatorResult &result);
+        void creationFailure(const QString& msg);
+        void creationSuccess(const TorrentCreatorResult& result);
         void progressUpdated(int progress);
 
     private:

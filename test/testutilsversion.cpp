@@ -26,11 +26,11 @@
  * exception statement from your version.
  */
 
-#include <QObject>
-#include <QTest>
-
 #include "base/global.h"
 #include "base/utils/version.h"
+
+#include <QObject>
+#include <QTest>
 
 class TestUtilsVersion final : public QObject
 {
@@ -78,7 +78,7 @@ private slots:
 
     void testVersionComponents() const
     {
-        const Utils::Version<1> version1 {1};
+        const Utils::Version<1> version1{ 1 };
         QCOMPARE(version1[0], 1);
         QVERIFY_THROWS_EXCEPTION(std::out_of_range, version1[1]);
         QCOMPARE(version1.majorNumber(), 1);
@@ -87,7 +87,7 @@ private slots:
         // version1.revisionNumber();
         // version1.patchNumber();
 
-        const Utils::Version<2, 1> version2 {2};
+        const Utils::Version<2, 1> version2{ 2 };
         QCOMPARE(version2[0], 2);
         QCOMPARE(version2[1], 0);
         QVERIFY_THROWS_EXCEPTION(std::out_of_range, version2[2]);
@@ -97,7 +97,7 @@ private slots:
         // version2.revisionNumber();
         // version2.patchNumber();
 
-        const Utils::Version<3, 2> version3 {3, 2};
+        const Utils::Version<3, 2> version3{ 3, 2 };
         QCOMPARE(version3[0], 3);
         QCOMPARE(version3[1], 2);
         QCOMPARE(version3[2], 0);
@@ -108,7 +108,7 @@ private slots:
         // should not compile:
         // version3.patchNumber();
 
-        const Utils::Version<4> version4 {10, 11, 12, 13};
+        const Utils::Version<4> version4{ 10, 11, 12, 13 };
         QCOMPARE(version4[0], 10);
         QCOMPARE(version4[1], 11);
         QCOMPARE(version4[2], 12);
@@ -135,7 +135,7 @@ private slots:
     void testFromString() const
     {
         using OneMandatory = Utils::Version<2, 1>;
-        const OneMandatory default1 {10, 11};
+        const OneMandatory default1{ 10, 11 };
         QCOMPARE(OneMandatory::fromString(u"1"_s, default1), OneMandatory(1));
         QCOMPARE(OneMandatory::fromString(u"1.2"_s, default1), OneMandatory(1, 2));
         QCOMPARE(OneMandatory::fromString(u"100.2000"_s, default1), OneMandatory(100, 2000));
@@ -149,7 +149,7 @@ private slots:
         QCOMPARE(OneMandatory::fromString(u"random_string"_s, default1), default1);
 
         using FourDigits = Utils::Version<4, 3>;
-        const FourDigits default2 {10, 11, 12, 13};
+        const FourDigits default2{ 10, 11, 12, 13 };
         QCOMPARE(FourDigits::fromString(u"1"_s, default2), default2);
         QCOMPARE(FourDigits::fromString(u"1.2"_s), FourDigits());
         QCOMPARE(FourDigits::fromString(u"1.2.3"_s), FourDigits(1, 2, 3));

@@ -28,20 +28,21 @@
 
 #include "tristateaction.h"
 
+#include "tristatewidget.h"
+
 #include <QString>
 #include <QWidget>
 
-#include "tristatewidget.h"
-
-TriStateAction::TriStateAction(const QString &text, QWidget *parent)
-    : QWidgetAction {parent}
-    , m_triStateWidget {new TriStateWidget {text, parent}}
+TriStateAction::TriStateAction(const QString& text, QWidget* parent)
+    : QWidgetAction{
+          parent
+},
+      m_triStateWidget{ new TriStateWidget{ text, parent } }
 {
     setCheckable(true);
 
     // required for QAction::setChecked(bool) to work
-    connect(this, &QAction::toggled, this, [this](const bool checked)
-    {
+    connect(this, &QAction::toggled, this, [this](const bool checked) {
         m_triStateWidget->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
     });
 

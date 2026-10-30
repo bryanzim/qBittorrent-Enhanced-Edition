@@ -28,14 +28,14 @@
 
 #pragma once
 
-#include <optional>
+#include "base/bittorrent/infohash.h"
+#include "base/bittorrent/torrentannouncestatus.h"
+#include "base/tag.h"
 
 #include <QSet>
 #include <QString>
 
-#include "base/bittorrent/infohash.h"
-#include "base/bittorrent/torrentannouncestatus.h"
-#include "base/tag.h"
+#include <optional>
 
 namespace BitTorrent
 {
@@ -76,33 +76,27 @@ public:
 
     TorrentFilter() = default;
     // category & tags: pass empty string for uncategorized / untagged torrents.
-    TorrentFilter(Status status
-            , const std::optional<TorrentIDSet> &idSet = AnyID
-            , const std::optional<QString> &category = AnyCategory
-            , const std::optional<Tag> &tag = AnyTag
-            , const std::optional<bool> &isPrivate = {}
-            , const std::optional<QString> &trackerHost = AnyTrackerHost
-            , const std::optional<BitTorrent::TorrentAnnounceStatus> &announceStatus = AnyAnnounceStatus);
+    TorrentFilter(Status status, const std::optional<TorrentIDSet>& idSet = AnyID, const std::optional<QString>& category = AnyCategory, const std::optional<Tag>& tag = AnyTag, const std::optional<bool>& isPrivate = {}, const std::optional<QString>& trackerHost = AnyTrackerHost, const std::optional<BitTorrent::TorrentAnnounceStatus>& announceStatus = AnyAnnounceStatus);
 
     bool setStatus(Status status);
-    bool setTorrentIDSet(const std::optional<TorrentIDSet> &idSet);
-    bool setCategory(const std::optional<QString> &category);
-    bool setTag(const std::optional<Tag> &tag);
+    bool setTorrentIDSet(const std::optional<TorrentIDSet>& idSet);
+    bool setCategory(const std::optional<QString>& category);
+    bool setTag(const std::optional<Tag>& tag);
     bool setPrivate(std::optional<bool> isPrivate);
-    bool setTrackerHost(const std::optional<QString> &trackerHost);
-    bool setAnnounceStatus(const std::optional<BitTorrent::TorrentAnnounceStatus> &announceStatus);
+    bool setTrackerHost(const std::optional<QString>& trackerHost);
+    bool setAnnounceStatus(const std::optional<BitTorrent::TorrentAnnounceStatus>& announceStatus);
 
-    bool match(const BitTorrent::Torrent *torrent) const;
+    bool match(const BitTorrent::Torrent* torrent) const;
 
 private:
-    bool matchStatus(const BitTorrent::Torrent *torrent) const;
-    bool matchHash(const BitTorrent::Torrent *torrent) const;
-    bool matchCategory(const BitTorrent::Torrent *torrent) const;
-    bool matchTag(const BitTorrent::Torrent *torrent) const;
-    bool matchPrivate(const BitTorrent::Torrent *torrent) const;
-    bool matchTracker(const BitTorrent::Torrent *torrent) const;
+    bool matchStatus(const BitTorrent::Torrent* torrent) const;
+    bool matchHash(const BitTorrent::Torrent* torrent) const;
+    bool matchCategory(const BitTorrent::Torrent* torrent) const;
+    bool matchTag(const BitTorrent::Torrent* torrent) const;
+    bool matchPrivate(const BitTorrent::Torrent* torrent) const;
+    bool matchTracker(const BitTorrent::Torrent* torrent) const;
 
-    Status m_status {All};
+    Status m_status{ All };
     std::optional<QString> m_category;
     std::optional<Tag> m_tag;
     std::optional<TorrentIDSet> m_idSet;
@@ -111,4 +105,4 @@ private:
     std::optional<BitTorrent::TorrentAnnounceStatus> m_announceStatus;
 };
 
-QString getTrackerHost(const QString &url);
+QString getTrackerHost(const QString& url);

@@ -29,7 +29,7 @@
 
 #include "tagset.h"
 
-bool TagLessThan::operator()(const Tag &left, const Tag &right) const
+bool TagLessThan::operator()(const Tag& left, const Tag& right) const
 {
     const int result = m_compare(left.toString(), right.toString());
     if (result != 0)

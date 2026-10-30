@@ -28,18 +28,17 @@
 
 #include "resumedatastorage.h"
 
-#include <utility>
-
 #include <QList>
 #include <QMetaObject>
 #include <QMutexLocker>
 #include <QThread>
 
+#include <utility>
+
 const int TORRENTIDLIST_TYPEID = qRegisterMetaType<QList<BitTorrent::TorrentID>>();
 
-BitTorrent::ResumeDataStorage::ResumeDataStorage(const Path &path, QObject *parent)
-    : QObject(parent)
-    , m_path {path}
+BitTorrent::ResumeDataStorage::ResumeDataStorage(const Path& path, QObject* parent)
+    : QObject(parent), m_path{ path }
 {
 }
 
@@ -52,8 +51,7 @@ void BitTorrent::ResumeDataStorage::loadAll() const
 {
     m_loadedResumeData.reserve(1024);
 
-    auto *loadingThread = QThread::create([this]()
-    {
+    auto* loadingThread = QThread::create([this]() {
         doLoadAll();
     });
     loadingThread->setObjectName("ResumeDataStorage::loadAll loadingThread");
@@ -63,7 +61,7 @@ void BitTorrent::ResumeDataStorage::loadAll() const
 
 QList<BitTorrent::LoadedResumeData> BitTorrent::ResumeDataStorage::fetchLoadedResumeData() const
 {
-    const QMutexLocker locker {&m_loadedResumeDataMutex};
+    const QMutexLocker locker{ &m_loadedResumeDataMutex };
 
     const QList<BitTorrent::LoadedResumeData> loadedResumeData = m_loadedResumeData;
     m_loadedResumeData.clear();
@@ -71,8 +69,8 @@ QList<BitTorrent::LoadedResumeData> BitTorrent::ResumeDataStorage::fetchLoadedRe
     return loadedResumeData;
 }
 
-void BitTorrent::ResumeDataStorage::onResumeDataLoaded(const TorrentID &torrentID, LoadResumeDataResult loadResumeDataResult) const
+void BitTorrent::ResumeDataStorage::onResumeDataLoaded(const TorrentID& torrentID, LoadResumeDataResult loadResumeDataResult) const
 {
-    const QMutexLocker locker {&m_loadedResumeDataMutex};
-    m_loadedResumeData.append({.torrentID = torrentID, .result = std::move(loadResumeDataResult)});
+    const QMutexLocker locker{ &m_loadedResumeDataMutex };
+    m_loadedResumeData.append({ .torrentID = torrentID, .result = std::move(loadResumeDataResult) });
 }

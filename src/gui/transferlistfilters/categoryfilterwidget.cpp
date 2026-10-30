@@ -28,19 +28,19 @@
 
 #include "categoryfilterwidget.h"
 
-#include <QMenu>
-
 #include "base/bittorrent/session.h"
 #include "base/global.h"
+#include "categoryfiltermodel.h"
+#include "categoryfilterproxymodel.h"
 #include "gui/torrentcategorydialog.h"
 #include "gui/uithememanager.h"
 #include "gui/utils.h"
-#include "categoryfiltermodel.h"
-#include "categoryfilterproxymodel.h"
+
+#include <QMenu>
 
 namespace
 {
-    QString getCategoryFilter(const CategoryFilterProxyModel *const model, const QModelIndex &index)
+    QString getCategoryFilter(const CategoryFilterProxyModel* const model, const QModelIndex& index)
     {
         QString categoryFilter; // Defaults to All
         if (index.isValid())
@@ -55,10 +55,10 @@ namespace
     }
 }
 
-CategoryFilterWidget::CategoryFilterWidget(QWidget *parent)
+CategoryFilterWidget::CategoryFilterWidget(QWidget* parent)
     : QTreeView(parent)
 {
-    auto *proxyModel = new CategoryFilterProxyModel(this);
+    auto* proxyModel = new CategoryFilterProxyModel(this);
     proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
     proxyModel->setSourceModel(new CategoryFilterModel(this));
     setModel(proxyModel);
@@ -79,15 +79,12 @@ CategoryFilterWidget::CategoryFilterWidget(QWidget *parent)
     connect(this, &QTreeView::collapsed, this, &CategoryFilterWidget::callUpdateGeometry);
     connect(this, &QTreeView::expanded, this, &CategoryFilterWidget::callUpdateGeometry);
     connect(this, &QWidget::customContextMenuRequested, this, &CategoryFilterWidget::showMenu);
-    connect(selectionModel(), &QItemSelectionModel::currentRowChanged
-            , this, &CategoryFilterWidget::onCurrentRowChanged);
-    connect(model(), &QAbstractItemModel::rowsRemoved, this, [this]
-    {
+    connect(selectionModel(), &QItemSelectionModel::currentRowChanged, this, &CategoryFilterWidget::onCurrentRowChanged);
+    connect(model(), &QAbstractItemModel::rowsRemoved, this, [this] {
         adjustIndentation();
         updateGeometry();
     });
-    connect(model(), &QAbstractItemModel::modelReset, this, [this]
-    {
+    connect(model(), &QAbstractItemModel::modelReset, this, [this] {
         adjustIndentation();
         updateGeometry();
     });
@@ -102,44 +99,35 @@ QString CategoryFilterWidget::currentCategory() const
     if (!selectedRows.isEmpty())
         current = selectedRows.first();
 
-    return getCategoryFilter(static_cast<CategoryFilterProxyModel *>(model()), current);
+    return getCategoryFilter(static_cast<CategoryFilterProxyModel*>(model()), current);
 }
 
-void CategoryFilterWidget::onCurrentRowChanged(const QModelIndex &current, [[maybe_unused]] const QModelIndex &previous)
+void CategoryFilterWidget::onCurrentRowChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
-    emit categoryChanged(getCategoryFilter(static_cast<CategoryFilterProxyModel *>(model()), current));
+    emit categoryChanged(getCategoryFilter(static_cast<CategoryFilterProxyModel*>(model()), current));
 }
 
 void CategoryFilterWidget::showMenu()
 {
-    QMenu *menu = new QMenu(this);
+    QMenu* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"list-add"_s), tr("Add category...")
-        , this, &CategoryFilterWidget::addCategory);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"list-add"_s), tr("Add category..."), this, &CategoryFilterWidget::addCategory);
 
     const auto selectedRows = selectionModel()->selectedRows();
     if (!selectedRows.empty() && !CategoryFilterModel::isSpecialItem(selectedRows.first()))
     {
-        menu->addAction(UIThemeManager::instance()->getIcon(u"list-add"_s), tr("Add subcategory...")
-            , this, &CategoryFilterWidget::addSubcategory);
-        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-rename"_s, u"document-edit"_s), tr("Edit category...")
-            , this, &CategoryFilterWidget::editCategory);
-        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove category")
-            , this, &CategoryFilterWidget::removeCategory);
+        menu->addAction(UIThemeManager::instance()->getIcon(u"list-add"_s), tr("Add subcategory..."), this, &CategoryFilterWidget::addSubcategory);
+        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-rename"_s, u"document-edit"_s), tr("Edit category..."), this, &CategoryFilterWidget::editCategory);
+        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove category"), this, &CategoryFilterWidget::removeCategory);
     }
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove unused categories")
-        , this, &CategoryFilterWidget::removeUnusedCategories);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s, u"list-remove"_s), tr("Remove unused categories"), this, &CategoryFilterWidget::removeUnusedCategories);
     menu->addSeparator();
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents")
-        , this, &CategoryFilterWidget::actionStartTorrentsTriggered);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents")
-        , this, &CategoryFilterWidget::actionForceStartTorrentsTriggered);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents")
-        , this, &CategoryFilterWidget::actionStopTorrentsTriggered);
-    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents")
-        , this, &CategoryFilterWidget::actionDeleteTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start"_s, u"media-playback-start"_s), tr("Start torrents"), this, &CategoryFilterWidget::actionStartTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-start-forced"_s, u"media-playback-start"_s), tr("Force start torrents"), this, &CategoryFilterWidget::actionForceStartTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"torrent-stop"_s, u"media-playback-pause"_s), tr("Stop torrents"), this, &CategoryFilterWidget::actionStopTorrentsTriggered);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"list-remove"_s), tr("Remove torrents"), this, &CategoryFilterWidget::actionDeleteTorrentsTriggered);
 
     menu->popup(QCursor::pos());
 }
@@ -154,9 +142,8 @@ QSize CategoryFilterWidget::sizeHint() const
     // The sizeHint must depend on viewportSizeHint,
     // otherwise widget will not correctly adjust the
     // size when subcategories are used.
-    const QSize viewportSize {viewportSizeHint()};
-    return
-    {
+    const QSize viewportSize{ viewportSizeHint() };
+    return {
         viewportSize.width(),
         viewportSize.height() + static_cast<int>(0.5 * sizeHintForRow(0))
     };
@@ -169,7 +156,7 @@ QSize CategoryFilterWidget::minimumSizeHint() const
     return size;
 }
 
-void CategoryFilterWidget::rowsInserted(const QModelIndex &parent, const int start, const int end)
+void CategoryFilterWidget::rowsInserted(const QModelIndex& parent, const int start, const int end)
 {
     QTreeView::rowsInserted(parent, start, end);
 
@@ -229,17 +216,17 @@ void CategoryFilterWidget::removeCategory()
     if (!selectedRows.empty() && !CategoryFilterModel::isSpecialItem(selectedRows.first()))
     {
         BitTorrent::Session::instance()->removeCategory(
-                    static_cast<CategoryFilterProxyModel *>(model())->categoryName(selectedRows.first()));
+            static_cast<CategoryFilterProxyModel*>(model())->categoryName(selectedRows.first()));
         updateGeometry();
     }
 }
 
 void CategoryFilterWidget::removeUnusedCategories()
 {
-    auto *session = BitTorrent::Session::instance();
-    for (const QString &category : asConst(session->categories()))
+    auto* session = BitTorrent::Session::instance();
+    for (const QString& category : asConst(session->categories()))
     {
-        if (model()->data(static_cast<CategoryFilterProxyModel *>(model())->index(category), Qt::UserRole) == 0)
+        if (model()->data(static_cast<CategoryFilterProxyModel*>(model())->index(category), Qt::UserRole) == 0)
             session->removeCategory(category);
     }
     updateGeometry();

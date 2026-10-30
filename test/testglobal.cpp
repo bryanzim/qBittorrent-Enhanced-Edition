@@ -26,13 +26,13 @@
  * exception statement from your version.
  */
 
-#include <type_traits>
+#include "base/global.h"
 
 #include <QList>
 #include <QObject>
 #include <QTest>
 
-#include "base/global.h"
+#include <type_traits>
 
 class TestGlobal final : public QObject
 {
@@ -46,7 +46,7 @@ private slots:
     void testAsConst() const
     {
         {
-            QList<int> list = {0, 1, 2};
+            QList<int> list = { 0, 1, 2 };
 
             static_assert(std::is_const_v<std::remove_reference_t<decltype(asConst(list))>>);
             QCOMPARE(list, asConst(list));
@@ -54,14 +54,14 @@ private slots:
         }
 
         {
-            const QList<int> list = {0, 1, 2};
+            const QList<int> list = { 0, 1, 2 };
 
             static_assert(std::is_const_v<std::remove_reference_t<decltype(asConst(list))>>);
             QCOMPARE(list, asConst(list));
             QCOMPARE(list, asConst(QList<int>(list)));
 
             // should not compile:
-            //asConst(std::move(list));
+            // asConst(std::move(list));
         }
     }
 };

@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include <QSortFilterProxyModel>
-
 #include "base/settingvalue.h"
 #include "base/torrentfilter.h"
 #include "base/utils/compare.h"
+
+#include <QSortFilterProxyModel>
 
 namespace BitTorrent
 {
@@ -45,24 +45,24 @@ class TransferListSortModel final : public QSortFilterProxyModel
     Q_DISABLE_COPY_MOVE(TransferListSortModel)
 
 public:
-    explicit TransferListSortModel(QObject *parent = nullptr);
+    explicit TransferListSortModel(QObject* parent = nullptr);
 
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
     void setStatusFilter(TorrentFilter::Status status);
-    void setCategoryFilter(const QString &category);
+    void setCategoryFilter(const QString& category);
     void disableCategoryFilter();
-    void setTagFilter(const Tag &tag);
+    void setTagFilter(const Tag& tag);
     void disableTagFilter();
-    void setTrackerFilter(const std::optional<QString> &trackerHost);
-    void setAnnounceStatusFilter(const std::optional<BitTorrent::TorrentAnnounceStatus> &announceStatus);
+    void setTrackerFilter(const std::optional<QString>& trackerHost);
+    void setAnnounceStatusFilter(const std::optional<BitTorrent::TorrentAnnounceStatus>& announceStatus);
 
 private:
-    int compare(const QModelIndex &left, const QModelIndex &right) const;
+    int compare(const QModelIndex& left, const QModelIndex& right) const;
 
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
-    bool matchFilter(int sourceRow, const QModelIndex &sourceParent) const;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    bool matchFilter(int sourceRow, const QModelIndex& sourceParent) const;
 
     TorrentFilter m_filter;
     CachedSettingValue<int> m_subSortColumn;

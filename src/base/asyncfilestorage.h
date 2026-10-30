@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/path.h"
+
+#include <QObject>
 
 class AsyncFileStorage final : public QObject
 {
@@ -38,17 +38,17 @@ class AsyncFileStorage final : public QObject
     Q_DISABLE_COPY_MOVE(AsyncFileStorage)
 
 public:
-    explicit AsyncFileStorage(const Path &storageFolderPath, QObject *parent = nullptr);
+    explicit AsyncFileStorage(const Path& storageFolderPath, QObject* parent = nullptr);
 
-    void store(const Path &filePath, const QByteArray &data);
+    void store(const Path& filePath, const QByteArray& data);
 
     Path storageDir() const;
 
 signals:
-    void failed(const Path &filePath, const QString &errorString);
+    void failed(const Path& filePath, const QString& errorString);
 
 private:
-    Q_INVOKABLE void store_impl(const Path &fileName, const QByteArray &data);
+    Q_INVOKABLE void store_impl(const Path& fileName, const QByteArray& data);
 
     Path m_storageDir;
 };

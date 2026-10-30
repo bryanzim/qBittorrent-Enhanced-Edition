@@ -45,11 +45,11 @@ class ComboBoxMenuButton final : public QComboBox
     Q_DISABLE_COPY_MOVE(ComboBoxMenuButton)
 
 public:
-    ComboBoxMenuButton(QWidget *parent, QMenu *menu);
+    ComboBoxMenuButton(QWidget* parent, QMenu* menu);
     void showPopup() override;
 
 private:
-    QMenu *m_menu = nullptr;
+    QMenu* m_menu = nullptr;
 };
 
 
@@ -59,7 +59,7 @@ class SpeedWidget : public QWidget
     Q_DISABLE_COPY_MOVE(SpeedWidget)
 
 public:
-    explicit SpeedWidget(PropertiesWidget *parent);
+    explicit SpeedWidget(PropertiesWidget* parent);
     ~SpeedWidget();
 
 private slots:
@@ -71,13 +71,13 @@ private:
     void loadSettings();
     void saveSettings() const;
 
-    QVBoxLayout *m_layout = nullptr;
-    QHBoxLayout *m_hlayout = nullptr;
-    QLabel *m_periodLabel = nullptr;
-    QComboBox *m_periodCombobox = nullptr;
-    SpeedPlotView *m_plot = nullptr;
+    QVBoxLayout* m_layout = nullptr;
+    QHBoxLayout* m_hlayout = nullptr;
+    QLabel* m_periodLabel = nullptr;
+    QComboBox* m_periodCombobox = nullptr;
+    SpeedPlotView* m_plot = nullptr;
 
-    ComboBoxMenuButton *m_graphsButton = nullptr;
-    QMenu *m_graphsMenu = nullptr;
-    QList<QAction *> m_graphsMenuActions;
+    ComboBoxMenuButton* m_graphsButton = nullptr;
+    QMenu* m_graphsMenu = nullptr;
+    QList<QAction*> m_graphsMenuActions;
 };

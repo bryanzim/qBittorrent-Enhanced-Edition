@@ -35,7 +35,7 @@
 #include <QStyle>
 #endif
 
-HidableTabWidget::HidableTabWidget(QWidget *parent)
+HidableTabWidget::HidableTabWidget(QWidget* parent)
     : QTabWidget(parent)
 {
     // Skip single tab in keyboard navigation (no point navigating to it)
@@ -63,7 +63,7 @@ void HidableTabWidget::tabsCountChanged()
 }
 
 #ifdef Q_OS_MACOS
-void HidableTabWidget::paintEvent(QPaintEvent *event)
+void HidableTabWidget::paintEvent(QPaintEvent* event)
 {
     // Hide the pane for macintosh style
     if (!style()->inherits("QMacStyle"))

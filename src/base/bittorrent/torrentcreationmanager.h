@@ -29,16 +29,16 @@
 
 #pragma once
 
-#include <memory>
-
-#include <QtContainerFwd>
-#include <QObject>
-#include <QThreadPool>
-
 #include "base/applicationcomponent.h"
 #include "base/settingvalue.h"
 #include "torrentcreationtask.h"
 #include "torrentcreator.h"
+
+#include <QObject>
+#include <QThreadPool>
+#include <QtContainerFwd>
+
+#include <memory>
 
 namespace BitTorrent
 {
@@ -48,13 +48,13 @@ namespace BitTorrent
         Q_DISABLE_COPY_MOVE(TorrentCreationManager)
 
     public:
-        explicit TorrentCreationManager(IApplication *app, QObject *parent = nullptr);
+        explicit TorrentCreationManager(IApplication* app, QObject* parent = nullptr);
         ~TorrentCreationManager() override;
 
-        std::shared_ptr<TorrentCreationTask> createTask(const TorrentCreatorParams &params, bool startSeeding = true);
-        std::shared_ptr<TorrentCreationTask> getTask(const QString &id) const;
+        std::shared_ptr<TorrentCreationTask> createTask(const TorrentCreatorParams& params, bool startSeeding = true);
+        std::shared_ptr<TorrentCreationTask> getTask(const QString& id) const;
         QList<std::shared_ptr<TorrentCreationTask>> tasks() const;
-        bool deleteTask(const QString &id);
+        bool deleteTask(const QString& id);
 
     private:
         QString generateTaskID() const;

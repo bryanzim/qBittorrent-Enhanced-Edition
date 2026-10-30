@@ -29,14 +29,14 @@
 
 #pragma once
 
-#include <functional>
-
-#include <QtContainerFwd>
-#include <QTreeView>
-
 #include "base/bittorrent/infohash.h"
 #include "guiapplicationcomponent.h"
 #include "transferlistmodel.h"
+
+#include <QTreeView>
+#include <QtContainerFwd>
+
+#include <functional>
 
 class Path;
 class TransferListSortModel;
@@ -58,14 +58,14 @@ class TransferListWidget final : public GUIApplicationComponent<QTreeView>
     Q_DISABLE_COPY_MOVE(TransferListWidget)
 
 public:
-    TransferListWidget(IGUIApplication *app, QWidget *parent);
+    TransferListWidget(IGUIApplication* app, QWidget* parent);
     ~TransferListWidget() override;
-    TransferListModel *getSourceModel() const;
+    TransferListModel* getSourceModel() const;
 
 public slots:
-    void setSelectionCategory(const QString &category);
-    void addSelectionTag(const Tag &tag);
-    void removeSelectionTag(const Tag &tag);
+    void setSelectionCategory(const QString& category);
+    void addSelectionTag(const Tag& tag);
+    void removeSelectionTag(const Tag& tag);
     void clearSelectionTags();
     void setSelectedTorrentsLocation();
     void pauseSession();
@@ -91,29 +91,29 @@ public slots:
     void copySelectedIDs() const;
     void copySelectedComments() const;
     void openSelectedTorrentsFolder();
-    void openDestinationFolder(const BitTorrent::Torrent *torrent);
+    void openDestinationFolder(const BitTorrent::Torrent* torrent);
     void recheckSelectedTorrents();
     void reannounceSelectedTorrents();
     void setTorrentOptions();
     void previewSelectedTorrents();
     void hideQueuePosColumn(bool hide);
-    void applyFilter(const QString &name, const TransferListModel::Column &type);
+    void applyFilter(const QString& name, const TransferListModel::Column& type);
     void applyStatusFilter(int filterIndex);
-    void applyCategoryFilter(const QString &category);
-    void applyTagFilter(const std::optional<Tag> &tag);
-    void applyTrackerFilter(const std::optional<QString> &trackerHost);
-    void applyAnnounceStatusFilter(const std::optional<BitTorrent::TorrentAnnounceStatus> &announceStatus);
-    void previewFile(const Path &filePath);
+    void applyCategoryFilter(const QString& category);
+    void applyTagFilter(const std::optional<Tag>& tag);
+    void applyTrackerFilter(const std::optional<QString>& trackerHost);
+    void applyAnnounceStatusFilter(const std::optional<BitTorrent::TorrentAnnounceStatus>& announceStatus);
+    void previewFile(const Path& filePath);
     void renameSelectedTorrent();
 
 signals:
-    void currentTorrentChanged(BitTorrent::Torrent *torrent);
+    void currentTorrentChanged(BitTorrent::Torrent* torrent);
 
 private slots:
     void torrentDoubleClicked();
     void displayListMenu();
     void displayColumnHeaderMenu();
-    void currentChanged(const QModelIndex &current, const QModelIndex &previous) override;
+    void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
     void setSelectedTorrentsSuperSeeding(bool enabled) const;
     void setSelectedTorrentsSequentialDownload(bool enabled) const;
     void setSelectedFirstLastPiecePrio(bool enabled) const;
@@ -122,26 +122,26 @@ private slots:
     void saveSettings();
 
 private:
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragMoveEvent(QDragMoveEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
-    void openPreviewSelectDialog(const BitTorrent::Torrent *torrent);
-    QModelIndex mapToSource(const QModelIndex &index) const;
-    QModelIndexList mapToSource(const QModelIndexList &indexes) const;
-    QModelIndex mapFromSource(const QModelIndex &index) const;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
+    void openPreviewSelectDialog(const BitTorrent::Torrent* torrent);
+    QModelIndex mapToSource(const QModelIndex& index) const;
+    QModelIndexList mapToSource(const QModelIndexList& indexes) const;
+    QModelIndex mapFromSource(const QModelIndex& index) const;
     bool loadSettings();
-    QList<BitTorrent::Torrent *> getSelectedTorrents() const;
+    QList<BitTorrent::Torrent*> getSelectedTorrents() const;
     void askAddTagsForSelection();
     void editTorrentTrackers();
     void manageTorrentContent();
     void exportTorrent();
     void confirmRemoveAllTagsForSelection();
-    TagSet askTagsForSelection(const QString &dialogTitle);
-    void applyToSelectedTorrents(const std::function<void (BitTorrent::Torrent *const)> &fn);
-    QList<BitTorrent::Torrent *> getVisibleTorrents() const;
+    TagSet askTagsForSelection(const QString& dialogTitle);
+    void applyToSelectedTorrents(const std::function<void(BitTorrent::Torrent* const)>& fn);
+    QList<BitTorrent::Torrent*> getVisibleTorrents() const;
     int visibleColumnsCount() const;
 
-    TransferListModel *m_listModel = nullptr;
-    TransferListSortModel *m_sortFilterModel = nullptr;
+    TransferListModel* m_listModel = nullptr;
+    TransferListSortModel* m_sortFilterModel = nullptr;
 };

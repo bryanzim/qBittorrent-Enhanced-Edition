@@ -28,11 +28,6 @@
 
 #include "statusbar.h"
 
-#include <QFrame>
-#include <QLabel>
-#include <QPushButton>
-#include <QStyle>
-
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/sessionstatus.h"
 #include "base/preferences.h"
@@ -41,11 +36,16 @@
 #include "uithememanager.h"
 #include "utils.h"
 
+#include <QFrame>
+#include <QLabel>
+#include <QPushButton>
+#include <QStyle>
+
 namespace
 {
-    QWidget *createSeparator(QWidget *parent)
+    QWidget* createSeparator(QWidget* parent)
     {
-        auto *separator = new QFrame(parent);
+        auto* separator = new QFrame(parent);
         separator->setFrameStyle(QFrame::VLine);
 #ifndef Q_OS_MACOS
         separator->setFrameShadow(QFrame::Raised);
@@ -53,9 +53,9 @@ namespace
         return separator;
     }
 
-    QPushButton *createSpeedButton(const QIcon &icon, QWidget *parent)
+    QPushButton* createSpeedButton(const QIcon& icon, QWidget* parent)
     {
-        auto *button = new QPushButton(icon, {}, parent);
+        auto* button = new QPushButton(icon, {}, parent);
         button->setCursor(Qt::PointingHandCursor);
         button->setFlat(true);
         button->setFocusPolicy(Qt::NoFocus);
@@ -65,7 +65,7 @@ namespace
     }
 }
 
-StatusBar::StatusBar(QWidget *parent)
+StatusBar::StatusBar(QWidget* parent)
     : QStatusBar(parent)
 {
     QString styleSheet = u"QWidget { margin: 0; }"_s;
@@ -76,15 +76,14 @@ StatusBar::StatusBar(QWidget *parent)
 #endif
     setStyleSheet(styleSheet);
 
-    const auto *session = BitTorrent::Session::instance();
+    const auto* session = BitTorrent::Session::instance();
     connect(session, &BitTorrent::Session::speedLimitModeChanged, this, &StatusBar::updateAltSpeedsBtn);
 
     m_connecStatusLblIcon = new QPushButton(UIThemeManager::instance()->getIcon(u"firewalled"_s), {}, this);
     m_connecStatusLblIcon->setCursor(Qt::PointingHandCursor);
     m_connecStatusLblIcon->setFlat(true);
     m_connecStatusLblIcon->setFocusPolicy(Qt::NoFocus);
-    m_connecStatusLblIcon->setToolTip(u"<b>%1</b><br><i>%2</i>"_s.arg(tr("Connection status:")
-        , tr("No direct connections. This may indicate network configuration problems.")));
+    m_connecStatusLblIcon->setToolTip(u"<b>%1</b><br><i>%2</i>"_s.arg(tr("Connection status:"), tr("No direct connections. This may indicate network configuration problems.")));
     connect(m_connecStatusLblIcon, &QAbstractButton::clicked, this, &StatusBar::connectionButtonClicked);
 
     m_dlSpeedLbl = createSpeedButton(UIThemeManager::instance()->getIcon(u"downloading"_s, u"downloading_small"_s), this);
@@ -123,7 +122,7 @@ StatusBar::StatusBar(QWidget *parent)
     m_connecStatusLblIcon->setIconSize(smallIconSize);
     m_dlSpeedLbl->setIconSize(smallIconSize);
     m_upSpeedLbl->setIconSize(smallIconSize);
-    m_altSpeedsBtn->setIconSize({midIconSize.width(), smallIconSize.height()});
+    m_altSpeedsBtn->setIconSize({ midIconSize.width(), smallIconSize.height() });
 
     addPermanentWidget(m_freeDiskSpaceLbl);
     addPermanentWidget(m_freeDiskSpaceSeparator);
@@ -157,19 +156,19 @@ void StatusBar::showRestartRequired()
     const QString restartText = tr("qBittorrent needs to be restarted!");
 
     const QPixmap pixmap = style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(Utils::Gui::smallIconSize());
-    auto *restartIconLbl = new QLabel(this);
+    auto* restartIconLbl = new QLabel(this);
     restartIconLbl->setPixmap(pixmap);
     restartIconLbl->setToolTip(restartText);
     insertWidget(0, restartIconLbl);
 
-    auto *restartLbl = new QLabel(this);
+    auto* restartLbl = new QLabel(this);
     restartLbl->setText(restartText);
     insertWidget(1, restartLbl);
 }
 
 void StatusBar::updateConnectionStatus()
 {
-    const BitTorrent::SessionStatus &sessionStatus = BitTorrent::Session::instance()->status();
+    const BitTorrent::SessionStatus& sessionStatus = BitTorrent::Session::instance()->status();
 
     if (!BitTorrent::Session::instance()->isListening())
     {
@@ -248,7 +247,7 @@ void StatusBar::updateExternalAddressesVisibility()
 
 void StatusBar::updateSpeedLabels()
 {
-    const BitTorrent::SessionStatus &sessionStatus = BitTorrent::Session::instance()->status();
+    const BitTorrent::SessionStatus& sessionStatus = BitTorrent::Session::instance()->status();
 
     QString dlSpeedLbl = Utils::Misc::friendlyUnit(sessionStatus.payloadDownloadRate, true);
     const int dlSpeedLimit = BitTorrent::Session::instance()->downloadSpeedLimit();
@@ -292,7 +291,7 @@ void StatusBar::updateAltSpeedsBtn(const bool alternative)
 
 void StatusBar::capSpeed()
 {
-    auto *dialog = new SpeedLimitDialog {parentWidget()};
+    auto* dialog = new SpeedLimitDialog{ parentWidget() };
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->open();
 }

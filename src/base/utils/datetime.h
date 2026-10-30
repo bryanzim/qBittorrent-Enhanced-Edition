@@ -34,5 +34,5 @@ class QDateTime;
 
 namespace Utils::DateTime
 {
-    qint64 toSecsSinceEpoch(const QDateTime &dateTime);
+    qint64 toSecsSinceEpoch(const QDateTime& dateTime);
 }

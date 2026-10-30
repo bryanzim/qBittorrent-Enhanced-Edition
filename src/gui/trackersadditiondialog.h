@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 namespace BitTorrent
 {
@@ -54,20 +54,20 @@ class TrackersAdditionDialog : public QDialog
     Q_DISABLE_COPY_MOVE(TrackersAdditionDialog)
 
 public:
-    TrackersAdditionDialog(QWidget *parent, BitTorrent::Torrent *torrent);
+    TrackersAdditionDialog(QWidget* parent, BitTorrent::Torrent* torrent);
     ~TrackersAdditionDialog();
 
 private slots:
     void onAccepted() const;
     void onDownloadButtonClicked();
-    void onTorrentListDownloadFinished(const Net::DownloadResult &result);
+    void onTorrentListDownloadFinished(const Net::DownloadResult& result);
 
 private:
     void saveSettings();
     void loadSettings();
 
-    Ui::TrackersAdditionDialog *m_ui = nullptr;
-    BitTorrent::Torrent *const m_torrent = nullptr;
+    Ui::TrackersAdditionDialog* m_ui = nullptr;
+    BitTorrent::Torrent* const m_torrent = nullptr;
 
     SettingValue<QSize> m_storeDialogSize;
     SettingValue<QString> m_storeTrackersListURL;

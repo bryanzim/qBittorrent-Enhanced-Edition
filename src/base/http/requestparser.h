@@ -50,12 +50,12 @@ namespace Http
             // when `status != ParseStatus::OK`, `request` & `frameSize` are undefined
             ParseStatus status = ParseStatus::BadRequest;
             Request request;
-            qsizetype frameSize = 0;  // http request frame size (bytes)
+            qsizetype frameSize = 0; // http request frame size (bytes)
         };
 
-        static ParseResult parse(const QByteArray &data);
+        static ParseResult parse(const QByteArray& data);
 
-        static const long MAX_CONTENT_SIZE = 64 * 1024 * 1024;  // 64 MB
+        static const long MAX_CONTENT_SIZE = 64 * 1024 * 1024; // 64 MB
 
     private:
         RequestParser() = default;

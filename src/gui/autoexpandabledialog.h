@@ -44,16 +44,16 @@ class AutoExpandableDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(AutoExpandableDialog)
 
 public:
-    explicit AutoExpandableDialog(QWidget *parent);
+    explicit AutoExpandableDialog(QWidget* parent);
     ~AutoExpandableDialog();
 
-    static QString getText(QWidget *parent, const QString &title, const QString &label,
-                           QLineEdit::EchoMode mode = QLineEdit::Normal, const QString &text = {},
-                            bool *ok = nullptr, bool excludeExtension = false, Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
+    static QString getText(QWidget* parent, const QString& title, const QString& label,
+                           QLineEdit::EchoMode mode = QLineEdit::Normal, const QString& text = {},
+                           bool* ok = nullptr, bool excludeExtension = false, Qt::InputMethodHints inputMethodHints = Qt::ImhNone);
 
 protected:
-    void showEvent(QShowEvent *e) override;
+    void showEvent(QShowEvent* e) override;
 
 private:
-    Ui::AutoExpandableDialog *m_ui = nullptr;
+    Ui::AutoExpandableDialog* m_ui = nullptr;
 };

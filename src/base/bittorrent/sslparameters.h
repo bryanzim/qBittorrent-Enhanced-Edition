@@ -36,12 +36,12 @@ namespace BitTorrent
 {
     struct SSLParameters
     {
-        QSslCertificate certificate {{}};
+        QSslCertificate certificate{ {} };
         QSslKey privateKey;
         QByteArray dhParams;
 
         bool isValid() const;
 
-        friend bool operator==(const SSLParameters &left, const SSLParameters &right) = default;
+        friend bool operator==(const SSLParameters& left, const SSLParameters& right) = default;
     };
 }

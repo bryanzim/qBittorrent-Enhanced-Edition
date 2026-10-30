@@ -36,19 +36,19 @@ class CategoryFilterWidget final : public QTreeView
     Q_DISABLE_COPY_MOVE(CategoryFilterWidget)
 
 public:
-    explicit CategoryFilterWidget(QWidget *parent = nullptr);
+    explicit CategoryFilterWidget(QWidget* parent = nullptr);
 
     QString currentCategory() const;
 
 signals:
-    void categoryChanged(const QString &categoryName);
+    void categoryChanged(const QString& categoryName);
     void actionStartTorrentsTriggered();
     void actionForceStartTorrentsTriggered();
     void actionStopTorrentsTriggered();
     void actionDeleteTorrentsTriggered();
 
 private slots:
-    void onCurrentRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void onCurrentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void showMenu();
     void callUpdateGeometry();
     void addCategory();
@@ -60,7 +60,7 @@ private slots:
 private:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
-    void rowsInserted(const QModelIndex &parent, int start, int end) override;
+    void rowsInserted(const QModelIndex& parent, int start, int end) override;
     bool hasAnySubcategory() const;
     void adjustIndentation();
 };

@@ -29,14 +29,13 @@
 
 #include "torrentcreationmanager.h"
 
-#include <utility>
-
-#include <boost/multi_index_container.hpp>
+#include <QUuid>
 #include <boost/multi_index/indexed_by.hpp>
 #include <boost/multi_index/key.hpp>
 #include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index_container.hpp>
 
-#include <QUuid>
+#include <utility>
 
 #define SETTINGS_KEY(name) u"TorrentCreator/Manager/" name
 
@@ -45,21 +44,17 @@ namespace BitTorrent
     using namespace boost::multi_index;
 
     class TorrentCreationManager::TaskSet final : public multi_index_container<
-        std::shared_ptr<TorrentCreationTask>,
-        indexed_by<
-            ordered_unique<tag<struct ByID>, key<&TorrentCreationTask::id>>,
-            ordered_non_unique<tag<struct ByCompletion>,
-                key<&TorrentCreationTask::isFinished, &TorrentCreationTask::timeAdded>>>>
+                                                      std::shared_ptr<TorrentCreationTask>,
+                                                      indexed_by<
+                                                          ordered_unique<tag<struct ByID>, key<&TorrentCreationTask::id>>,
+                                                          ordered_non_unique<tag<struct ByCompletion>,
+                                                                             key<&TorrentCreationTask::isFinished, &TorrentCreationTask::timeAdded>>>>
     {
     };
 }
 
-BitTorrent::TorrentCreationManager::TorrentCreationManager(IApplication *app, QObject *parent)
-    : ApplicationComponent(app, parent)
-    , m_maxTasks {SETTINGS_KEY(u"MaxTasks"_s), 256}
-    , m_numThreads {SETTINGS_KEY(u"NumThreads"_s), 1}
-    , m_tasks {std::make_unique<TaskSet>()}
-    , m_threadPool(this)
+BitTorrent::TorrentCreationManager::TorrentCreationManager(IApplication* app, QObject* parent)
+    : ApplicationComponent(app, parent), m_maxTasks{ SETTINGS_KEY(u"MaxTasks"_s), 256 }, m_numThreads{ SETTINGS_KEY(u"NumThreads"_s), 1 }, m_tasks{ std::make_unique<TaskSet>() }, m_threadPool(this)
 {
     m_threadPool.setObjectName("TorrentCreationManager m_threadPool");
 
@@ -69,12 +64,12 @@ BitTorrent::TorrentCreationManager::TorrentCreationManager(IApplication *app, QO
 
 BitTorrent::TorrentCreationManager::~TorrentCreationManager() = default;
 
-std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationManager::createTask(const TorrentCreatorParams &params, const bool startSeeding)
+std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationManager::createTask(const TorrentCreatorParams& params, const bool startSeeding)
 {
     if (std::cmp_greater_equal(m_tasks->size(), m_maxTasks.get()))
     {
         // Try to delete old finished tasks to stay under target
-        auto &tasksByCompletion = m_tasks->get<ByCompletion>();
+        auto& tasksByCompletion = m_tasks->get<ByCompletion>();
         auto [iter, endIter] = tasksByCompletion.equal_range(std::make_tuple(true));
         while ((iter != endIter) && std::cmp_greater_equal(m_tasks->size(), m_maxTasks.get()))
         {
@@ -86,7 +81,7 @@ std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationMana
 
     const QString taskID = generateTaskID();
 
-    auto *torrentCreator = new TorrentCreator(params, this);
+    auto* torrentCreator = new TorrentCreator(params, this);
     auto creationTask = std::make_shared<TorrentCreationTask>(app(), taskID, torrentCreator, startSeeding);
     connect(creationTask.get(), &QObject::destroyed, torrentCreator, &BitTorrent::TorrentCreator::requestInterruption);
 
@@ -98,7 +93,7 @@ std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationMana
 
 QString BitTorrent::TorrentCreationManager::generateTaskID() const
 {
-    const auto &tasksByID = m_tasks->get<ByID>();
+    const auto& tasksByID = m_tasks->get<ByID>();
     QString taskID = QUuid::createUuid().toString(QUuid::WithoutBraces);
     while (tasksByID.find(taskID) != tasksByID.end())
         taskID = QUuid::createUuid().toString(QUuid::WithoutBraces);
@@ -106,9 +101,9 @@ QString BitTorrent::TorrentCreationManager::generateTaskID() const
     return taskID;
 }
 
-std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationManager::getTask(const QString &id) const
+std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationManager::getTask(const QString& id) const
 {
-    const auto &tasksByID = m_tasks->get<ByID>();
+    const auto& tasksByID = m_tasks->get<ByID>();
     const auto iter = tasksByID.find(id);
     if (iter == tasksByID.end())
         return nullptr;
@@ -118,13 +113,13 @@ std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationMana
 
 QList<std::shared_ptr<BitTorrent::TorrentCreationTask>> BitTorrent::TorrentCreationManager::tasks() const
 {
-    const auto &tasksByCompletion = m_tasks->get<ByCompletion>();
-    return {tasksByCompletion.cbegin(), tasksByCompletion.cend()};
+    const auto& tasksByCompletion = m_tasks->get<ByCompletion>();
+    return { tasksByCompletion.cbegin(), tasksByCompletion.cend() };
 }
 
-bool BitTorrent::TorrentCreationManager::deleteTask(const QString &id)
+bool BitTorrent::TorrentCreationManager::deleteTask(const QString& id)
 {
-    auto &tasksByID = m_tasks->get<ByID>();
+    auto& tasksByID = m_tasks->get<ByID>();
     const auto iter = tasksByID.find(id);
     if (iter == tasksByID.end())
         return false;

@@ -28,10 +28,10 @@
 
 #pragma once
 
+#include "base/bittorrent/peerinfo.h"
+
 #include <QDialog>
 #include <QList>
-
-#include "base/bittorrent/peerinfo.h"
 
 namespace Ui
 {
@@ -44,15 +44,15 @@ class PeersAdditionDialog : public QDialog
     Q_DISABLE_COPY_MOVE(PeersAdditionDialog)
 
 public:
-    PeersAdditionDialog(QWidget *parent);
+    PeersAdditionDialog(QWidget* parent);
     ~PeersAdditionDialog();
 
-    static QList<BitTorrent::PeerAddress> askForPeers(QWidget *parent);
+    static QList<BitTorrent::PeerAddress> askForPeers(QWidget* parent);
 
 protected slots:
     void validateInput();
 
 private:
-    Ui::PeersAdditionDialog *m_ui = nullptr;
+    Ui::PeersAdditionDialog* m_ui = nullptr;
     QList<BitTorrent::PeerAddress> m_peersList;
 };

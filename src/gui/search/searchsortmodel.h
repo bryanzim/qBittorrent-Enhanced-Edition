@@ -29,10 +29,10 @@
 
 #pragma once
 
+#include "base/utils/compare.h"
+
 #include <QSortFilterProxyModel>
 #include <QStringList>
-
-#include "base/utils/compare.h"
 
 class SearchSortModel final : public QSortFilterProxyModel
 {
@@ -58,10 +58,10 @@ public:
         UnderlyingDataRole = Qt::UserRole
     };
 
-    explicit SearchSortModel(QObject *parent = nullptr);
+    explicit SearchSortModel(QObject* parent = nullptr);
 
     void enableNameFilter(bool enabled);
-    void setNameFilter(const QString &searchTerm = {});
+    void setNameFilter(const QString& searchTerm = {});
 
     //! \brief Sets parameters for filtering by size
     //! \param minSize minimal size in bytes
@@ -89,8 +89,8 @@ public:
     qint64 maxSize() const;
 
 protected:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
 private:
     bool m_isNameFilterEnabled = false;

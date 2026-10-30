@@ -7,10 +7,10 @@
 #if (LIBTORRENT_VERSION_NUM >= 20000)
 using client_data = lt::client_data_t;
 #else
-using client_data = void *;
+using client_data = void*;
 #endif
 
-using filter_function = std::function<bool(const lt::peer_info &, bool, bool *)>;
+using filter_function = std::function<bool(const lt::peer_info&, bool, bool*)>;
 
 class peer_shadowban_plugin final : public lt::peer_plugin
 {
@@ -20,7 +20,7 @@ public:
     {
     }
 
-    bool on_request(lt::peer_request const &r) override
+    bool on_request(lt::peer_request const& r) override
     {
         if (is_shadowbanned_peer())
         {
@@ -30,7 +30,7 @@ public:
     }
 
     // don't send request if peer shadowbanned to prevent use this function to leech
-    bool write_request(lt::peer_request const &r) override
+    bool write_request(lt::peer_request const& r) override
     {
         if (is_shadowbanned_peer())
         {
@@ -68,13 +68,13 @@ public:
     {
     }
 
-    std::shared_ptr<lt::peer_plugin> new_connection(lt::peer_connection_handle const &p) override
+    std::shared_ptr<lt::peer_plugin> new_connection(lt::peer_connection_handle const& p) override
     {
         return std::make_shared<peer_shadowban_plugin>(p);
     }
 };
 
-std::shared_ptr<lt::torrent_plugin> create_peer_shadowban_plugin(const lt::torrent_handle &th, client_data)
+std::shared_ptr<lt::torrent_plugin> create_peer_shadowban_plugin(const lt::torrent_handle& th, client_data)
 {
     // ignore private torrents
     if (th.torrent_file() && th.torrent_file()->priv())

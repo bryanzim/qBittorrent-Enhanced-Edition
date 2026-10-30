@@ -29,9 +29,9 @@
 
 #pragma once
 
+#include <QByteArrayView>
 #include <Qt>
 #include <QtContainerFwd>
-#include <QByteArrayView>
 
 class QByteArray;
 
@@ -41,10 +41,10 @@ namespace Utils::ByteArray
     QList<QByteArrayView> splitToViews(QByteArrayView in, QByteArrayView sep, Qt::SplitBehavior behavior = Qt::SkipEmptyParts);
     QByteArray asQByteArray(QByteArrayView view);
 
-    QByteArray toBase32(const QByteArray &in);
+    QByteArray toBase32(const QByteArray& in);
 
     template <typename T>
-    T unquote(const T &arr, const QByteArrayView quotes = "\"")
+    T unquote(const T& arr, const QByteArrayView quotes = "\"")
     {
         if (arr.length() < 2)
             return arr;

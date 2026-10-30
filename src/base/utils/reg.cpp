@@ -30,9 +30,9 @@
 
 #include "reg.h"
 
-#include <memory>
-
 #include <QStringList>
+
+#include <memory>
 
 QStringList Utils::Reg::getSubkeys(const HKEY handle)
 {
@@ -60,7 +60,7 @@ QStringList Utils::Reg::getSubkeys(const HKEY handle)
     return keys;
 }
 
-QString Utils::Reg::getStringValue(const HKEY handle, const QString &name)
+QString Utils::Reg::getStringValue(const HKEY handle, const QString& name)
 {
     const std::wstring nameWStr = name.toStdWString();
     DWORD type = 0;
@@ -81,7 +81,7 @@ QString Utils::Reg::getStringValue(const HKEY handle, const QString &name)
     return {};
 }
 
-ulong Utils::Reg::getULongValue(const HKEY handle, const QString &name)
+ulong Utils::Reg::getULongValue(const HKEY handle, const QString& name)
 {
     const std::wstring nameWStr = name.toStdWString();
     DWORD type = 0;

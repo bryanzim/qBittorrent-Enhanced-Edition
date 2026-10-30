@@ -28,26 +28,25 @@
 
 #pragma once
 
-#include <type_traits>
-
+#include <QString>
 #include <QtProcessorDetection>
 
-#include <QString>
+#include <type_traits>
 
 #if (QT_POINTER_SIZE == 8)
 #define QBT_APP_64BIT
 #endif
 
 template <typename T>
-constexpr typename std::add_const_t<T> &asConst(T &t) noexcept { return t; }
+constexpr typename std::add_const_t<T>& asConst(T& t) noexcept { return t; }
 
 // Forward rvalue as const
 template <typename T>
-constexpr typename std::add_const_t<T> asConst(T &&t) noexcept { return std::forward<T>(t); }
+constexpr typename std::add_const_t<T> asConst(T&& t) noexcept { return std::forward<T>(t); }
 
 // Prevent const rvalue arguments
 template <typename T>
-void asConst(const T &&) = delete;
+void asConst(const T&&) = delete;
 
 using namespace Qt::Literals::StringLiterals;
 

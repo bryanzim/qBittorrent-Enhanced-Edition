@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <QtContainerFwd>
 #include <QString>
+#include <QtContainerFwd>
 
 class QStringView;
 
@@ -38,12 +38,12 @@ namespace BitTorrent
 {
     struct TrackerEntry
     {
-        QString url {};
+        QString url{};
         int tier = 0;
     };
 
     QList<TrackerEntry> parseTrackerEntries(QStringView str);
 
-    bool operator==(const TrackerEntry &left, const TrackerEntry &right);
-    std::size_t qHash(const TrackerEntry &key, std::size_t seed = 0);
+    bool operator==(const TrackerEntry& left, const TrackerEntry& right);
+    std::size_t qHash(const TrackerEntry& key, std::size_t seed = 0);
 }

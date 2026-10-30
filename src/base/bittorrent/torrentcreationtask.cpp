@@ -30,32 +30,23 @@
 #include "torrentcreationtask.h"
 
 #include "base/addtorrentmanager.h"
-#include "base/interfaces/iapplication.h"
 #include "base/bittorrent/addtorrentparams.h"
+#include "base/interfaces/iapplication.h"
 
-BitTorrent::TorrentCreationTask::TorrentCreationTask(IApplication *app, const QString &id
-        , TorrentCreator *torrentCreator, bool startSeeding, QObject *parent)
-    : ApplicationComponent(app, parent)
-    , m_id {id}
-    , m_params {torrentCreator->params()}
-    , m_timeAdded {QDateTime::currentDateTime()}
+BitTorrent::TorrentCreationTask::TorrentCreationTask(IApplication* app, const QString& id, TorrentCreator* torrentCreator, bool startSeeding, QObject* parent)
+    : ApplicationComponent(app, parent), m_id{ id }, m_params{ torrentCreator->params() }, m_timeAdded{ QDateTime::currentDateTime() }
 {
     Q_ASSERT(torrentCreator);
 
-    connect(torrentCreator, &BitTorrent::TorrentCreator::started, this, [this]
-    {
+    connect(torrentCreator, &BitTorrent::TorrentCreator::started, this, [this] {
         m_timeStarted = QDateTime::currentDateTime();
     });
 
-    connect(torrentCreator, &BitTorrent::TorrentCreator::progressUpdated, this
-            , [this](const int progress)
-    {
+    connect(torrentCreator, &BitTorrent::TorrentCreator::progressUpdated, this, [this](const int progress) {
         m_progress = progress;
     });
 
-    connect(torrentCreator, &BitTorrent::TorrentCreator::creationSuccess, this
-            , [this, app, startSeeding](const TorrentCreatorResult &result)
-    {
+    connect(torrentCreator, &BitTorrent::TorrentCreator::creationSuccess, this, [this, app, startSeeding](const TorrentCreatorResult& result) {
         m_timeFinished = QDateTime::currentDateTime();
         m_result = result;
 
@@ -69,16 +60,14 @@ BitTorrent::TorrentCreationTask::TorrentCreationTask(IApplication *app, const QS
         params.savePath = result.savePath;
         params.seedMode = true;
         params.stopCondition = BitTorrent::Torrent::StopCondition::None;
-        params.useAutoTMM = false;  // otherwise if it is on by default, it will overwrite `savePath` to the default save path
+        params.useAutoTMM = false; // otherwise if it is on by default, it will overwrite `savePath` to the default save path
         params.useDownloadPath = false;
 
         if (!app->addTorrentManager()->addTorrent(result.torrentFilePath.data(), params))
             m_errorMsg = tr("Failed to start seeding.");
     });
 
-    connect(torrentCreator, &BitTorrent::TorrentCreator::creationFailure, this
-            , [this](const QString &errorMsg)
-    {
+    connect(torrentCreator, &BitTorrent::TorrentCreator::creationFailure, this, [this](const QString& errorMsg) {
         m_timeFinished = QDateTime::currentDateTime();
         m_errorMsg = errorMsg;
     });
@@ -89,7 +78,7 @@ QString BitTorrent::TorrentCreationTask::id() const
     return m_id;
 }
 
-const BitTorrent::TorrentCreatorParams &BitTorrent::TorrentCreationTask::params() const
+const BitTorrent::TorrentCreatorParams& BitTorrent::TorrentCreationTask::params() const
 {
     return m_params;
 }
@@ -128,7 +117,7 @@ int BitTorrent::TorrentCreationTask::progress() const
     return m_progress;
 }
 
-const BitTorrent::TorrentCreatorResult &BitTorrent::TorrentCreationTask::result() const
+const BitTorrent::TorrentCreatorResult& BitTorrent::TorrentCreationTask::result() const
 {
     return m_result;
 }

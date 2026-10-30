@@ -29,14 +29,14 @@
 
 #pragma once
 
-#include <utility>
+#include "base/rss/rss_autodownloadrule.h"
+#include "base/settingvalue.h"
 
 #include <QDialog>
 #include <QHash>
 #include <QSet>
 
-#include "base/rss/rss_autodownloadrule.h"
-#include "base/settingvalue.h"
+#include <utility>
 
 class QListWidgetItem;
 class QRegularExpression;
@@ -59,7 +59,7 @@ class AutomatedRssDownloader : public QDialog
     Q_DISABLE_COPY_MOVE(AutomatedRssDownloader)
 
 public:
-    explicit AutomatedRssDownloader(QWidget *parent = nullptr);
+    explicit AutomatedRssDownloader(QWidget* parent = nullptr);
     ~AutomatedRssDownloader() override;
 
 private slots:
@@ -68,8 +68,8 @@ private slots:
     void onExportBtnClicked();
     void onImportBtnClicked();
     void onRenameRuleBtnClicked();
-    void handleRuleCheckStateChange(QListWidgetItem *ruleItem);
-    void handleFeedCheckStateChange(QListWidgetItem *feedItem);
+    void handleRuleCheckStateChange(QListWidgetItem* ruleItem);
+    void handleFeedCheckStateChange(QListWidgetItem* feedItem);
     void displayRulesListMenu();
     void cloneSelectedRule();
     void renameSelectedRule();
@@ -80,35 +80,35 @@ private slots:
     void updateMustNotLineValidity();
     void updateEpisodeFilterValidity();
     void handleRuleDefinitionChanged();
-    void handleRuleAdded(const QString &ruleName);
-    void handleRuleRenamed(const QString &ruleName, const QString &oldRuleName);
-    void handleRuleChanged(const QString &ruleName);
-    void handleRuleAboutToBeRemoved(const QString &ruleName);
+    void handleRuleAdded(const QString& ruleName);
+    void handleRuleRenamed(const QString& ruleName, const QString& oldRuleName);
+    void handleRuleChanged(const QString& ruleName);
+    void handleRuleAboutToBeRemoved(const QString& ruleName);
 
     void handleProcessingStateChanged(bool enabled);
 
 private:
     void loadSettings();
     void saveSettings();
-    void createRuleItem(const RSS::AutoDownloadRule &rule);
+    void createRuleItem(const RSS::AutoDownloadRule& rule);
     void clearRuleDefinitionBox();
     void updateEditedRule();
     void updateMatchingArticles();
     void saveEditedRule();
     void loadFeedList();
     void updateFeedList();
-    void addFeedArticlesToTree(RSS::Feed *feed, const QStringList &articles);
+    void addFeedArticlesToTree(RSS::Feed* feed, const QStringList& articles);
 
     const QString m_formatFilterJSON;
     const QString m_formatFilterLegacy;
 
-    Ui::AutomatedRssDownloader *m_ui = nullptr;
-    AddTorrentParamsWidget *m_addTorrentParamsWidget = nullptr;
-    QListWidgetItem *m_currentRuleItem = nullptr;
+    Ui::AutomatedRssDownloader* m_ui = nullptr;
+    AddTorrentParamsWidget* m_addTorrentParamsWidget = nullptr;
+    QListWidgetItem* m_currentRuleItem = nullptr;
     QSet<std::pair<QString, QString>> m_treeListEntries;
     RSS::AutoDownloadRule m_currentRule;
-    QHash<QString, QListWidgetItem *> m_itemsByRuleName;
-    QRegularExpression *m_episodeRegex = nullptr;
+    QHash<QString, QListWidgetItem*> m_itemsByRuleName;
+    QRegularExpression* m_episodeRegex = nullptr;
 
     SettingValue<QSize> m_storeDialogSize;
     SettingValue<QByteArray> m_storeMainSplitterState;

@@ -42,7 +42,7 @@ class TorrentCreatorController final : public APIController
     Q_DISABLE_COPY_MOVE(TorrentCreatorController)
 
 public:
-    TorrentCreatorController(BitTorrent::TorrentCreationManager *torrentCreationManager, IApplication *app, QObject *parent = nullptr);
+    TorrentCreatorController(BitTorrent::TorrentCreationManager* torrentCreationManager, IApplication* app, QObject* parent = nullptr);
 
 private slots:
     void addTaskAction();
@@ -51,5 +51,5 @@ private slots:
     void deleteTaskAction();
 
 private:
-    BitTorrent::TorrentCreationManager *m_torrentCreationManager = nullptr;
+    BitTorrent::TorrentCreationManager* m_torrentCreationManager = nullptr;
 };

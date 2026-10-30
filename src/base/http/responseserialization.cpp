@@ -28,17 +28,17 @@
 
 #include "responseserialization.h"
 
-#include <algorithm>
+#include "base/utils/gzip.h"
+#include "constants.h"
+#include "request.h"
+#include "response.h"
 
 #include <QDateTime>
 #include <QLocale>
 #include <QStringTokenizer>
 #include <QStringView>
 
-#include "base/utils/gzip.h"
-#include "constants.h"
-#include "request.h"
-#include "response.h"
+#include <algorithm>
 
 using namespace Qt::StringLiterals;
 
@@ -49,16 +49,14 @@ namespace
         // [RFC 7231] 7.1.1.1. Date/Time Formats
         // example: "Sun, 06 Nov 1994 08:49:37 GMT"
 
-        return QLocale::c().toString(QDateTime::currentDateTimeUtc(), u"ddd, dd MMM yyyy HH:mm:ss"_s)
-            .append(u" GMT");
+        return QLocale::c().toString(QDateTime::currentDateTimeUtc(), u"ddd, dd MMM yyyy HH:mm:ss"_s).append(u" GMT");
     }
 
     bool acceptsGzipEncoding(const QStringView encodings)
     {
         // [rfc7231] 5.3.4. Accept-Encoding
 
-        const auto matchEncoding = [](const QStringView encodingEntry, const QStringView encoding) -> bool
-        {
+        const auto matchEncoding = [](const QStringView encodingEntry, const QStringView encoding) -> bool {
             if (!encodingEntry.startsWith(encoding))
                 return false;
 
@@ -67,7 +65,7 @@ namespace
                 return true;
 
             // [rfc7231] 5.3.1. Quality Values
-            const QStringView qualityStr = encodingEntry.sliced(encoding.size() + 1).trimmed();  // ex. skip over "gzip;"
+            const QStringView qualityStr = encodingEntry.sliced(encoding.size() + 1).trimmed(); // ex. skip over "gzip;"
             if (!qualityStr.startsWith(u"q="))
                 return false;
 
@@ -79,27 +77,24 @@ namespace
             return false;
         };
 
-        return std::ranges::any_of(qTokenize(encodings, u',', Qt::SkipEmptyParts)
-                , [&matchEncoding](QStringView encodingEntry)
-        {
+        return std::ranges::any_of(qTokenize(encodings, u',', Qt::SkipEmptyParts), [&matchEncoding](QStringView encodingEntry) {
             encodingEntry = encodingEntry.trimmed();
             return matchEncoding(encodingEntry, u"gzip") || matchEncoding(encodingEntry, u"*");
         });
     }
 
-    bool needCompressContent(const Http::Response &response, const Http::Request &request)
+    bool needCompressContent(const Http::Response& response, const Http::Request& request)
     {
         if (!acceptsGzipEncoding(request.headers.value(u"accept-encoding"_s)))
             return false;
 
         // for very small files, compressing them only wastes cpu cycles
-        if (response.content.size() <= 1024)  // 1 kb
+        if (response.content.size() <= 1024) // 1 kb
             return false;
 
         // filter out known hard-to-compress types
         const QString contentType = response.headers[Http::HEADER_CONTENT_TYPE];
-        if ((contentType == Http::CONTENT_TYPE_GIF) || (contentType == Http::CONTENT_TYPE_JPEG)
-                || (contentType == Http::CONTENT_TYPE_PNG) || (contentType == Http::CONTENT_TYPE_WEBP))
+        if ((contentType == Http::CONTENT_TYPE_GIF) || (contentType == Http::CONTENT_TYPE_JPEG) || (contentType == Http::CONTENT_TYPE_PNG) || (contentType == Http::CONTENT_TYPE_WEBP))
         {
             return false;
         }
@@ -108,13 +103,12 @@ namespace
     }
 }
 
-QByteArray Http::serializeResponseHead(const Http::ResponseStatus &responseStatus, const Http::HeaderMap &responseHeaders)
+QByteArray Http::serializeResponseHead(const Http::ResponseStatus& responseStatus, const Http::HeaderMap& responseHeaders)
 {
     QByteArray buf;
     buf.reserve(1024);
 
-    const auto serializeHeader = [&buf](const QString &name, const QString &value)
-    {
+    const auto serializeHeader = [&buf](const QString& name, const QString& value) {
         buf.append(name.toLatin1())
             .append(": ")
             .append(value.toLatin1())
@@ -122,7 +116,7 @@ QByteArray Http::serializeResponseHead(const Http::ResponseStatus &responseStatu
     };
 
     // Status Line
-    buf.append("HTTP/1.1 ")  // TODO: depends on request
+    buf.append("HTTP/1.1 ") // TODO: depends on request
         .append(QByteArray::number(responseStatus.code))
         .append(' ')
         .append(responseStatus.text.toLatin1())
@@ -132,7 +126,7 @@ QByteArray Http::serializeResponseHead(const Http::ResponseStatus &responseStatu
     serializeHeader(Http::HEADER_DATE, httpDate());
     if (!responseHeaders.contains(Http::HEADER_CONNECTION))
         serializeHeader(Http::HEADER_CONNECTION, u"keep-alive"_s);
-    for (const auto &[headerName, headerValue] : responseHeaders.asKeyValueRange())
+    for (const auto& [headerName, headerValue] : responseHeaders.asKeyValueRange())
         serializeHeader(headerName, headerValue);
 
     // the first empty line
@@ -141,7 +135,7 @@ QByteArray Http::serializeResponseHead(const Http::ResponseStatus &responseStatu
     return buf;
 }
 
-QByteArray Http::serializeResponse(const Http::Response &response, const Http::Request &request)
+QByteArray Http::serializeResponse(const Http::Response& response, const Http::Request& request)
 {
     const qsizetype responseContentSize = response.content.size();
 

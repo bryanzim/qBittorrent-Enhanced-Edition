@@ -40,11 +40,11 @@ class MacOSShiftClickHandler final : public QObject
     Q_DISABLE_COPY_MOVE(MacOSShiftClickHandler)
 
 public:
-    explicit MacOSShiftClickHandler(QTreeView *treeView);
+    explicit MacOSShiftClickHandler(QTreeView* treeView);
 
 private:
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
-    QTreeView *m_treeView = nullptr;
+    QTreeView* m_treeView = nullptr;
     QPersistentModelIndex m_lastClickedIndex;
 };

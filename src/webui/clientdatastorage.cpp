@@ -28,21 +28,20 @@
 
 #include "clientdatastorage.h"
 
-#include <QJsonDocument>
-#include <QJsonObject>
-
 #include "base/global.h"
 #include "base/logger.h"
 #include "base/path.h"
 #include "base/profile.h"
 #include "base/utils/io.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
+
 const int CLIENT_DATA_FILE_MAX_SIZE = 1024 * 1024; // 1 MiB
 const QString CLIENT_DATA_FILE_NAME = u"web_clientdata.json"_s;
 
-ClientDataStorage::ClientDataStorage(QObject *parent)
-    : QObject(parent)
-    , m_clientDataFilePath(specialFolderLocation(SpecialFolder::Data) / Path(CLIENT_DATA_FILE_NAME))
+ClientDataStorage::ClientDataStorage(QObject* parent)
+    : QObject(parent), m_clientDataFilePath(specialFolderLocation(SpecialFolder::Data) / Path(CLIENT_DATA_FILE_NAME))
 {
     if (!m_clientDataFilePath.exists())
         return;
@@ -59,40 +58,42 @@ ClientDataStorage::ClientDataStorage(QObject *parent)
     if (jsonError.error != QJsonParseError::NoError)
     {
         LogMsg(tr("Failed to parse web client data. File: \"%1\". Error: \"%2\"")
-            .arg(m_clientDataFilePath.toString(), jsonError.errorString()), Log::WARNING);
+                   .arg(m_clientDataFilePath.toString(), jsonError.errorString()),
+               Log::WARNING);
         return;
     }
 
     if (!jsonDoc.isObject())
     {
         LogMsg(tr("Failed to load web client data. File: \"%1\". Error: \"Invalid data format\"")
-            .arg(m_clientDataFilePath.toString()), Log::WARNING);
+                   .arg(m_clientDataFilePath.toString()),
+               Log::WARNING);
         return;
     }
 
     m_clientData = jsonDoc.object();
 }
 
-nonstd::expected<void, QString> ClientDataStorage::storeData(const QJsonObject &object)
+nonstd::expected<void, QString> ClientDataStorage::storeData(const QJsonObject& object)
 {
     QJsonObject clientData = m_clientData;
     bool dataModified = false;
     for (auto it = object.constBegin(), end = object.constEnd(); it != end; ++it)
     {
-        const QString &key = it.key();
-        const QJsonValue &value = it.value();
+        const QString& key = it.key();
+        const QJsonValue& value = it.value();
 
         if (value.isNull())
         {
-            if (auto it = clientData.find(key); it != clientData.end())
+            if (auto existing = clientData.find(key); existing != clientData.end())
             {
-                clientData.erase(it);
+                clientData.erase(existing);
                 dataModified = true;
             }
         }
         else
         {
-            const auto &existingValue = clientData.find(key);
+            const auto& existingValue = clientData.find(key);
             if (existingValue == clientData.end())
             {
                 clientData.insert(key, value);
@@ -126,10 +127,10 @@ QJsonObject ClientDataStorage::loadData() const
     return m_clientData;
 }
 
-QJsonObject ClientDataStorage::loadData(const QStringList &keys) const
+QJsonObject ClientDataStorage::loadData(const QStringList& keys) const
 {
     QJsonObject clientData;
-    for (const QString &key : keys)
+    for (const QString& key : keys)
     {
         if (const auto iter = m_clientData.constFind(key); iter != m_clientData.constEnd())
             clientData.insert(key, iter.value());

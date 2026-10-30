@@ -28,11 +28,11 @@
 
 #pragma once
 
+#include "base/applicationcomponent.h"
+
 #include <QHostAddress>
 #include <QObject>
 #include <QPointer>
-
-#include "base/applicationcomponent.h"
 
 namespace Http
 {
@@ -52,7 +52,7 @@ class WebUI final : public ApplicationComponent<QObject>
     Q_DISABLE_COPY_MOVE(WebUI)
 
 public:
-    explicit WebUI(IApplication *app, const QByteArray &tempPasswordHash = {});
+    explicit WebUI(IApplication* app, const QByteArray& tempPasswordHash = {});
 
     bool isEnabled() const;
     bool isErrored() const;
@@ -62,13 +62,13 @@ public:
     quint16 port() const;
 
 signals:
-    void error(const QString &message);
+    void error(const QString& message);
 
 private slots:
     void configure();
 
 private:
-    void setError(const QString &message);
+    void setError(const QString& message);
 
     bool m_isEnabled = false;
     bool m_isErrored = false;

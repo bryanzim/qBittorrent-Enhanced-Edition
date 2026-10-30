@@ -30,12 +30,12 @@
 
 #pragma once
 
+#include "base/utils/thread.h"
+#include "gui/guiapplicationcomponent.h"
+
 #include <QPointer>
 #include <QSet>
 #include <QWidget>
-
-#include "base/utils/thread.h"
-#include "gui/guiapplicationcomponent.h"
 
 class QEvent;
 class QObject;
@@ -54,7 +54,7 @@ class SearchWidget : public GUIApplicationComponent<QWidget>
     Q_DISABLE_COPY_MOVE(SearchWidget)
 
 public:
-    explicit SearchWidget(IGUIApplication *app, QWidget *parent);
+    explicit SearchWidget(IGUIApplication* app, QWidget* parent);
     ~SearchWidget() override;
 
     void giveFocusToSearchInput();
@@ -63,21 +63,21 @@ signals:
     void searchFinished(bool failed);
 
 private:
-    bool eventFilter(QObject *object, QEvent *event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
 
     void onPreferencesChanged();
 
     void pluginsButtonClicked();
     void searchButtonClicked();
     void stopButtonClicked();
-    void searchTextEdited(const QString &text);
+    void searchTextEdited(const QString& text);
     void currentTabChanged(int index);
 
-    void tabStatusChanged(SearchJobWidget *tab);
+    void tabStatusChanged(SearchJobWidget* tab);
 
     void closeTab(int index);
     void closeAllTabs();
-    void refreshTab(SearchJobWidget *searchJobWidget);
+    void refreshTab(SearchJobWidget* searchJobWidget);
     void showTabMenu(int index);
 
     void selectMultipleBox(int index);
@@ -92,19 +92,19 @@ private:
     QStringList selectedPlugins() const;
 
     QString generateTabID() const;
-    int addTab(const QString &tabID, SearchJobWidget *searchJobWdget);
+    int addTab(const QString& tabID, SearchJobWidget* searchJobWdget);
 
     void loadHistory();
     void restoreSession();
-    void updateHistory(const QString &newSearchPattern);
+    void updateHistory(const QString& newSearchPattern);
     void saveSession() const;
 
     void createSearchPatternCompleter();
 
-    Ui::SearchWidget *m_ui = nullptr;
+    Ui::SearchWidget* m_ui = nullptr;
     QPointer<SearchJobWidget> m_currentSearchTab; // Selected tab
     bool m_isNewQueryString = false;
-    QHash<QString, SearchJobWidget *> m_tabWidgets;
+    QHash<QString, SearchJobWidget*> m_tabWidgets;
 
     bool m_storeOpenedTabs = false;
     bool m_storeOpenedTabsResults = false;
@@ -113,7 +113,7 @@ private:
     Utils::Thread::UniquePtr m_ioThread;
 
     class DataStorage;
-    DataStorage *m_dataStorage = nullptr;
+    DataStorage* m_dataStorage = nullptr;
 
-    QStringListModel *m_searchPatternCompleterModel = nullptr;
+    QStringListModel* m_searchPatternCompleterModel = nullptr;
 };

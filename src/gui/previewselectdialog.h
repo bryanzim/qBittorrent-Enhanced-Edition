@@ -29,10 +29,10 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "base/path.h"
 #include "base/settingvalue.h"
+
+#include <QDialog>
 
 namespace BitTorrent
 {
@@ -60,24 +60,24 @@ public:
         NB_COLUMNS
     };
 
-    PreviewSelectDialog(QWidget *parent, const BitTorrent::Torrent *torrent);
+    PreviewSelectDialog(QWidget* parent, const BitTorrent::Torrent* torrent);
     ~PreviewSelectDialog();
 
 signals:
-    void readyToPreviewFile(const Path &filePath) const;
+    void readyToPreviewFile(const Path& filePath) const;
 
 private slots:
     void previewButtonClicked();
     void displayColumnHeaderMenu();
 
 private:
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent* event) override;
 
     void loadWindowState();
     void saveWindowState();
 
-    Ui::PreviewSelectDialog *m_ui = nullptr;
-    const BitTorrent::Torrent *m_torrent = nullptr;
+    Ui::PreviewSelectDialog* m_ui = nullptr;
+    const BitTorrent::Torrent* m_torrent = nullptr;
     bool m_headerStateInitialized = false;
 
     // Settings

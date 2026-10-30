@@ -28,14 +28,14 @@
 
 #include "torrentcontenthandler.h"
 
+#include "base/exceptions.h"
+#include "base/path.h"
+
 #include <QDir>
 #include <QHash>
 #include <QList>
 
-#include "base/exceptions.h"
-#include "base/path.h"
-
-void BitTorrent::TorrentContentHandler::renameFile(const Path &oldPath, const Path &newPath)
+void BitTorrent::TorrentContentHandler::renameFile(const Path& oldPath, const Path& newPath)
 {
     if (!oldPath.isValid())
         throw RuntimeError(tr("The old path is invalid: '%1'.").arg(oldPath.toString()));
@@ -61,7 +61,7 @@ void BitTorrent::TorrentContentHandler::renameFile(const Path &oldPath, const Pa
     renameFile(renamingFileIndex, newPath);
 }
 
-void BitTorrent::TorrentContentHandler::renameFolder(const Path &oldFolderPath, const Path &newFolderPath)
+void BitTorrent::TorrentContentHandler::renameFolder(const Path& oldFolderPath, const Path& newFolderPath)
 {
     if (!oldFolderPath.isValid())
         throw RuntimeError(tr("The old path is invalid: '%1'.").arg(oldFolderPath.toString()));

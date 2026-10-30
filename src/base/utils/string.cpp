@@ -29,12 +29,12 @@
 
 #include "string.h"
 
-#include <cmath>
-
 #include <QList>
 #include <QLocale>
 #include <QRegularExpression>
 #include <QStringList>
+
+#include <cmath>
 
 // to send numbers instead of strings with suffixes
 QString Utils::String::fromDouble(const double n, const int precision)
@@ -59,17 +59,16 @@ QString Utils::String::fromLocal8Bit(const std::string_view string)
     return QString::fromLocal8Bit(string.data(), string.size());
 }
 
-QString Utils::String::wildcardToRegexPattern(const QString &pattern)
+QString Utils::String::wildcardToRegexPattern(const QString& pattern)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 6, 1))
-    return QRegularExpression::wildcardToRegularExpression(pattern
-            , (QRegularExpression::UnanchoredWildcardConversion | QRegularExpression::NonPathWildcardConversion));
+    return QRegularExpression::wildcardToRegularExpression(pattern, (QRegularExpression::UnanchoredWildcardConversion | QRegularExpression::NonPathWildcardConversion));
 #else
     return QRegularExpression::wildcardToRegularExpression(pattern, QRegularExpression::UnanchoredWildcardConversion);
 #endif
 }
 
-QStringList Utils::String::splitCommand(const QString &command)
+QStringList Utils::String::splitCommand(const QString& command)
 {
     QStringList ret;
     ret.reserve(32);
@@ -105,7 +104,7 @@ QStringList Utils::String::splitCommand(const QString &command)
     return ret;
 }
 
-std::optional<bool> Utils::String::parseBool(const QString &string)
+std::optional<bool> Utils::String::parseBool(const QString& string)
 {
     if (string.compare(u"true", Qt::CaseInsensitive) == 0)
         return true;
@@ -115,7 +114,7 @@ std::optional<bool> Utils::String::parseBool(const QString &string)
     return std::nullopt;
 }
 
-std::optional<int> Utils::String::parseInt(const QString &string)
+std::optional<int> Utils::String::parseInt(const QString& string)
 {
     bool ok = false;
     const int result = string.toInt(&ok);
@@ -125,7 +124,7 @@ std::optional<int> Utils::String::parseInt(const QString &string)
     return std::nullopt;
 }
 
-std::optional<double> Utils::String::parseDouble(const QString &string)
+std::optional<double> Utils::String::parseDouble(const QString& string)
 {
     bool ok = false;
     const double result = string.toDouble(&ok);

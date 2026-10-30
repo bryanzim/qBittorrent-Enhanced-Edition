@@ -28,6 +28,11 @@
 
 #pragma once
 
+#include "base/applicationcomponent.h"
+#include "base/exceptions.h"
+#include "base/settingvalue.h"
+#include "base/utils/thread.h"
+
 #include <QBasicTimer>
 #include <QHash>
 #include <QList>
@@ -35,11 +40,6 @@
 #include <QPointer>
 #include <QRegularExpression>
 #include <QSharedPointer>
-
-#include "base/applicationcomponent.h"
-#include "base/exceptions.h"
-#include "base/settingvalue.h"
-#include "base/utils/thread.h"
 
 class QTimer;
 
@@ -68,7 +68,7 @@ namespace RSS
 
         friend class ::Application;
 
-        explicit AutoDownloader(IApplication *app);
+        explicit AutoDownloader(IApplication* app);
         ~AutoDownloader() override;
 
     public:
@@ -78,61 +78,61 @@ namespace RSS
             JSON
         };
 
-        static AutoDownloader *instance();
+        static AutoDownloader* instance();
 
         bool isProcessingEnabled() const;
         void setProcessingEnabled(bool enabled);
 
         QStringList smartEpisodeFilters() const;
-        void setSmartEpisodeFilters(const QStringList &filters);
+        void setSmartEpisodeFilters(const QStringList& filters);
         QRegularExpression smartEpisodeRegex() const;
 
         bool downloadRepacks() const;
         void setDownloadRepacks(bool enabled);
 
-        bool hasRule(const QString &ruleName) const;
-        AutoDownloadRule ruleByName(const QString &ruleName) const;
+        bool hasRule(const QString& ruleName) const;
+        AutoDownloadRule ruleByName(const QString& ruleName) const;
         QList<AutoDownloadRule> rules() const;
 
-        void setRule(const AutoDownloadRule &rule);
-        bool cloneRule(const QString &ruleName, const QString &cloneRuleName);
-        bool renameRule(const QString &ruleName, const QString &newRuleName);
-        void removeRule(const QString &ruleName);
+        void setRule(const AutoDownloadRule& rule);
+        bool cloneRule(const QString& ruleName, const QString& cloneRuleName);
+        bool renameRule(const QString& ruleName, const QString& newRuleName);
+        void removeRule(const QString& ruleName);
 
         QByteArray exportRules(RulesFileFormat format = RulesFileFormat::JSON) const;
-        void importRules(const QByteArray &data, RulesFileFormat format = RulesFileFormat::JSON);
+        void importRules(const QByteArray& data, RulesFileFormat format = RulesFileFormat::JSON);
 
     signals:
         void processingStateChanged(bool enabled);
-        void ruleAdded(const QString &ruleName);
-        void ruleChanged(const QString &ruleName);
-        void ruleRenamed(const QString &ruleName, const QString &oldRuleName);
-        void ruleAboutToBeRemoved(const QString &ruleName);
+        void ruleAdded(const QString& ruleName);
+        void ruleChanged(const QString& ruleName);
+        void ruleRenamed(const QString& ruleName, const QString& oldRuleName);
+        void ruleAboutToBeRemoved(const QString& ruleName);
 
     private slots:
         void process();
-        void handleTorrentAdded(const QString &source);
-        void handleAddTorrentFailed(const QString &url, const QString &error);
-        void handleNewArticle(const Article *article);
-        void handleFeedURLChanged(Feed *feed, const QString &oldURL);
+        void handleTorrentAdded(const QString& source);
+        void handleAddTorrentFailed(const QString& url, const QString& error);
+        void handleNewArticle(const Article* article);
+        void handleFeedURLChanged(Feed* feed, const QString& oldURL);
 
     private:
-        void timerEvent(QTimerEvent *event) override;
-        void setRule_impl(const AutoDownloadRule &rule);
+        void timerEvent(QTimerEvent* event) override;
+        void setRule_impl(const AutoDownloadRule& rule);
         void sortRules();
         void resetProcessingQueue();
         void startProcessing();
-        void addJobForArticle(const Article *article);
-        void processJob(const QSharedPointer<ProcessingJob> &job);
+        void addJobForArticle(const Article* article);
+        void processJob(const QSharedPointer<ProcessingJob>& job);
         void load();
-        void loadRules(const QByteArray &data);
+        void loadRules(const QByteArray& data);
         void loadRulesLegacy();
         void store();
         void storeDeferred();
         QByteArray exportRulesToJSONFormat() const;
-        void importRulesFromJSONFormat(const QByteArray &data);
+        void importRulesFromJSONFormat(const QByteArray& data);
         QByteArray exportRulesToLegacyFormat() const;
-        void importRulesFromLegacyFormat(const QByteArray &data);
+        void importRulesFromLegacyFormat(const QByteArray& data);
 
         static QPointer<AutoDownloader> m_instance;
 
@@ -140,9 +140,9 @@ namespace RSS
         SettingValue<QVariant> m_storeSmartEpisodeFilter;
         SettingValue<bool> m_storeDownloadRepacks;
 
-        QTimer *m_processingTimer = nullptr;
+        QTimer* m_processingTimer = nullptr;
         Utils::Thread::UniquePtr m_ioThread;
-        AsyncFileStorage *m_fileStorage = nullptr;
+        AsyncFileStorage* m_fileStorage = nullptr;
         QList<AutoDownloadRule> m_rules;
         QHash<QString, qsizetype> m_rulesByName;
         QList<QSharedPointer<ProcessingJob>> m_processingQueue;

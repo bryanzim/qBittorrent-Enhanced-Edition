@@ -29,11 +29,11 @@
 
 #include "torrent.h"
 
-#include <limits>
+#include "infohash.h"
 
 #include <QHash>
 
-#include "infohash.h"
+#include <limits>
 
 namespace BitTorrent
 {

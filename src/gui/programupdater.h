@@ -56,7 +56,7 @@ signals:
     void updateCheckFinished();
 
 private slots:
-    void rssDownloadFinished(const Net::DownloadResult &result);
+    void rssDownloadFinished(const Net::DownloadResult& result);
 
 private:
     QString m_newVersion;

@@ -29,16 +29,6 @@
 
 #include "searchjobmanager.h"
 
-#include <limits>
-
-#include <QDateTime>
-#include <QDir>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QString>
-#include <QStringList>
-
 #include "base/global.h"
 #include "base/logger.h"
 #include "base/path.h"
@@ -50,9 +40,19 @@
 #include "base/utils/io.h"
 #include "base/utils/random.h"
 
-const Path DATA_FOLDER {u"WebUI/Search"_s};
+#include <QDateTime>
+#include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QString>
+#include <QStringList>
+
+#include <limits>
+
+const Path DATA_FOLDER{ u"WebUI/Search"_s };
 const QString SESSION_FILE_NAME = u"Session.json"_s;
-const int SESSION_FILE_MAX_SIZE = 1024 * 1024; // 1 MiB
+const int SESSION_FILE_MAX_SIZE = 1024 * 1024;      // 1 MiB
 const int RESULTS_FILE_MAX_SIZE = 10 * 1024 * 1024; // 10 MiB
 const int MAX_CONCURRENT_SEARCHES = 5;
 
@@ -74,7 +74,7 @@ const QString KEY_RESULT_PUB_DATE = u"PubDate"_s;
 
 namespace
 {
-    Path makeDataFilePath(const QString &fileName)
+    Path makeDataFilePath(const QString& fileName)
     {
         return specialFolderLocation(SpecialFolder::Data) / DATA_FOLDER / Path(fileName);
     }
@@ -99,10 +99,10 @@ namespace
         const QJsonArray resultsArray = jsonDoc.array();
         QList<SearchResult> results;
         results.reserve(resultsArray.size());
-        for (const QJsonValue &resultValue : resultsArray)
+        for (const QJsonValue& resultValue : resultsArray)
         {
             const QJsonObject resultObj = resultValue.toObject();
-            const SearchResult result {
+            const SearchResult result{
                 .fileName = resultObj[KEY_RESULT_FILE_NAME].toString(),
                 .fileUrl = resultObj[KEY_RESULT_FILE_URL].toString(),
                 .fileSize = resultObj[KEY_RESULT_FILE_SIZE].toInteger(),
@@ -120,16 +120,14 @@ namespace
     }
 }
 
-SearchJobManager::SearchJobManager(QObject *parent)
-    : QObject(parent)
-    , m_storeSearchJobs {Preferences::instance()->storeSearchJobs()}
-    , m_storeSearchJobResults {Preferences::instance()->storeSearchJobResults()}
+SearchJobManager::SearchJobManager(QObject* parent)
+    : QObject(parent), m_storeSearchJobs{ Preferences::instance()->storeSearchJobs() }, m_storeSearchJobResults{ Preferences::instance()->storeSearchJobResults() }
 {
     connect(Preferences::instance(), &Preferences::changed, this, &SearchJobManager::onPreferencesChanged);
     loadSession();
 }
 
-nonstd::expected<int, QString> SearchJobManager::startSearch(const QString &pattern, const QString &category, const QStringList &plugins)
+nonstd::expected<int, QString> SearchJobManager::startSearch(const QString& pattern, const QString& category, const QStringList& plugins)
 {
     if (m_searchHandlers.size() >= MAX_CONCURRENT_SEARCHES)
         return nonstd::make_unexpected(tr("Unable to create more than %1 concurrent searches.").arg(MAX_CONCURRENT_SEARCHES));
@@ -139,8 +137,7 @@ nonstd::expected<int, QString> SearchJobManager::startSearch(const QString &patt
 
     connect(searchHandler.get(), &SearchHandler::searchFinished, this, [this, id] { onSearchStopped(id); });
     connect(searchHandler.get(), &SearchHandler::searchFailed, this, [this, id] { onSearchStopped(id); });
-    connect(searchHandler.get(), &SearchHandler::newSearchResults, this, [this, id, handler = searchHandler.get()]
-    {
+    connect(searchHandler.get(), &SearchHandler::newSearchResults, this, [this, id, handler = searchHandler.get()] {
         const auto jobIter = m_jobs.find(id);
         if (jobIter == m_jobs.end())
             return;
@@ -149,13 +146,12 @@ nonstd::expected<int, QString> SearchJobManager::startSearch(const QString &patt
     });
 
     m_searchHandlers.insert(id, searchHandler);
-    m_jobs.insert(id, {
-        .id = id,
-        .pattern = pattern,
-        .category = category,
-        .plugins = plugins,
-        .active = true,
-        .results = {}});
+    m_jobs.insert(id, { .id = id,
+                        .pattern = pattern,
+                        .category = category,
+                        .plugins = plugins,
+                        .active = true,
+                        .results = {} });
     m_searchOrder.append(id);
 
     saveSession();
@@ -248,7 +244,8 @@ void SearchJobManager::loadSession()
         if (readResult.error().status != Utils::IO::ReadError::NotExist)
         {
             LogMsg(tr("Failed to load WebUI search session. File: \"%1\". Error: \"%2\"")
-                    .arg(sessionFilePath.toString(), readResult.error().message), Log::WARNING);
+                       .arg(sessionFilePath.toString(), readResult.error().message),
+                   Log::WARNING);
         }
         return;
     }
@@ -258,14 +255,15 @@ void SearchJobManager::loadSession()
     if (jsonError.error != QJsonParseError::NoError)
     {
         LogMsg(tr("Failed to parse WebUI search session. File: \"%1\". Error: \"%2\"")
-                .arg(sessionFilePath.toString(), jsonError.errorString()), Log::WARNING);
+                   .arg(sessionFilePath.toString(), jsonError.errorString()),
+               Log::WARNING);
         return;
     }
 
     const QJsonObject jsonObj = jsonDoc.object();
     const QJsonArray jobsArray = jsonObj[KEY_JOBS].toArray();
 
-    for (const QJsonValue &jobValue : jobsArray)
+    for (const QJsonValue& jobValue : jobsArray)
     {
         const QJsonObject jobObj = jobValue.toObject();
         const int jobId = jobObj[KEY_JOB_ID].toInt();
@@ -278,7 +276,7 @@ void SearchJobManager::loadSession()
         jobInfo.id = jobId;
         jobInfo.pattern = searchPattern;
         jobInfo.category = jobObj[KEY_JOB_CATEGORY].toString();
-        for (const QJsonValue &pluginValue : jobObj[KEY_JOB_PLUGINS].toArray())
+        for (const QJsonValue& pluginValue : jobObj[KEY_JOB_PLUGINS].toArray())
             jobInfo.plugins.append(pluginValue.toString());
 
         if (m_storeSearchJobResults)
@@ -307,16 +305,16 @@ void SearchJobManager::saveSession() const
         if (!jobInfo) [[unlikely]]
             continue;
 
-        jobsArray.append(QJsonObject {
-            {KEY_JOB_ID, searchId},
-            {KEY_JOB_SEARCH_PATTERN, jobInfo->pattern},
-            {KEY_JOB_CATEGORY, jobInfo->category},
-            {KEY_JOB_PLUGINS, QJsonArray::fromStringList(jobInfo->plugins)}
+        jobsArray.append(QJsonObject{
+            {             KEY_JOB_ID,                                     searchId },
+            { KEY_JOB_SEARCH_PATTERN,                             jobInfo->pattern },
+            {       KEY_JOB_CATEGORY,                            jobInfo->category },
+            {        KEY_JOB_PLUGINS, QJsonArray::fromStringList(jobInfo->plugins) }
         });
     }
 
-    const QJsonObject sessionObj {
-        {KEY_JOBS, jobsArray}
+    const QJsonObject sessionObj{
+        { KEY_JOBS, jobsArray }
     };
 
     const Path sessionFilePath = makeDataFilePath(SESSION_FILE_NAME);
@@ -328,7 +326,8 @@ void SearchJobManager::saveSession() const
     if (!saveResult)
     {
         LogMsg(tr("Failed to save WebUI search session. File: \"%1\". Error: \"%2\"")
-                .arg(sessionFilePath.toString(), saveResult.error()), Log::WARNING);
+                   .arg(sessionFilePath.toString(), saveResult.error()),
+               Log::WARNING);
     }
 }
 
@@ -340,18 +339,18 @@ void SearchJobManager::saveSearchResults(const int searchId) const
         return;
 
     QJsonArray resultsArray;
-    for (const SearchResult &result : jobInfo->results)
+    for (const SearchResult& result : jobInfo->results)
     {
-        resultsArray.append(QJsonObject {
-            {KEY_RESULT_FILE_NAME, result.fileName},
-            {KEY_RESULT_FILE_URL, result.fileUrl},
-            {KEY_RESULT_FILE_SIZE, result.fileSize},
-            {KEY_RESULT_SEEDERS_COUNT, result.nbSeeders},
-            {KEY_RESULT_LEECHERS_COUNT, result.nbLeechers},
-            {KEY_RESULT_ENGINE_NAME, result.engineName},
-            {KEY_RESULT_SITE_URL, result.siteUrl},
-            {KEY_RESULT_DESCR_LINK, result.descrLink},
-            {KEY_RESULT_PUB_DATE, result.pubDate.toSecsSinceEpoch()}
+        resultsArray.append(QJsonObject{
+            {      KEY_RESULT_FILE_NAME,                   result.fileName },
+            {       KEY_RESULT_FILE_URL,                    result.fileUrl },
+            {      KEY_RESULT_FILE_SIZE,                   result.fileSize },
+            {  KEY_RESULT_SEEDERS_COUNT,                  result.nbSeeders },
+            { KEY_RESULT_LEECHERS_COUNT,                 result.nbLeechers },
+            {    KEY_RESULT_ENGINE_NAME,                 result.engineName },
+            {       KEY_RESULT_SITE_URL,                    result.siteUrl },
+            {     KEY_RESULT_DESCR_LINK,                  result.descrLink },
+            {       KEY_RESULT_PUB_DATE, result.pubDate.toSecsSinceEpoch() }
         });
     }
 
@@ -364,7 +363,8 @@ void SearchJobManager::saveSearchResults(const int searchId) const
     if (!saveResult)
     {
         LogMsg(tr("Failed to save WebUI search results. File: \"%1\". Error: \"%2\"")
-                .arg(resultsFilePath.toString(), saveResult.error()), Log::WARNING);
+                   .arg(resultsFilePath.toString(), saveResult.error()),
+               Log::WARNING);
     }
 }
 
@@ -384,8 +384,8 @@ void SearchJobManager::removeAllResultFiles() const
 {
     const Path dataFolderPath = specialFolderLocation(SpecialFolder::Data) / DATA_FOLDER;
     // Remove all .json files except Session.json
-    const QStringList entries = QDir(dataFolderPath.data()).entryList({u"*.json"_s}, QDir::Files);
-    for (const QString &entry : entries)
+    const QStringList entries = QDir(dataFolderPath.data()).entryList({ u"*.json"_s }, QDir::Files);
+    for (const QString& entry : entries)
     {
         if (entry != SESSION_FILE_NAME)
             std::ignore = Utils::Fs::removeFile(dataFolderPath / Path(entry));
@@ -394,7 +394,7 @@ void SearchJobManager::removeAllResultFiles() const
 
 void SearchJobManager::onPreferencesChanged()
 {
-    const auto *pref = Preferences::instance();
+    const auto* pref = Preferences::instance();
 
     const bool storeSearchJobs = pref->storeSearchJobs();
     if (storeSearchJobs != m_storeSearchJobs)
@@ -410,7 +410,7 @@ void SearchJobManager::onPreferencesChanged()
         if (m_storeSearchJobResults && m_storeSearchJobs)
         {
             // Save results for all completed searches
-            for (const JobInfo &job : asConst(m_jobs))
+            for (const JobInfo& job : asConst(m_jobs))
             {
                 if (!job.active)
                     saveSearchResults(job.id);

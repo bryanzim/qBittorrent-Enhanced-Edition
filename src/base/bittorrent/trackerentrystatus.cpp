@@ -43,12 +43,12 @@ void BitTorrent::TrackerEntryStatus::clear()
     endpoints.clear();
 }
 
-bool BitTorrent::operator==(const TrackerEntryStatus &left, const TrackerEntryStatus &right)
+bool BitTorrent::operator==(const TrackerEntryStatus& left, const TrackerEntryStatus& right)
 {
     return (left.url == right.url);
 }
 
-std::size_t BitTorrent::qHash(const TrackerEntryStatus &key, const std::size_t seed)
+std::size_t BitTorrent::qHash(const TrackerEntryStatus& key, const std::size_t seed)
 {
     return ::qHash(key.url, seed);
 }

@@ -28,4 +28,4 @@
 
 #pragma once
 
-inline const char *QBT_NAMESPACE = "qBittorrent";
+inline const char* QBT_NAMESPACE = "qBittorrent";

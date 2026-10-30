@@ -28,10 +28,6 @@
 
 #pragma once
 
-#include <libtorrent/add_torrent_params.hpp>
-
-#include <QString>
-
 #include "base/path.h"
 #include "base/tagset.h"
 #include "sharelimits.h"
@@ -39,11 +35,14 @@
 #include "torrent.h"
 #include "torrentcontentlayout.h"
 
+#include <QString>
+#include <libtorrent/add_torrent_params.hpp>
+
 namespace BitTorrent
 {
     struct LoadTorrentParams
     {
-        lt::add_torrent_params ltAddTorrentParams {};
+        lt::add_torrent_params ltAddTorrentParams{};
 
         QString name;
         QString category;

@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include <optional>
+#include "base/bittorrent/sharelimits.h"
 
 #include <QWidget>
 
-#include "base/bittorrent/sharelimits.h"
+#include <optional>
 
 namespace Ui
 {
@@ -51,7 +51,7 @@ public:
         Category
     };
 
-    explicit TorrentShareLimitsWidget(QWidget *parent = nullptr);
+    explicit TorrentShareLimitsWidget(QWidget* parent = nullptr);
     ~TorrentShareLimitsWidget() override;
 
     void setRatioLimit(qreal ratioLimit);
@@ -60,7 +60,7 @@ public:
     void setShareLimitsMode(BitTorrent::ShareLimitsMode mode);
     void setShareLimitAction(BitTorrent::ShareLimitAction action);
 
-    void setDefaults(UsedDefaults usedDefaults, const BitTorrent::ShareLimits &shareLimits);
+    void setDefaults(UsedDefaults usedDefaults, const BitTorrent::ShareLimits& shareLimits);
 
     std::optional<qreal> ratioLimit() const;
     std::optional<int> seedingTimeLimit() const;
@@ -74,7 +74,7 @@ private:
     void onInactiveSeedingTimeLimitModeChanged(int currentIndex, int previousIndex);
     void resetDefaultItemsText();
 
-    Ui::TorrentShareLimitsWidget *m_ui = nullptr;
+    Ui::TorrentShareLimitsWidget* m_ui = nullptr;
 
     int m_seedingTimeLimit = 1440;
     int m_inactiveSeedingTimeLimit = 1440;

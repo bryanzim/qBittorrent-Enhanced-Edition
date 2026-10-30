@@ -41,10 +41,10 @@
 #include <io.h>
 #endif
 
+#include "base/version.h"
+
 #include <QCoreApplication>
 #include <QMetaObject>
-
-#include "base/version.h"
 
 #ifdef STACKTRACE
 #include "stacktrace.h"
@@ -52,13 +52,12 @@
 #ifndef DISABLE_GUI
 #include "gui/stacktracedialog.h"
 #endif
-#endif //STACKTRACE
+#endif // STACKTRACE
 
 namespace
 {
     // sys_signame[] is only defined in BSD
-    const char *const sysSigName[] =
-    {
+    const char* const sysSigName[] = {
 #ifdef Q_OS_WIN
         "", "", "SIGINT", "", "SIGILL", "", "SIGABRT_COMPAT", "", "SIGFPE", "",
         "", "SIGSEGV", "", "", "", "SIGTERM", "", "", "", "",
@@ -72,7 +71,7 @@ namespace
 #endif
     };
 
-    void safePrint(const char *str)
+    void safePrint(const char* str)
     {
         const size_t strLen = strlen(str);
 #ifdef Q_OS_WIN
@@ -86,27 +85,27 @@ namespace
 
     void normalExitHandler(const int signum)
     {
-        const char *msgs[] = {"Catching signal: ", sysSigName[signum], "\nExiting cleanly\n"};
+        const char* msgs[] = { "Catching signal: ", sysSigName[signum], "\nExiting cleanly\n" };
         std::ranges::for_each(msgs, safePrint);
         signal(signum, SIG_DFL);
-        QMetaObject::invokeMethod(qApp, [] { QCoreApplication::exit(); }, Qt::QueuedConnection);  // unsafe, but exit anyway
+        QMetaObject::invokeMethod(qApp, [] { QCoreApplication::exit(); }, Qt::QueuedConnection); // unsafe, but exit anyway
     }
 
 #ifdef STACKTRACE
     void abnormalExitHandler(const int signum)
     {
         const char msg[] = "\n\n*************************************************************\n"
-            "Please file a bug report at https://bug.qbittorrent.org and provide the following information:\n\n"
-            "qBittorrent version: " QBT_VERSION "\n\n"
-            "Caught signal: ";
-        const char *sigName = sysSigName[signum];
+                           "Please file a bug report at https://bug.qbittorrent.org and provide the following information:\n\n"
+                           "qBittorrent version: " QBT_VERSION "\n\n"
+                           "Caught signal: ";
+        const char* sigName = sysSigName[signum];
         const std::string stacktrace = getStacktrace();
 
-        const char *msgs[] = {msg, sigName, "\n```\n", stacktrace.c_str(), "```\n\n"};
+        const char* msgs[] = { msg, sigName, "\n```\n", stacktrace.c_str(), "```\n\n" };
         std::ranges::for_each(msgs, safePrint);
 
 #ifndef DISABLE_GUI
-        StacktraceDialog dlg;  // unsafe
+        StacktraceDialog dlg; // unsafe
         dlg.setText(QString::fromLatin1(sigName), QString::fromStdString(stacktrace));
         dlg.exec();
 #endif

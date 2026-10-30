@@ -28,8 +28,8 @@
 
 #include "keysequence.h"
 
-#include <QtSystemDetection>
 #include <QKeySequence>
+#include <QtSystemDetection>
 
 QKeySequence Utils::KeySequence::deleteItem()
 {

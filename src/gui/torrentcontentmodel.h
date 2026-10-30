@@ -29,13 +29,13 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QAbstractItemModel>
-#include <QList>
-
 #include "base/indexrange.h"
 #include "base/pathfwd.h"
 #include "torrentcontentmodelitem.h"
+
+#include <QAbstractItemModel>
+#include <QList>
+#include <QtContainerFwd>
 
 class QFileIconProvider;
 class QMimeData;
@@ -60,34 +60,34 @@ public:
         UnderlyingDataRole = Qt::UserRole
     };
 
-    explicit TorrentContentModel(QObject *parent = nullptr);
+    explicit TorrentContentModel(QObject* parent = nullptr);
     ~TorrentContentModel() override;
 
-    void setContentHandler(BitTorrent::TorrentContentHandler *contentHandler);
-    BitTorrent::TorrentContentHandler *contentHandler() const;
+    void setContentHandler(BitTorrent::TorrentContentHandler* contentHandler);
+    BitTorrent::TorrentContentHandler* contentHandler() const;
 
     void refresh();
 
     QList<BitTorrent::DownloadPriority> getFilePriorities() const;
-    TorrentContentModelItem::ItemType itemType(const QModelIndex &index) const;
-    int getFileIndex(const QModelIndex &index) const;
-    QSet<int> getFileIndexes(const QModelIndex &itemIndex) const;
-    Path getItemPath(const QModelIndex &index) const;
+    TorrentContentModelItem::ItemType itemType(const QModelIndex& index) const;
+    int getFileIndex(const QModelIndex& index) const;
+    QSet<int> getFileIndexes(const QModelIndex& itemIndex) const;
+    Path getItemPath(const QModelIndex& index) const;
 
-    int columnCount(const QModelIndex &parent = {}) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    int columnCount(const QModelIndex& parent = {}) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
-    QModelIndex parent(const QModelIndex &index) const override;
-    int rowCount(const QModelIndex &parent = {}) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
+    int rowCount(const QModelIndex& parent = {}) const override;
 
-    QModelIndex index(const Path &itemPath) const;
-    QModelIndex index(const TorrentContentModelItem *item) const;
+    QModelIndex index(const Path& itemPath) const;
+    QModelIndex index(const TorrentContentModelItem* item) const;
 
 signals:
-    void renameFailed(const QString &errorMessage);
+    void renameFailed(const QString& errorMessage);
 
 private:
     using ColumnInterval = IndexInterval<int>;
@@ -98,27 +98,26 @@ private:
         SuppressInsertRowsNotify = 1
     };
 
-    QMimeData *mimeData(const QModelIndexList &indexes) const override;
+    QMimeData* mimeData(const QModelIndexList& indexes) const override;
     QStringList mimeTypes() const override;
     void populate();
-    TorrentContentModelFolder *populateFolder(const Path &folderPath, PopulateFolderFlags flags = None);
-    void removeEmptyBranch(const Path &folderPath);
+    TorrentContentModelFolder* populateFolder(const Path& folderPath, PopulateFolderFlags flags = None);
+    void removeEmptyBranch(const Path& folderPath);
 
     void onMetadataReceived();
-    void onFileRenamed(int index, const Path &oldFilePath);
-    void onFolderRenamed(const Path &newFolderPath, const Path &oldFolderPath);
-    void onFolderRenamingFailed(const Path &newFolderPath, const Path &oldFolderPath
-            , const QHash<int, Path> &renamedFiles, const QList<int> &failedFileIndexes);
+    void onFileRenamed(int index, const Path& oldFilePath);
+    void onFolderRenamed(const Path& newFolderPath, const Path& oldFolderPath);
+    void onFolderRenamingFailed(const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles, const QList<int>& failedFileIndexes);
 
     void updateFilesProgress();
     void updateFilesPriorities();
     void updateFilesAvailability();
-    bool setItemPriority(const QModelIndex &index, BitTorrent::DownloadPriority priority);
-    void notifySubtreeUpdated(const QModelIndex &index, const QList<ColumnInterval> &columns);
+    bool setItemPriority(const QModelIndex& index, BitTorrent::DownloadPriority priority);
+    void notifySubtreeUpdated(const QModelIndex& index, const QList<ColumnInterval>& columns);
 
-    BitTorrent::TorrentContentHandler *m_contentHandler = nullptr;
-    TorrentContentModelFolder *m_rootItem = nullptr;
-    QList<TorrentContentModelFile *> m_filesIndex;
-    QHash<Path, TorrentContentModelItem *> m_itemByPath;
-    QFileIconProvider *m_fileIconProvider = nullptr;
+    BitTorrent::TorrentContentHandler* m_contentHandler = nullptr;
+    TorrentContentModelFolder* m_rootItem = nullptr;
+    QList<TorrentContentModelFile*> m_filesIndex;
+    QHash<Path, TorrentContentModelItem*> m_itemByPath;
+    QFileIconProvider* m_fileIconProvider = nullptr;
 };

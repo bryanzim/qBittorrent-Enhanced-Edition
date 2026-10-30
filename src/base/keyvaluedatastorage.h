@@ -38,17 +38,17 @@ class KeyValueDataStorage final : public QObject
     Q_DISABLE_COPY_MOVE(KeyValueDataStorage)
 
 public:
-    explicit KeyValueDataStorage(const QString &storageName, QObject *parent = nullptr);
+    explicit KeyValueDataStorage(const QString& storageName, QObject* parent = nullptr);
     ~KeyValueDataStorage() override;
 
-    QFuture<QVariant> fetchValue(const QString &key) const;
-    void storeValue(const QString &key, const QVariant &value);
-    void storeValue(const QString &key, QVariant &&value);
-    void removeValue(const QString &key);
+    QFuture<QVariant> fetchValue(const QString& key) const;
+    void storeValue(const QString& key, const QVariant& value);
+    void storeValue(const QString& key, QVariant&& value);
+    void removeValue(const QString& key);
 
 private:
     QString m_storageName;
 
     class Worker;
-    mutable Worker *m_asyncWorker = nullptr;
+    mutable Worker* m_asyncWorker = nullptr;
 };

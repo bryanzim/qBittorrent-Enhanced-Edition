@@ -29,32 +29,28 @@
 
 #include "inhibitordbus.h"
 
+#include "base/global.h"
+#include "base/logger.h"
+
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusPendingCall>
 #include <QDBusPendingReply>
 
-#include "base/global.h"
-#include "base/logger.h"
-
-InhibitorDBus::InhibitorDBus(QObject *parent)
-    : QObject(parent)
-    , m_busInterface {new QDBusInterface(u"org.gnome.SessionManager"_s, u"/org/gnome/SessionManager"_s
-        , u"org.gnome.SessionManager"_s, QDBusConnection::sessionBus(), this)}
+InhibitorDBus::InhibitorDBus(QObject* parent)
+    : QObject(parent), m_busInterface{ new QDBusInterface(u"org.gnome.SessionManager"_s, u"/org/gnome/SessionManager"_s, u"org.gnome.SessionManager"_s, QDBusConnection::sessionBus(), this) }
 {
     if (!m_busInterface->isValid())
     {
         delete m_busInterface;
 
-        m_busInterface = new QDBusInterface(u"org.freedesktop.login1"_s, u"/org/freedesktop/login1"_s
-            , u"org.freedesktop.login1.Manager"_s, QDBusConnection::systemBus(), this);
+        m_busInterface = new QDBusInterface(u"org.freedesktop.login1"_s, u"/org/freedesktop/login1"_s, u"org.freedesktop.login1.Manager"_s, QDBusConnection::systemBus(), this);
         m_manager = ManagerType::Systemd;
         if (!m_busInterface->isValid())
         {
             delete m_busInterface;
 
-            m_busInterface = new QDBusInterface(u"org.freedesktop.PowerManagement"_s, u"/org/freedesktop/PowerManagement/Inhibit"_s
-                , u"org.freedesktop.PowerManagement.Inhibit"_s, QDBusConnection::sessionBus(), this);
+            m_busInterface = new QDBusInterface(u"org.freedesktop.PowerManagement"_s, u"/org/freedesktop/PowerManagement/Inhibit"_s, u"org.freedesktop.PowerManagement.Inhibit"_s, QDBusConnection::sessionBus(), this);
             m_manager = ManagerType::Freedesktop;
             if (!m_busInterface->isValid())
             {
@@ -100,18 +96,18 @@ bool InhibitorDBus::requestBusy()
     switch (m_manager)
     {
     case ManagerType::Freedesktop:
-        args = {u"qBittorrent"_s, message};
+        args = { u"qBittorrent"_s, message };
         break;
     case ManagerType::Gnome:
-        args = {u"qBittorrent"_s, 0u, message, 4u};
+        args = { u"qBittorrent"_s, 0u, message, 4u };
         break;
     case ManagerType::Systemd:
-        args = {u"sleep"_s, u"qBittorrent"_s, message, u"block"_s};
+        args = { u"sleep"_s, u"qBittorrent"_s, message, u"block"_s };
         break;
     }
 
     const QDBusPendingCall pcall = m_busInterface->asyncCallWithArgumentList(u"Inhibit"_s, args);
-    const auto *watcher = new QDBusPendingCallWatcher(pcall, this);
+    const auto* watcher = new QDBusPendingCallWatcher(pcall, this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this, &InhibitorDBus::onAsyncReply);
     return true;
 }
@@ -142,15 +138,15 @@ bool InhibitorDBus::requestIdle()
     m_state = RequestIdle;
 
     const QString method = (m_manager == ManagerType::Gnome)
-        ? u"Uninhibit"_s
-        : u"UnInhibit"_s;
+                               ? u"Uninhibit"_s
+                               : u"UnInhibit"_s;
     const QDBusPendingCall pcall = m_busInterface->asyncCall(method, m_cookie);
-    const auto *watcher = new QDBusPendingCallWatcher(pcall, this);
+    const auto* watcher = new QDBusPendingCallWatcher(pcall, this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this, &InhibitorDBus::onAsyncReply);
     return true;
 }
 
-void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher *call)
+void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher* call)
 {
     call->deleteLater();
 
@@ -160,8 +156,7 @@ void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher *call)
 
         if (reply.isError())
         {
-            LogMsg(tr("Power management error. Action: %1. Error: %2").arg(u"RequestIdle"_s
-                , reply.error().message()), Log::WARNING);
+            LogMsg(tr("Power management error. Action: %1. Error: %2").arg(u"RequestIdle"_s, reply.error().message()), Log::WARNING);
             m_state = Error;
         }
         else
@@ -179,8 +174,7 @@ void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher *call)
 
             if (reply.isError())
             {
-                LogMsg(tr("Power management error. Action: %1. Error: %2").arg(u"RequestBusy"_s
-                    , reply.error().message()), Log::WARNING);
+                LogMsg(tr("Power management error. Action: %1. Error: %2").arg(u"RequestBusy"_s, reply.error().message()), Log::WARNING);
                 m_state = Error;
             }
             else
@@ -197,8 +191,7 @@ void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher *call)
 
             if (reply.isError())
             {
-                LogMsg(tr("Power management error. Action: %1. Error: %2").arg(u"RequestBusy"_s
-                    , reply.error().message()), Log::WARNING);
+                LogMsg(tr("Power management error. Action: %1. Error: %2").arg(u"RequestBusy"_s, reply.error().message()), Log::WARNING);
                 m_state = Error;
             }
             else
@@ -217,8 +210,7 @@ void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher *call)
 
         if (error.isValid())
         {
-            LogMsg(tr("Power management unexpected error. State: %1. Error: %2").arg(QString::number(m_state)
-                , error.message()), Log::WARNING);
+            LogMsg(tr("Power management unexpected error. State: %1. Error: %2").arg(QString::number(m_state), error.message()), Log::WARNING);
         }
         m_state = Error;
     }

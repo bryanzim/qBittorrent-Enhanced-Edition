@@ -28,6 +28,12 @@
 
 #include "pluginsdialog.h"
 
+#include "base/path.h"
+#include "gui/autoexpandabledialog.h"
+#include "gui/uithememanager.h"
+#include "gui/utils.h"
+#include "ui_pluginsdialog.h"
+
 #include <QClipboard>
 #include <QDropEvent>
 #include <QFileDialog>
@@ -37,12 +43,6 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QSignalBlocker>
-
-#include "base/path.h"
-#include "gui/autoexpandabledialog.h"
-#include "gui/uithememanager.h"
-#include "gui/utils.h"
-#include "ui_pluginsdialog.h"
 
 #define SETTINGS_KEY(name) u"PluginsDialog/" name
 
@@ -55,13 +55,8 @@ enum PluginColumns
     PLUGIN_STATE
 };
 
-PluginsDialog::PluginsDialog(PluginsEngine *pluginsEngine, QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::PluginsDialog}
-    , m_pluginsEngine {pluginsEngine}
-    , m_storeDialogSize {SETTINGS_KEY(u"Size"_s)}
-    , m_storeHeaderState {SETTINGS_KEY(u"HeaderState"_s)}
-    , m_storeLastPath {SETTINGS_KEY(u"LastUsedPath"_s)}
+PluginsDialog::PluginsDialog(PluginsEngine* pluginsEngine, QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::PluginsDialog }, m_pluginsEngine{ pluginsEngine }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }, m_storeHeaderState{ SETTINGS_KEY(u"HeaderState"_s) }, m_storeLastPath{ SETTINGS_KEY(u"LastUsedPath"_s) }
 {
     m_ui->setupUi(this);
 
@@ -103,7 +98,7 @@ PluginsDialog::~PluginsDialog()
     delete m_ui;
 }
 
-void PluginsDialog::dragEnterEvent(QDragEnterEvent *event)
+void PluginsDialog::dragEnterEvent(QDragEnterEvent* event)
 {
     if (event->mimeData()->hasText() || event->mimeData()->hasUrls())
     {
@@ -112,19 +107,19 @@ void PluginsDialog::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void PluginsDialog::dragMoveEvent(QDragMoveEvent *event)
+void PluginsDialog::dragMoveEvent(QDragMoveEvent* event)
 {
     event->acceptProposedAction();
 }
 
-void PluginsDialog::dropEvent(QDropEvent *event)
+void PluginsDialog::dropEvent(QDropEvent* event)
 {
     event->acceptProposedAction();
 
-    const QMimeData *mimeData = event->mimeData();
+    const QMimeData* mimeData = event->mimeData();
     if (mimeData->hasUrls())
     {
-        for (const QUrl &url : asConst(mimeData->urls()))
+        for (const QUrl& url : asConst(mimeData->urls()))
         {
             if (url.isLocalFile())
                 installPlugin(Path(url.toLocalFile()));
@@ -132,7 +127,7 @@ void PluginsDialog::dropEvent(QDropEvent *event)
     }
     else
     {
-        for (const QString &pathStr : asConst(mimeData->text().split(u'\n')))
+        for (const QString& pathStr : asConst(mimeData->text().split(u'\n')))
             installPlugin(Path(pathStr));
     }
 }
@@ -140,10 +135,9 @@ void PluginsDialog::dropEvent(QDropEvent *event)
 void PluginsDialog::onActionInstallTriggered()
 {
     const QStringList pathsList = QFileDialog::getOpenFileNames(
-            nullptr, tr("Select plugins"), m_storeLastPath.get(QDir::homePath())
-            , (tr("qBittorrent plugin") + u" (*.lua)"));
+        nullptr, tr("Select plugins"), m_storeLastPath.get(QDir::homePath()), (tr("qBittorrent plugin") + u" (*.lua)"));
 
-    for (const QString &pathStr : pathsList)
+    for (const QString& pathStr : pathsList)
         installPlugin(Path(pathStr));
 
     if (!pathsList.isEmpty())
@@ -152,7 +146,7 @@ void PluginsDialog::onActionInstallTriggered()
 
 void PluginsDialog::onActionUninstallTriggered()
 {
-    for (QTreeWidgetItem *item : asConst(m_ui->pluginsTree->selectedItems()))
+    for (QTreeWidgetItem* item : asConst(m_ui->pluginsTree->selectedItems()))
     {
         const int index = m_ui->pluginsTree->indexOfTopLevelItem(item);
         Q_ASSERT(index != -1);
@@ -168,7 +162,7 @@ void PluginsDialog::onActionUninstallTriggered()
     }
 }
 
-void PluginsDialog::togglePluginState(QTreeWidgetItem *item)
+void PluginsDialog::togglePluginState(QTreeWidgetItem* item)
 {
     const QString pluginID = item->text(PLUGIN_ID);
     const bool isEnabled = item->data(PLUGIN_STATE, Qt::UserRole).toBool();
@@ -177,21 +171,21 @@ void PluginsDialog::togglePluginState(QTreeWidgetItem *item)
 
 void PluginsDialog::displayContextMenu()
 {
-    const QList<QTreeWidgetItem *> items = m_ui->pluginsTree->selectedItems();
+    const QList<QTreeWidgetItem*> items = m_ui->pluginsTree->selectedItems();
     if (items.isEmpty())
         return;
 
-    QMenu *myContextMenu = new QMenu(this);
+    QMenu* myContextMenu = new QMenu(this);
     myContextMenu->setAttribute(Qt::WA_DeleteOnClose);
 
-    const QTreeWidgetItem *firstItem = items.first();
+    const QTreeWidgetItem* firstItem = items.first();
     const bool isEnabled = firstItem->data(PLUGIN_STATE, Qt::UserRole).toBool();
 
     myContextMenu->addAction(m_ui->actionEnable);
     myContextMenu->addSeparator();
     myContextMenu->addAction(m_ui->actionUninstall);
 
-    [[maybe_unused]] const QSignalBlocker actionEnableSignalBlocker {*m_ui->actionEnable};
+    [[maybe_unused]] const QSignalBlocker actionEnableSignalBlocker{ *m_ui->actionEnable };
     m_ui->actionEnable->setChecked(isEnabled);
 
     myContextMenu->popup(QCursor::pos());
@@ -199,7 +193,7 @@ void PluginsDialog::displayContextMenu()
 
 void PluginsDialog::enableSelection(const bool enable)
 {
-    for (QTreeWidgetItem *item : asConst(m_ui->pluginsTree->selectedItems()))
+    for (QTreeWidgetItem* item : asConst(m_ui->pluginsTree->selectedItems()))
     {
         const int index = m_ui->pluginsTree->indexOfTopLevelItem(item);
         Q_ASSERT(index != -1);
@@ -221,20 +215,20 @@ void PluginsDialog::enableSelection(const bool enable)
     }
 }
 
-void PluginsDialog::setRowColor(const int row, const QString &color)
+void PluginsDialog::setRowColor(const int row, const QString& color)
 {
-    QTreeWidgetItem *item = m_ui->pluginsTree->topLevelItem(row);
+    QTreeWidgetItem* item = m_ui->pluginsTree->topLevelItem(row);
     for (int i = 0; i < m_ui->pluginsTree->columnCount(); ++i)
     {
         item->setData(i, Qt::ForegroundRole, QColor(color));
     }
 }
 
-QTreeWidgetItem *PluginsDialog::findItem(const QString &pluginID)
+QTreeWidgetItem* PluginsDialog::findItem(const QString& pluginID)
 {
     for (int i = 0; i < m_ui->pluginsTree->topLevelItemCount(); ++i)
     {
-        QTreeWidgetItem *item = m_ui->pluginsTree->topLevelItem(i);
+        QTreeWidgetItem* item = m_ui->pluginsTree->topLevelItem(i);
         if (pluginID == item->text(PLUGIN_ID))
             return item;
     }
@@ -246,13 +240,13 @@ void PluginsDialog::loadPlugins()
 {
     // Some clean up first
     m_ui->pluginsTree->clear();
-    for (const PluginInfo &pluginInfo : asConst(m_pluginsEngine->allPlugins()))
+    for (const PluginInfo& pluginInfo : asConst(m_pluginsEngine->allPlugins()))
         addNewPlugin(pluginInfo);
 }
 
-void PluginsDialog::addNewPlugin(const PluginInfo &pluginInfo)
+void PluginsDialog::addNewPlugin(const PluginInfo& pluginInfo)
 {
-    auto *item = new QTreeWidgetItem(m_ui->pluginsTree);
+    auto* item = new QTreeWidgetItem(m_ui->pluginsTree);
     item->setText(PLUGIN_ID, pluginInfo.id);
     item->setText(PLUGIN_NAME, pluginInfo.name);
     item->setText(PLUGIN_INVOCABLE, (pluginInfo.invocable ? tr("Yes") : tr("No")));
@@ -271,9 +265,9 @@ void PluginsDialog::addNewPlugin(const PluginInfo &pluginInfo)
     item->setText(PLUGIN_VERSION, pluginInfo.version.toString());
 }
 
-void PluginsDialog::updatePlugin(const PluginInfo &pluginInfo)
+void PluginsDialog::updatePlugin(const PluginInfo& pluginInfo)
 {
-    QTreeWidgetItem *item = findItem(pluginInfo.id);
+    QTreeWidgetItem* item = findItem(pluginInfo.id);
     if (!item)
         return;
 
@@ -282,7 +276,7 @@ void PluginsDialog::updatePlugin(const PluginInfo &pluginInfo)
     item->setText(PLUGIN_VERSION, pluginInfo.version.toString());
 }
 
-void PluginsDialog::installPlugin(const Path &pluginPath)
+void PluginsDialog::installPlugin(const Path& pluginPath)
 {
     if (m_pluginsEngine->installPlugin(pluginPath))
     {
@@ -305,7 +299,7 @@ void PluginsDialog::finishAsyncOp()
         setCursor(QCursor(Qt::ArrowCursor));
 }
 
-void PluginsDialog::pluginInstalled(const Path &pluginPath, const PluginInfo &pluginInfo)
+void PluginsDialog::pluginInstalled(const Path& pluginPath, const PluginInfo& pluginInfo)
 {
     addNewPlugin(pluginInfo);
     if (m_installingPlugins.remove(pluginPath))
@@ -315,43 +309,37 @@ void PluginsDialog::pluginInstalled(const Path &pluginPath, const PluginInfo &pl
     }
 }
 
-void PluginsDialog::pluginInstallationFailed(const Path &pluginPath, const QString &reason)
+void PluginsDialog::pluginInstallationFailed(const Path& pluginPath, const QString& reason)
 {
     if (m_installingPlugins.remove(pluginPath))
     {
         finishAsyncOp();
-        QMessageBox::information(this, tr("Plugin install")
-                , tr("Couldn't install plugin from file '%1'.\n%2").arg(pluginPath.toString(), reason));
+        QMessageBox::information(this, tr("Plugin install"), tr("Couldn't install plugin from file '%1'.\n%2").arg(pluginPath.toString(), reason));
     }
 }
 
-void PluginsDialog::pluginUpdated(const Path &pluginPath
-        , const PluginInfo &, const PluginInfo &newPluginInfo)
+void PluginsDialog::pluginUpdated(const Path& pluginPath, const PluginInfo&, const PluginInfo& newPluginInfo)
 {
     updatePlugin(newPluginInfo);
     if (m_installingPlugins.remove(pluginPath))
     {
         finishAsyncOp();
-        QMessageBox::information(this, tr("Plugin update"), tr("Plugin '%1' updated to version %2.")
-                .arg(newPluginInfo.id, newPluginInfo.version.toString()));
+        QMessageBox::information(this, tr("Plugin update"), tr("Plugin '%1' updated to version %2.").arg(newPluginInfo.id, newPluginInfo.version.toString()));
     }
 }
 
-void PluginsDialog::pluginUpdateFailed(const Path &pluginPath, const PluginInfo &currentPluginInfo
-        , const PluginInfo &, const QString &reason)
+void PluginsDialog::pluginUpdateFailed(const Path& pluginPath, const PluginInfo& currentPluginInfo, const PluginInfo&, const QString& reason)
 {
     if (m_installingPlugins.remove(pluginPath))
     {
         finishAsyncOp();
-        QMessageBox::information(this, tr("Plugin update")
-                , tr("Couldn't update plugin '%1' from file '%2'.\n%3")
-                        .arg(currentPluginInfo.id, pluginPath.toString(), reason));
+        QMessageBox::information(this, tr("Plugin update"), tr("Couldn't update plugin '%1' from file '%2'.\n%3").arg(currentPluginInfo.id, pluginPath.toString(), reason));
     }
 }
 
-void PluginsDialog::pluginUninstalled(const QString &pluginID)
+void PluginsDialog::pluginUninstalled(const QString& pluginID)
 {
-    const QTreeWidgetItem *item = findItem(pluginID);
+    const QTreeWidgetItem* item = findItem(pluginID);
     if (!item)
         return;
 
@@ -363,9 +351,9 @@ void PluginsDialog::pluginUninstalled(const QString &pluginID)
     }
 }
 
-void PluginsDialog::pluginUninstallationFailed(const QString &pluginID, const QString &reason)
+void PluginsDialog::pluginUninstallationFailed(const QString& pluginID, const QString& reason)
 {
-    const QTreeWidgetItem *item = findItem(pluginID);
+    const QTreeWidgetItem* item = findItem(pluginID);
     if (!item)
         return;
 
@@ -374,14 +362,13 @@ void PluginsDialog::pluginUninstallationFailed(const QString &pluginID, const QS
         // Disable it instead
         m_pluginsEngine->setPluginEnabled(pluginID, false);
         finishAsyncOp();
-        QMessageBox::warning(this, tr("Plugin uninstall")
-                , tr("Failed to uninstall plugin '%1'.\n%2").arg(pluginID, reason));
+        QMessageBox::warning(this, tr("Plugin uninstall"), tr("Failed to uninstall plugin '%1'.\n%2").arg(pluginID, reason));
     }
 }
 
-void PluginsDialog::pluginEnabledChanged(const QString &pluginID, bool isEnabled)
+void PluginsDialog::pluginEnabledChanged(const QString& pluginID, bool isEnabled)
 {
-    QTreeWidgetItem *item = findItem(pluginID);
+    QTreeWidgetItem* item = findItem(pluginID);
     if (!item)
         return;
 

@@ -42,16 +42,16 @@ class SearchDownloadHandler : public QObject
 
     friend class SearchPluginManager;
 
-    SearchDownloadHandler(const QString &pluginName, const QString &url, SearchPluginManager *manager);
+    SearchDownloadHandler(const QString& pluginName, const QString& url, SearchPluginManager* manager);
 
 signals:
-    void downloadFinished(const QString &path, const QString &errorMessage);
+    void downloadFinished(const QString& path, const QString& errorMessage);
 
 private:
     void downloadProcessFinished(int exitcode);
 
     QString m_pluginName;
     QString m_url;
-    SearchPluginManager *m_manager = nullptr;
-    QProcess *m_downloadProcess = nullptr;
+    SearchPluginManager* m_manager = nullptr;
+    QProcess* m_downloadProcess = nullptr;
 };

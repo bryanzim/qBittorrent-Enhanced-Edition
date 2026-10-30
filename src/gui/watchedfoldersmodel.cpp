@@ -28,33 +28,30 @@
 
 #include "watchedfoldersmodel.h"
 
-#include <QDir>
-
 #include "base/exceptions.h"
 #include "base/global.h"
 #include "base/utils/fs.h"
 
-WatchedFoldersModel::WatchedFoldersModel(TorrentFilesWatcher *fsWatcher, QObject *parent)
-    : QAbstractListModel {parent}
-    , m_fsWatcher {fsWatcher}
-    , m_watchedFolders {m_fsWatcher->folders().keys()}
-    , m_watchedFoldersOptions {m_fsWatcher->folders()}
+#include <QDir>
+
+WatchedFoldersModel::WatchedFoldersModel(TorrentFilesWatcher* fsWatcher, QObject* parent)
+    : QAbstractListModel{ parent }, m_fsWatcher{ fsWatcher }, m_watchedFolders{ m_fsWatcher->folders().keys() }, m_watchedFoldersOptions{ m_fsWatcher->folders() }
 {
     connect(m_fsWatcher, &TorrentFilesWatcher::watchedFolderSet, this, &WatchedFoldersModel::onFolderSet);
     connect(m_fsWatcher, &TorrentFilesWatcher::watchedFolderRemoved, this, &WatchedFoldersModel::onFolderRemoved);
 }
 
-int WatchedFoldersModel::rowCount(const QModelIndex &parent) const
+int WatchedFoldersModel::rowCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : m_watchedFolders.count();
 }
 
-int WatchedFoldersModel::columnCount([[maybe_unused]] const QModelIndex &parent) const
+int WatchedFoldersModel::columnCount([[maybe_unused]] const QModelIndex& parent) const
 {
     return 1;
 }
 
-QVariant WatchedFoldersModel::data(const QModelIndex &index, const int role) const
+QVariant WatchedFoldersModel::data(const QModelIndex& index, const int role) const
 {
     if (!index.isValid() || (index.row() >= rowCount()) || (index.column() >= columnCount()))
         return {};
@@ -67,8 +64,7 @@ QVariant WatchedFoldersModel::data(const QModelIndex &index, const int role) con
 
 QVariant WatchedFoldersModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
 {
-    if ((orientation != Qt::Horizontal) || (role != Qt::DisplayRole)
-            || (section < 0) || (section >= columnCount()))
+    if ((orientation != Qt::Horizontal) || (role != Qt::DisplayRole) || (section < 0) || (section >= columnCount()))
     {
         return {};
     }
@@ -76,10 +72,9 @@ QVariant WatchedFoldersModel::headerData(const int section, const Qt::Orientatio
     return tr("Watched Folder");
 }
 
-bool WatchedFoldersModel::removeRows(const int row, const int count, const QModelIndex &parent)
+bool WatchedFoldersModel::removeRows(const int row, const int count, const QModelIndex& parent)
 {
-    if (parent.isValid() || (row < 0) || (row >= rowCount())
-        || (count <= 0) || ((row + count) > rowCount()))
+    if (parent.isValid() || (row < 0) || (row >= rowCount()) || (count <= 0) || ((row + count) > rowCount()))
     {
         return false;
     }
@@ -90,7 +85,7 @@ bool WatchedFoldersModel::removeRows(const int row, const int count, const QMode
     beginRemoveRows(parent, firstRow, lastRow);
     for (int i = firstRow; i <= lastRow; ++i)
     {
-        const Path &folderPath = m_watchedFolders.at(i);
+        const Path& folderPath = m_watchedFolders.at(i);
         m_watchedFoldersOptions.remove(folderPath);
         m_deletedFolders.insert(folderPath);
     }
@@ -100,7 +95,7 @@ bool WatchedFoldersModel::removeRows(const int row, const int count, const QMode
     return true;
 }
 
-void WatchedFoldersModel::addFolder(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options)
+void WatchedFoldersModel::addFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     if (path.isEmpty())
         throw InvalidArgument(tr("Watched folder path cannot be empty."));
@@ -111,7 +106,7 @@ void WatchedFoldersModel::addFolder(const Path &path, const TorrentFilesWatcher:
     if (m_watchedFoldersOptions.contains(path))
         throw RuntimeError(tr("Folder '%1' is already in watch list.").arg(path.toString()));
 
-    const QDir watchDir {path.data()};
+    const QDir watchDir{ path.data() };
     if (!watchDir.exists())
         throw RuntimeError(tr("Folder '%1' doesn't exist.").arg(path.toString()));
     if (!watchDir.isReadable())
@@ -133,7 +128,7 @@ TorrentFilesWatcher::WatchedFolderOptions WatchedFoldersModel::folderOptions(con
     return m_watchedFoldersOptions[folderPath];
 }
 
-void WatchedFoldersModel::setFolderOptions(const int row, const TorrentFilesWatcher::WatchedFolderOptions &options)
+void WatchedFoldersModel::setFolderOptions(const int row, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     Q_ASSERT((row >= 0) && (row < rowCount()));
 
@@ -143,18 +138,18 @@ void WatchedFoldersModel::setFolderOptions(const int row, const TorrentFilesWatc
 
 void WatchedFoldersModel::apply()
 {
-    const QSet<Path> deletedFolders {m_deletedFolders};
+    const QSet<Path> deletedFolders{ m_deletedFolders };
     // We have to clear `m_deletedFolders` for optimization reason, otherwise
     // it will be cleared one element at a time in `onFolderRemoved()` handler
     m_deletedFolders.clear();
-    for (const Path &path : deletedFolders)
+    for (const Path& path : deletedFolders)
         m_fsWatcher->removeWatchedFolder(path);
 
-    for (const Path &path : asConst(m_watchedFolders))
+    for (const Path& path : asConst(m_watchedFolders))
         m_fsWatcher->setWatchedFolder(path, m_watchedFoldersOptions.value(path));
 }
 
-void WatchedFoldersModel::onFolderSet(const Path &path, const TorrentFilesWatcher::WatchedFolderOptions &options)
+void WatchedFoldersModel::onFolderSet(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     if (!m_watchedFoldersOptions.contains(path))
     {
@@ -171,7 +166,7 @@ void WatchedFoldersModel::onFolderSet(const Path &path, const TorrentFilesWatche
     }
 }
 
-void WatchedFoldersModel::onFolderRemoved(const Path &path)
+void WatchedFoldersModel::onFolderRemoved(const Path& path)
 {
     const qsizetype row = m_watchedFolders.indexOf(path);
     if (row >= 0)

@@ -46,7 +46,7 @@ namespace RSS
 
         friend class Feed;
 
-        Article(Feed *feed, const QVariantHash &varHash);
+        Article(Feed* feed, const QVariantHash& varHash);
 
     public:
         static const QString KeyId;
@@ -58,7 +58,7 @@ namespace RSS
         static const QString KeyLink;
         static const QString KeyIsRead;
 
-        Feed *feed() const;
+        Feed* feed() const;
         QString guid() const;
         QDateTime date() const;
         QString title() const;
@@ -71,14 +71,14 @@ namespace RSS
 
         void markAsRead();
 
-        static bool articleDateRecentThan(const Article *article, const QDateTime &date);
-        static bool isSupportedTorrentURL(const QString &url);
+        static bool articleDateRecentThan(const Article* article, const QDateTime& date);
+        static bool isSupportedTorrentURL(const QString& url);
 
     signals:
-        void read(Article *article = nullptr);
+        void read(Article* article = nullptr);
 
     private:
-        Feed *m_feed = nullptr;
+        Feed* m_feed = nullptr;
         QString m_guid;
         QDateTime m_date;
         QString m_title;

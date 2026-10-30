@@ -53,10 +53,9 @@ public:
         return static_cast<int>(BaseType::size());
     }
 
-    ThisType &intersect(const ThisType &other)
+    ThisType& intersect(const ThisType& other)
     {
-        std::erase_if(*this, [&other](const value_type &value) -> bool
-        {
+        std::erase_if(*this, [&other](const value_type& value) -> bool {
             return !other.contains(value);
         });
         return *this;
@@ -67,20 +66,20 @@ public:
         return BaseType::empty();
     }
 
-    bool remove(const key_type &value)
+    bool remove(const key_type& value)
     {
         return (BaseType::erase(value) > 0);
     }
 
     template <typename Set>
-    ThisType &unite(const Set &other)
+    ThisType& unite(const Set& other)
     {
         BaseType::insert(other.cbegin(), other.cend());
         return *this;
     }
 
     template <typename Set>
-    ThisType united(const Set &other) const
+    ThisType united(const Set& other) const
     {
         ThisType result = *this;
         result.unite(other);

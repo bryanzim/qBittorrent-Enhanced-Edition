@@ -28,13 +28,13 @@
 
 #pragma once
 
-#include <optional>
-
-#include <QString>
-
 #include "base/path.h"
 #include "downloadpathoption.h"
 #include "sharelimits.h"
+
+#include <QString>
+
+#include <optional>
 
 class QJsonObject;
 
@@ -47,9 +47,9 @@ namespace BitTorrent
 
         ShareLimits shareLimits;
 
-        static CategoryOptions fromJSON(const QJsonObject &jsonObj);
+        static CategoryOptions fromJSON(const QJsonObject& jsonObj);
         QJsonObject toJSON() const;
 
-        friend bool operator==(const CategoryOptions &, const CategoryOptions &) = default;
+        friend bool operator==(const CategoryOptions&, const CategoryOptions&) = default;
     };
 }

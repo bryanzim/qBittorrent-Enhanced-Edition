@@ -37,15 +37,14 @@ class GUIApplicationComponent : public Base, public ApplicationComponentBase
 {
 public:
     template <typename... Args>
-    explicit GUIApplicationComponent(IGUIApplication *app, Args&&... args)
-        : Base(std::forward<Args>(args)...)
-        , ApplicationComponentBase(reinterpret_cast<IApplication *>(app))
+    explicit GUIApplicationComponent(IGUIApplication* app, Args&&... args)
+        : Base(std::forward<Args>(args)...), ApplicationComponentBase(reinterpret_cast<IApplication*>(app))
     {
     }
 
-    IGUIApplication *app() const
+    IGUIApplication* app() const
     {
-        return reinterpret_cast<IGUIApplication *>(ApplicationComponentBase::app());
+        return reinterpret_cast<IGUIApplication*>(ApplicationComponentBase::app());
     }
 };
 
@@ -54,13 +53,13 @@ class GUIApplicationComponent<Base> : public Base
 {
 public:
     template <typename... Args>
-    explicit GUIApplicationComponent(IGUIApplication *app, Args&&... args)
-        : Base(reinterpret_cast<IApplication *>(app), std::forward<Args>(args)...)
+    explicit GUIApplicationComponent(IGUIApplication* app, Args&&... args)
+        : Base(reinterpret_cast<IApplication*>(app), std::forward<Args>(args)...)
     {
     }
 
-    IGUIApplication *app() const
+    IGUIApplication* app() const
     {
-        return reinterpret_cast<IGUIApplication *>(ApplicationComponentBase::app());
+        return reinterpret_cast<IGUIApplication*>(ApplicationComponentBase::app());
     }
 };

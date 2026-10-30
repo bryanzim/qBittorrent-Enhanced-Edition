@@ -31,10 +31,10 @@
 
 #pragma once
 
-#include <QList>
-
 #include "base/global.h"
 #include "rss_item.h"
+
+#include <QList>
 
 namespace RSS
 {
@@ -47,17 +47,17 @@ namespace RSS
 
         friend class Session;
 
-        explicit Folder(const QString &path = {});
+        explicit Folder(const QString& path = {});
         ~Folder() override;
 
     public:
-        QList<Article *> articles() const override;
+        QList<Article*> articles() const override;
         int unreadCount() const override;
         void markAsRead() override;
         void refresh() override;
         void updateFetchDelay() override;
 
-        QList<Item *> items() const;
+        QList<Item*> items() const;
 
         QJsonValue toJsonValue(bool withData = false) const override;
 
@@ -66,9 +66,9 @@ namespace RSS
 
     private:
         void cleanup() override;
-        void addItem(Item *item);
-        void removeItem(Item *item);
+        void addItem(Item* item);
+        void removeItem(Item* item);
 
-        QList<Item *> m_items;
+        QList<Item*> m_items;
     };
 }

@@ -49,7 +49,7 @@ namespace RSS
         friend class Session;
 
     public:
-        virtual QList<Article *> articles() const = 0;
+        virtual QList<Article*> articles() const = 0;
         virtual int unreadCount() const = 0;
         virtual void markAsRead() = 0;
         virtual void refresh() = 0;
@@ -62,28 +62,28 @@ namespace RSS
 
         static const QChar PathSeparator;
 
-        static bool isValidPath(const QString &path);
-        static QString joinPath(const QString &path1, const QString &path2);
-        static QStringList expandPath(const QString &path);
-        static QString parentPath(const QString &path);
-        static QString relativeName(const QString &path);
+        static bool isValidPath(const QString& path);
+        static QString joinPath(const QString& path1, const QString& path2);
+        static QStringList expandPath(const QString& path);
+        static QString parentPath(const QString& path);
+        static QString relativeName(const QString& path);
 
     signals:
-        void pathChanged(Item *item = nullptr);
-        void unreadCountChanged(Item *item = nullptr);
-        void aboutToBeDestroyed(Item *item = nullptr);
-        void newArticle(Article *article);
-        void articleRead(Article *article);
-        void articleAboutToBeRemoved(Article *article);
+        void pathChanged(Item* item = nullptr);
+        void unreadCountChanged(Item* item = nullptr);
+        void aboutToBeDestroyed(Item* item = nullptr);
+        void newArticle(Article* article);
+        void articleRead(Article* article);
+        void articleAboutToBeRemoved(Article* article);
 
     protected:
-        explicit Item(const QString &path);
+        explicit Item(const QString& path);
         ~Item() override = default;
 
         virtual void cleanup() = 0;
 
     private:
-        void setPath(const QString &path);
+        void setPath(const QString& path);
 
         QString m_path;
     };

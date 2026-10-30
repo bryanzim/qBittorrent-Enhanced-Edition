@@ -29,6 +29,9 @@
 
 #include "htmlbrowser.h"
 
+#include "base/path.h"
+#include "base/profile.h"
+
 #include <QApplication>
 #include <QDateTime>
 #include <QDebug>
@@ -38,12 +41,9 @@
 #include <QScrollBar>
 #include <QStyle>
 
-#include "base/path.h"
-#include "base/profile.h"
-
 using namespace Qt::Literals::StringLiterals;
 
-HtmlBrowser::HtmlBrowser(QWidget *parent)
+HtmlBrowser::HtmlBrowser(QWidget* parent)
     : QTextBrowser(parent)
 {
     m_netManager = new QNetworkAccessManager(this);
@@ -56,15 +56,15 @@ HtmlBrowser::HtmlBrowser(QWidget *parent)
     connect(m_netManager, &QNetworkAccessManager::finished, this, &HtmlBrowser::resourceLoaded);
 }
 
-QVariant HtmlBrowser::loadResource(int type, const QUrl &name)
+QVariant HtmlBrowser::loadResource(int type, const QUrl& name)
 {
     if (type == QTextDocument::ImageResource)
     {
-        QUrl url {name};
+        QUrl url{ name };
         if (url.scheme().isEmpty())
             url.setScheme(u"http"_s);
 
-        QIODevice *dev = m_diskCache->data(url);
+        QIODevice* dev = m_diskCache->data(url);
         if (dev)
         {
             qDebug() << "HtmlBrowser::loadResource() cache " << url.toString();
@@ -77,7 +77,7 @@ QVariant HtmlBrowser::loadResource(int type, const QUrl &name)
         {
             m_activeRequests.insert(url, true);
             qDebug() << "HtmlBrowser::loadResource() get " << url.toString();
-            QNetworkRequest req {url};
+            QNetworkRequest req{ url };
             req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
             m_netManager->get(req);
         }
@@ -88,7 +88,7 @@ QVariant HtmlBrowser::loadResource(int type, const QUrl &name)
     return QTextBrowser::loadResource(type, name);
 }
 
-void HtmlBrowser::resourceLoaded(QNetworkReply *reply)
+void HtmlBrowser::resourceLoaded(QNetworkReply* reply)
 {
     m_activeRequests.remove(reply->request().url());
 
@@ -111,7 +111,7 @@ void HtmlBrowser::resourceLoaded(QNetworkReply *reply)
         const auto currentDateTime = QDateTime::currentDateTime();
         metaData.setLastModified(currentDateTime);
         metaData.setExpirationDate(currentDateTime.addDays(1));
-        QIODevice *dev = m_diskCache->prepare(metaData);
+        QIODevice* dev = m_diskCache->prepare(metaData);
         if (!dev)
             return;
 

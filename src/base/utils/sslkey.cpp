@@ -31,10 +31,10 @@
 #include <QByteArray>
 #include <QSslKey>
 
-QSslKey Utils::SSLKey::load(const QByteArray &data)
+QSslKey Utils::SSLKey::load(const QByteArray& data)
 {
     // try different formats
-    if (const QSslKey key {data, QSsl::Ec}; !key.isNull())
+    if (const QSslKey key{ data, QSsl::Ec }; !key.isNull())
         return key;
-    return {data, QSsl::Rsa};
+    return { data, QSsl::Rsa };
 }

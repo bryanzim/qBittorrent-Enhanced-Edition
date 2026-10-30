@@ -33,7 +33,7 @@
 class Exception
 {
 public:
-    explicit Exception(const QString &message = {}) noexcept;
+    explicit Exception(const QString& message = {}) noexcept;
     [[nodiscard]] QString message() const noexcept;
 
 private:

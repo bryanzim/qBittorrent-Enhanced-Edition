@@ -30,10 +30,10 @@
 
 #include "requestparser.h"
 
-#include <algorithm>
-#include <cctype>
-#include <optional>
-#include <utility>
+#include "base/global.h"
+#include "base/utils/bytearray.h"
+#include "base/utils/string.h"
+#include "constants.h"
 
 #include <QByteArrayList>
 #include <QByteArrayView>
@@ -41,10 +41,10 @@
 #include <QUrl>
 #include <QUrlQuery>
 
-#include "base/global.h"
-#include "base/utils/bytearray.h"
-#include "base/utils/string.h"
-#include "constants.h"
+#include <algorithm>
+#include <cctype>
+#include <optional>
+#include <utility>
 
 using namespace Http;
 using namespace Utils::ByteArray;
@@ -83,11 +83,13 @@ namespace
 
         const QString name = QString::fromLatin1(line.first(i).trimmed()).toLower();
         const QString value = QString::fromLatin1(line.sliced(i + 1).trimmed());
-        return {{name, value}};
+        return {
+            { name, value }
+        };
     }
 }
 
-RequestParser::ParseResult RequestParser::parse(const QByteArray &data)
+RequestParser::ParseResult RequestParser::parse(const QByteArray& data)
 {
     // Warning! Header names are converted to lowercase
     return RequestParser().doParse(data);
@@ -100,30 +102,29 @@ RequestParser::ParseResult RequestParser::doParse(const QByteArrayView data)
     if (headerEnd < 0)
     {
         qDebug() << Q_FUNC_INFO << "incomplete request";
-        return {ParseStatus::Incomplete, Request(), 0};
+        return { ParseStatus::Incomplete, Request(), 0 };
     }
 
     const QByteArrayView httpHeaders = data.first(headerEnd);
     if (!parseStartLines(httpHeaders))
     {
         qWarning() << Q_FUNC_INFO << "header parsing error";
-        return {ParseStatus::BadRequest, Request(), 0};
+        return { ParseStatus::BadRequest, Request(), 0 };
     }
 
     const qsizetype headerLength = headerEnd + EOH.length();
 
     // handle supported methods
     if ((m_request.method == HEADER_REQUEST_METHOD_GET) || (m_request.method == HEADER_REQUEST_METHOD_HEAD))
-        return {ParseStatus::OK, m_request, headerLength};
+        return { ParseStatus::OK, m_request, headerLength };
 
     if (m_request.method == HEADER_REQUEST_METHOD_POST)
     {
-        const auto parseContentLength = [this]() -> int
-        {
+        const auto parseContentLength = [this]() -> int {
             // [rfc7230] 3.3.2. Content-Length
 
             const QString rawValue = m_request.headers.value(HEADER_CONTENT_LENGTH);
-            if (rawValue.isNull())  // `HEADER_CONTENT_LENGTH` does not exist
+            if (rawValue.isNull()) // `HEADER_CONTENT_LENGTH` does not exist
                 return 0;
             return Utils::String::parseInt(rawValue).value_or(-1);
         };
@@ -132,12 +133,12 @@ RequestParser::ParseResult RequestParser::doParse(const QByteArrayView data)
         if (contentLength < 0)
         {
             qWarning() << Q_FUNC_INFO << "bad request: content-length invalid";
-            return {ParseStatus::BadRequest, Request(), 0};
+            return { ParseStatus::BadRequest, Request(), 0 };
         }
         if (contentLength > MAX_CONTENT_SIZE)
         {
             qWarning() << Q_FUNC_INFO << "bad request: message too long";
-            return {ParseStatus::BadRequest, Request(), 0};
+            return { ParseStatus::BadRequest, Request(), 0 };
         }
 
         if (contentLength > 0)
@@ -146,20 +147,20 @@ RequestParser::ParseResult RequestParser::doParse(const QByteArrayView data)
             if (httpBodyView.length() < contentLength)
             {
                 qDebug() << Q_FUNC_INFO << "incomplete request";
-                return {ParseStatus::Incomplete, Request(), 0};
+                return { ParseStatus::Incomplete, Request(), 0 };
             }
 
             if (!parsePostMessage(httpBodyView))
             {
                 qWarning() << Q_FUNC_INFO << "message body parsing error";
-                return {ParseStatus::BadRequest, Request(), 0};
+                return { ParseStatus::BadRequest, Request(), 0 };
             }
         }
 
-        return {ParseStatus::OK, m_request, (headerLength + contentLength)};
+        return { ParseStatus::OK, m_request, (headerLength + contentLength) };
     }
 
-    return {ParseStatus::BadMethod, m_request, 0};
+    return { ParseStatus::BadMethod, m_request, 0 };
 }
 
 bool RequestParser::parseStartLines(const QByteArrayView data)
@@ -169,7 +170,7 @@ bool RequestParser::parseStartLines(const QByteArrayView data)
 
     // [rfc7230] 3.2.2. Field Order
     QByteArrayList requestLines;
-    for (const auto &line : lines)
+    for (const auto& line : lines)
     {
         if (QChar::fromLatin1(line.at(0)).isSpace() && !requestLines.isEmpty())
         {
@@ -234,11 +235,11 @@ bool RequestParser::parseRequestLine(const QByteArrayView line)
 
         // [rfc3986] 2.4 When to Encode or Decode
         // URL components should be separated before percent-decoding
-        for (const QByteArrayView &param : asConst(splitToViews(query, "&")))
+        for (const QByteArrayView& param : asConst(splitToViews(query, "&")))
         {
             const qsizetype eqCharPos = param.indexOf('=');
             if (eqCharPos <= 0)
-                continue;  // ignores params without name
+                continue; // ignores params without name
 
             const QByteArrayView nameComponent = param.first(eqCharPos);
             const QByteArrayView valueComponent = param.sliced(eqCharPos + 1);
@@ -253,8 +254,7 @@ bool RequestParser::parseRequestLine(const QByteArrayView line)
     // HTTP-version
     const QByteArrayView version = parts[2];
     const QByteArray prefix = "HTTP/"_ba;
-    if ((version.length() != 8) || !version.startsWith(prefix)
-        || !isDigit(version[5]) || (version[6] != '.') || !isDigit(version[7]))
+    if ((version.length() != 8) || !version.startsWith(prefix) || !isDigit(version[5]) || (version[6] != '.') || !isDigit(version[7]))
     {
         qWarning() << Q_FUNC_INFO << "invalid http version:" << version;
         return false;
@@ -277,7 +277,7 @@ bool RequestParser::parsePostMessage(const QByteArrayView data)
         const QByteArray processedData = Utils::ByteArray::asQByteArray(data).replace('+', ' ');
 
         const QList<QStringPair> pairs = QUrlQuery(QString::fromUtf8(processedData)).queryItems(QUrl::FullyDecoded);
-        for (const QStringPair &pair : pairs)
+        for (const QStringPair& pair : pairs)
             m_request.posts[pair.first] = pair.second;
 
         return true;
@@ -317,8 +317,7 @@ bool RequestParser::parsePostMessage(const QByteArrayView data)
         const QByteArray endDelimiter = QByteArray("--") + delimiter + QByteArray("--") + CRLF;
         multipart.push_back(viewWithoutEndingWith(multipart.takeLast(), endDelimiter));
 
-        return std::ranges::all_of(asConst(multipart), [this](const QByteArrayView &part)
-        {
+        return std::ranges::all_of(asConst(multipart), [this](const QByteArrayView& part) {
             return this->parseFormData(part);
         });
     }
@@ -342,7 +341,7 @@ bool RequestParser::parseFormData(const QByteArrayView data)
 
     HeaderMap headersMap;
     const QList<QByteArrayView> headerLines = splitToViews(headers, CRLF, Qt::SkipEmptyParts);
-    for (const auto &line : headerLines)
+    for (const auto& line : headerLines)
     {
         const std::optional<QStringPair> header = parseHeaderLine(line);
         if (!header.has_value())
@@ -355,7 +354,7 @@ bool RequestParser::parseFormData(const QByteArrayView data)
             // extract out filename & name
             const QList<QByteArrayView> directives = splitToViews(line, ";", Qt::SkipEmptyParts);
 
-            for (const auto &directive : directives)
+            for (const auto& directive : directives)
             {
                 const qsizetype idx = directive.indexOf(u'=');
                 if (idx < 0)
@@ -378,8 +377,7 @@ bool RequestParser::parseFormData(const QByteArrayView data)
 
     if (headersMap.contains(filename))
     {
-        m_request.files.append({.filename = headersMap[filename], .type = headersMap[HEADER_CONTENT_TYPE]
-            , .data = payload.toByteArray()});
+        m_request.files.append({ .filename = headersMap[filename], .type = headersMap[HEADER_CONTENT_TYPE], .data = payload.toByteArray() });
     }
     else if (headersMap.contains(name))
     {

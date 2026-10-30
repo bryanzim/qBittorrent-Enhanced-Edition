@@ -29,11 +29,11 @@
 
 #include "torrentcontentmodelitem.h"
 
-#include <QVariant>
-
 #include "base/utils/misc.h"
 #include "base/utils/string.h"
 #include "torrentcontentmodelfolder.h"
+
+#include <QVariant>
 
 TorrentContentModelItem::TorrentContentModelItem() = default;
 TorrentContentModelItem::~TorrentContentModelItem() = default;
@@ -49,7 +49,7 @@ QString TorrentContentModelItem::name() const
     return m_name;
 }
 
-void TorrentContentModelItem::setName(const QString &name)
+void TorrentContentModelItem::setName(const QString& name)
 {
     Q_ASSERT(!isRootItem());
     m_name = name;
@@ -118,23 +118,22 @@ QString TorrentContentModelItem::displayData(const int column) const
         }
     case COL_PROGRESS:
         return (m_progress >= 1)
-               ? u"100%"_s
-               : (Utils::String::fromDouble((m_progress * 100), 1) + u'%');
+                   ? u"100%"_s
+                   : (Utils::String::fromDouble((m_progress * 100), 1) + u'%');
     case COL_SIZE:
         return Utils::Misc::friendlyUnit(m_size);
     case COL_REMAINING:
         return Utils::Misc::friendlyUnit(remaining());
-    case COL_AVAILABILITY:
-        {
-            const qreal avail = availability();
-            if (avail < 0)
-                return tr("N/A");
+    case COL_AVAILABILITY: {
+        const qreal avail = availability();
+        if (avail < 0)
+            return tr("N/A");
 
-            const QString value = (avail >= 1)
-                    ? u"100"_s
-                    : Utils::String::fromDouble((avail * 100), 1);
-            return (value + u'%');
-        }
+        const QString value = (avail >= 1)
+                                  ? u"100"_s
+                                  : Utils::String::fromDouble((avail * 100), 1);
+        return (value + u'%');
+    }
     default:
         Q_UNREACHABLE();
         break;
@@ -173,11 +172,11 @@ QVariant TorrentContentModelItem::underlyingData(const int column) const
 int TorrentContentModelItem::row() const
 {
     if (m_parentItem)
-        return m_parentItem->children().indexOf(const_cast<TorrentContentModelItem *>(this));
+        return m_parentItem->children().indexOf(const_cast<TorrentContentModelItem*>(this));
     return 0;
 }
 
-TorrentContentModelFolder *TorrentContentModelItem::parent() const
+TorrentContentModelFolder* TorrentContentModelItem::parent() const
 {
     return m_parentItem;
 }

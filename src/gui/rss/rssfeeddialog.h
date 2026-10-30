@@ -28,8 +28,9 @@
 
 #pragma once
 
-#include <chrono>
 #include <QDialog>
+
+#include <chrono>
 
 namespace Ui
 {
@@ -42,16 +43,16 @@ class RSSFeedDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(RSSFeedDialog)
 
 public:
-    explicit RSSFeedDialog(QWidget *parent = nullptr);
+    explicit RSSFeedDialog(QWidget* parent = nullptr);
     ~RSSFeedDialog() override;
 
     QString feedURL() const;
-    void setFeedURL(const QString &feedURL);
+    void setFeedURL(const QString& feedURL);
     std::chrono::seconds refreshInterval() const;
     void setRefreshInterval(std::chrono::seconds refreshInterval);
 
 private:
-    void feedURLChanged(const QString &feedURL);
+    void feedURLChanged(const QString& feedURL);
 
-    Ui::RSSFeedDialog *m_ui = nullptr;
+    Ui::RSSFeedDialog* m_ui = nullptr;
 };

@@ -28,14 +28,13 @@
 
 #pragma once
 
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/key.hpp>
-#include <boost/multi_index/tag.hpp>
-
 #include <QCache>
 #include <QHostAddress>
 #include <QObject>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/key.hpp>
+#include <boost/multi_index/tag.hpp>
+#include <boost/multi_index_container.hpp>
 
 class QHostInfo;
 class QString;
@@ -50,25 +49,25 @@ namespace Net
     public:
         static void initInstance();
         static void freeInstance();
-        static ReverseResolution *instance();
+        static ReverseResolution* instance();
 
-        QString resolve(const QHostAddress &ip);
+        QString resolve(const QHostAddress& ip);
 
     signals:
-        void ipResolved(const QHostAddress &ip, const QString &hostname);
+        void ipResolved(const QHostAddress& ip, const QString& hostname);
 
     private slots:
-        void hostResolved(const QHostInfo &host);
+        void hostResolved(const QHostInfo& host);
 
     private:
         ReverseResolution();
         ~ReverseResolution() override;
 
-        static ReverseResolution *m_instance;
+        static ReverseResolution* m_instance;
 
         struct LookupRequest
         {
-            int id = -1;  // lookup ID
+            int id = -1; // lookup ID
             QHostAddress address;
         };
 
@@ -79,6 +78,6 @@ namespace Net
                 boost::multi_index::hashed_unique<boost::multi_index::tag<struct ByAddress>, boost::multi_index::key<&LookupRequest::address>>>>;
         Lookups m_lookups;
 
-        QCache<QHostAddress, QString> m_cache;  // <IP, HostName>
+        QCache<QHostAddress, QString> m_cache; // <IP, HostName>
     };
 }

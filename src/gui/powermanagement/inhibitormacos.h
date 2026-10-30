@@ -28,11 +28,10 @@
 
 #pragma once
 
-#include <IOKit/pwr_mgt/IOPMLib.h>
-
-#include <QCoreApplication>
-
 #include "inhibitor.h"
+
+#include <IOKit/pwr_mgt/IOPMLib.h>
+#include <QCoreApplication>
 
 class InhibitorMacOS final : public Inhibitor
 {
@@ -43,5 +42,5 @@ public:
     bool requestIdle() override;
 
 private:
-    IOPMAssertionID m_assertionID {};
+    IOPMAssertionID m_assertionID{};
 };

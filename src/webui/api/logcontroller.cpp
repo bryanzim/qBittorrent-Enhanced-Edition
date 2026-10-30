@@ -28,13 +28,13 @@
 
 #include "logcontroller.h"
 
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QList>
-
 #include "base/global.h"
 #include "base/logger.h"
 #include "base/utils/string.h"
+
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QList>
 
 const QString KEY_LOG_ID = u"id"_s;
 const QString KEY_LOG_TIMESTAMP = u"timestamp"_s;
@@ -71,23 +71,19 @@ void LogController::mainAction()
     if (!ok)
         lastKnownId = -1;
 
-    Logger *const logger = Logger::instance();
+    Logger* const logger = Logger::instance();
     QJsonArray msgList;
 
-    for (const Log::Msg &msg : asConst(logger->getMessages(lastKnownId)))
+    for (const Log::Msg& msg : asConst(logger->getMessages(lastKnownId)))
     {
-        if (!(((msg.type == Log::NORMAL) && isNormal)
-              || ((msg.type == Log::INFO) && isInfo)
-              || ((msg.type == Log::WARNING) && isWarning)
-              || ((msg.type == Log::CRITICAL) && isCritical)))
+        if (!(((msg.type == Log::NORMAL) && isNormal) || ((msg.type == Log::INFO) && isInfo) || ((msg.type == Log::WARNING) && isWarning) || ((msg.type == Log::CRITICAL) && isCritical)))
             continue;
 
-        msgList.append(QJsonObject
-        {
-            {KEY_LOG_ID, msg.id},
-            {KEY_LOG_TIMESTAMP, msg.timestamp},
-            {KEY_LOG_MSG_TYPE, msg.type},
-            {KEY_LOG_MSG_MESSAGE, msg.message}
+        msgList.append(QJsonObject{
+            {          KEY_LOG_ID,        msg.id },
+            {   KEY_LOG_TIMESTAMP, msg.timestamp },
+            {    KEY_LOG_MSG_TYPE,      msg.type },
+            { KEY_LOG_MSG_MESSAGE,   msg.message }
         });
     }
 
@@ -111,18 +107,17 @@ void LogController::peersAction()
     if (!ok)
         lastKnownId = -1;
 
-    Logger *const logger = Logger::instance();
+    Logger* const logger = Logger::instance();
     QJsonArray peerList;
 
-    for (const Log::Peer &peer : asConst(logger->getPeers(lastKnownId)))
+    for (const Log::Peer& peer : asConst(logger->getPeers(lastKnownId)))
     {
-        peerList.append(QJsonObject
-        {
-            {KEY_LOG_ID, peer.id},
-            {KEY_LOG_TIMESTAMP, peer.timestamp},
-            {KEY_LOG_PEER_IP, peer.ip},
-            {KEY_LOG_PEER_BLOCKED, peer.blocked},
-            {KEY_LOG_PEER_REASON, peer.reason}
+        peerList.append(QJsonObject{
+            {           KEY_LOG_ID,        peer.id },
+            {    KEY_LOG_TIMESTAMP, peer.timestamp },
+            {      KEY_LOG_PEER_IP,        peer.ip },
+            { KEY_LOG_PEER_BLOCKED,   peer.blocked },
+            {  KEY_LOG_PEER_REASON,    peer.reason }
         });
     }
 

@@ -30,8 +30,8 @@
 
 #include <QStyledItemDelegate>
 
-//class QModelIndex;
-//class QStyleOptionViewItem;
+// class QModelIndex;
+// class QStyleOptionViewItem;
 class TrackerListWidget;
 
 class TrackerListItemDelegate final : public QStyledItemDelegate
@@ -40,10 +40,10 @@ class TrackerListItemDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY_MOVE(TrackerListItemDelegate)
 
 public:
-    explicit TrackerListItemDelegate(TrackerListWidget *view);
+    explicit TrackerListItemDelegate(TrackerListWidget* view);
 
-    void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override;
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
 
 private:
-    TrackerListWidget *m_view = nullptr;
+    TrackerListWidget* m_view = nullptr;
 };

@@ -38,5 +38,5 @@ namespace BitTorrent
         Path path;
     };
 
-    bool operator==(const DownloadPathOption &left, const DownloadPathOption &right);
+    bool operator==(const DownloadPathOption& left, const DownloadPathOption& right);
 }

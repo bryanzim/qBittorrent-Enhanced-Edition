@@ -30,7 +30,7 @@
 
 #include "trackerlistmodel.h"
 
-TrackerListSortModel::TrackerListSortModel(TrackerListModel *model, QObject *parent)
+TrackerListSortModel::TrackerListSortModel(TrackerListModel* model, QObject* parent)
     : QSortFilterProxyModel(parent)
 {
     QSortFilterProxyModel::setSourceModel(model);
@@ -39,12 +39,12 @@ TrackerListSortModel::TrackerListSortModel(TrackerListModel *model, QObject *par
     setSortRole(TrackerListModel::SortRole);
 }
 
-void TrackerListSortModel::setSourceModel(TrackerListModel *model)
+void TrackerListSortModel::setSourceModel(TrackerListModel* model)
 {
     QSortFilterProxyModel::setSourceModel(model);
 }
 
-bool TrackerListSortModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool TrackerListSortModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
     if (!left.parent().isValid() && !right.parent().isValid())
     {

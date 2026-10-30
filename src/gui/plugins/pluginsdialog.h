@@ -28,11 +28,11 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QSet>
-
 #include "base/plugins/pluginsengine.h"
 #include "base/settingvalue.h"
+
+#include <QDialog>
+#include <QSet>
 
 class QDropEvent;
 class QTreeWidgetItem;
@@ -53,44 +53,42 @@ class PluginsDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(PluginsDialog)
 
 public:
-    explicit PluginsDialog(PluginsEngine *pluginsEngine, QWidget *parent = nullptr);
+    explicit PluginsDialog(PluginsEngine* pluginsEngine, QWidget* parent = nullptr);
     ~PluginsDialog() override;
 
-    QTreeWidgetItem *findItem(const QString &pluginID);
+    QTreeWidgetItem* findItem(const QString& pluginID);
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragMoveEvent(QDragMoveEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
 private slots:
     void onActionInstallTriggered();
     void onActionUninstallTriggered();
     void togglePluginState(QTreeWidgetItem*);
-    void setRowColor(int row, const QString &color);
+    void setRowColor(int row, const QString& color);
     void displayContextMenu();
     void enableSelection(bool enable);
 
-    void pluginInstalled(const Path &pluginPath, const PluginInfo &pluginInfo);
-    void pluginInstallationFailed(const Path &pluginPath, const QString &reason);
-    void pluginUpdated(const Path &pluginPath, const PluginInfo &oldPluginInfo
-            , const PluginInfo &newPluginInfo);
-    void pluginUpdateFailed(const Path &pluginPath, const PluginInfo &currentPluginInfo
-            , const PluginInfo &newPluginInfo, const QString &reason);
-    void pluginUninstalled(const QString &pluginID);
-    void pluginUninstallationFailed(const QString &pluginID, const QString &reason);
-    void pluginEnabledChanged(const QString &pluginID, bool isEnabled);
+    void pluginInstalled(const Path& pluginPath, const PluginInfo& pluginInfo);
+    void pluginInstallationFailed(const Path& pluginPath, const QString& reason);
+    void pluginUpdated(const Path& pluginPath, const PluginInfo& oldPluginInfo, const PluginInfo& newPluginInfo);
+    void pluginUpdateFailed(const Path& pluginPath, const PluginInfo& currentPluginInfo, const PluginInfo& newPluginInfo, const QString& reason);
+    void pluginUninstalled(const QString& pluginID);
+    void pluginUninstallationFailed(const QString& pluginID, const QString& reason);
+    void pluginEnabledChanged(const QString& pluginID, bool isEnabled);
 
 private:
     void loadPlugins();
-    void addNewPlugin(const PluginInfo &pluginInfo);
-    void updatePlugin(const PluginInfo &pluginInfo);
-    void installPlugin(const Path &pluginPath);
+    void addNewPlugin(const PluginInfo& pluginInfo);
+    void updatePlugin(const PluginInfo& pluginInfo);
+    void installPlugin(const Path& pluginPath);
     void startAsyncOp();
     void finishAsyncOp();
 
-    Ui::PluginsDialog *m_ui = nullptr;
-    PluginsEngine *m_pluginsEngine = nullptr;
+    Ui::PluginsDialog* m_ui = nullptr;
+    PluginsEngine* m_pluginsEngine = nullptr;
 
     SettingValue<QSize> m_storeDialogSize;
     SettingValue<QByteArray> m_storeHeaderState;

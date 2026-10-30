@@ -29,19 +29,18 @@
 
 #pragma once
 
-#include <libtorrent/version.hpp>
-
-#include <QtContainerFwd>
-#include <QObject>
-
+#include "addtorrentparams.h"
 #include "base/pathfwd.h"
 #include "base/tagset.h"
-#include "addtorrentparams.h"
 #include "categoryoptions.h"
 #include "sharelimits.h"
 #include "torrentcontentremoveoption.h"
 #include "trackerentry.h"
 #include "trackerentrystatus.h"
+
+#include <QObject>
+#include <QtContainerFwd>
+#include <libtorrent/version.hpp>
 
 class QString;
 
@@ -143,43 +142,43 @@ namespace BitTorrent
     public:
         static void initInstance();
         static void freeInstance();
-        static Session *instance();
+        static Session* instance();
 
         using QObject::QObject;
 
         virtual Path savePath() const = 0;
-        virtual void setSavePath(const Path &path) = 0;
+        virtual void setSavePath(const Path& path) = 0;
         virtual Path downloadPath() const = 0;
-        virtual void setDownloadPath(const Path &path) = 0;
+        virtual void setDownloadPath(const Path& path) = 0;
         virtual bool isDownloadPathEnabled() const = 0;
         virtual void setDownloadPathEnabled(bool enabled) = 0;
 
-        static bool isValidCategoryName(const QString &name);
-        static QString subcategoryName(const QString &category);
-        static QString parentCategoryName(const QString &category);
+        static bool isValidCategoryName(const QString& name);
+        static QString subcategoryName(const QString& category);
+        static QString parentCategoryName(const QString& category);
         // returns category itself and all top level categories
-        static QStringList expandCategory(const QString &category);
+        static QStringList expandCategory(const QString& category);
 
         virtual QStringList categories() const = 0;
-        virtual CategoryOptions categoryOptions(const QString &categoryName) const = 0;
-        virtual bool setCategoryOptions(const QString &categoryName, const CategoryOptions &options) = 0;
-        virtual Path categorySavePath(const QString &categoryName) const = 0;
-        virtual Path categorySavePath(const QString &categoryName, const CategoryOptions &options) const = 0;
-        virtual Path categoryDownloadPath(const QString &categoryName) const = 0;
-        virtual Path categoryDownloadPath(const QString &categoryName, const CategoryOptions &options) const = 0;
-        virtual ShareLimits categoryShareLimits(const QString &categoryName) const = 0;
-        virtual bool addCategory(const QString &name, const CategoryOptions &options = {}) = 0;
-        virtual bool removeCategory(const QString &name) = 0;
+        virtual CategoryOptions categoryOptions(const QString& categoryName) const = 0;
+        virtual bool setCategoryOptions(const QString& categoryName, const CategoryOptions& options) = 0;
+        virtual Path categorySavePath(const QString& categoryName) const = 0;
+        virtual Path categorySavePath(const QString& categoryName, const CategoryOptions& options) const = 0;
+        virtual Path categoryDownloadPath(const QString& categoryName) const = 0;
+        virtual Path categoryDownloadPath(const QString& categoryName, const CategoryOptions& options) const = 0;
+        virtual ShareLimits categoryShareLimits(const QString& categoryName) const = 0;
+        virtual bool addCategory(const QString& name, const CategoryOptions& options = {}) = 0;
+        virtual bool removeCategory(const QString& name) = 0;
         virtual bool useCategoryPathsInManualMode() const = 0;
         virtual void setUseCategoryPathsInManualMode(bool value) = 0;
 
-        virtual Path suggestedSavePath(const QString &categoryName, std::optional<bool> useAutoTMM) const = 0;
-        virtual Path suggestedDownloadPath(const QString &categoryName, std::optional<bool> useAutoTMM) const = 0;
+        virtual Path suggestedSavePath(const QString& categoryName, std::optional<bool> useAutoTMM) const = 0;
+        virtual Path suggestedDownloadPath(const QString& categoryName, std::optional<bool> useAutoTMM) const = 0;
 
         virtual TagSet tags() const = 0;
-        virtual bool hasTag(const Tag &tag) const = 0;
-        virtual bool addTag(const Tag &tag) = 0;
-        virtual bool removeTag(const Tag &tag) = 0;
+        virtual bool hasTag(const Tag& tag) const = 0;
+        virtual bool addTag(const Tag& tag) = 0;
+        virtual bool removeTag(const Tag& tag) = 0;
 
         // Torrent Management Mode subsystem (TMM)
         //
@@ -201,13 +200,13 @@ namespace BitTorrent
         virtual bool isDisableAutoTMMWhenCategorySavePathChanged() const = 0;
         virtual void setDisableAutoTMMWhenCategorySavePathChanged(bool value) = 0;
 
-        virtual const ShareLimits &shareLimits() const = 0;
+        virtual const ShareLimits& shareLimits() const = 0;
         virtual void setShareLimits(ShareLimits shareLimits) = 0;
 
         virtual QString getDHTBootstrapNodes() const = 0;
-        virtual void setDHTBootstrapNodes(const QString &nodes) = 0;
+        virtual void setDHTBootstrapNodes(const QString& nodes) = 0;
         virtual QString getWebTorrentSTUNServer() const = 0;
-        virtual void setWebTorrentSTUNServer(const QString &server) = 0;
+        virtual void setWebTorrentSTUNServer(const QString& server) = 0;
         virtual bool isDHTEnabled() const = 0;
         virtual void setDHTEnabled(bool enabled) = 0;
         virtual bool isLSDEnabled() const = 0;
@@ -236,18 +235,18 @@ namespace BitTorrent
         virtual bool isTorrentFileBackupEnabled() const = 0;
         virtual void setTorrentFileBackupEnabled(bool enabled) = 0;
         virtual Path torrentBackupDirectory() const = 0;
-        virtual void setTorrentBackupDirectory(const Path &path) = 0;
+        virtual void setTorrentBackupDirectory(const Path& path) = 0;
         virtual bool isFinishedTorrentBackupDirectoryEnabled() const = 0;
         virtual void setFinishedTorrentBackupDirectoryEnabled(bool enabled) = 0;
         virtual Path finishedTorrentBackupDirectory() const = 0;
-        virtual void setFinishedTorrentBackupDirectory(const Path &path) = 0;
+        virtual void setFinishedTorrentBackupDirectory(const Path& path) = 0;
         virtual bool removeTorrentFileBackup() const = 0;
         virtual void setRemoveTorrentFileBackup(bool remove) = 0;
 
         virtual bool isAddTrackersFromURLEnabled() const = 0;
         virtual void setAddTrackersFromURLEnabled(bool enabled) = 0;
         virtual QString additionalTrackersURL() const = 0;
-        virtual void setAdditionalTrackersURL(const QString &url) = 0;
+        virtual void setAdditionalTrackersURL(const QString& url) = 0;
         virtual QString additionalTrackersFromURL() const = 0;
 
         // Auto ban Unknown Peer
@@ -262,7 +261,7 @@ namespace BitTorrent
         virtual bool isShadowBanEnabled() const = 0;
         virtual void setShadowBan(bool value) = 0;
         virtual QStringList shadowBannedIPs() const = 0;
-        virtual void setShadowBannedIPs(const QStringList &newList) = 0;
+        virtual void setShadowBannedIPs(const QStringList& newList) = 0;
 
         virtual int globalDownloadSpeedLimit() const = 0;
         virtual void setGlobalDownloadSpeedLimit(int limit) = 0;
@@ -296,11 +295,11 @@ namespace BitTorrent
         virtual int sslPort() const = 0;
         virtual void setSSLPort(int port) = 0;
         virtual QString networkInterface() const = 0;
-        virtual void setNetworkInterface(const QString &iface) = 0;
+        virtual void setNetworkInterface(const QString& iface) = 0;
         virtual QString networkInterfaceName() const = 0;
-        virtual void setNetworkInterfaceName(const QString &name) = 0;
+        virtual void setNetworkInterfaceName(const QString& name) = 0;
         virtual QString networkInterfaceAddress() const = 0;
-        virtual void setNetworkInterfaceAddress(const QString &address) = 0;
+        virtual void setNetworkInterfaceAddress(const QString& address) = 0;
         virtual int encryption() const = 0;
         virtual void setEncryption(int state) = 0;
         virtual int maxActiveCheckingTorrents() const = 0;
@@ -308,7 +307,7 @@ namespace BitTorrent
         virtual bool isI2PEnabled() const = 0;
         virtual void setI2PEnabled(bool enabled) = 0;
         virtual QString I2PAddress() const = 0;
-        virtual void setI2PAddress(const QString &address) = 0;
+        virtual void setI2PAddress(const QString& address) = 0;
         virtual int I2PPort() const = 0;
         virtual void setI2PPort(int port) = 0;
         virtual bool I2PMixedMode() const = 0;
@@ -336,11 +335,11 @@ namespace BitTorrent
         virtual bool isAddTrackersEnabled() const = 0;
         virtual void setAddTrackersEnabled(bool enabled) = 0;
         virtual QString additionalTrackers() const = 0;
-        virtual void setAdditionalTrackers(const QString &trackers) = 0;
+        virtual void setAdditionalTrackers(const QString& trackers) = 0;
         virtual bool isIPFilteringEnabled() const = 0;
         virtual void setIPFilteringEnabled(bool enabled) = 0;
         virtual Path IPFilterFile() const = 0;
-        virtual void setIPFilterFile(const Path &path) = 0;
+        virtual void setIPFilterFile(const Path& path) = 0;
         virtual bool announceToAllTrackers() const = 0;
         virtual void setAnnounceToAllTrackers(bool val) = 0;
         virtual bool announceToAllTiers() const = 0;
@@ -422,7 +421,7 @@ namespace BitTorrent
         virtual bool includeOverheadInLimits() const = 0;
         virtual void setIncludeOverheadInLimits(bool include) = 0;
         virtual QString announceIP() const = 0;
-        virtual void setAnnounceIP(const QString &ip) = 0;
+        virtual void setAnnounceIP(const QString& ip) = 0;
         virtual int announcePort() const = 0;
         virtual void setAnnouncePort(int port) = 0;
         virtual int maxConcurrentHTTPAnnounces() const = 0;
@@ -471,10 +470,10 @@ namespace BitTorrent
         virtual bool isExcludedFileNamesEnabled() const = 0;
         virtual void setExcludedFileNamesEnabled(bool enabled) = 0;
         virtual QStringList excludedFileNames() const = 0;
-        virtual void setExcludedFileNames(const QStringList &newList) = 0;
-        virtual void applyFilenameFilter(const PathList &files, QList<BitTorrent::DownloadPriority> &priorities) = 0;
+        virtual void setExcludedFileNames(const QStringList& newList) = 0;
+        virtual void applyFilenameFilter(const PathList& files, QList<BitTorrent::DownloadPriority>& priorities) = 0;
         virtual QStringList bannedIPs() const = 0;
-        virtual void setBannedIPs(const QStringList &newList) = 0;
+        virtual void setBannedIPs(const QStringList& newList) = 0;
         virtual ResumeDataStorageType resumeDataStorageType() const = 0;
         virtual void setResumeDataStorageType(ResumeDataStorageType type) = 0;
         virtual bool isMergeTrackersEnabled() const = 0;
@@ -490,27 +489,27 @@ namespace BitTorrent
         virtual void pause() = 0;
         virtual void resume() = 0;
 
-        virtual Torrent *getTorrent(const TorrentID &id) const = 0;
-        virtual Torrent *findTorrent(const InfoHash &infoHash) const = 0;
-        virtual QList<Torrent *> torrents() const = 0;
+        virtual Torrent* getTorrent(const TorrentID& id) const = 0;
+        virtual Torrent* findTorrent(const InfoHash& infoHash) const = 0;
+        virtual QList<Torrent*> torrents() const = 0;
         virtual qsizetype torrentsCount() const = 0;
-        virtual const SessionStatus &status() const = 0;
-        virtual const CacheStatus &cacheStatus() const = 0;
+        virtual const SessionStatus& status() const = 0;
+        virtual const CacheStatus& cacheStatus() const = 0;
         virtual bool isListening() const = 0;
 
-        virtual void banIP(const QString &ip) = 0;
-        virtual void shadowbanIP(const QString &ip) = 0;
+        virtual void banIP(const QString& ip) = 0;
+        virtual void shadowbanIP(const QString& ip) = 0;
 
-        virtual bool isKnownTorrent(const InfoHash &infoHash) const = 0;
-        virtual bool addTorrent(const TorrentDescriptor &torrentDescr, const AddTorrentParams &params = {}) = 0;
-        virtual bool removeTorrent(const TorrentID &id, TorrentRemoveOption deleteOption = TorrentRemoveOption::KeepContent) = 0;
-        virtual bool downloadMetadata(const TorrentDescriptor &torrentDescr) = 0;
-        virtual bool cancelDownloadMetadata(const TorrentID &id) = 0;
+        virtual bool isKnownTorrent(const InfoHash& infoHash) const = 0;
+        virtual bool addTorrent(const TorrentDescriptor& torrentDescr, const AddTorrentParams& params = {}) = 0;
+        virtual bool removeTorrent(const TorrentID& id, TorrentRemoveOption deleteOption = TorrentRemoveOption::KeepContent) = 0;
+        virtual bool downloadMetadata(const TorrentDescriptor& torrentDescr) = 0;
+        virtual bool cancelDownloadMetadata(const TorrentID& id) = 0;
 
-        virtual void increaseTorrentsQueuePos(const QList<TorrentID> &ids) = 0;
-        virtual void decreaseTorrentsQueuePos(const QList<TorrentID> &ids) = 0;
-        virtual void topTorrentsQueuePos(const QList<TorrentID> &ids) = 0;
-        virtual void bottomTorrentsQueuePos(const QList<TorrentID> &ids) = 0;
+        virtual void increaseTorrentsQueuePos(const QList<TorrentID>& ids) = 0;
+        virtual void decreaseTorrentsQueuePos(const QList<TorrentID>& ids) = 0;
+        virtual void topTorrentsQueuePos(const QList<TorrentID>& ids) = 0;
+        virtual void bottomTorrentsQueuePos(const QList<TorrentID>& ids) = 0;
 
         virtual QString lastExternalIPv4Address() const = 0;
         virtual QString lastExternalIPv6Address() const = 0;
@@ -519,50 +518,48 @@ namespace BitTorrent
 
     signals:
         void startupProgressUpdated(int progress);
-        void addTorrentFailed(const InfoHash &infoHash, const QString &reason);
+        void addTorrentFailed(const InfoHash& infoHash, const QString& reason);
         void allTorrentsFinished();
-        void categoryAdded(const QString &categoryName);
-        void categoryRemoved(const QString &categoryName);
-        void categoryOptionsChanged(const QString &categoryName);
+        void categoryAdded(const QString& categoryName);
+        void categoryRemoved(const QString& categoryName);
+        void categoryOptionsChanged(const QString& categoryName);
         void IPFilterParsed(bool error, int ruleCount);
-        void metadataDownloaded(const TorrentInfo &info);
+        void metadataDownloaded(const TorrentInfo& info);
         void restored();
         void paused();
         void resumed();
         void speedLimitModeChanged(bool alternative);
         void statsUpdated();
         void subcategoriesSupportChanged();
-        void tagAdded(const Tag &tag);
-        void tagRemoved(const Tag &tag);
-        void torrentsLoaded(const QList<Torrent *> &torrents);
-        void torrentsUpdated(const QList<Torrent *> &torrents);
+        void tagAdded(const Tag& tag);
+        void tagRemoved(const Tag& tag);
+        void torrentsLoaded(const QList<Torrent*>& torrents);
+        void torrentsUpdated(const QList<Torrent*>& torrents);
         void freeDiskSpaceChecked(qint64 result);
 
-        void torrentAboutToBeRemoved(Torrent *torrent);
-        void torrentAdded(Torrent *torrent);
-        void duplicateTorrentDetected(const InfoHash &infoHash, Torrent *torrent, const QString &message);
-        void torrentCategoryChanged(Torrent *torrent, const QString &oldCategory);
-        void torrentFinished(Torrent *torrent);
-        void torrentFinishedChecking(Torrent *torrent);
-        void torrentMetadataReceived(Torrent *torrent);
-        void torrentStopped(Torrent *torrent);
-        void torrentStarted(Torrent *torrent);
-        void torrentSavePathChanged(Torrent *torrent);
-        void torrentSavingModeChanged(Torrent *torrent);
-        void torrentTagAdded(Torrent *torrent, const Tag &tag);
-        void torrentTagRemoved(Torrent *torrent, const Tag &tag);
-        void torrentContentFileRenamed(Torrent *torrent, int index, const Path &oldFilePath);
-        void torrentContentFolderRenamed(Torrent *torrent, const Path &newFolderPath
-                , const Path &oldFolderPath, const QHash<int, Path> &renamedFiles);
-        void torrentContentFolderRenamingFailed(Torrent *torrent, const Path &newFolderPath, const Path &oldFolderPath
-                , const QHash<int, Path> &renamedFiles, const QList<int> &failedFileIndexes);
-        void torrentIOError(Torrent *torrent, const QString &message);
-        void trackersAdded(Torrent *torrent, const QList<TrackerEntry> &trackers);
-        void trackersReset(Torrent *torrent, const QList<TrackerEntryStatus> &oldEntries, const QList<TrackerEntry> &newEntries);
-        void trackersRemoved(Torrent *torrent, const QStringList &trackers);
-        void trackerSuccess(Torrent *torrent, const QString &tracker);
-        void trackerWarning(Torrent *torrent, const QString &tracker);
-        void trackerError(Torrent *torrent, const QString &tracker);
-        void trackerEntryStatusesUpdated(Torrent *torrent, const QHash<QString, TrackerEntryStatus> &updatedTrackers);
+        void torrentAboutToBeRemoved(Torrent* torrent);
+        void torrentAdded(Torrent* torrent);
+        void duplicateTorrentDetected(const InfoHash& infoHash, Torrent* torrent, const QString& message);
+        void torrentCategoryChanged(Torrent* torrent, const QString& oldCategory);
+        void torrentFinished(Torrent* torrent);
+        void torrentFinishedChecking(Torrent* torrent);
+        void torrentMetadataReceived(Torrent* torrent);
+        void torrentStopped(Torrent* torrent);
+        void torrentStarted(Torrent* torrent);
+        void torrentSavePathChanged(Torrent* torrent);
+        void torrentSavingModeChanged(Torrent* torrent);
+        void torrentTagAdded(Torrent* torrent, const Tag& tag);
+        void torrentTagRemoved(Torrent* torrent, const Tag& tag);
+        void torrentContentFileRenamed(Torrent* torrent, int index, const Path& oldFilePath);
+        void torrentContentFolderRenamed(Torrent* torrent, const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles);
+        void torrentContentFolderRenamingFailed(Torrent* torrent, const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles, const QList<int>& failedFileIndexes);
+        void torrentIOError(Torrent* torrent, const QString& message);
+        void trackersAdded(Torrent* torrent, const QList<TrackerEntry>& trackers);
+        void trackersReset(Torrent* torrent, const QList<TrackerEntryStatus>& oldEntries, const QList<TrackerEntry>& newEntries);
+        void trackersRemoved(Torrent* torrent, const QStringList& trackers);
+        void trackerSuccess(Torrent* torrent, const QString& tracker);
+        void trackerWarning(Torrent* torrent, const QString& tracker);
+        void trackerError(Torrent* torrent, const QString& tracker);
+        void trackerEntryStatusesUpdated(Torrent* torrent, const QHash<QString, TrackerEntryStatus>& updatedTrackers);
     };
 }

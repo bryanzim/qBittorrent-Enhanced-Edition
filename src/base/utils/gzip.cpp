@@ -29,17 +29,17 @@
 
 #include "gzip.h"
 
+#include <QByteArray>
+#include <QtAssert>
+
 #include <vector>
 
-#include <QtAssert>
-#include <QByteArray>
-
 #ifndef ZLIB_CONST
-#define ZLIB_CONST  // make z_stream.next_in const
+#define ZLIB_CONST // make z_stream.next_in const
 #endif
 #include <zlib.h>
 
-QByteArray Utils::Gzip::compress(const QByteArray &data, const int level, bool *ok)
+QByteArray Utils::Gzip::compress(const QByteArray& data, const int level, bool* ok)
 {
     if (ok)
         *ok = false;
@@ -47,11 +47,11 @@ QByteArray Utils::Gzip::compress(const QByteArray &data, const int level, bool *
     if (data.isEmpty())
         return {};
 
-    z_stream strm {};
+    z_stream strm{};
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
-    strm.next_in = reinterpret_cast<const Bytef *>(data.constData());
+    strm.next_in = reinterpret_cast<const Bytef*>(data.constData());
     strm.avail_in = static_cast<uInt>(data.size());
 
     // windowBits = 15 + 16 to enable gzip
@@ -61,8 +61,8 @@ QByteArray Utils::Gzip::compress(const QByteArray &data, const int level, bool *
     if (initResult != Z_OK)
         return {};
 
-    QByteArray ret {static_cast<qsizetype>(deflateBound(&strm, data.size())), Qt::Uninitialized};
-    strm.next_out = reinterpret_cast<Bytef *>(ret.data());
+    QByteArray ret{ static_cast<qsizetype>(deflateBound(&strm, data.size())), Qt::Uninitialized };
+    strm.next_out = reinterpret_cast<Bytef*>(ret.data());
     strm.avail_out = ret.size();
 
     // From the zlib manual: Z_FINISH can be used in the first deflate call after deflateInit if all the compression
@@ -79,9 +79,10 @@ QByteArray Utils::Gzip::compress(const QByteArray &data, const int level, bool *
     return ret;
 }
 
-QByteArray Utils::Gzip::decompress(const QByteArray &data, bool *ok)
+QByteArray Utils::Gzip::decompress(const QByteArray& data, bool* ok)
 {
-    if (ok) *ok = false;
+    if (ok)
+        *ok = false;
 
     if (data.isEmpty())
         return {};
@@ -89,13 +90,13 @@ QByteArray Utils::Gzip::decompress(const QByteArray &data, bool *ok)
     const int BUFSIZE = 1024 * 1024;
     std::vector<char> tmpBuf(BUFSIZE);
 
-    z_stream strm {};
+    z_stream strm{};
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
-    strm.next_in = reinterpret_cast<const Bytef *>(data.constData());
+    strm.next_in = reinterpret_cast<const Bytef*>(data.constData());
     strm.avail_in = uInt(data.size());
-    strm.next_out = reinterpret_cast<Bytef *>(tmpBuf.data());
+    strm.next_out = reinterpret_cast<Bytef*>(tmpBuf.data());
     strm.avail_out = BUFSIZE;
 
     // windowBits must be greater than or equal to the windowBits value provided to deflateInit2() while compressing
@@ -126,12 +127,13 @@ QByteArray Utils::Gzip::decompress(const QByteArray &data, bool *ok)
         }
 
         output.append(tmpBuf.data(), (BUFSIZE - strm.avail_out));
-        strm.next_out = reinterpret_cast<Bytef *>(tmpBuf.data());
+        strm.next_out = reinterpret_cast<Bytef*>(tmpBuf.data());
         strm.avail_out = BUFSIZE;
     }
 
     inflateEnd(&strm);
 
-    if (ok) *ok = true;
+    if (ok)
+        *ok = true;
     return output;
 }

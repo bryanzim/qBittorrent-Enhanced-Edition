@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QAbstractItemModel>
-
 #include "base/bittorrent/torrent.h"
 #include "base/tagset.h"
+
+#include <QAbstractItemModel>
+#include <QtContainerFwd>
 
 class QModelIndex;
 
@@ -45,38 +45,38 @@ class TagFilterModel final : public QAbstractListModel
     Q_DISABLE_COPY_MOVE(TagFilterModel)
 
 public:
-    explicit TagFilterModel(QObject *parent = nullptr);
+    explicit TagFilterModel(QObject* parent = nullptr);
     ~TagFilterModel() override;
 
-    static bool isSpecialItem(const QModelIndex &index);
+    static bool isSpecialItem(const QModelIndex& index);
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
-    int rowCount(const QModelIndex &parent = {}) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    int rowCount(const QModelIndex& parent = {}) const override;
 
-    QModelIndex index(const Tag &tag) const;
-    Tag tag(const QModelIndex &index) const;
+    QModelIndex index(const Tag& tag) const;
+    Tag tag(const QModelIndex& index) const;
 
 private slots:
-    void tagAdded(const Tag &tag);
-    void tagRemoved(const Tag &tag);
-    void torrentTagAdded(BitTorrent::Torrent *torrent, const Tag &tag);
-    void torrentTagRemoved(BitTorrent::Torrent *, const Tag &tag);
-    void torrentsLoaded(const QList<BitTorrent::Torrent *> &torrents);
-    void torrentAboutToBeRemoved(BitTorrent::Torrent *torrent);
+    void tagAdded(const Tag& tag);
+    void tagRemoved(const Tag& tag);
+    void torrentTagAdded(BitTorrent::Torrent* torrent, const Tag& tag);
+    void torrentTagRemoved(BitTorrent::Torrent*, const Tag& tag);
+    void torrentsLoaded(const QList<BitTorrent::Torrent*>& torrents);
+    void torrentAboutToBeRemoved(BitTorrent::Torrent* torrent);
 
 private:
     void populate();
-    void addToModel(const Tag &tag, int count);
+    void addToModel(const Tag& tag, int count);
     void removeFromModel(int row);
     bool isValidRow(int row) const;
-    int findRow(const Tag &tag) const;
-    TagModelItem *findItem(const Tag &tag);
-    QList<TagModelItem *> findItems(const TagSet &tags);
-    TagModelItem *allTagsItem();
-    TagModelItem *untaggedItem();
+    int findRow(const Tag& tag) const;
+    TagModelItem* findItem(const Tag& tag);
+    QList<TagModelItem*> findItems(const TagSet& tags);
+    TagModelItem* allTagsItem();
+    TagModelItem* untaggedItem();
 
-    QList<TagModelItem> m_tagItems;  // Index corresponds to its row
+    QList<TagModelItem> m_tagItems; // Index corresponds to its row
 };

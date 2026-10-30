@@ -29,11 +29,11 @@
 
 #include "desktopintegration.h"
 
-#include <chrono>
-
-#include <QtEnvironmentVariables>
 #include <QMenu>
 #include <QTimer>
+#include <QtEnvironmentVariables>
+
+#include <chrono>
 
 #ifndef Q_OS_MACOS
 #include <QSystemTrayIcon>
@@ -53,7 +53,7 @@
 namespace
 {
 #ifdef Q_OS_MACOS
-    DesktopIntegration *desktopIntegrationInstance = nullptr;
+    DesktopIntegration* desktopIntegrationInstance = nullptr;
 
     bool handleDockClicked([[maybe_unused]] id self, [[maybe_unused]] SEL cmd, ...)
     {
@@ -70,12 +70,11 @@ using namespace std::chrono_literals;
 #define SETTINGS_KEY(name) u"GUI/" name
 #define NOTIFICATIONS_SETTINGS_KEY(name) (SETTINGS_KEY(u"Notifications/"_s) name)
 
-DesktopIntegration::DesktopIntegration(QObject *parent)
-    : QObject(parent)
-    , m_storeNotificationEnabled {NOTIFICATIONS_SETTINGS_KEY(u"Enabled"_s), true}
-    , m_menu {new QMenu}
+DesktopIntegration::DesktopIntegration(QObject* parent)
+    : QObject(parent), m_storeNotificationEnabled{ NOTIFICATIONS_SETTINGS_KEY(u"Enabled"_s), true }, m_menu{ new QMenu }
 #ifdef QBT_USES_DBUS
-    , m_storeNotificationTimeOut {NOTIFICATIONS_SETTINGS_KEY(u"Timeout"_s), -1}
+      ,
+      m_storeNotificationTimeOut{ NOTIFICATIONS_SETTINGS_KEY(u"Timeout"_s), -1 }
 #endif
 {
 #ifdef Q_OS_MACOS
@@ -98,8 +97,7 @@ DesktopIntegration::DesktopIntegration(QObject *parent)
 
     connect(Preferences::instance(), &Preferences::changed, this, &DesktopIntegration::onPreferencesChanged);
 #ifndef Q_OS_MACOS
-    connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, [this]
-    {
+    connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, [this] {
         if (m_systrayIcon)
             m_systrayIcon->setIcon(getSystrayIcon());
     });
@@ -125,7 +123,7 @@ QString DesktopIntegration::toolTip() const
     return m_toolTip;
 }
 
-void DesktopIntegration::setToolTip(const QString &toolTip)
+void DesktopIntegration::setToolTip(const QString& toolTip)
 {
     if (m_toolTip == toolTip)
         return;
@@ -137,7 +135,7 @@ void DesktopIntegration::setToolTip(const QString &toolTip)
 #endif
 }
 
-QMenu *DesktopIntegration::menu() const
+QMenu* DesktopIntegration::menu() const
 {
     return m_menu;
 }
@@ -184,7 +182,7 @@ void DesktopIntegration::setNotificationTimeout(const int value)
 }
 #endif
 
-void DesktopIntegration::showNotification(const QString &title, const QString &msg) const
+void DesktopIntegration::showNotification(const QString& title, const QString& msg) const
 {
     if (!isNotificationsEnabled())
         return;
@@ -237,9 +235,7 @@ void DesktopIntegration::createTrayIcon()
     if (m_menu)
         m_systrayIcon->setContextMenu(m_menu);
 
-    connect(m_systrayIcon, &QSystemTrayIcon::activated, this
-            , [this](const QSystemTrayIcon::ActivationReason reason)
-    {
+    connect(m_systrayIcon, &QSystemTrayIcon::activated, this, [this](const QSystemTrayIcon::ActivationReason reason) {
         if (reason == QSystemTrayIcon::Trigger)
             emit activationRequested();
     });

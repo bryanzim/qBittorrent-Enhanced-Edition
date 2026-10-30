@@ -29,17 +29,17 @@
 
 #include "transferlistdelegate.h"
 
-#include <QModelIndex>
-
 #include "base/preferences.h"
 #include "transferlistmodel.h"
 
-TransferListDelegate::TransferListDelegate(QObject *parent)
+#include <QModelIndex>
+
+TransferListDelegate::TransferListDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
 }
 
-QSize TransferListDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize TransferListDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     // Reimplementing sizeHint() because the 'name' column contains text+icon.
     // When that WHOLE column goes out of view(eg user scrolls horizontally)
@@ -57,40 +57,38 @@ QSize TransferListDelegate::sizeHint(const QStyleOptionViewItem &option, const Q
     return size;
 }
 
-void TransferListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void TransferListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     switch (index.column())
     {
-    case TransferListModel::TR_PROGRESS:
-        {
-            using namespace BitTorrent;
+    case TransferListModel::TR_PROGRESS: {
+        using namespace BitTorrent;
 
-            const auto isEnableState = [](const TorrentState state) -> bool
+        const auto isEnableState = [](const TorrentState state) -> bool {
+            switch (state)
             {
-                switch (state)
-                {
-                case TorrentState::Error:
-                case TorrentState::StoppedDownloading:
-                case TorrentState::Unknown:
-                    return false;
-                default:
-                    return true;
-                }
-            };
+            case TorrentState::Error:
+            case TorrentState::StoppedDownloading:
+            case TorrentState::Unknown:
+                return false;
+            default:
+                return true;
+            }
+        };
 
-            const int progress = static_cast<int>(index.data(TransferListModel::UnderlyingDataRole).toReal());
+        const int progress = static_cast<int>(index.data(TransferListModel::UnderlyingDataRole).toReal());
 
-            const QModelIndex statusIndex = index.siblingAtColumn(TransferListModel::TR_STATUS);
-            const auto torrentState = statusIndex.data(TransferListModel::UnderlyingDataRole).value<TorrentState>();
+        const QModelIndex statusIndex = index.siblingAtColumn(TransferListModel::TR_STATUS);
+        const auto torrentState = statusIndex.data(TransferListModel::UnderlyingDataRole).value<TorrentState>();
 
-            QStyleOptionViewItem customOption {option};
-            customOption.state.setFlag(QStyle::State_Enabled, isEnableState(torrentState));
+        QStyleOptionViewItem customOption{ option };
+        customOption.state.setFlag(QStyle::State_Enabled, isEnableState(torrentState));
 
-            const QColor color = Preferences::instance()->getProgressBarFollowsTextColor() ? index.data(Qt::ForegroundRole).value<QColor>() : QColor();
+        const QColor color = Preferences::instance()->getProgressBarFollowsTextColor() ? index.data(Qt::ForegroundRole).value<QColor>() : QColor();
 
-            m_progressBarPainter.paint(painter, customOption, index.data().toString(), progress, color);
-        }
-        break;
+        m_progressBarPainter.paint(painter, customOption, index.data().toString(), progress, color);
+    }
+    break;
     default:
         QStyledItemDelegate::paint(painter, option, index);
         break;

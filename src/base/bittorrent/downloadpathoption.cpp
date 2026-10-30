@@ -28,7 +28,7 @@
 
 #include "downloadpathoption.h"
 
-bool BitTorrent::operator==(const DownloadPathOption &left, const DownloadPathOption &right)
+bool BitTorrent::operator==(const DownloadPathOption& left, const DownloadPathOption& right)
 {
     return ((left.enabled == right.enabled) && (left.path == right.path));
 }

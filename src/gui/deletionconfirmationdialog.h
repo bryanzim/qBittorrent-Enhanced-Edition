@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <QDialog>
-
 #include "ui_deletionconfirmationdialog.h"
+
+#include <QDialog>
 
 namespace Ui
 {
@@ -44,11 +44,11 @@ class DeletionConfirmationDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(DeletionConfirmationDialog)
 
 public:
-    DeletionConfirmationDialog(QWidget *parent, int torrentsCount, const QString &name, bool defaultDeleteFiles);
+    DeletionConfirmationDialog(QWidget* parent, int torrentsCount, const QString& name, bool defaultDeleteFiles);
     ~DeletionConfirmationDialog() override;
 
     bool isRemoveContentSelected() const;
 
 private:
-    Ui::DeletionConfirmationDialog *m_ui = nullptr;
+    Ui::DeletionConfirmationDialog* m_ui = nullptr;
 };

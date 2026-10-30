@@ -28,11 +28,12 @@
 
 #pragma once
 
-#include <QObject>
-
 #include "base/path.h"
 
-template <typename T> class QPromise;
+#include <QObject>
+
+template <typename T>
+class QPromise;
 
 struct FileSearchResult
 {
@@ -48,6 +49,5 @@ class FileSearcher final : public QObject
 public:
     using QObject::QObject;
 
-    void search(const PathList &originalFileNames, const Path &savePath
-            , const Path &downloadPath, bool forceAppendExt, QPromise<FileSearchResult> &promise);
+    void search(const PathList& originalFileNames, const Path& savePath, const Path& downloadPath, bool forceAppendExt, QPromise<FileSearchResult>& promise);
 };

@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QStringList>
-
 #include "base/search/searchpluginmanager.h"
 #include "base/settingvalue.h"
+
+#include <QDialog>
+#include <QStringList>
 
 class QDropEvent;
 class QTreeWidgetItem;
@@ -54,15 +54,15 @@ class SearchPluginSelectDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(SearchPluginSelectDialog)
 
 public:
-    explicit SearchPluginSelectDialog(SearchPluginManager *pluginManager, QWidget *parent = nullptr);
+    explicit SearchPluginSelectDialog(SearchPluginManager* pluginManager, QWidget* parent = nullptr);
     ~SearchPluginSelectDialog() override;
 
-    QList<QTreeWidgetItem*> findItemsWithUrl(const QString &url);
-    QTreeWidgetItem *findItemWithID(const QString &id);
+    QList<QTreeWidgetItem*> findItemsWithUrl(const QString& url);
+    QTreeWidgetItem* findItemWithID(const QString& id);
 
 protected:
-    void dropEvent(QDropEvent *event) override;
-    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
 
 private slots:
     void on_actionUninstall_triggered();
@@ -70,30 +70,30 @@ private slots:
     void on_installButton_clicked();
     void on_closeButton_clicked();
     void togglePluginState(QTreeWidgetItem*, int);
-    void setRowColor(int row, const QString &color);
+    void setRowColor(int row, const QString& color);
     void displayContextMenu();
     void enableSelection(bool enable);
     void askForLocalPlugin();
     void askForPluginUrl();
-    void iconDownloadFinished(const Net::DownloadResult &result);
+    void iconDownloadFinished(const Net::DownloadResult& result);
 
-    void checkForUpdatesFinished(const QHash<QString, SearchPluginVersion> &updateInfo);
-    void checkForUpdatesFailed(const QString &reason);
-    void pluginInstalled(const QString &name);
-    void pluginInstallationFailed(const QString &name, const QString &reason);
-    void pluginUpdated(const QString &name);
-    void pluginUpdateFailed(const QString &name, const QString &reason);
+    void checkForUpdatesFinished(const QHash<QString, SearchPluginVersion>& updateInfo);
+    void checkForUpdatesFailed(const QString& reason);
+    void pluginInstalled(const QString& name);
+    void pluginInstallationFailed(const QString& name, const QString& reason);
+    void pluginUpdated(const QString& name);
+    void pluginUpdateFailed(const QString& name, const QString& reason);
 
 private:
     void loadSupportedSearchPlugins();
-    void addNewPlugin(const QString &pluginName);
+    void addNewPlugin(const QString& pluginName);
     void startAsyncOp();
     void finishAsyncOp();
     void finishPluginUpdate();
 
-    Ui::SearchPluginSelectDialog *m_ui = nullptr;
+    Ui::SearchPluginSelectDialog* m_ui = nullptr;
     SettingValue<QSize> m_storeDialogSize;
-    SearchPluginManager *m_pluginManager = nullptr;
+    SearchPluginManager* m_pluginManager = nullptr;
     QStringList m_updatedPlugins;
     int m_asyncOps = 0;
     int m_pendingUpdates = 0;

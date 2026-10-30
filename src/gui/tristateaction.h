@@ -41,7 +41,7 @@ class TriStateWidget;
 class TriStateAction : public QWidgetAction
 {
 public:
-    TriStateAction(const QString &text, QWidget *parent);
+    TriStateAction(const QString& text, QWidget* parent);
 
     // should use this function instead of QAction::setChecked(bool)
     void setCheckState(Qt::CheckState checkState);
@@ -54,5 +54,5 @@ public:
     void setCloseOnInteraction(bool enabled);
 
 private:
-    TriStateWidget *m_triStateWidget = nullptr;
+    TriStateWidget* m_triStateWidget = nullptr;
 };

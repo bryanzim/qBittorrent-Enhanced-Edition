@@ -28,13 +28,12 @@
 
 #include "rssfeeddialog.h"
 
-#include <QPushButton>
-
 #include "ui_rssfeeddialog.h"
 
-RSSFeedDialog::RSSFeedDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::RSSFeedDialog}
+#include <QPushButton>
+
+RSSFeedDialog::RSSFeedDialog(QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::RSSFeedDialog }
 {
     m_ui->setupUi(this);
 
@@ -61,7 +60,7 @@ QString RSSFeedDialog::feedURL() const
     return m_ui->textFeedURL->text();
 }
 
-void RSSFeedDialog::setFeedURL(const QString &feedURL)
+void RSSFeedDialog::setFeedURL(const QString& feedURL)
 {
     m_ui->textFeedURL->setText(feedURL);
 }
@@ -76,7 +75,7 @@ void RSSFeedDialog::setRefreshInterval(const std::chrono::seconds refreshInterva
     m_ui->spinRefreshInterval->setValue(refreshInterval.count());
 }
 
-void RSSFeedDialog::feedURLChanged(const QString &feedURL)
+void RSSFeedDialog::feedURLChanged(const QString& feedURL)
 {
     m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!feedURL.isEmpty());
 }

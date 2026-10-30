@@ -28,38 +28,36 @@
 
 #include "peerlistsortmodel.h"
 
-#include <QMetaType>
-
 #include "base/bittorrent/peeraddress.h"
 #include "peerlistwidget.h"
 
-PeerListSortModel::PeerListSortModel(QObject *parent)
+#include <QMetaType>
+
+PeerListSortModel::PeerListSortModel(QObject* parent)
     : QSortFilterProxyModel(parent)
 {
     setSortRole(UnderlyingDataRole);
 }
 
-bool PeerListSortModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool PeerListSortModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
     switch (sortColumn())
     {
-    case PeerListWidget::IP:
-        {
-            const QMetaType peerAddressType = QMetaType::fromType<BitTorrent::PeerAddress>();
-            const QVariant leftData = left.data(UnderlyingDataRole);
-            const QVariant rightData = right.data(UnderlyingDataRole);
+    case PeerListWidget::IP: {
+        const QMetaType peerAddressType = QMetaType::fromType<BitTorrent::PeerAddress>();
+        const QVariant leftData = left.data(UnderlyingDataRole);
+        const QVariant rightData = right.data(UnderlyingDataRole);
 
-            if ((leftData.metaType() == peerAddressType) && (rightData.metaType() == peerAddressType))
-                return leftData.value<BitTorrent::PeerAddress>() < rightData.value<BitTorrent::PeerAddress>();
-            return m_naturalLessThan(leftData.toString(), rightData.toString());
-        }
+        if ((leftData.metaType() == peerAddressType) && (rightData.metaType() == peerAddressType))
+            return leftData.value<BitTorrent::PeerAddress>() < rightData.value<BitTorrent::PeerAddress>();
+        return m_naturalLessThan(leftData.toString(), rightData.toString());
+    }
 
-    case PeerListWidget::CLIENT:
-        {
-            const QString strL = left.data(UnderlyingDataRole).toString();
-            const QString strR = right.data(UnderlyingDataRole).toString();
-            return m_naturalLessThan(strL, strR);
-        }
+    case PeerListWidget::CLIENT: {
+        const QString strL = left.data(UnderlyingDataRole).toString();
+        const QString strR = right.data(UnderlyingDataRole).toString();
+        return m_naturalLessThan(strL, strR);
+    }
 
     default:
         return QSortFilterProxyModel::lessThan(left, right);

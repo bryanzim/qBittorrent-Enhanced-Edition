@@ -28,11 +28,7 @@
 
 #include "synccontroller.h"
 
-#include <QFuture>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QMetaObject>
-
+#include "apierror.h"
 #include "base/algorithm.h"
 #include "base/bittorrent/cachestatus.h"
 #include "base/bittorrent/infohash.h"
@@ -49,8 +45,12 @@
 #include "base/preferences.h"
 #include "base/utils/dict.h"
 #include "base/utils/string.h"
-#include "apierror.h"
 #include "serialize/serialize_torrent.h"
+
+#include <QFuture>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QMetaObject>
 
 namespace
 {
@@ -132,36 +132,35 @@ namespace
     const QString KEY_TORRENT_HAS_TRACKER_ERROR = u"has_tracker_error"_s;
     const QString KEY_TORRENT_HAS_OTHER_ANNOUNCE_ERROR = u"has_other_announce_error"_s;
 
-    QStringList asStrings(const QSet<BitTorrent::TorrentID> &torrentIDs)
+    QStringList asStrings(const QSet<BitTorrent::TorrentID>& torrentIDs)
     {
         QStringList result;
         result.reserve(torrentIDs.size());
-        for (const BitTorrent::TorrentID &torrentID : torrentIDs)
+        for (const BitTorrent::TorrentID& torrentID : torrentIDs)
             result.emplaceBack(torrentID.toString());
 
         return result;
     }
 
-    bool hasWarningMessage(const BitTorrent::TrackerEntryStatus &status)
+    bool hasWarningMessage(const BitTorrent::TrackerEntryStatus& status)
     {
-        return std::ranges::any_of(status.endpoints, [](const BitTorrent::TrackerEndpointStatus &endpointEntry)
-        {
+        return std::ranges::any_of(status.endpoints, [](const BitTorrent::TrackerEndpointStatus& endpointEntry) {
             return (endpointEntry.state == BitTorrent::TrackerEndpointState::Working) && !endpointEntry.message.isEmpty();
         });
     }
 
-    QVariantMap processMap(const QVariantMap &prevData, const QVariantMap &data, const QVariantMap &initialSyncData);
-    std::pair<QVariantMap, QVariantList> processHash(QVariantHash prevData, const QVariantHash &data, const std::pair<QVariantMap, QVariantList> &initialSyncData);
-    std::pair<QVariantList, QVariantList> processList(QVariantList prevData, const QVariantList &data, const std::pair<QVariantList, QVariantList> &initialSyncData);
-    QJsonObject generateSyncData(int acceptedResponseId, const QVariantMap &data, QVariantMap &lastAcceptedData, QVariantMap &lastData);
+    QVariantMap processMap(const QVariantMap& prevData, const QVariantMap& data, const QVariantMap& initialSyncData);
+    std::pair<QVariantMap, QVariantList> processHash(QVariantHash prevData, const QVariantHash& data, const std::pair<QVariantMap, QVariantList>& initialSyncData);
+    std::pair<QVariantList, QVariantList> processList(QVariantList prevData, const QVariantList& data, const std::pair<QVariantList, QVariantList>& initialSyncData);
+    QJsonObject generateSyncData(int acceptedResponseId, const QVariantMap& data, QVariantMap& lastAcceptedData, QVariantMap& lastData);
 
     QVariantMap getTransferInfo()
     {
         QVariantMap map;
-        const auto *session = BitTorrent::Session::instance();
+        const auto* session = BitTorrent::Session::instance();
 
-        const BitTorrent::SessionStatus &sessionStatus = session->status();
-        const BitTorrent::CacheStatus &cacheStatus = session->cacheStatus();
+        const BitTorrent::SessionStatus& sessionStatus = session->status();
+        const BitTorrent::CacheStatus& cacheStatus = session->cacheStatus();
         map[KEY_TRANSFER_DLSPEED] = sessionStatus.payloadDownloadRate;
         map[KEY_TRANSFER_DLDATA] = sessionStatus.totalPayloadDownload;
         map[KEY_TRANSFER_UPSPEED] = sessionStatus.payloadUploadRate;
@@ -177,16 +176,16 @@ namespace
         map[KEY_TRANSFER_GLOBAL_RATIO] = ((atd > 0) && (atu > 0)) ? Utils::String::fromDouble(static_cast<qreal>(atu) / atd, 2) : u"-"_s;
         map[KEY_TRANSFER_TOTAL_PEER_CONNECTIONS] = sessionStatus.peersCount;
 
-        const qreal readRatio = cacheStatus.readRatio;  // TODO: remove when LIBTORRENT_VERSION_NUM >= 20000
+        const qreal readRatio = cacheStatus.readRatio; // TODO: remove when LIBTORRENT_VERSION_NUM >= 20000
         map[KEY_TRANSFER_READ_CACHE_HITS] = (readRatio > 0) ? Utils::String::fromDouble(100 * readRatio, 2) : u"0"_s;
         map[KEY_TRANSFER_TOTAL_BUFFERS_SIZE] = cacheStatus.totalUsedBuffers * 16 * 1024;
 
         map[KEY_TRANSFER_WRITE_CACHE_OVERLOAD] = ((sessionStatus.diskWriteQueue > 0) && (sessionStatus.peersCount > 0))
-            ? Utils::String::fromDouble((100. * sessionStatus.diskWriteQueue / sessionStatus.peersCount), 2)
-            : u"0"_s;
+                                                     ? Utils::String::fromDouble((100. * sessionStatus.diskWriteQueue / sessionStatus.peersCount), 2)
+                                                     : u"0"_s;
         map[KEY_TRANSFER_READ_CACHE_OVERLOAD] = ((sessionStatus.diskReadQueue > 0) && (sessionStatus.peersCount > 0))
-            ? Utils::String::fromDouble((100. * sessionStatus.diskReadQueue / sessionStatus.peersCount), 2)
-            : u"0"_s;
+                                                    ? Utils::String::fromDouble((100. * sessionStatus.diskReadQueue / sessionStatus.peersCount), 2)
+                                                    : u"0"_s;
 
         map[KEY_TRANSFER_QUEUED_IO_JOBS] = cacheStatus.jobQueueLength;
         map[KEY_TRANSFER_AVERAGE_TIME_QUEUE] = cacheStatus.averageJobTime;
@@ -197,8 +196,8 @@ namespace
         map[KEY_TRANSFER_LAST_EXTERNAL_ADDRESS_V6] = session->lastExternalIPv6Address();
         map[KEY_TRANSFER_DHT_NODES] = sessionStatus.dhtNodes;
         map[KEY_TRANSFER_CONNECTION_STATUS] = session->isListening()
-            ? (sessionStatus.hasIncomingConnections ? u"connected"_s : u"firewalled"_s)
-            : u"disconnected"_s;
+                                                  ? (sessionStatus.hasIncomingConnections ? u"connected"_s : u"firewalled"_s)
+                                                  : u"disconnected"_s;
 
         // Tracker statistics
         map[KEY_TRANSFER_QUEUED_TRACKER_ANNOUNCES] = sessionStatus.queuedTrackerAnnounces;
@@ -208,45 +207,40 @@ namespace
 
     // Compare two structures (prevData, data) and calculate difference (syncData).
     // Structures encoded as map.
-    QVariantMap processMap(const QVariantMap &prevData, const QVariantMap &data, const QVariantMap &initialSyncData)
+    QVariantMap processMap(const QVariantMap& prevData, const QVariantMap& data, const QVariantMap& initialSyncData)
     {
         // initialize output variable
         QVariantMap syncData;
 
         for (auto i = data.cbegin(); i != data.cend(); ++i)
         {
-            const QString &key = i.key();
-            const QVariant &value = i.value();
+            const QString& key = i.key();
+            const QVariant& value = i.value();
 
             switch (value.typeId())
             {
-            case QMetaType::QVariantMap:
-                {
-                    const QVariantMap map = processMap(prevData[key].toMap(), value.toMap(), initialSyncData[key].toMap());
-                    if (!map.isEmpty())
-                        syncData[key] = map;
-                }
-                break;
-            case QMetaType::QVariantHash:
-                {
-                    const auto [map, removedItems] = processHash(prevData[key].toHash(), value.toHash()
-                            , {initialSyncData[key].toMap(), initialSyncData[key + KEY_SUFFIX_REMOVED].toList()});
-                    if (!map.isEmpty())
-                        syncData[key] = map;
-                    if (!removedItems.isEmpty())
-                        syncData[key + KEY_SUFFIX_REMOVED] = removedItems;
-                }
-                break;
-            case QMetaType::QVariantList:
-                {
-                    const auto [list, removedItems] = processList(prevData[key].toList(), value.toList()
-                            , {initialSyncData[key].toList(), initialSyncData[key + KEY_SUFFIX_REMOVED].toList()});
-                    if (!list.isEmpty())
-                        syncData[key] = list;
-                    if (!removedItems.isEmpty())
-                        syncData[key + KEY_SUFFIX_REMOVED] = removedItems;
-                }
-                break;
+            case QMetaType::QVariantMap: {
+                const QVariantMap map = processMap(prevData[key].toMap(), value.toMap(), initialSyncData[key].toMap());
+                if (!map.isEmpty())
+                    syncData[key] = map;
+            }
+            break;
+            case QMetaType::QVariantHash: {
+                const auto [map, removedItems] = processHash(prevData[key].toHash(), value.toHash(), { initialSyncData[key].toMap(), initialSyncData[key + KEY_SUFFIX_REMOVED].toList() });
+                if (!map.isEmpty())
+                    syncData[key] = map;
+                if (!removedItems.isEmpty())
+                    syncData[key + KEY_SUFFIX_REMOVED] = removedItems;
+            }
+            break;
+            case QMetaType::QVariantList: {
+                const auto [list, removedItems] = processList(prevData[key].toList(), value.toList(), { initialSyncData[key].toList(), initialSyncData[key + KEY_SUFFIX_REMOVED].toList() });
+                if (!list.isEmpty())
+                    syncData[key] = list;
+                if (!removedItems.isEmpty())
+                    syncData[key + KEY_SUFFIX_REMOVED] = removedItems;
+            }
+            break;
             case QMetaType::QString:
             case QMetaType::LongLong:
             case QMetaType::Float:
@@ -264,9 +258,7 @@ namespace
                     syncData[key] = *syncValue;
                 break;
             default:
-                Q_ASSERT_X(false, "processMap"
-                        , u"Unexpected type: %1"_s.arg(QString::fromLatin1(value.metaType().name()))
-                                .toUtf8().constData());
+                Q_ASSERT_X(false, "processMap", u"Unexpected type: %1"_s.arg(QString::fromLatin1(value.metaType().name())).toUtf8().constData());
             }
         }
 
@@ -276,16 +268,16 @@ namespace
     // Compare two lists of structures (prevData, data) and calculate difference (items, removedItems).
     // Structures encoded as map.
     // Lists are encoded as hash table (indexed by structure key value) to improve ease of searching for removed items.
-    std::pair<QVariantMap, QVariantList> processHash(QVariantHash prevData, const QVariantHash &data, const std::pair<QVariantMap, QVariantList> &initialSyncData)
+    std::pair<QVariantMap, QVariantList> processHash(QVariantHash prevData, const QVariantHash& data, const std::pair<QVariantMap, QVariantList>& initialSyncData)
     {
         // initialize output variables
         std::pair<QVariantMap, QVariantList> syncData = initialSyncData;
-        auto &[items, removedItems] = syncData;
+        auto& [items, removedItems] = syncData;
 
         for (auto i = data.cbegin(); i != data.cend(); ++i)
         {
-            const QString &key = i.key();
-            const QVariant &value = i.value();
+            const QString& key = i.key();
+            const QVariant& value = i.value();
 
             Q_ASSERT(value.typeId() == QMetaType::QVariantMap);
 
@@ -318,13 +310,13 @@ namespace
     }
 
     // Compare two lists of simple value (prevData, data) and calculate difference (items, removedItems).
-    std::pair<QVariantList, QVariantList> processList(QVariantList prevData, const QVariantList &data, const std::pair<QVariantList, QVariantList> &initialSyncData)
+    std::pair<QVariantList, QVariantList> processList(QVariantList prevData, const QVariantList& data, const std::pair<QVariantList, QVariantList>& initialSyncData)
     {
         // initialize output variables
         std::pair<QVariantList, QVariantList> syncData = initialSyncData;
-        auto &[items, removedItems] = syncData;
+        auto& [items, removedItems] = syncData;
 
-        for (const QVariant &item : data)
+        for (const QVariant& item : data)
         {
             if (!prevData.contains(item))
             {
@@ -346,7 +338,7 @@ namespace
         return syncData;
     }
 
-    QJsonObject generateSyncData(int acceptedResponseId, const QVariantMap &data, QVariantMap &lastAcceptedData, QVariantMap &lastData)
+    QJsonObject generateSyncData(int acceptedResponseId, const QVariantMap& data, QVariantMap& lastAcceptedData, QVariantMap& lastData)
     {
         QVariantMap syncData;
         bool fullUpdate = true;
@@ -356,8 +348,7 @@ namespace
             if (lastResponseId == acceptedResponseId)
                 lastAcceptedData = lastData;
 
-            if (const int lastAcceptedResponseId = lastAcceptedData[KEY_RESPONSE_ID].toInt()
-                    ; lastAcceptedResponseId == acceptedResponseId)
+            if (const int lastAcceptedResponseId = lastAcceptedData[KEY_RESPONSE_ID].toInt(); lastAcceptedResponseId == acceptedResponseId)
             {
                 fullUpdate = false;
             }
@@ -374,7 +365,7 @@ namespace
             syncData = processMap(lastAcceptedData, data, syncData);
         }
 
-        const int responseId = (lastResponseId % 1000000) + 1;  // cycle between 1 and 1000000
+        const int responseId = (lastResponseId % 1000000) + 1; // cycle between 1 and 1000000
         lastData = data;
         lastData[KEY_RESPONSE_ID] = responseId;
         syncData[KEY_RESPONSE_ID] = responseId;
@@ -382,12 +373,12 @@ namespace
         return QJsonObject::fromVariantMap(syncData);
     }
 
-    void addAnnounceStats(QVariantMap &serializedTorrent, const BitTorrent::Torrent *torrent)
+    void addAnnounceStats(QVariantMap& serializedTorrent, const BitTorrent::Torrent* torrent)
     {
         bool hasTrackerWarning = false;
         bool hasTrackerError = false;
         bool hasOtherAnnounceError = false;
-        for (const BitTorrent::TrackerEntryStatus &status : asConst(torrent->trackers()))
+        for (const BitTorrent::TrackerEntryStatus& status : asConst(torrent->trackers()))
         {
             switch (status.state)
             {
@@ -496,7 +487,7 @@ void SyncController::maindataAction()
     {
         makeMaindataSnapshot();
 
-        const auto *btSession = BitTorrent::Session::instance();
+        const auto* btSession = BitTorrent::Session::instance();
         connect(btSession, &BitTorrent::Session::categoryAdded, this, &SyncController::onCategoryAdded);
         connect(btSession, &BitTorrent::Session::categoryRemoved, this, &SyncController::onCategoryRemoved);
         connect(btSession, &BitTorrent::Session::categoryOptionsChanged, this, &SyncController::onCategoryOptionsChanged);
@@ -537,7 +528,7 @@ void SyncController::maindataAction()
         }
     }
 
-    const int id = (m_maindataLastSentID % 1000000) + 1;  // cycle between 1 and 1000000
+    const int id = (m_maindataLastSentID % 1000000) + 1; // cycle between 1 and 1000000
     setResult(generateMaindataSyncData(id, fullUpdate));
     m_maindataLastSentID = id;
 }
@@ -548,9 +539,9 @@ void SyncController::makeMaindataSnapshot()
     m_maindataAcceptedID = 0;
     m_maindataSnapshot = {};
 
-    const auto *session = BitTorrent::Session::instance();
+    const auto* session = BitTorrent::Session::instance();
 
-    for (const BitTorrent::Torrent *torrent : asConst(session->torrents()))
+    for (const BitTorrent::Torrent* torrent : asConst(session->torrents()))
     {
         const BitTorrent::TorrentID torrentID = torrent->id();
 
@@ -558,14 +549,14 @@ void SyncController::makeMaindataSnapshot()
         serializedTorrent.remove(KEY_TORRENT_ID);
         addAnnounceStats(serializedTorrent, torrent);
 
-        for (const BitTorrent::TrackerEntryStatus &status : asConst(torrent->trackers()))
+        for (const BitTorrent::TrackerEntryStatus& status : asConst(torrent->trackers()))
             m_knownTrackers[status.url].insert(torrentID);
 
         m_maindataSnapshot.torrents[torrentID.toString()] = serializedTorrent;
     }
 
     const QStringList categoriesList = session->categories();
-    for (const auto &categoryName : categoriesList)
+    for (const auto& categoryName : categoriesList)
     {
         const BitTorrent::CategoryOptions categoryOptions = session->categoryOptions(categoryName);
         QJsonObject category = categoryOptions.toJSON();
@@ -575,10 +566,10 @@ void SyncController::makeMaindataSnapshot()
         m_maindataSnapshot.categories[categoryName] = category.toVariantMap();
     }
 
-    for (const Tag &tag : asConst(session->tags()))
+    for (const Tag& tag : asConst(session->tags()))
         m_maindataSnapshot.tags.append(tag.toString());
 
-    for (const auto &[tracker, torrentIDs] : asConst(m_knownTrackers).asKeyValueRange())
+    for (const auto& [tracker, torrentIDs] : asConst(m_knownTrackers).asKeyValueRange())
         m_maindataSnapshot.trackers[tracker] = asStrings(torrentIDs);
 
     m_maindataSnapshot.serverState = getTransferInfo();
@@ -592,33 +583,33 @@ void SyncController::makeMaindataSnapshot()
 QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fullUpdate)
 {
     // if need to update existing sync data
-    for (const QString &category : asConst(m_updatedCategories))
+    for (const QString& category : asConst(m_updatedCategories))
         m_maindataSyncBuf.removedCategories.removeOne(category);
-    for (const QString &category : asConst(m_removedCategories))
+    for (const QString& category : asConst(m_removedCategories))
         m_maindataSyncBuf.categories.remove(category);
 
-    for (const QString &tag : asConst(m_addedTags))
+    for (const QString& tag : asConst(m_addedTags))
         m_maindataSyncBuf.removedTags.removeOne(tag);
-    for (const QString &tag : asConst(m_removedTags))
+    for (const QString& tag : asConst(m_removedTags))
         m_maindataSyncBuf.tags.removeOne(tag);
 
-    for (const BitTorrent::TorrentID &torrentID : asConst(m_updatedTorrents))
+    for (const BitTorrent::TorrentID& torrentID : asConst(m_updatedTorrents))
         m_maindataSyncBuf.removedTorrents.removeOne(torrentID.toString());
 
-    for (const BitTorrent::TorrentID &torrentID : asConst(m_removedTorrents))
+    for (const BitTorrent::TorrentID& torrentID : asConst(m_removedTorrents))
     {
         const QString torrentIDStr = torrentID.toString();
         m_maindataSyncBuf.torrents.remove(torrentIDStr);
     }
 
-    for (const QString &tracker : asConst(m_updatedTrackers))
+    for (const QString& tracker : asConst(m_updatedTrackers))
         m_maindataSyncBuf.removedTrackers.removeOne(tracker);
-    for (const QString &tracker : asConst(m_removedTrackers))
+    for (const QString& tracker : asConst(m_removedTrackers))
         m_maindataSyncBuf.trackers.remove(tracker);
 
-    const auto *session = BitTorrent::Session::instance();
+    const auto* session = BitTorrent::Session::instance();
 
-    for (const QString &categoryName : asConst(m_updatedCategories))
+    for (const QString& categoryName : asConst(m_updatedCategories))
     {
         const BitTorrent::CategoryOptions categoryOptions = session->categoryOptions(categoryName);
         auto category = categoryOptions.toJSON().toVariantMap();
@@ -626,9 +617,9 @@ QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fu
         category[u"savePath"_s] = category.take(u"save_path"_s);
         category.insert(u"name"_s, categoryName);
 
-        auto &categorySnapshot = m_maindataSnapshot.categories[categoryName];
+        auto& categorySnapshot = m_maindataSnapshot.categories[categoryName];
         if (const QVariantMap syncData = processMap(categorySnapshot, category, m_maindataSyncBuf.categories.value(categoryName));
-                !syncData.isEmpty())
+            !syncData.isEmpty())
         {
             m_maindataSyncBuf.categories[categoryName] = syncData;
             categorySnapshot = category;
@@ -636,37 +627,37 @@ QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fu
     }
     m_updatedCategories.clear();
 
-    for (const QString &category : asConst(m_removedCategories))
+    for (const QString& category : asConst(m_removedCategories))
     {
         m_maindataSyncBuf.removedCategories.append(category);
         m_maindataSnapshot.categories.remove(category);
     }
     m_removedCategories.clear();
 
-    for (const QString &tag : asConst(m_addedTags))
+    for (const QString& tag : asConst(m_addedTags))
     {
         m_maindataSyncBuf.tags.append(tag);
         m_maindataSnapshot.tags.append(tag);
     }
     m_addedTags.clear();
 
-    for (const QString &tag : asConst(m_removedTags))
+    for (const QString& tag : asConst(m_removedTags))
     {
         m_maindataSyncBuf.removedTags.append(tag);
         m_maindataSnapshot.tags.removeOne(tag);
     }
     m_removedTags.clear();
 
-    for (const BitTorrent::TorrentID &torrentID : asConst(m_updatedTorrents))
+    for (const BitTorrent::TorrentID& torrentID : asConst(m_updatedTorrents))
     {
-        const BitTorrent::Torrent *torrent = session->getTorrent(torrentID);
+        const BitTorrent::Torrent* torrent = session->getTorrent(torrentID);
         Q_ASSERT(torrent);
 
         QVariantMap serializedTorrent = serialize(*torrent);
         serializedTorrent.remove(KEY_TORRENT_ID);
 
         const QString torrentIDStr = torrentID.toString();
-        auto &torrentSnapshot = m_maindataSnapshot.torrents[torrentIDStr];
+        auto& torrentSnapshot = m_maindataSnapshot.torrents[torrentIDStr];
 
         if (m_announcedTorrents.contains(torrentID))
         {
@@ -680,30 +671,30 @@ QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fu
         }
 
         if (const QVariantMap syncData = processMap(torrentSnapshot, serializedTorrent, m_maindataSyncBuf.torrents.value(torrentIDStr));
-                !syncData.isEmpty())
+            !syncData.isEmpty())
         {
             m_maindataSyncBuf.torrents[torrentIDStr] = syncData;
             torrentSnapshot = serializedTorrent;
         }
     }
 
-    for (const BitTorrent::TorrentID &torrentID : asConst(m_announcedTorrents))
+    for (const BitTorrent::TorrentID& torrentID : asConst(m_announcedTorrents))
     {
         if (m_updatedTorrents.contains(torrentID))
             continue;
 
-        const BitTorrent::Torrent *torrent = session->getTorrent(torrentID);
+        const BitTorrent::Torrent* torrent = session->getTorrent(torrentID);
         Q_ASSERT(torrent);
 
         const QString torrentIDStr = torrentID.toString();
-        auto &torrentSnapshot = m_maindataSnapshot.torrents[torrentIDStr];
+        auto& torrentSnapshot = m_maindataSnapshot.torrents[torrentIDStr];
 
         // Only announce stats are changed so don't need to serialize torrent again
         QVariantMap serializedTorrent = torrentSnapshot;
         addAnnounceStats(serializedTorrent, torrent);
 
         if (const QVariantMap syncData = processMap(torrentSnapshot, serializedTorrent, m_maindataSyncBuf.torrents.value(torrentIDStr));
-                !syncData.isEmpty())
+            !syncData.isEmpty())
         {
             m_maindataSyncBuf.torrents[torrentIDStr] = syncData;
             torrentSnapshot = serializedTorrent;
@@ -713,7 +704,7 @@ QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fu
     m_updatedTorrents.clear();
     m_announcedTorrents.clear();
 
-    for (const BitTorrent::TorrentID &torrentID : asConst(m_removedTorrents))
+    for (const BitTorrent::TorrentID& torrentID : asConst(m_removedTorrents))
     {
         const QString torrentIDStr = torrentID.toString();
 
@@ -722,7 +713,7 @@ QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fu
     }
     m_removedTorrents.clear();
 
-    for (const QString &tracker : asConst(m_updatedTrackers))
+    for (const QString& tracker : asConst(m_updatedTrackers))
     {
         const QStringList serializedTorrentIDs = asStrings(m_knownTrackers[tracker]);
 
@@ -731,7 +722,7 @@ QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fu
     }
     m_updatedTrackers.clear();
 
-    for (const QString &tracker : asConst(m_removedTrackers))
+    for (const QString& tracker : asConst(m_removedTrackers))
     {
         m_maindataSyncBuf.removedTrackers.append(tracker);
         m_maindataSnapshot.trackers.remove(tracker);
@@ -805,7 +796,7 @@ QJsonObject SyncController::generateMaindataSyncData(const int id, const bool fu
 void SyncController::torrentPeersAction()
 {
     const auto id = BitTorrent::TorrentID::fromString(params()[u"hash"_s]);
-    const BitTorrent::Torrent *torrent = BitTorrent::Session::instance()->getTorrent(id);
+    const BitTorrent::Torrent* torrent = BitTorrent::Session::instance()->getTorrent(id);
     if (!torrent)
         throw APIError(APIErrorType::NotFound);
 
@@ -814,13 +805,13 @@ void SyncController::torrentPeersAction()
 
     const QList<BitTorrent::PeerInfo> peersList = torrent->fetchPeerInfo().takeResult();
 
-    const auto *pref = Preferences::instance();
+    const auto* pref = Preferences::instance();
     const bool resolvePeerHostNames = pref->resolvePeerHostNames();
     const bool resolvePeerCountries = pref->resolvePeerCountries();
 
     data[KEY_SYNC_TORRENT_PEERS_SHOW_FLAGS] = resolvePeerCountries;
 
-    for (const BitTorrent::PeerInfo &pi : peersList)
+    for (const BitTorrent::PeerInfo& pi : peersList)
     {
         const BitTorrent::PeerAddress address = pi.address();
         const bool useI2PSocket = pi.useI2PSocket();
@@ -828,20 +819,19 @@ void SyncController::torrentPeersAction()
         if (address.ip.isNull() && !useI2PSocket)
             continue;
 
-        QVariantMap peer =
-        {
-            {KEY_PEER_CLIENT, pi.client()},
-            {KEY_PEER_ID_CLIENT, pi.peerIdClient()},
-            {KEY_PEER_PROGRESS, pi.progress()},
-            {KEY_PEER_DOWN_SPEED, pi.payloadDownSpeed()},
-            {KEY_PEER_UP_SPEED, pi.payloadUpSpeed()},
-            {KEY_PEER_TOT_DOWN, pi.totalDownload()},
-            {KEY_PEER_TOT_UP, pi.totalUpload()},
-            {KEY_PEER_CONNECTION_TYPE, pi.connectionType()},
-            {KEY_PEER_FLAGS, pi.flags()},
-            {KEY_PEER_FLAGS_DESCRIPTION, pi.flagsDescription()},
-            {KEY_PEER_RELEVANCE, pi.relevance()},
-            {KEY_PEER_SHADOWBANNED, pi.isShadowBanned()}
+        QVariantMap peer = {
+            {            KEY_PEER_CLIENT,           pi.client() },
+            {         KEY_PEER_ID_CLIENT,     pi.peerIdClient() },
+            {          KEY_PEER_PROGRESS,         pi.progress() },
+            {        KEY_PEER_DOWN_SPEED, pi.payloadDownSpeed() },
+            {          KEY_PEER_UP_SPEED,   pi.payloadUpSpeed() },
+            {          KEY_PEER_TOT_DOWN,    pi.totalDownload() },
+            {            KEY_PEER_TOT_UP,      pi.totalUpload() },
+            {   KEY_PEER_CONNECTION_TYPE,   pi.connectionType() },
+            {             KEY_PEER_FLAGS,            pi.flags() },
+            { KEY_PEER_FLAGS_DESCRIPTION, pi.flagsDescription() },
+            {         KEY_PEER_RELEVANCE,        pi.relevance() },
+            {      KEY_PEER_SHADOWBANNED,   pi.isShadowBanned() }
         };
 
         const qlonglong totalUpload = pi.totalUpload();
@@ -861,7 +851,7 @@ void SyncController::torrentPeersAction()
             const PathList filePaths = torrent->info().filesForPiece(pi.downloadingPieceIndex());
             QStringList filesForPiece;
             filesForPiece.reserve(filePaths.size());
-            for (const Path &filePath : filePaths)
+            for (const Path& filePath : filePaths)
                 filesForPiece.append(filePath.toString());
             peer.insert(KEY_PEER_FILES, filesForPiece.join(u'\n'));
         }
@@ -878,8 +868,8 @@ void SyncController::torrentPeersAction()
             peer[KEY_PEER_PORT] = address.port;
 
             peer[KEY_PEER_HOST_NAME] = resolvePeerHostNames
-                ? Net::ReverseResolution::instance()->resolve(address.ip)
-                : QString();
+                                           ? Net::ReverseResolution::instance()->resolve(address.ip)
+                                           : QString();
 
             if (resolvePeerCountries)
             {
@@ -902,19 +892,19 @@ void SyncController::torrentPeersAction()
     setResult(generateSyncData(acceptedResponseId, data, m_lastAcceptedPeersResponse, m_lastPeersResponse));
 }
 
-void SyncController::onCategoryAdded(const QString &categoryName)
+void SyncController::onCategoryAdded(const QString& categoryName)
 {
     m_removedCategories.remove(categoryName);
     m_updatedCategories.insert(categoryName);
 }
 
-void SyncController::onCategoryRemoved(const QString &categoryName)
+void SyncController::onCategoryRemoved(const QString& categoryName)
 {
     m_updatedCategories.remove(categoryName);
     m_removedCategories.insert(categoryName);
 }
 
-void SyncController::onCategoryOptionsChanged(const QString &categoryName)
+void SyncController::onCategoryOptionsChanged(const QString& categoryName)
 {
     Q_ASSERT(!m_removedCategories.contains(categoryName));
 
@@ -924,7 +914,7 @@ void SyncController::onCategoryOptionsChanged(const QString &categoryName)
 void SyncController::onSubcategoriesSupportChanged()
 {
     const QStringList categoriesList = BitTorrent::Session::instance()->categories();
-    for (const auto &categoryName : categoriesList)
+    for (const auto& categoryName : categoriesList)
     {
         if (!m_maindataSnapshot.categories.contains(categoryName))
         {
@@ -934,19 +924,19 @@ void SyncController::onSubcategoriesSupportChanged()
     }
 }
 
-void SyncController::onTagAdded(const Tag &tag)
+void SyncController::onTagAdded(const Tag& tag)
 {
     m_removedTags.remove(tag.toString());
     m_addedTags.insert(tag.toString());
 }
 
-void SyncController::onTagRemoved(const Tag &tag)
+void SyncController::onTagRemoved(const Tag& tag)
 {
     m_addedTags.remove(tag.toString());
     m_removedTags.insert(tag.toString());
 }
 
-void SyncController::onTorrentAdded(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentAdded(BitTorrent::Torrent* torrent)
 {
     const BitTorrent::TorrentID torrentID = torrent->id();
 
@@ -954,7 +944,7 @@ void SyncController::onTorrentAdded(BitTorrent::Torrent *torrent)
     m_updatedTorrents.insert(torrentID);
     m_announcedTorrents.insert(torrentID);
 
-    for (const BitTorrent::TrackerEntryStatus &status : asConst(torrent->trackers()))
+    for (const BitTorrent::TrackerEntryStatus& status : asConst(torrent->trackers()))
     {
         m_knownTrackers[status.url].insert(torrentID);
         m_updatedTrackers.insert(status.url);
@@ -962,7 +952,7 @@ void SyncController::onTorrentAdded(BitTorrent::Torrent *torrent)
     }
 }
 
-void SyncController::onTorrentAboutToBeRemoved(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentAboutToBeRemoved(BitTorrent::Torrent* torrent)
 {
     const BitTorrent::TorrentID torrentID = torrent->id();
 
@@ -970,14 +960,14 @@ void SyncController::onTorrentAboutToBeRemoved(BitTorrent::Torrent *torrent)
     m_updatedTorrents.remove(torrentID);
     m_removedTorrents.insert(torrentID);
 
-    for (const BitTorrent::TrackerEntryStatus &status : asConst(torrent->trackers()))
+    for (const BitTorrent::TrackerEntryStatus& status : asConst(torrent->trackers()))
     {
         const auto iter = m_knownTrackers.find(status.url);
         Q_ASSERT(iter != m_knownTrackers.end());
         if (iter == m_knownTrackers.end()) [[unlikely]]
             continue;
 
-        QSet<BitTorrent::TorrentID> &torrentIDs = iter.value();
+        QSet<BitTorrent::TorrentID>& torrentIDs = iter.value();
         torrentIDs.remove(torrentID);
         if (torrentIDs.isEmpty())
         {
@@ -992,55 +982,54 @@ void SyncController::onTorrentAboutToBeRemoved(BitTorrent::Torrent *torrent)
     }
 }
 
-void SyncController::onTorrentCategoryChanged(BitTorrent::Torrent *torrent
-        , [[maybe_unused]] const QString &oldCategory)
+void SyncController::onTorrentCategoryChanged(BitTorrent::Torrent* torrent, [[maybe_unused]] const QString& oldCategory)
 {
     m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentMetadataReceived(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentMetadataReceived(BitTorrent::Torrent* torrent)
 {
     m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentStopped(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentStopped(BitTorrent::Torrent* torrent)
 {
     m_updatedTorrents.insert(torrent->id());
     m_announcedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentStarted(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentStarted(BitTorrent::Torrent* torrent)
 {
     m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentSavePathChanged(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentSavePathChanged(BitTorrent::Torrent* torrent)
 {
     m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentSavingModeChanged(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentSavingModeChanged(BitTorrent::Torrent* torrent)
 {
     m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentTagAdded(BitTorrent::Torrent *torrent, [[maybe_unused]] const Tag &tag)
+void SyncController::onTorrentTagAdded(BitTorrent::Torrent* torrent, [[maybe_unused]] const Tag& tag)
 {
     m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentTagRemoved(BitTorrent::Torrent *torrent, [[maybe_unused]] const Tag &tag)
+void SyncController::onTorrentTagRemoved(BitTorrent::Torrent* torrent, [[maybe_unused]] const Tag& tag)
 {
     m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentsUpdated(const QList<BitTorrent::Torrent *> &torrents)
+void SyncController::onTorrentsUpdated(const QList<BitTorrent::Torrent*>& torrents)
 {
-    for (const BitTorrent::Torrent *torrent : torrents)
+    for (const BitTorrent::Torrent* torrent : torrents)
         m_updatedTorrents.insert(torrent->id());
 }
 
-void SyncController::onTorrentTrackersChanged(BitTorrent::Torrent *torrent)
+void SyncController::onTorrentTrackersChanged(BitTorrent::Torrent* torrent)
 {
     using namespace BitTorrent;
 
@@ -1048,15 +1037,12 @@ void SyncController::onTorrentTrackersChanged(BitTorrent::Torrent *torrent)
 
     QSet<QString> currentTrackers;
     currentTrackers.reserve(trackers.size());
-    for (const TrackerEntryStatus &status : trackers)
+    for (const TrackerEntryStatus& status : trackers)
         currentTrackers.insert(status.url);
 
     const TorrentID torrentID = torrent->id();
-    Algorithm::removeIf(m_knownTrackers
-        , [this, torrentID, currentTrackers](const QString &knownTracker, QSet<TorrentID> &torrentIDs)
-    {
-        if (auto idIter = torrentIDs.find(torrentID)
-                ; (idIter != torrentIDs.end()) && !currentTrackers.contains(knownTracker))
+    Algorithm::removeIf(m_knownTrackers, [this, torrentID, currentTrackers](const QString& knownTracker, QSet<TorrentID>& torrentIDs) {
+        if (auto idIter = torrentIDs.find(torrentID); (idIter != torrentIDs.end()) && !currentTrackers.contains(knownTracker))
         {
             torrentIDs.erase(idIter);
             if (torrentIDs.isEmpty())
@@ -1080,11 +1066,11 @@ void SyncController::onTorrentTrackersChanged(BitTorrent::Torrent *torrent)
         return false;
     });
 
-    for (const QString &currentTracker : asConst(currentTrackers))
+    for (const QString& currentTracker : asConst(currentTrackers))
     {
         if (!m_knownTrackers.contains(currentTracker))
         {
-            m_knownTrackers.insert(currentTracker, {torrentID});
+            m_knownTrackers.insert(currentTracker, { torrentID });
             m_updatedTrackers.insert(currentTracker);
             m_removedTrackers.remove(currentTracker);
         }
@@ -1093,8 +1079,7 @@ void SyncController::onTorrentTrackersChanged(BitTorrent::Torrent *torrent)
     m_announcedTorrents.insert(torrentID);
 }
 
-void SyncController::onTorrentTrackerEntryStatusesUpdated(const BitTorrent::Torrent *torrent
-        , [[maybe_unused]] const QHash<QString, BitTorrent::TrackerEntryStatus> &updatedTrackers)
+void SyncController::onTorrentTrackerEntryStatusesUpdated(const BitTorrent::Torrent* torrent, [[maybe_unused]] const QHash<QString, BitTorrent::TrackerEntryStatus>& updatedTrackers)
 {
     m_announcedTorrents.insert(torrent->id());
 }

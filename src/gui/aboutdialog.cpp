@@ -29,8 +29,6 @@
 
 #include "aboutdialog.h"
 
-#include <QClipboard>
-
 #include "base/path.h"
 #include "base/unicodestrings.h"
 #include "base/utils/io.h"
@@ -40,6 +38,8 @@
 #include "uithememanager.h"
 #include "utils.h"
 
+#include <QClipboard>
+
 #ifdef ENABLE_PLUGINS
 #include "base/plugins/pluginsengine.h"
 #endif
@@ -48,10 +48,8 @@ using namespace Qt::Literals::StringLiterals;
 
 #define SETTINGS_KEY(name) u"AboutDialog/" name
 
-AboutDialog::AboutDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::AboutDialog}
-    , m_storeDialogSize {SETTINGS_KEY(u"Size"_s)}
+AboutDialog::AboutDialog(QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::AboutDialog }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }
 {
     m_ui->setupUi(this);
 
@@ -73,14 +71,10 @@ AboutDialog::AboutDialog(QWidget *parent)
         u"<tr><td>%7</td><td><a href=\"https://t.me/loli_make_the_world_great_again\">Husky</a></td></tr>"
         u"</table>"
         u"</p>"_s
-        .arg(tr("An advanced BitTorrent client programmed in C++, based on Qt toolkit and libtorrent-rasterbar.")
-                .replace(u"C++"_s, u"C\u2060+\u2060+"_s) // make C++ non-breaking
-            , tr("Copyright %1 2006-2026 The qBittorrent project").arg(C_COPYRIGHT)
-            , tr("Home Page:")
-            , tr("Forum:")
-            , tr("Bug Tracker:")
-            , tr("Enhanced Edition:")
-            , tr("Maintainer:"));
+            .arg(tr("An advanced BitTorrent client programmed in C++, based on Qt toolkit and libtorrent-rasterbar.")
+                     .replace(u"C++"_s, u"C\u2060+\u2060+"_s) // make C++ non-breaking
+                 ,
+                 tr("Copyright %1 2006-2026 The qBittorrent project").arg(C_COPYRIGHT), tr("Home Page:"), tr("Forum:"), tr("Bug Tracker:"), tr("Enhanced Edition:"), tr("Maintainer:"));
     m_ui->labelAbout->setText(aboutText);
 
     m_ui->labelMascot->setPixmap(Utils::Gui::scaledPixmap(Path(u":/icons/mascot.png"_s)));
@@ -115,24 +109,24 @@ AboutDialog::AboutDialog(QWidget *parent)
     const Qt::TextInteractionFlags interactionFlags = m_ui->labelZlibVer->textInteractionFlags();
 
     const int luaRow = m_ui->gridLayout->rowCount();
-    auto *labelLua = new QLabel(m_ui->SoftwareUsedTab);
+    auto* labelLua = new QLabel(m_ui->SoftwareUsedTab);
     labelLua->setObjectName("labelLua");
     labelLua->setAlignment(alignment);
     labelLua->setText(tr("Lua:"));
     m_ui->gridLayout->addWidget(labelLua, luaRow, 1);
-    auto *labelLuaVer = new QLabel(m_ui->SoftwareUsedTab);
+    auto* labelLuaVer = new QLabel(m_ui->SoftwareUsedTab);
     labelLuaVer->setObjectName("labelLuaVer");
     labelLuaVer->setTextInteractionFlags(interactionFlags);
     labelLuaVer->setText(PluginsEngine::luaVersion().toString());
     m_ui->gridLayout->addWidget(labelLuaVer, luaRow, 2);
 
     const int luaBridgeRow = m_ui->gridLayout->rowCount();
-    auto *labelLuaBridge = new QLabel(m_ui->SoftwareUsedTab);
+    auto* labelLuaBridge = new QLabel(m_ui->SoftwareUsedTab);
     labelLuaBridge->setObjectName("labelLuaBridge");
     labelLuaBridge->setAlignment(alignment);
     labelLuaBridge->setText(tr("LuaBridge:"));
     m_ui->gridLayout->addWidget(labelLuaBridge, luaBridgeRow, 1);
-    auto *labelLuaBridgeVer = new QLabel(m_ui->SoftwareUsedTab);
+    auto* labelLuaBridgeVer = new QLabel(m_ui->SoftwareUsedTab);
     labelLuaBridgeVer->setObjectName("labelLuaBridgeVer");
     labelLuaBridgeVer->setTextInteractionFlags(interactionFlags);
     labelLuaBridgeVer->setText(PluginsEngine::luaBridgeVersion().toString());
@@ -144,8 +138,8 @@ AboutDialog::AboutDialog(QWidget *parent)
     const QString DBIPText = u"<html><head/><body><p>"
                              u"%1 (<a href=\"https://db-ip.com/\">https://db-ip.com/</a>)"
                              u"</p></body></html>"_s
-                             .arg(tr("The free IP to Country Lite database by DB-IP is used for resolving the countries of peers. "
-                                     "The database is licensed under the Creative Commons Attribution 4.0 International License"));
+                                 .arg(tr("The free IP to Country Lite database by DB-IP is used for resolving the countries of peers. "
+                                         "The database is licensed under the Creative Commons Attribution 4.0 International License"));
     m_ui->labelDBIP->setText(DBIPText);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
@@ -167,15 +161,11 @@ void AboutDialog::copyVersionsToClipboard() const
 #else
     const QString versions = u"%1 %2\n%3 %4\n%5 %6\n%7 %8\n%9 %10\n"_s
 #endif
-        .arg(m_ui->labelQt->text(), m_ui->labelQtVer->text()
-            , m_ui->labelLibt->text(), m_ui->labelLibtVer->text()
-            , m_ui->labelBoost->text(), m_ui->labelBoostVer->text()
-            , m_ui->labelOpenssl->text(), m_ui->labelOpensslVer->text()
-            , m_ui->labelZlib->text(), m_ui->labelZlibVer->text()
+                                 .arg(m_ui->labelQt->text(), m_ui->labelQtVer->text(), m_ui->labelLibt->text(), m_ui->labelLibtVer->text(), m_ui->labelBoost->text(), m_ui->labelBoostVer->text(), m_ui->labelOpenssl->text(), m_ui->labelOpensslVer->text(), m_ui->labelZlib->text(), m_ui->labelZlibVer->text()
 #ifdef ENABLE_PLUGINS
-            , tr("Lua:"), PluginsEngine::luaVersion().toString()
-            , tr("LuaBridge:"), PluginsEngine::luaBridgeVersion().toString()
+                                                                                                                                                                                                                                                                                           ,
+                                      tr("Lua:"), PluginsEngine::luaVersion().toString(), tr("LuaBridge:"), PluginsEngine::luaBridgeVersion().toString()
 #endif
-        );
+                                 );
     qApp->clipboard()->setText(versions);
 }

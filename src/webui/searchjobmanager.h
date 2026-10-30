@@ -29,14 +29,14 @@
 
 #pragma once
 
-#include <memory>
-#include <optional>
+#include "base/3rdparty/expected.hpp"
+#include "base/search/searchhandler.h"
 
 #include <QHash>
 #include <QObject>
 
-#include "base/3rdparty/expected.hpp"
-#include "base/search/searchhandler.h"
+#include <memory>
+#include <optional>
 
 class SearchJobManager final : public QObject
 {
@@ -54,9 +54,9 @@ public:
         QList<SearchResult> results;
     };
 
-    explicit SearchJobManager(QObject *parent = nullptr);
+    explicit SearchJobManager(QObject* parent = nullptr);
 
-    nonstd::expected<int, QString> startSearch(const QString &pattern, const QString &category, const QStringList &plugins);
+    nonstd::expected<int, QString> startSearch(const QString& pattern, const QString& category, const QStringList& plugins);
     bool stopSearch(int id);
     bool deleteSearch(int id);
 
@@ -82,5 +82,5 @@ private:
     QHash<int, std::shared_ptr<SearchHandler>> m_searchHandlers;
     // TODO: use Boost.MultiIndex to provide both lookup by ID and insertion order
     QHash<int, JobInfo> m_jobs;
-    QList<int> m_searchOrder;  // Tracks insertion order (oldest first)
+    QList<int> m_searchOrder; // Tracks insertion order (oldest first)
 };

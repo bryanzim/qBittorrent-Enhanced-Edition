@@ -28,16 +28,16 @@
 
 #include "logger.h"
 
-#include <algorithm>
-#include <ranges>
-
 #include <QDateTime>
 #include <QList>
+
+#include <algorithm>
+#include <ranges>
 
 namespace
 {
     template <typename T>
-    QList<T> loadFromBuffer(const boost::circular_buffer_space_optimized<T> &src, const int offset = 0)
+    QList<T> loadFromBuffer(const boost::circular_buffer_space_optimized<T>& src, const int offset = 0)
     {
         QList<T> ret;
         ret.reserve(static_cast<typename decltype(ret)::size_type>(src.size()) - offset);
@@ -46,15 +46,14 @@ namespace
     }
 }
 
-Logger *Logger::m_instance = nullptr;
+Logger* Logger::m_instance = nullptr;
 
 Logger::Logger()
-    : m_messages(MAX_LOG_MESSAGES)
-    , m_peers(MAX_LOG_MESSAGES)
+    : m_messages(MAX_LOG_MESSAGES), m_peers(MAX_LOG_MESSAGES)
 {
 }
 
-Logger *Logger::instance()
+Logger* Logger::instance()
 {
     return m_instance;
 }
@@ -71,20 +70,20 @@ void Logger::freeInstance()
     m_instance = nullptr;
 }
 
-void Logger::addMessage(const QString &message, const Log::MsgType &type)
+void Logger::addMessage(const QString& message, const Log::MsgType& type)
 {
     QWriteLocker locker(&m_lock);
-    const Log::Msg msg = {m_msgCounter++, type, QDateTime::currentSecsSinceEpoch(), message};
+    const Log::Msg msg = { m_msgCounter++, type, QDateTime::currentSecsSinceEpoch(), message };
     m_messages.push_back(msg);
     locker.unlock();
 
     emit newLogMessage(msg);
 }
 
-void Logger::addPeer(const QString &ip, const bool blocked, const QString &reason)
+void Logger::addPeer(const QString& ip, const bool blocked, const QString& reason)
 {
     QWriteLocker locker(&m_lock);
-    const Log::Peer msg = {m_peerCounter++, blocked, QDateTime::currentSecsSinceEpoch(), ip, reason};
+    const Log::Peer msg = { m_peerCounter++, blocked, QDateTime::currentSecsSinceEpoch(), ip, reason };
     m_peers.push_back(msg);
     locker.unlock();
 
@@ -123,7 +122,7 @@ QList<Log::Peer> Logger::getPeers(const int lastKnownId) const
     return loadFromBuffer(m_peers, (size - diff));
 }
 
-void LogMsg(const QString &message, const Log::MsgType &type)
+void LogMsg(const QString& message, const Log::MsgType& type)
 {
     Logger::instance()->addMessage(message, type);
 }

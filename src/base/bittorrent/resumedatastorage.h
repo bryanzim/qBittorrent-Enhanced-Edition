@@ -28,15 +28,15 @@
 
 #pragma once
 
-#include <QtContainerFwd>
-#include <QList>
-#include <QMutex>
-#include <QObject>
-
 #include "base/3rdparty/expected.hpp"
 #include "base/path.h"
 #include "infohash.h"
 #include "loadtorrentparams.h"
+
+#include <QList>
+#include <QMutex>
+#include <QObject>
+#include <QtContainerFwd>
 
 namespace BitTorrent
 {
@@ -54,25 +54,25 @@ namespace BitTorrent
         Q_DISABLE_COPY_MOVE(ResumeDataStorage)
 
     public:
-        explicit ResumeDataStorage(const Path &path, QObject *parent = nullptr);
+        explicit ResumeDataStorage(const Path& path, QObject* parent = nullptr);
 
         Path path() const;
 
         virtual QList<TorrentID> registeredTorrents() const = 0;
-        virtual LoadResumeDataResult load(const TorrentID &id) const = 0;
-        virtual void store(const TorrentID &id, LoadTorrentParams resumeData) const = 0;
-        virtual void remove(const TorrentID &id) const = 0;
-        virtual void storeQueue(const QList<TorrentID> &queue) const = 0;
+        virtual LoadResumeDataResult load(const TorrentID& id) const = 0;
+        virtual void store(const TorrentID& id, LoadTorrentParams resumeData) const = 0;
+        virtual void remove(const TorrentID& id) const = 0;
+        virtual void storeQueue(const QList<TorrentID>& queue) const = 0;
 
         void loadAll() const;
         QList<LoadedResumeData> fetchLoadedResumeData() const;
 
     signals:
-        void loadStarted(const QList<BitTorrent::TorrentID> &torrents);
+        void loadStarted(const QList<BitTorrent::TorrentID>& torrents);
         void loadFinished();
 
     protected:
-        void onResumeDataLoaded(const TorrentID &torrentID, LoadResumeDataResult loadResumeDataResult) const;
+        void onResumeDataLoaded(const TorrentID& torrentID, LoadResumeDataResult loadResumeDataResult) const;
 
     private:
         virtual void doLoadAll() const = 0;

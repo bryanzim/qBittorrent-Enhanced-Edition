@@ -30,19 +30,17 @@
 
 #include "logmodel.h"
 
-#include <QApplication>
-#include <QDateTime>
-#include <QColor>
-
 #include "base/global.h"
 #include "gui/uithememanager.h"
 
+#include <QApplication>
+#include <QColor>
+#include <QDateTime>
+
 const int MAX_VISIBLE_MESSAGES = 20000;
 
-BaseLogModel::Message::Message(const QString &time, const QString &message, const Log::MsgType type)
-    : m_time {time}
-    , m_message {message}
-    , m_type {type}
+BaseLogModel::Message::Message(const QString& time, const QString& message, const Log::MsgType type)
+    : m_time{ time }, m_message{ message }, m_type{ type }
 {
 }
 
@@ -61,25 +59,24 @@ Log::MsgType BaseLogModel::Message::type() const
     return m_type;
 }
 
-BaseLogModel::BaseLogModel(QObject *parent)
-    : QAbstractListModel(parent)
-    , m_messages(MAX_VISIBLE_MESSAGES)
+BaseLogModel::BaseLogModel(QObject* parent)
+    : QAbstractListModel(parent), m_messages(MAX_VISIBLE_MESSAGES)
 {
     loadColors();
     connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, &BaseLogModel::onUIThemeChanged);
 }
 
-int BaseLogModel::rowCount(const QModelIndex &) const
+int BaseLogModel::rowCount(const QModelIndex&) const
 {
     return static_cast<int>(m_messages.size());
 }
 
-int BaseLogModel::columnCount(const QModelIndex &) const
+int BaseLogModel::columnCount(const QModelIndex&) const
 {
     return 1;
 }
 
-QVariant BaseLogModel::data(const QModelIndex &index, const int role) const
+QVariant BaseLogModel::data(const QModelIndex& index, const int role) const
 {
     if (!index.isValid())
         return {};
@@ -88,7 +85,7 @@ QVariant BaseLogModel::data(const QModelIndex &index, const int role) const
     if ((messageIndex < 0) || (messageIndex >= static_cast<int>(m_messages.size())))
         return {};
 
-    const Message &message = m_messages[messageIndex];
+    const Message& message = m_messages[messageIndex];
     switch (role)
     {
     case TimeRole:
@@ -106,7 +103,7 @@ QVariant BaseLogModel::data(const QModelIndex &index, const int role) const
     }
 }
 
-void BaseLogModel::addNewMessage(const BaseLogModel::Message &message)
+void BaseLogModel::addNewMessage(const BaseLogModel::Message& message)
 {
     // if row is inserted on filled up buffer, the size will not change
     // but because of calling of beginInsertRows function we'll have ghost rows.
@@ -127,7 +124,7 @@ void BaseLogModel::onUIThemeChanged()
 {
     loadColors();
     if (const int rCount = rowCount(); rCount > 0)
-        emit dataChanged(index(0, 0), index((rCount - 1), (columnCount() - 1)), {TimeForegroundRole, MessageForegroundRole});
+        emit dataChanged(index(0, 0), index((rCount - 1), (columnCount() - 1)), { TimeForegroundRole, MessageForegroundRole });
 }
 
 void BaseLogModel::loadColors()
@@ -142,23 +139,23 @@ void BaseLogModel::reset()
     endResetModel();
 }
 
-LogMessageModel::LogMessageModel(QObject *parent)
+LogMessageModel::LogMessageModel(QObject* parent)
     : BaseLogModel(parent)
 {
     loadColors();
 
-    for (const Log::Msg &msg : asConst(Logger::instance()->getMessages()))
+    for (const Log::Msg& msg : asConst(Logger::instance()->getMessages()))
         handleNewMessage(msg);
     connect(Logger::instance(), &Logger::newLogMessage, this, &LogMessageModel::handleNewMessage);
 }
 
-void LogMessageModel::handleNewMessage(const Log::Msg &message)
+void LogMessageModel::handleNewMessage(const Log::Msg& message)
 {
     const QString time = QLocale::system().toString(QDateTime::fromSecsSinceEpoch(message.timestamp), QLocale::ShortFormat);
-    addNewMessage({time, message.message, message.type});
+    addNewMessage({ time, message.message, message.type });
 }
 
-QColor LogMessageModel::messageForeground(const Message &message) const
+QColor LogMessageModel::messageForeground(const Message& message) const
 {
     return m_foregroundForMessageTypes.value(message.type());
 }
@@ -171,38 +168,37 @@ void LogMessageModel::onUIThemeChanged()
 
 void LogMessageModel::loadColors()
 {
-    const auto *themeManager = UIThemeManager::instance();
+    const auto* themeManager = UIThemeManager::instance();
     const QColor normalColor = themeManager->getColor(u"Log.Normal"_s);
-    m_foregroundForMessageTypes =
-    {
-        {Log::NORMAL, normalColor.isValid() ? normalColor : QApplication::palette().color(QPalette::Active, QPalette::WindowText)},
-        {Log::INFO, themeManager->getColor(u"Log.Info"_s)},
-        {Log::WARNING, themeManager->getColor(u"Log.Warning"_s)},
-        {Log::CRITICAL, themeManager->getColor(u"Log.Critical"_s)}
+    m_foregroundForMessageTypes = {
+        { Log::NORMAL, normalColor.isValid() ? normalColor : QApplication::palette().color(QPalette::Active, QPalette::WindowText) },
+        { Log::INFO, themeManager->getColor(u"Log.Info"_s) },
+        { Log::WARNING, themeManager->getColor(u"Log.Warning"_s) },
+        { Log::CRITICAL, themeManager->getColor(u"Log.Critical"_s) }
     };
 }
 
-LogPeerModel::LogPeerModel(QObject *parent)
+LogPeerModel::LogPeerModel(QObject* parent)
     : BaseLogModel(parent)
 {
     loadColors();
 
-    for (const Log::Peer &peer : asConst(Logger::instance()->getPeers()))
+    for (const Log::Peer& peer : asConst(Logger::instance()->getPeers()))
         handleNewMessage(peer);
     connect(Logger::instance(), &Logger::newLogPeer, this, &LogPeerModel::handleNewMessage);
 }
 
-void LogPeerModel::handleNewMessage(const Log::Peer &peer)
+void LogPeerModel::handleNewMessage(const Log::Peer& peer)
 {
     const QString time = QLocale::system().toString(QDateTime::fromSecsSinceEpoch(peer.timestamp), QLocale::ShortFormat);
     const QString message = peer.blocked
-            ? tr("%1 was blocked. Reason: %2.", "0.0.0.0 was blocked. Reason: reason for blocking.").arg(peer.ip, peer.reason)
-            : tr("%1 was banned", "0.0.0.0 was banned").arg(peer.ip);
+                                ? tr("%1 was blocked. Reason: %2.", "0.0.0.0 was blocked. Reason: reason for blocking.").arg(peer.ip, peer.reason)
+                                : tr("%1 was banned", "0.0.0.0 was banned").arg(peer.ip);
 
-    addNewMessage({time, message, Log::NORMAL});
+    addNewMessage({ time, message, Log::NORMAL });
 }
 
-QColor LogPeerModel::messageForeground([[maybe_unused]] const Message &message) const
+QColor LogPeerModel::messageForeground([[maybe_unused]] const Message& message) const
 {
     return m_bannedPeerForeground;
 }

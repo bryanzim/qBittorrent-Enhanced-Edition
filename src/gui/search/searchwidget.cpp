@@ -30,9 +30,24 @@
 
 #include "searchwidget.h"
 
-#include <QtSystemDetection>
-
-#include <utility>
+#include "base/global.h"
+#include "base/logger.h"
+#include "base/preferences.h"
+#include "base/profile.h"
+#include "base/search/searchhandler.h"
+#include "base/search/searchpluginmanager.h"
+#include "base/utils/bytearray.h"
+#include "base/utils/compare.h"
+#include "base/utils/datetime.h"
+#include "base/utils/foreignapps.h"
+#include "base/utils/fs.h"
+#include "base/utils/io.h"
+#include "gui/desktopintegration.h"
+#include "gui/interfaces/iguiapplication.h"
+#include "gui/uithememanager.h"
+#include "searchjobwidget.h"
+#include "searchpluginselectdialog.h"
+#include "ui_searchwidget.h"
 
 #include <QCompleter>
 #include <QDebug>
@@ -53,25 +68,9 @@
 #include <QStringList>
 #include <QStringListModel>
 #include <QThread>
+#include <QtSystemDetection>
 
-#include "base/global.h"
-#include "base/logger.h"
-#include "base/preferences.h"
-#include "base/profile.h"
-#include "base/search/searchhandler.h"
-#include "base/search/searchpluginmanager.h"
-#include "base/utils/bytearray.h"
-#include "base/utils/compare.h"
-#include "base/utils/datetime.h"
-#include "base/utils/foreignapps.h"
-#include "base/utils/fs.h"
-#include "base/utils/io.h"
-#include "gui/desktopintegration.h"
-#include "gui/interfaces/iguiapplication.h"
-#include "gui/uithememanager.h"
-#include "searchjobwidget.h"
-#include "searchpluginselectdialog.h"
-#include "ui_searchwidget.h"
+#include <utility>
 
 const int HISTORY_FILE_MAX_SIZE = 10 * 1024 * 1024;
 const int SESSION_FILE_MAX_SIZE = 10 * 1024 * 1024;
@@ -106,7 +105,7 @@ namespace
         using QSortFilterProxyModel::QSortFilterProxyModel;
 
     private:
-        bool lessThan(const QModelIndex &left, const QModelIndex &right) const override
+        bool lessThan(const QModelIndex& left, const QModelIndex& right) const override
         {
             const int result = m_naturalCompare(left.data(sortRole()).toString(), right.data(sortRole()).toString());
             return result < 0;
@@ -146,12 +145,12 @@ namespace
         }
     }
 
-    Path makeDataFilePath(const QString &fileName)
+    Path makeDataFilePath(const QString& fileName)
     {
         return specialFolderLocation(SpecialFolder::Data) / Path(DATA_FOLDER_NAME) / Path(fileName);
     }
 
-    QString makeTabName(SearchJobWidget *searchJobWdget)
+    QString makeTabName(SearchJobWidget* searchJobWdget)
     {
         Q_ASSERT(searchJobWdget);
         if (!searchJobWdget) [[unlikely]]
@@ -162,7 +161,7 @@ namespace
         return tabName;
     }
 
-    nonstd::expected<QStringList, QString> loadHistory(const Path &filePath)
+    nonstd::expected<QStringList, QString> loadHistory(const Path& filePath)
     {
         const auto readResult = Utils::IO::readFile(filePath, HISTORY_FILE_MAX_SIZE);
         if (!readResult)
@@ -182,7 +181,7 @@ namespace
         return history;
     }
 
-    nonstd::expected<SessionData, QString> loadSession(const Path &filePath)
+    nonstd::expected<SessionData, QString> loadSession(const Path& filePath)
     {
         const auto readResult = Utils::IO::readFile(filePath, SESSION_FILE_MAX_SIZE);
         if (!readResult)
@@ -209,7 +208,7 @@ namespace
 
         QList<TabData> tabs;
         QSet<QString> tabIDs;
-        for (const QJsonValue &tabVal : asConst(tabsVal.toArray()))
+        for (const QJsonValue& tabVal : asConst(tabsVal.toArray()))
         {
             if (!tabVal.isObject())
                 return nonstd::make_unexpected(formatErrorMsg);
@@ -226,7 +225,7 @@ namespace
 
             const QString tabID = tabIDVal.toString();
             tabIDs.insert(tabID);
-            tabs.emplaceBack(TabData {tabID, patternVal.toString()});
+            tabs.emplaceBack(TabData{ tabID, patternVal.toString() });
             if (tabs.size() != tabIDs.size()) // duplicate ID
                 return nonstd::make_unexpected(formatErrorMsg);
         }
@@ -235,10 +234,10 @@ namespace
         if (!currentTabVal.isString())
             return nonstd::make_unexpected(formatErrorMsg);
 
-        return SessionData {.tabs = tabs, .currentTabID = currentTabVal.toString()};
+        return SessionData{ .tabs = tabs, .currentTabID = currentTabVal.toString() };
     }
 
-    nonstd::expected<QList<SearchResult>, QString> loadSearchResults(const Path &filePath)
+    nonstd::expected<QList<SearchResult>, QString> loadSearchResults(const Path& filePath)
     {
         const auto readResult = Utils::IO::readFile(filePath, RESULTS_FILE_MAX_SIZE);
         if (!readResult)
@@ -262,13 +261,13 @@ namespace
 
         const QJsonArray resultsList = searchResultsDoc.array();
         QList<SearchResult> searchResults;
-        for (const QJsonValue &resultVal : resultsList)
+        for (const QJsonValue& resultVal : resultsList)
         {
             if (!resultVal.isObject())
                 return nonstd::make_unexpected(formatErrorMsg);
 
             const QJsonObject resultObj = resultVal.toObject();
-            SearchResult &searchResult = searchResults.emplaceBack();
+            SearchResult& searchResult = searchResults.emplaceBack();
 
             if (const QJsonValue fileNameVal = resultObj[KEY_RESULT_FILENAME]; fileNameVal.isString())
                 searchResult.fileName = fileNameVal.toString();
@@ -276,12 +275,12 @@ namespace
                 return nonstd::make_unexpected(formatErrorMsg);
 
             if (const QJsonValue fileURLVal = resultObj[KEY_RESULT_FILEURL]; fileURLVal.isString())
-                searchResult.fileUrl= fileURLVal.toString();
+                searchResult.fileUrl = fileURLVal.toString();
             else
                 return nonstd::make_unexpected(formatErrorMsg);
 
             if (const QJsonValue fileSizeVal = resultObj[KEY_RESULT_FILESIZE]; fileSizeVal.isDouble())
-                searchResult.fileSize= fileSizeVal.toInteger();
+                searchResult.fileSize = fileSizeVal.toInteger();
             else
                 return nonstd::make_unexpected(formatErrorMsg);
 
@@ -296,17 +295,17 @@ namespace
                 return nonstd::make_unexpected(formatErrorMsg);
 
             if (const QJsonValue engineNameVal = resultObj[KEY_RESULT_ENGINENAME]; engineNameVal.isString())
-                searchResult.engineName= engineNameVal.toString();
+                searchResult.engineName = engineNameVal.toString();
             else
                 return nonstd::make_unexpected(formatErrorMsg);
 
             if (const QJsonValue siteURLVal = resultObj[KEY_RESULT_SITEURL]; siteURLVal.isString())
-                searchResult.siteUrl= siteURLVal.toString();
+                searchResult.siteUrl = siteURLVal.toString();
             else
                 return nonstd::make_unexpected(formatErrorMsg);
 
             if (const QJsonValue descrLinkVal = resultObj[KEY_RESULT_DESCRLINK]; descrLinkVal.isString())
-                searchResult.descrLink= descrLinkVal.toString();
+                searchResult.descrLink = descrLinkVal.toString();
             else
                 return nonstd::make_unexpected(formatErrorMsg);
 
@@ -329,45 +328,33 @@ public:
     using QObject::QObject;
 
     void loadSession(bool withSearchResults);
-    void storeSession(const SessionData &sessionData);
+    void storeSession(const SessionData& sessionData);
     void removeSession();
-    void storeTab(const QString &tabID, const QList<SearchResult> &searchResults);
-    void removeTab(const QString &tabID);
+    void storeTab(const QString& tabID, const QList<SearchResult>& searchResults);
+    void removeTab(const QString& tabID);
     void loadHistory();
-    void storeHistory(const QStringList &history);
+    void storeHistory(const QStringList& history);
     void removeHistory();
 
 signals:
-    void historyLoaded(const QStringList &history);
-    void sessionLoaded(const SessionData &sessionData);
-    void tabLoaded(const QString &tabID, const QString &searchPattern, const QList<SearchResult> &searchResults);
+    void historyLoaded(const QStringList& history);
+    void sessionLoaded(const SessionData& sessionData);
+    void tabLoaded(const QString& tabID, const QString& searchPattern, const QList<SearchResult>& searchResults);
 };
 
-SearchWidget::SearchWidget(IGUIApplication *app, QWidget *parent)
-    : GUIApplicationComponent(app, parent)
-    , m_ui {new Ui::SearchWidget()}
-    , m_ioThread {new QThread}
-    , m_dataStorage {new DataStorage}
+SearchWidget::SearchWidget(IGUIApplication* app, QWidget* parent)
+    : GUIApplicationComponent(app, parent), m_ui{ new Ui::SearchWidget() }, m_ioThread{ new QThread }, m_dataStorage{ new DataStorage }
 {
     m_ui->setupUi(this);
 
     m_ui->stopButton->hide();
     m_ui->tabWidget->tabBar()->installEventFilter(this);
 
-    const QString searchPatternHint = u"<html><head/><body><p>"
-        + tr("A phrase to search for.") + u"<br>"
-        + tr("Spaces in a search term may be protected by double quotes.")
-        + u"</p><p>"
-        + tr("Example:", "Search phrase example")
-        + u"<br>"
-        + tr("<b>foo bar</b>: search for <b>foo</b> and <b>bar</b>",
-                 "Search phrase example, illustrates quotes usage, a pair of "
-                 "space delimited words, individual words are highlighted")
-        + u"<br>"
-        + tr("<b>&quot;foo bar&quot;</b>: search for <b>foo bar</b>",
-                 "Search phrase example, illustrates quotes usage, double quoted"
-                 "pair of space delimited words, the whole pair is highlighted")
-        + u"</p></body></html>";
+    const QString searchPatternHint = u"<html><head/><body><p>" + tr("A phrase to search for.") + u"<br>" + tr("Spaces in a search term may be protected by double quotes.") + u"</p><p>" + tr("Example:", "Search phrase example") + u"<br>" + tr("<b>foo bar</b>: search for <b>foo</b> and <b>bar</b>", "Search phrase example, illustrates quotes usage, a pair of "
+                                                                                                                                                                                                                                                                                                           "space delimited words, individual words are highlighted") +
+                                      u"<br>" + tr("<b>&quot;foo bar&quot;</b>: search for <b>foo bar</b>", "Search phrase example, illustrates quotes usage, double quoted"
+                                                                                                            "pair of space delimited words, the whole pair is highlighted") +
+                                      u"</p></body></html>";
     m_ui->lineEditSearchPattern->setToolTip(searchPatternHint);
 
 #ifndef Q_OS_MACOS
@@ -385,13 +372,12 @@ SearchWidget::SearchWidget(IGUIApplication *app, QWidget *parent)
     connect(m_ui->tabWidget, &QTabWidget::currentChanged, this, &SearchWidget::saveSession);
     connect(m_ui->tabWidget->tabBar(), &QTabBar::tabMoved, this, &SearchWidget::saveSession);
 
-    connect(m_ui->tabWidget, &QTabWidget::tabBarDoubleClicked, this, [this](const int tabIndex)
-    {
+    connect(m_ui->tabWidget, &QTabWidget::tabBarDoubleClicked, this, [this](const int tabIndex) {
         if (tabIndex < 0)
             return;
 
         // Reset current search pattern
-        auto *searchJobWidget = static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(tabIndex));
+        auto* searchJobWidget = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(tabIndex));
         const QString pattern = searchJobWidget->searchPattern();
         if (pattern != m_ui->lineEditSearchPattern->text())
         {
@@ -401,9 +387,8 @@ SearchWidget::SearchWidget(IGUIApplication *app, QWidget *parent)
         }
     });
 
-    const auto *searchManager = SearchPluginManager::instance();
-    const auto onPluginChanged = [this]()
-    {
+    const auto* searchManager = SearchPluginManager::instance();
+    const auto onPluginChanged = [this]() {
         fillPluginComboBox();
         fillCatCombobox();
         selectActivePage();
@@ -421,19 +406,16 @@ SearchWidget::SearchWidget(IGUIApplication *app, QWidget *parent)
     connect(m_ui->stopButton, &QPushButton::clicked, this, &SearchWidget::stopButtonClicked);
     connect(m_ui->lineEditSearchPattern, &LineEdit::returnPressed, m_ui->searchButton, &QPushButton::click);
     connect(m_ui->lineEditSearchPattern, &LineEdit::textEdited, this, &SearchWidget::searchTextEdited);
-    connect(m_ui->selectPlugin, qOverload<int>(&QComboBox::currentIndexChanged)
-            , this, &SearchWidget::selectMultipleBox);
-    connect(m_ui->selectPlugin, qOverload<int>(&QComboBox::currentIndexChanged)
-            , this, &SearchWidget::fillCatCombobox);
+    connect(m_ui->selectPlugin, qOverload<int>(&QComboBox::currentIndexChanged), this, &SearchWidget::selectMultipleBox);
+    connect(m_ui->selectPlugin, qOverload<int>(&QComboBox::currentIndexChanged), this, &SearchWidget::fillCatCombobox);
 
-    const auto *focusSearchHotkey = new QShortcut(QKeySequence::Find, this);
+    const auto* focusSearchHotkey = new QShortcut(QKeySequence::Find, this);
     connect(focusSearchHotkey, &QShortcut::activated, this, &SearchWidget::toggleFocusBetweenLineEdits);
-    const auto *focusSearchHotkeyAlternative = new QShortcut((Qt::CTRL | Qt::Key_E), this);
+    const auto* focusSearchHotkeyAlternative = new QShortcut((Qt::CTRL | Qt::Key_E), this);
     connect(focusSearchHotkeyAlternative, &QShortcut::activated, this, &SearchWidget::toggleFocusBetweenLineEdits);
 
-    const auto *closeTabHotkey = new QShortcut(QKeySequence::Close, this);
-    connect(closeTabHotkey, &QShortcut::activated, this, [this]()
-    {
+    const auto* closeTabHotkey = new QShortcut(QKeySequence::Close, this);
+    connect(closeTabHotkey, &QShortcut::activated, this, [this]() {
         const int currentIndex = m_ui->tabWidget->currentIndex();
         if (currentIndex >= 0)
             closeTab(currentIndex);
@@ -453,7 +435,7 @@ SearchWidget::SearchWidget(IGUIApplication *app, QWidget *parent)
     restoreSession();
 }
 
-bool SearchWidget::eventFilter(QObject *object, QEvent *event)
+bool SearchWidget::eventFilter(QObject* object, QEvent* event)
 {
     if (object == m_ui->tabWidget->tabBar())
     {
@@ -461,7 +443,7 @@ bool SearchWidget::eventFilter(QObject *object, QEvent *event)
         if (event->type() != QEvent::MouseButtonRelease)
             return false;
 
-        const auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        const auto* mouseEvent = static_cast<QMouseEvent*>(event);
         const int tabIndex = m_ui->tabWidget->tabBar()->tabAt(mouseEvent->pos());
         if (tabIndex >= 0)
         {
@@ -488,7 +470,7 @@ bool SearchWidget::eventFilter(QObject *object, QEvent *event)
 
 void SearchWidget::onPreferencesChanged()
 {
-    const auto *pref = Preferences::instance();
+    const auto* pref = Preferences::instance();
 
     const bool storeOpenedTabs = pref->storeSearchJobs();
     const bool isStoreOpenedTabsChanged = storeOpenedTabs != m_storeOpenedTabs;
@@ -517,9 +499,8 @@ void SearchWidget::onPreferencesChanged()
         {
             for (int tabIndex = (m_ui->tabWidget->count() - 1); tabIndex >= 0; --tabIndex)
             {
-                const auto *tab = static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(tabIndex));
-                QMetaObject::invokeMethod(m_dataStorage, [this, tabID = tab->id(), searchResults = tab->searchResults()]
-                {
+                const auto* tab = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(tabIndex));
+                QMetaObject::invokeMethod(m_dataStorage, [this, tabID = tab->id(), searchResults = tab->searchResults()] {
                     m_dataStorage->storeTab(tabID, searchResults);
                 });
             }
@@ -528,7 +509,7 @@ void SearchWidget::onPreferencesChanged()
         {
             for (int tabIndex = (m_ui->tabWidget->count() - 1); tabIndex >= 0; --tabIndex)
             {
-                const auto *tab = static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(tabIndex));
+                const auto* tab = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(tabIndex));
                 QMetaObject::invokeMethod(m_dataStorage, [this, tabID = tab->id()] { m_dataStorage->removeTab(tabID); });
             }
         }
@@ -553,8 +534,7 @@ void SearchWidget::onPreferencesChanged()
                 if (const int rowCount = m_searchPatternCompleterModel->rowCount(); rowCount > historyLength)
                 {
                     m_searchPatternCompleterModel->removeRows(0, (rowCount - historyLength));
-                    QMetaObject::invokeMethod(m_dataStorage, [this]
-                    {
+                    QMetaObject::invokeMethod(m_dataStorage, [this] {
                         m_dataStorage->storeHistory(m_searchPatternCompleterModel->stringList());
                     });
                 }
@@ -573,11 +553,11 @@ void SearchWidget::fillCatCombobox()
     using QStrPair = std::pair<QString, QString>;
     QList<QStrPair> tmpList;
     const auto selectedPlugin = m_ui->selectPlugin->itemData(m_ui->selectPlugin->currentIndex()).toString();
-    for (const QString &cat : asConst(SearchPluginManager::instance()->getPluginCategories(selectedPlugin)))
+    for (const QString& cat : asConst(SearchPluginManager::instance()->getPluginCategories(selectedPlugin)))
         tmpList << std::make_pair(SearchPluginManager::categoryFullName(cat), cat);
-    std::ranges::sort(tmpList, [](const QStrPair &l, const QStrPair &r) { return (QString::localeAwareCompare(l.first, r.first) < 0); });
+    std::ranges::sort(tmpList, [](const QStrPair& l, const QStrPair& r) { return (QString::localeAwareCompare(l.first, r.first) < 0); });
 
-    for (const QStrPair &p : asConst(tmpList))
+    for (const QStrPair& p : asConst(tmpList))
     {
         qDebug("Supported category: %s", qUtf8Printable(p.second));
         m_ui->comboCategory->addItem(p.first, p.second);
@@ -596,11 +576,11 @@ void SearchWidget::fillPluginComboBox()
 
     using QStrPair = std::pair<QString, QString>;
     QList<QStrPair> tmpList;
-    for (const QString &name : asConst(SearchPluginManager::instance()->enabledPlugins()))
+    for (const QString& name : asConst(SearchPluginManager::instance()->enabledPlugins()))
         tmpList << std::make_pair(SearchPluginManager::instance()->pluginFullName(name), name);
-    std::ranges::sort(tmpList, [](const QStrPair &l, const QStrPair &r) { return (QString::localeAwareCompare(l.first, r.first) < 0); });
+    std::ranges::sort(tmpList, [](const QStrPair& l, const QStrPair& r) { return (QString::localeAwareCompare(l.first, r.first) < 0); });
 
-    for (const QStrPair &p : asConst(tmpList))
+    for (const QStrPair& p : asConst(tmpList))
         m_ui->selectPlugin->addItem(p.first, p.second);
 
     if (m_ui->selectPlugin->count() > 3)
@@ -622,7 +602,7 @@ QStringList SearchWidget::selectedPlugins() const
     if ((itemText == u"enabled") || (itemText == u"multi"))
         return SearchPluginManager::instance()->enabledPlugins();
 
-    return {itemText};
+    return { itemText };
 }
 
 QString SearchWidget::generateTabID() const
@@ -633,11 +613,9 @@ QString SearchWidget::generateTabID() const
         if (!m_tabWidgets.contains(tabID))
             return tabID;
     }
-
-    return {};
 }
 
-int SearchWidget::addTab(const QString &tabID, SearchJobWidget *searchJobWdget)
+int SearchWidget::addTab(const QString& tabID, SearchJobWidget* searchJobWdget)
 {
     Q_ASSERT(!m_tabWidgets.contains(tabID));
 
@@ -646,7 +624,7 @@ int SearchWidget::addTab(const QString &tabID, SearchJobWidget *searchJobWdget)
     return m_ui->tabWidget->addTab(searchJobWdget, makeTabName(searchJobWdget));
 }
 
-void SearchWidget::updateHistory(const QString &newSearchPattern)
+void SearchWidget::updateHistory(const QString& newSearchPattern)
 {
     if (m_historyLength <= 0)
         return;
@@ -660,8 +638,7 @@ void SearchWidget::updateHistory(const QString &newSearchPattern)
     if (m_searchPatternCompleterModel->rowCount() > m_historyLength)
         m_searchPatternCompleterModel->removeRow(0);
 
-    QMetaObject::invokeMethod(m_dataStorage, [this, history = m_searchPatternCompleterModel->stringList()]
-    {
+    QMetaObject::invokeMethod(m_dataStorage, [this, history = m_searchPatternCompleterModel->stringList()] {
         m_dataStorage->storeHistory(history);
     });
 }
@@ -673,13 +650,12 @@ void SearchWidget::loadHistory()
 
     createSearchPatternCompleter();
 
-    connect(m_dataStorage, &DataStorage::historyLoaded, this, [this](const QStringList &storedHistory)
-    {
+    connect(m_dataStorage, &DataStorage::historyLoaded, this, [this](const QStringList& storedHistory) {
         if (m_historyLength <= 0)
             return;
 
         QStringList history = storedHistory;
-        for (const QString &newPattern : asConst(m_searchPatternCompleterModel->stringList()))
+        for (const QString& newPattern : asConst(m_searchPatternCompleterModel->stringList()))
         {
             if (!history.contains(newPattern))
                 history.append(newPattern);
@@ -703,8 +679,8 @@ void SearchWidget::saveSession() const
     SessionData sessionData;
     for (int tabIndex = 0; tabIndex < m_ui->tabWidget->count(); ++tabIndex)
     {
-        auto *searchJobWidget = static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(tabIndex));
-        sessionData.tabs.emplaceBack(TabData {searchJobWidget->id(), searchJobWidget->searchPattern()});
+        auto* searchJobWidget = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(tabIndex));
+        sessionData.tabs.emplaceBack(TabData{ searchJobWidget->id(), searchJobWidget->searchPattern() });
         if (currentIndex == tabIndex)
             sessionData.currentTabID = searchJobWidget->id();
     }
@@ -717,10 +693,10 @@ void SearchWidget::createSearchPatternCompleter()
     Q_ASSERT(!m_ui->lineEditSearchPattern->completer());
 
     m_searchPatternCompleterModel = new QStringListModel(this);
-    auto *sortModel = new SearchHistorySortModel(this);
+    auto* sortModel = new SearchHistorySortModel(this);
     sortModel->setSourceModel(m_searchPatternCompleterModel);
     sortModel->sort(0);
-    auto *completer = new QCompleter(sortModel, this);
+    auto* completer = new QCompleter(sortModel, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
     m_ui->lineEditSearchPattern->setCompleter(completer);
@@ -731,15 +707,12 @@ void SearchWidget::restoreSession()
     if (!m_storeOpenedTabs)
         return;
 
-    connect(m_dataStorage, &DataStorage::tabLoaded, this
-            , [this](const QString &tabID, const QString &searchPattern, const QList<SearchResult> &searchResults)
-    {
-        auto *restoredTab = new SearchJobWidget(tabID, searchPattern, searchResults, app(), this);
+    connect(m_dataStorage, &DataStorage::tabLoaded, this, [this](const QString& tabID, const QString& searchPattern, const QList<SearchResult>& searchResults) {
+        auto* restoredTab = new SearchJobWidget(tabID, searchPattern, searchResults, app(), this);
         addTab(tabID, restoredTab);
     });
 
-    connect(m_dataStorage, &DataStorage::sessionLoaded, this, [this](const SessionData &sessionData)
-    {
+    connect(m_dataStorage, &DataStorage::sessionLoaded, this, [this](const SessionData& sessionData) {
         m_ui->tabWidget->setCurrentWidget(m_tabWidgets.value(sessionData.currentTabID));
     });
 
@@ -777,8 +750,8 @@ void SearchWidget::currentTabChanged(const int index)
     // when we switch from a tab that is not empty to another that is empty
     // the download button doesn't have to be available
     m_currentSearchTab = (index >= 0)
-        ? static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(index))
-        : nullptr;
+                             ? static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(index))
+                             : nullptr;
 
     if (!m_currentSearchTab)
         m_isNewQueryString = true;
@@ -812,8 +785,7 @@ void SearchWidget::toggleFocusBetweenLineEdits()
 
 void SearchWidget::adjustSearchButton()
 {
-    if (!m_isNewQueryString
-            && (m_currentSearchTab && (m_currentSearchTab->status() == SearchJobWidget::Status::Ongoing)))
+    if (!m_isNewQueryString && (m_currentSearchTab && (m_currentSearchTab->status() == SearchJobWidget::Status::Ongoing)))
     {
         if (m_ui->searchButton->isVisible())
         {
@@ -833,10 +805,10 @@ void SearchWidget::adjustSearchButton()
 
 void SearchWidget::showTabMenu(const int index)
 {
-    QMenu *menu = new QMenu(this);
+    QMenu* menu = new QMenu(this);
 
-    if (auto *searchJobWidget = static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(index));
-            searchJobWidget->status() != SearchJobWidget::Status::Ongoing)
+    if (auto* searchJobWidget = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(index));
+        searchJobWidget->status() != SearchJobWidget::Status::Ongoing)
     {
         menu->addAction(tr("Refresh tab"), this, [this, searchJobWidget] { refreshTab(searchJobWidget); });
     }
@@ -855,12 +827,12 @@ void SearchWidget::showTabMenu(const int index)
 
 void SearchWidget::pluginsButtonClicked()
 {
-    auto *dlg = new SearchPluginSelectDialog(SearchPluginManager::instance(), this);
+    auto* dlg = new SearchPluginSelectDialog(SearchPluginManager::instance(), this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->show();
 }
 
-void SearchWidget::searchTextEdited(const QString &text)
+void SearchWidget::searchTextEdited(const QString& text)
 {
     if (m_currentSearchTab)
     {
@@ -896,11 +868,11 @@ void SearchWidget::searchButtonClicked()
     qDebug("Search with category: %s", qUtf8Printable(selectedCategory()));
 
     // Launch search
-    auto *searchHandler = SearchPluginManager::instance()->startSearch(pattern, selectedCategory(), selectedPlugins());
+    auto* searchHandler = SearchPluginManager::instance()->startSearch(pattern, selectedCategory(), selectedPlugins());
 
     // Tab Addition
     const QString newTabID = generateTabID();
-    auto *newTab = new SearchJobWidget(newTabID, searchHandler, app(), this);
+    auto* newTab = new SearchJobWidget(newTabID, searchHandler, app(), this);
     const int tabIndex = addTab(newTabID, newTab);
     m_ui->tabWidget->setTabToolTip(tabIndex, newTab->statusTip());
     m_ui->tabWidget->setTabIcon(tabIndex, UIThemeManager::instance()->getIcon(statusIconName(newTab->status())));
@@ -915,12 +887,12 @@ void SearchWidget::stopButtonClicked()
     m_currentSearchTab->cancelSearch();
 }
 
-void SearchWidget::tabStatusChanged(SearchJobWidget *tab)
+void SearchWidget::tabStatusChanged(SearchJobWidget* tab)
 {
     const int tabIndex = m_ui->tabWidget->indexOf(tab);
     m_ui->tabWidget->setTabToolTip(tabIndex, tab->statusTip());
     m_ui->tabWidget->setTabIcon(tabIndex, UIThemeManager::instance()->getIcon(
-            statusIconName(static_cast<SearchJobWidget *>(tab)->status())));
+                                              statusIconName(static_cast<SearchJobWidget*>(tab)->status())));
 
     if (tab->status() != SearchJobWidget::Status::Ongoing)
     {
@@ -931,8 +903,7 @@ void SearchWidget::tabStatusChanged(SearchJobWidget *tab)
 
         if (m_storeOpenedTabsResults)
         {
-            QMetaObject::invokeMethod(m_dataStorage, [this, tabID = tab->id(), searchResults = tab->searchResults()]
-            {
+            QMetaObject::invokeMethod(m_dataStorage, [this, tabID = tab->id(), searchResults = tab->searchResults()] {
                 m_dataStorage->storeTab(tabID, searchResults);
             });
         }
@@ -941,7 +912,7 @@ void SearchWidget::tabStatusChanged(SearchJobWidget *tab)
 
 void SearchWidget::closeTab(const int index)
 {
-    const auto *tab = static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(index));
+    const auto* tab = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(index));
     const QString tabID = tab->id();
     delete m_tabWidgets.take(tabID);
 
@@ -953,7 +924,7 @@ void SearchWidget::closeAllTabs()
 {
     for (int tabIndex = (m_ui->tabWidget->count() - 1); tabIndex >= 0; --tabIndex)
     {
-        const auto *tab = static_cast<SearchJobWidget *>(m_ui->tabWidget->widget(tabIndex));
+        const auto* tab = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(tabIndex));
         const QString tabID = tab->id();
         delete m_tabWidgets.take(tabID);
         QMetaObject::invokeMethod(m_dataStorage, [this, tabID] { m_dataStorage->removeTab(tabID); });
@@ -962,7 +933,7 @@ void SearchWidget::closeAllTabs()
     saveSession();
 }
 
-void SearchWidget::refreshTab(SearchJobWidget *searchJobWidget)
+void SearchWidget::refreshTab(SearchJobWidget* searchJobWidget)
 {
     if (!Utils::ForeignApps::pythonInfo().isValid())
     {
@@ -971,7 +942,7 @@ void SearchWidget::refreshTab(SearchJobWidget *searchJobWidget)
     }
 
     // Re-launch search
-    auto *searchHandler = SearchPluginManager::instance()->startSearch(searchJobWidget->searchPattern(), selectedCategory(), selectedPlugins());
+    auto* searchHandler = SearchPluginManager::instance()->startSearch(searchJobWidget->searchPattern(), selectedCategory(), selectedPlugins());
     searchJobWidget->assignSearchHandler(searchHandler);
 }
 
@@ -982,13 +953,14 @@ void SearchWidget::DataStorage::loadSession(const bool withSearchResults)
     if (!loadResult)
     {
         LogMsg(tr("Failed to load Search UI saved state data. File: \"%1\". Error: \"%2\"")
-                .arg(sessionFilePath.toString(), loadResult.error()), Log::WARNING);
+                   .arg(sessionFilePath.toString(), loadResult.error()),
+               Log::WARNING);
         return;
     }
 
-    const SessionData &sessionData = loadResult.value();
+    const SessionData& sessionData = loadResult.value();
 
-    for (const auto &[tabID, searchPattern] : sessionData.tabs)
+    for (const auto& [tabID, searchPattern] : sessionData.tabs)
     {
         QList<SearchResult> searchResults;
 
@@ -1002,7 +974,8 @@ void SearchWidget::DataStorage::loadSession(const bool withSearchResults)
             else
             {
                 LogMsg(tr("Failed to load saved search results. Tab: \"%1\". File: \"%2\". Error: \"%3\"")
-                        .arg(searchPattern, tabStateFilePath.toString(), loadTabStateResult.error()), Log::WARNING);
+                           .arg(searchPattern, tabStateFilePath.toString(), loadTabStateResult.error()),
+                       Log::WARNING);
             }
         }
 
@@ -1012,21 +985,21 @@ void SearchWidget::DataStorage::loadSession(const bool withSearchResults)
     emit sessionLoaded(sessionData);
 }
 
-void SearchWidget::DataStorage::storeSession(const SessionData &sessionData)
+void SearchWidget::DataStorage::storeSession(const SessionData& sessionData)
 {
     QJsonArray tabsList;
-    for (const auto &[tabID, searchPattern] : sessionData.tabs)
+    for (const auto& [tabID, searchPattern] : sessionData.tabs)
     {
-        const QJsonObject tabObj {
-            {u"ID"_s, tabID},
-            {u"SearchPattern"_s, searchPattern}
+        const QJsonObject tabObj{
+            {            u"ID"_s,         tabID },
+            { u"SearchPattern"_s, searchPattern }
         };
         tabsList.append(tabObj);
     }
 
-    const QJsonObject sessionObj {
-        {u"Tabs"_s, tabsList},
-        {u"CurrentTab"_s, sessionData.currentTabID}
+    const QJsonObject sessionObj{
+        {       u"Tabs"_s,                 tabsList },
+        { u"CurrentTab"_s, sessionData.currentTabID }
     };
 
     const Path sessionFilePath = makeDataFilePath(SESSION_FILE_NAME);
@@ -1034,7 +1007,8 @@ void SearchWidget::DataStorage::storeSession(const SessionData &sessionData)
     if (!saveResult)
     {
         LogMsg(tr("Failed to save Search UI state. File: \"%1\". Error: \"%2\"")
-                .arg(sessionFilePath.toString(), saveResult.error()), Log::WARNING);
+                   .arg(sessionFilePath.toString(), saveResult.error()),
+               Log::WARNING);
     }
 }
 
@@ -1043,21 +1017,21 @@ void SearchWidget::DataStorage::removeSession()
     std::ignore = Utils::Fs::removeFile(makeDataFilePath(SESSION_FILE_NAME));
 }
 
-void SearchWidget::DataStorage::storeTab(const QString &tabID, const QList<SearchResult> &searchResults)
+void SearchWidget::DataStorage::storeTab(const QString& tabID, const QList<SearchResult>& searchResults)
 {
     QJsonArray searchResultsArray;
-    for (const SearchResult &searchResult : searchResults)
+    for (const SearchResult& searchResult : searchResults)
     {
-        searchResultsArray.append(QJsonObject {
-            {KEY_RESULT_FILENAME, searchResult.fileName},
-            {KEY_RESULT_FILEURL, searchResult.fileUrl},
-            {KEY_RESULT_FILESIZE, searchResult.fileSize},
-            {KEY_RESULT_SEEDERSCOUNT, searchResult.nbSeeders},
-            {KEY_RESULT_LEECHERSCOUNT, searchResult.nbLeechers},
-            {KEY_RESULT_ENGINENAME, searchResult.engineName},
-            {KEY_RESULT_SITEURL, searchResult.siteUrl},
-            {KEY_RESULT_DESCRLINK, searchResult.descrLink},
-            {KEY_RESULT_PUBDATE, Utils::DateTime::toSecsSinceEpoch(searchResult.pubDate)}
+        searchResultsArray.append(QJsonObject{
+            {      KEY_RESULT_FILENAME,                                   searchResult.fileName },
+            {       KEY_RESULT_FILEURL,                                    searchResult.fileUrl },
+            {      KEY_RESULT_FILESIZE,                                   searchResult.fileSize },
+            {  KEY_RESULT_SEEDERSCOUNT,                                  searchResult.nbSeeders },
+            { KEY_RESULT_LEECHERSCOUNT,                                 searchResult.nbLeechers },
+            {    KEY_RESULT_ENGINENAME,                                 searchResult.engineName },
+            {       KEY_RESULT_SITEURL,                                    searchResult.siteUrl },
+            {     KEY_RESULT_DESCRLINK,                                  searchResult.descrLink },
+            {       KEY_RESULT_PUBDATE, Utils::DateTime::toSecsSinceEpoch(searchResult.pubDate) }
         });
     }
 
@@ -1066,11 +1040,12 @@ void SearchWidget::DataStorage::storeTab(const QString &tabID, const QList<Searc
     if (!saveResult)
     {
         LogMsg(tr("Failed to save search results. Tab: \"%1\". File: \"%2\". Error: \"%3\"")
-                .arg(tabID, filePath.toString(), saveResult.error()), Log::WARNING);
+                   .arg(tabID, filePath.toString(), saveResult.error()),
+               Log::WARNING);
     }
 }
 
-void SearchWidget::DataStorage::removeTab(const QString &tabID)
+void SearchWidget::DataStorage::removeTab(const QString& tabID)
 {
     std::ignore = Utils::Fs::removeFile(makeDataFilePath(tabID + u".json"));
 }
@@ -1082,21 +1057,23 @@ void SearchWidget::DataStorage::loadHistory()
     if (!loadResult)
     {
         LogMsg(tr("Failed to load Search UI history. File: \"%1\". Error: \"%2\"")
-                .arg(historyFilePath.toString(), loadResult.error()), Log::WARNING);
+                   .arg(historyFilePath.toString(), loadResult.error()),
+               Log::WARNING);
         return;
     }
 
     emit historyLoaded(loadResult.value());
 }
 
-void SearchWidget::DataStorage::storeHistory(const QStringList &history)
+void SearchWidget::DataStorage::storeHistory(const QStringList& history)
 {
     const Path filePath = makeDataFilePath(HISTORY_FILE_NAME);
     const auto saveResult = Utils::IO::saveToFile(filePath, history.join(u'\n').toUtf8());
     if (!saveResult)
     {
         LogMsg(tr("Failed to save search history. File: \"%1\". Error: \"%2\"")
-                .arg(filePath.toString(), saveResult.error()), Log::WARNING);
+                   .arg(filePath.toString(), saveResult.error()),
+               Log::WARNING);
     }
 }
 

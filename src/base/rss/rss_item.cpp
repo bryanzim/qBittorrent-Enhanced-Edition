@@ -30,22 +30,22 @@
 
 #include "rss_item.h"
 
+#include "base/global.h"
+
 #include <QDebug>
 #include <QRegularExpression>
 #include <QStringList>
-
-#include "base/global.h"
 
 using namespace RSS;
 
 const QChar Item::PathSeparator = u'\\';
 
-Item::Item(const QString &path)
+Item::Item(const QString& path)
     : m_path(path)
 {
 }
 
-void Item::setPath(const QString &path)
+void Item::setPath(const QString& path)
 {
     if (path != m_path)
     {
@@ -64,11 +64,10 @@ QString Item::name() const
     return relativeName(path());
 }
 
-bool Item::isValidPath(const QString &path)
+bool Item::isValidPath(const QString& path)
 {
     const QRegularExpression re(
-                uR"(\A[^\%1]+(\%1[^\%1]+)*\z)"_s.arg(Item::PathSeparator)
-                , QRegularExpression::DontCaptureOption);
+        uR"(\A[^\%1]+(\%1[^\%1]+)*\z)"_s.arg(Item::PathSeparator), QRegularExpression::DontCaptureOption);
 
     if (path.isEmpty() || !re.match(path).hasMatch())
     {
@@ -79,7 +78,7 @@ bool Item::isValidPath(const QString &path)
     return true;
 }
 
-QString Item::joinPath(const QString &path1, const QString &path2)
+QString Item::joinPath(const QString& path1, const QString& path2)
 {
     if (path1.isEmpty())
         return path2;
@@ -87,10 +86,11 @@ QString Item::joinPath(const QString &path1, const QString &path2)
     return (path1 + Item::PathSeparator + path2);
 }
 
-QStringList Item::expandPath(const QString &path)
+QStringList Item::expandPath(const QString& path)
 {
     QStringList result;
-    if (path.isEmpty()) return result;
+    if (path.isEmpty())
+        return result;
     //    if (!isValidRSSFolderName(folder))
     //        return result;
 
@@ -105,13 +105,13 @@ QStringList Item::expandPath(const QString &path)
     return result;
 }
 
-QString Item::parentPath(const QString &path)
+QString Item::parentPath(const QString& path)
 {
     const qsizetype pos = path.lastIndexOf(Item::PathSeparator);
     return (pos >= 0) ? path.first(pos) : QString();
 }
 
-QString Item::relativeName(const QString &path)
+QString Item::relativeName(const QString& path)
 {
     const qsizetype pos = path.lastIndexOf(Item::PathSeparator);
     return (pos >= 0) ? path.sliced(pos + 1) : path;

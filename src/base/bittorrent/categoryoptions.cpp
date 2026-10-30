@@ -28,10 +28,10 @@
 
 #include "categoryoptions.h"
 
+#include "base/utils/string.h"
+
 #include <QJsonObject>
 #include <QJsonValue>
-
-#include "base/utils/string.h"
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -44,16 +44,16 @@ const QString OPTION_INACTIVESEEDINGTIMELIMIT = u"inactive_seeding_time_limit"_s
 const QString OPTION_SHARELIMITACTION = u"share_limit_action"_s;
 const QString OPTION_SHARELIMITSMODE = u"share_limits_mode"_s;
 
-BitTorrent::CategoryOptions BitTorrent::CategoryOptions::fromJSON(const QJsonObject &jsonObj)
+BitTorrent::CategoryOptions BitTorrent::CategoryOptions::fromJSON(const QJsonObject& jsonObj)
 {
     CategoryOptions options;
     options.savePath = Path(jsonObj.value(OPTION_SAVEPATH).toString());
 
     const QJsonValue downloadPathValue = jsonObj.value(OPTION_DOWNLOADPATH);
     if (downloadPathValue.isBool())
-        options.downloadPath = {downloadPathValue.toBool(), {}};
+        options.downloadPath = { downloadPathValue.toBool(), {} };
     else if (downloadPathValue.isString())
-        options.downloadPath = {true, Path(downloadPathValue.toString())};
+        options.downloadPath = { true, Path(downloadPathValue.toString()) };
 
     options.shareLimits.ratioLimit = jsonObj.value(OPTION_RATIOLIMIT).toDouble(DEFAULT_RATIO_LIMIT);
     options.shareLimits.seedingTimeLimit = jsonObj.value(OPTION_SEEDINGTIMELIMIT).toInt(DEFAULT_SEEDING_TIME_LIMIT);
@@ -76,12 +76,12 @@ QJsonObject BitTorrent::CategoryOptions::toJSON() const
     }
 
     return {
-        {OPTION_SAVEPATH, savePath.data()},
-        {OPTION_DOWNLOADPATH, downloadPathValue},
-        {OPTION_RATIOLIMIT, shareLimits.ratioLimit},
-        {OPTION_SEEDINGTIMELIMIT, shareLimits.seedingTimeLimit},
-        {OPTION_INACTIVESEEDINGTIMELIMIT, shareLimits.inactiveSeedingTimeLimit},
-        {OPTION_SHARELIMITACTION, Utils::String::fromEnum(shareLimits.action)},
-        {OPTION_SHARELIMITSMODE, Utils::String::fromEnum(shareLimits.mode)}
+        {                 OPTION_SAVEPATH,                             savePath.data() },
+        {             OPTION_DOWNLOADPATH,                           downloadPathValue },
+        {               OPTION_RATIOLIMIT,                      shareLimits.ratioLimit },
+        {         OPTION_SEEDINGTIMELIMIT,                shareLimits.seedingTimeLimit },
+        { OPTION_INACTIVESEEDINGTIMELIMIT,        shareLimits.inactiveSeedingTimeLimit },
+        {         OPTION_SHARELIMITACTION, Utils::String::fromEnum(shareLimits.action) },
+        {          OPTION_SHARELIMITSMODE,   Utils::String::fromEnum(shareLimits.mode) }
     };
 }

@@ -28,8 +28,6 @@
 
 #include "statsdialog.h"
 
-#include <algorithm>
-
 #include "base/bittorrent/cachestatus.h"
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/sessionstatus.h"
@@ -40,12 +38,12 @@
 #include "ui_statsdialog.h"
 #include "utils.h"
 
+#include <algorithm>
+
 #define SETTINGS_KEY(name) u"StatisticsDialog/" name
 
-StatsDialog::StatsDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::StatsDialog)
-    , m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
+StatsDialog::StatsDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::StatsDialog), m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
 {
     m_ui->setupUi(this);
 
@@ -56,8 +54,7 @@ StatsDialog::StatsDialog(QWidget *parent)
 
     connect(m_ui->buttonBox, &QDialogButtonBox::clicked, this, &StatsDialog::close);
 
-    connect(BitTorrent::Session::instance(), &BitTorrent::Session::statsUpdated
-            , this, &StatsDialog::update);
+    connect(BitTorrent::Session::instance(), &BitTorrent::Session::statsUpdated, this, &StatsDialog::update);
     update();
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
@@ -72,8 +69,8 @@ StatsDialog::~StatsDialog()
 
 void StatsDialog::update()
 {
-    const BitTorrent::SessionStatus &ss = BitTorrent::Session::instance()->status();
-    const BitTorrent::CacheStatus &cs = BitTorrent::Session::instance()->cacheStatus();
+    const BitTorrent::SessionStatus& ss = BitTorrent::Session::instance()->status();
+    const BitTorrent::CacheStatus& cs = BitTorrent::Session::instance()->cacheStatus();
 
     // All-time DL/UL
     const qint64 atd = ss.allTimeDownload;
@@ -84,15 +81,15 @@ void StatsDialog::update()
     m_ui->labelWaste->setText(Utils::Misc::friendlyUnit(ss.totalWasted));
     // Global ratio
     m_ui->labelGlobalRatio->setText(
-                ((atd > 0) && (atu > 0))
-                ? Utils::String::fromDouble(static_cast<qreal>(atu) / atd, 2)
-                : u"-"_s);
+        ((atd > 0) && (atu > 0))
+            ? Utils::String::fromDouble(static_cast<qreal>(atu) / atd, 2)
+            : u"-"_s);
 #ifndef QBT_USES_LIBTORRENT2
     // Cache hits
     const qreal readRatio = cs.readRatio;
     m_ui->labelCacheHits->setText(u"%1%"_s.arg((readRatio > 0)
-        ? Utils::String::fromDouble((100 * readRatio), 2)
-        : u"0"_s));
+                                                   ? Utils::String::fromDouble((100 * readRatio), 2)
+                                                   : u"0"_s));
 #endif
     // Buffers size
     m_ui->labelTotalBuf->setText(Utils::Misc::friendlyUnit(cs.totalUsedBuffers * 16 * 1024));
@@ -101,11 +98,11 @@ void StatsDialog::update()
     // From lt manual: disk_write_queue and disk_read_queue are the number of peers currently waiting on a disk write or disk read
     // to complete before it receives or sends any more data on the socket. It's a metric of how disk bound you are.
     m_ui->labelWriteStarve->setText(u"%1%"_s.arg(((ss.diskWriteQueue > 0) && (ss.peersCount > 0))
-        ? Utils::String::fromDouble((100. * ss.diskWriteQueue / ss.peersCount), 2)
-        : u"0"_s));
+                                                     ? Utils::String::fromDouble((100. * ss.diskWriteQueue / ss.peersCount), 2)
+                                                     : u"0"_s));
     m_ui->labelReadStarve->setText(u"%1%"_s.arg(((ss.diskReadQueue > 0) && (ss.peersCount > 0))
-        ? Utils::String::fromDouble((100. * ss.diskReadQueue / ss.peersCount), 2)
-        : u"0"_s));
+                                                    ? Utils::String::fromDouble((100. * ss.diskReadQueue / ss.peersCount), 2)
+                                                    : u"0"_s));
 
     // Disk queues
     const QString msSuffix = tr("%1 ms");

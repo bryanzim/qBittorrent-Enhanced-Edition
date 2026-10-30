@@ -28,10 +28,6 @@
 
 #include "peerinfo.h"
 
-#include <libtorrent/version.hpp>
-
-#include <QBitArray>
-
 #include "base/algorithm.h"
 #include "base/bittorrent/ltqbitarray.h"
 #include "base/net/geoipmanager.h"
@@ -40,11 +36,13 @@
 #include "base/utils/bytearray.h"
 #include "peeraddress.h"
 
+#include <QBitArray>
+#include <libtorrent/version.hpp>
+
 using namespace BitTorrent;
 
-PeerInfo::PeerInfo(const lt::peer_info &nativeInfo, const QBitArray &allPieces)
-    : m_nativeInfo(nativeInfo)
-    , m_relevance(calcRelevance(allPieces))
+PeerInfo::PeerInfo(const lt::peer_info& nativeInfo, const QBitArray& allPieces)
+    : m_nativeInfo(nativeInfo), m_relevance(calcRelevance(allPieces))
 {
     determineFlags();
 }
@@ -196,12 +194,12 @@ PeerAddress PeerInfo::address() const
 #if LIBTORRENT_VERSION_NUM >= 20100
     const lt::tcp::endpoint ip = m_nativeInfo.remote_endpoint();
 #else
-    const lt::tcp::endpoint &ip = m_nativeInfo.ip;
+    const lt::tcp::endpoint& ip = m_nativeInfo.ip;
 #endif
     // fast path for platforms which boost.asio internal struct maps to `sockaddr`
-    return {QHostAddress(ip.data()), ip.port()};
+    return { QHostAddress(ip.data()), ip.port() };
     // slow path for the others
-    //return {QHostAddress(QString::fromStdString(m_nativeInfo.ip.address().to_string()))
+    // return {QHostAddress(QString::fromStdString(m_nativeInfo.ip.address().to_string()))
     //    , m_nativeInfo.ip.port()};
 }
 
@@ -214,7 +212,7 @@ QString PeerInfo::I2PAddress() const
     if (m_I2PAddress.isEmpty())
     {
         const lt::sha256_hash destHash = m_nativeInfo.i2p_destination();
-        const QByteArray base32Dest = Utils::ByteArray::toBase32({destHash.data(), destHash.size()}).replace('=', "").toLower();
+        const QByteArray base32Dest = Utils::ByteArray::toBase32({ destHash.data(), destHash.size() }).replace('=', "").toLower();
         m_I2PAddress = QString::fromLatin1(base32Dest) + u".b32.i2p";
     }
 #endif
@@ -227,7 +225,7 @@ QString PeerInfo::client() const
     auto client = QString::fromStdString(m_nativeInfo.client).simplified();
 
     // remove non-printable characters
-    erase_if(client, [](const QChar &c) { return !c.isPrint(); });
+    erase_if(client, [](const QChar& c) { return !c.isPrint(); });
 
     return client;
 }
@@ -293,11 +291,11 @@ QString PeerInfo::connectionType() const
         return C_UTP;
 
     return (m_nativeInfo.connection_type == lt::peer_info::standard_bittorrent)
-        ? u"BT"_s
-        : u"Web"_s;
+               ? u"BT"_s
+               : u"Web"_s;
 }
 
-qreal PeerInfo::calcRelevance(const QBitArray &allPieces) const
+qreal PeerInfo::calcRelevance(const QBitArray& allPieces) const
 {
     const qsizetype localMissing = allPieces.count(false);
     if (localMissing <= 0)
@@ -315,8 +313,7 @@ qreal PeerInfo::relevance() const
 
 void PeerInfo::determineFlags()
 {
-    const auto updateFlags = [this](const QChar specifier, const QString &explanation)
-    {
+    const auto updateFlags = [this](const QChar specifier, const QString& explanation) {
         m_flags += (specifier + u' ');
         m_flagsDescription += u"%1 = %2\n"_s.arg(specifier, explanation);
     };

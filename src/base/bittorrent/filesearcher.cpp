@@ -28,16 +28,16 @@
 
 #include "filesearcher.h"
 
-#include <QPromise>
-
 #include "base/bittorrent/common.h"
+
+#include <QPromise>
 
 namespace
 {
-    bool findInDir(const Path &dirPath, PathList &fileNames, const bool forceAppendExt)
+    bool findInDir(const Path& dirPath, PathList& fileNames, const bool forceAppendExt)
     {
         bool found = false;
-        for (Path &fileName : fileNames)
+        for (Path& fileName : fileNames)
         {
             if ((dirPath / fileName).exists())
             {
@@ -62,8 +62,7 @@ namespace
     }
 }
 
-void FileSearcher::search(const PathList &originalFileNames, const Path &savePath
-        , const Path &downloadPath, const bool forceAppendExt, QPromise<FileSearchResult> &promise)
+void FileSearcher::search(const PathList& originalFileNames, const Path& savePath, const Path& downloadPath, const bool forceAppendExt, QPromise<FileSearchResult>& promise)
 {
     Path usedPath = savePath;
     PathList adjustedFileNames = originalFileNames;
@@ -74,5 +73,5 @@ void FileSearcher::search(const PathList &originalFileNames, const Path &savePat
         findInDir(usedPath, adjustedFileNames, forceAppendExt);
     }
 
-    promise.addResult(FileSearchResult {.savePath = usedPath, .fileNames = adjustedFileNames});
+    promise.addResult(FileSearchResult{ .savePath = usedPath, .fileNames = adjustedFileNames });
 }

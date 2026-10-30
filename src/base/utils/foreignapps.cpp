@@ -31,8 +31,9 @@
 #include "foreignapps.h"
 
 #if defined(Q_OS_WIN)
+#include <Windows.h>
+
 #include <algorithm>
-#include <windows.h>
 #endif
 
 #include <QCoreApplication>
@@ -58,7 +59,7 @@ using namespace Utils::ForeignApps;
 
 namespace
 {
-    bool testPythonInstallation(const Path &exePath, PythonInfo &info)
+    bool testPythonInstallation(const Path& exePath, PythonInfo& info)
     {
         info = {};
 
@@ -66,7 +67,7 @@ namespace
 #ifdef Q_OS_UNIX
         proc.setUnixProcessParameters(QProcess::UnixProcessFlag::CloseFileDescriptors);
 #endif
-        proc.start(exePath.data(), {u"--version"_s}, QIODevice::ReadOnly);
+        proc.start(exePath.data(), { u"--version"_s }, QIODevice::ReadOnly);
         if (proc.waitForFinished() && (proc.exitStatus() == QProcess::NormalExit))
         {
             QByteArray procOutput = proc.readAllStandardOutput();
@@ -89,9 +90,10 @@ namespace
             if (!version.isValid())
                 return false;
 
-            info = {.executablePath = exePath, .version = version};
+            info = { .executablePath = exePath, .version = version };
             LogMsg(QCoreApplication::translate("Utils::ForeignApps", "Found Python executable. Name: \"%1\". Version: \"%2\"")
-                .arg(info.executablePath.toString(), info.version.toString()), Log::INFO);
+                       .arg(info.executablePath.toString(), info.version.toString()),
+                   Log::INFO);
             return true;
         }
 
@@ -109,11 +111,10 @@ namespace
     PathList pythonSearchReg(const REG_SEARCH_TYPE type)
     {
         const HKEY hkRoot = (type == USER) ? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE;
-        const REGSAM samDesired = KEY_READ
-            | ((type == SYSTEM_64BIT) ? KEY_WOW64_64KEY : KEY_WOW64_32KEY);
+        const REGSAM samDesired = KEY_READ | ((type == SYSTEM_64BIT) ? KEY_WOW64_64KEY : KEY_WOW64_32KEY);
         PathList ret;
 
-        HKEY hkPythonCore {0};
+        HKEY hkPythonCore{ 0 };
         if (::RegOpenKeyExW(hkRoot, L"SOFTWARE\\Python\\PythonCore", 0, samDesired, &hkPythonCore) == ERROR_SUCCESS)
         {
             [[maybe_unused]] const auto hkPythonCoreGuard = qScopeGuard([&hkPythonCore] { ::RegCloseKey(hkPythonCore); });
@@ -122,8 +123,7 @@ namespace
             QStringList versions = Utils::Reg::getSubkeys(hkPythonCore);
             // ordinary sort won't suffice, it needs to sort ["3.9", "3.10"] correctly
             const Utils::Compare::NaturalCompare<Qt::CaseInsensitive> comparator;
-            std::ranges::sort(versions, [&comparator](const QString &left, const QString &right)
-            {
+            std::ranges::sort(versions, [&comparator](const QString& left, const QString& right) {
                 return comparator(left, right);
             });
 
@@ -133,12 +133,12 @@ namespace
             {
                 const std::wstring version = (Path(versions.takeLast()) / Path(u"InstallPath"_s)).toString().toStdWString();
 
-                HKEY hkInstallPath {0};
+                HKEY hkInstallPath{ 0 };
                 if (::RegOpenKeyExW(hkPythonCore, version.c_str(), 0, samDesired, &hkInstallPath) == ERROR_SUCCESS)
                 {
                     [[maybe_unused]] const auto hkInstallPathGuard = qScopeGuard([&hkInstallPath] { ::RegCloseKey(hkInstallPath); });
 
-                    const Path basePath {Utils::Reg::getStringValue(hkInstallPath)};
+                    const Path basePath{ Utils::Reg::getStringValue(hkInstallPath) };
                     if (basePath.isEmpty())
                         continue;
 
@@ -156,15 +156,13 @@ namespace
     PathList searchPythonPaths()
     {
         // From registry
-        PathList ret = pythonSearchReg(USER)
-            + pythonSearchReg(SYSTEM_64BIT)
-            + pythonSearchReg(SYSTEM_32BIT);
+        PathList ret = pythonSearchReg(USER) + pythonSearchReg(SYSTEM_64BIT) + pythonSearchReg(SYSTEM_32BIT);
 
         // Fallback: Detect python from default locations
-        const QFileInfoList dirs = QDir(u"C:/"_s).entryInfoList({u"Python*"_s}, QDir::Dirs, (QDir::Name | QDir::Reversed));
-        for (const QFileInfo &info : dirs)
+        const QFileInfoList dirs = QDir(u"C:/"_s).entryInfoList({ u"Python*"_s }, QDir::Dirs, (QDir::Name | QDir::Reversed));
+        for (const QFileInfo& info : dirs)
         {
-            const Path absPath {info.absoluteFilePath()};
+            const Path absPath{ info.absoluteFilePath() };
 
             if (const Path path = (absPath / Path(u"python3.exe"_s)); path.exists())
                 ret.append(path);
@@ -195,8 +193,7 @@ PythonInfo Utils::ForeignApps::pythonInfo()
     if (pyInfo.isValid() && (preferredPythonPath == pyInfo.executablePath))
         return pyInfo;
 
-    const QString invalidVersionMessage = QCoreApplication::translate("Utils::ForeignApps"
-        , "Python failed to meet minimum version requirement. Path: \"%1\". Found version: \"%2\". Minimum supported version: \"%3\".");
+    const QString invalidVersionMessage = QCoreApplication::translate("Utils::ForeignApps", "Python failed to meet minimum version requirement. Path: \"%1\". Found version: \"%2\". Minimum supported version: \"%3\".");
 
     if (!preferredPythonPath.isEmpty())
     {
@@ -205,13 +202,13 @@ PythonInfo Utils::ForeignApps::pythonInfo()
             if (pyInfo.isSupportedVersion())
                 return pyInfo;
 
-            LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString()
-                , pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::WARNING);
+            LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString(), pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::WARNING);
         }
         else
         {
             LogMsg(QCoreApplication::translate("Utils::ForeignApps", "Failed to find Python executable. Path: \"%1\".")
-                .arg(preferredPythonPath.toString()), Log::WARNING);
+                       .arg(preferredPythonPath.toString()),
+                   Log::WARNING);
         }
     }
     else
@@ -221,34 +218,33 @@ PythonInfo Utils::ForeignApps::pythonInfo()
         if (!pyInfo.isValid())
         {
             // search in `PATH` environment variable
-            const QString exeNames[] = {u"python3"_s, u"python"_s};
-            for (const QString &exeName : exeNames)
+            const QString exeNames[] = { u"python3"_s, u"python"_s };
+            for (const QString& exeName : exeNames)
             {
                 if (testPythonInstallation(Path(exeName), pyInfo))
                 {
                     if (pyInfo.isSupportedVersion())
                         return pyInfo;
 
-                    LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString()
-                        , pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::INFO);
+                    LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString(), pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::INFO);
                 }
                 else
                 {
                     LogMsg(QCoreApplication::translate("Utils::ForeignApps", "Failed to find `%1` executable in PATH environment variable. PATH: \"%2\"")
-                        .arg(exeName, qEnvironmentVariable("PATH")), Log::INFO);
+                               .arg(exeName, qEnvironmentVariable("PATH")),
+                           Log::INFO);
                 }
             }
 
 #if defined(Q_OS_WIN)
-            for (const Path &path : asConst(searchPythonPaths()))
+            for (const Path& path : asConst(searchPythonPaths()))
             {
                 if (testPythonInstallation(path, pyInfo))
                 {
                     if (pyInfo.isSupportedVersion())
                         return pyInfo;
 
-                    LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString()
-                        , pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::INFO);
+                    LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString(), pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::INFO);
                 }
             }
 #endif

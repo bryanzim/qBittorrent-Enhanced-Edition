@@ -28,10 +28,6 @@
 
 #include "executionlogwidget.h"
 
-#include <QDateTime>
-#include <QMenu>
-#include <QPalette>
-
 #include "base/global.h"
 #include "log/logfiltermodel.h"
 #include "log/loglistview.h"
@@ -39,29 +35,29 @@
 #include "ui_executionlogwidget.h"
 #include "uithememanager.h"
 
-ExecutionLogWidget::ExecutionLogWidget(const Log::MsgTypes types, QWidget *parent)
-    : QWidget(parent)
-    , m_ui(new Ui::ExecutionLogWidget)
-    , m_messageFilterModel(new LogFilterModel(types, this))
+#include <QDateTime>
+#include <QMenu>
+#include <QPalette>
+
+ExecutionLogWidget::ExecutionLogWidget(const Log::MsgTypes types, QWidget* parent)
+    : QWidget(parent), m_ui(new Ui::ExecutionLogWidget), m_messageFilterModel(new LogFilterModel(types, this))
 {
     m_ui->setupUi(this);
 
-    LogMessageModel *messageModel = new LogMessageModel(this);
+    LogMessageModel* messageModel = new LogMessageModel(this);
     m_messageFilterModel->setSourceModel(messageModel);
-    LogListView *messageView = new LogListView(this);
+    LogListView* messageView = new LogListView(this);
     messageView->setModel(m_messageFilterModel);
     messageView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(messageView, &LogListView::customContextMenuRequested, this, [this, messageView, messageModel]()
-    {
+    connect(messageView, &LogListView::customContextMenuRequested, this, [this, messageView, messageModel]() {
         displayContextMenu(messageView, messageModel);
     });
 
-    LogPeerModel *peerModel = new LogPeerModel(this);
-    LogListView *peerView = new LogListView(this);
+    LogPeerModel* peerModel = new LogPeerModel(this);
+    LogListView* peerView = new LogListView(this);
     peerView->setModel(peerModel);
     peerView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(peerView, &LogListView::customContextMenuRequested, this, [this, peerView, peerModel]()
-    {
+    connect(peerView, &LogListView::customContextMenuRequested, this, [this, peerView, peerModel]() {
         displayContextMenu(peerView, peerModel);
     });
 
@@ -84,20 +80,18 @@ void ExecutionLogWidget::setMessageTypes(const Log::MsgTypes types)
     m_messageFilterModel->setMessageTypes(types);
 }
 
-void ExecutionLogWidget::displayContextMenu(const LogListView *view, const BaseLogModel *model) const
+void ExecutionLogWidget::displayContextMenu(const LogListView* view, const BaseLogModel* model) const
 {
-    QMenu *menu = new QMenu;
+    QMenu* menu = new QMenu;
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
     // only show copy action if any of the row is selected
     if (view->currentIndex().isValid())
     {
-        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-copy"_s), tr("Copy")
-            , view, &LogListView::copySelection);
+        menu->addAction(UIThemeManager::instance()->getIcon(u"edit-copy"_s), tr("Copy"), view, &LogListView::copySelection);
     }
 
-    menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s), tr("Clear")
-        , model, &BaseLogModel::reset);
+    menu->addAction(UIThemeManager::instance()->getIcon(u"edit-clear"_s), tr("Clear"), model, &BaseLogModel::reset);
 
     menu->popup(QCursor::pos());
 }

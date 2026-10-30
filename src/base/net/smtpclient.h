@@ -54,9 +54,7 @@ namespace Net
         Q_DISABLE_COPY_MOVE(SMTPClient)
 
     public:
-        static void sendMail(const QString &from, const QString &to
-                , const QString &subject, const QString &body
-                , QObject *context = nullptr);
+        static void sendMail(const QString& from, const QString& to, const QString& subject, const QString& body, QObject* context = nullptr);
 
     private slots:
         void readyRead();
@@ -89,22 +87,21 @@ namespace Net
             AuthCramMD5
         };
 
-        SMTPClient(const QString &sender, const QStringList &recipients, const QString &subject
-                   , const QString &body, QObject *parent = nullptr);
+        SMTPClient(const QString& sender, const QStringList& recipients, const QString& subject, const QString& body, QObject* parent = nullptr);
         ~SMTPClient() override;
 
         void ehlo();
         void helo();
-        void parseEhloResponse(const QByteArray &code, bool continued, const QString &line);
+        void parseEhloResponse(const QByteArray& code, bool continued, const QString& line);
         void authenticate();
         void startTLS();
-        void authCramMD5(const QByteArray &challenge = {});
+        void authCramMD5(const QByteArray& challenge = {});
         void authPlain();
         void authLogin();
-        void logError(const QString &msg);
+        void logError(const QString& msg);
 
         QByteArray m_message;
-        QSslSocket *m_socket = nullptr;
+        QSslSocket* m_socket = nullptr;
         QString m_sender;
         QStringList m_recipients;
         QStringListIterator m_recipientsIterator;

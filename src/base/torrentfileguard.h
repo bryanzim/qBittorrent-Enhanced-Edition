@@ -28,17 +28,21 @@
 
 #pragma once
 
+#include "base/path.h"
+
 #include <QObject>
 #include <QString>
-
-#include "base/path.h"
 
 /// Utility class to defer file deletion
 class FileGuard
 {
 public:
-    explicit FileGuard(const Path &path = {});
+    explicit FileGuard(const Path& path = {});
     ~FileGuard();
+    FileGuard(const FileGuard&) = delete;
+    FileGuard& operator=(const FileGuard&) = delete;
+    FileGuard(FileGuard&&) = delete;
+    FileGuard& operator=(FileGuard&&) = delete;
 
     /// Cancels or re-enables deferred file deletion
     void setAutoRemove(bool remove) noexcept;
@@ -55,14 +59,18 @@ class TorrentFileGuard : private FileGuard
     Q_GADGET
 
 public:
-    explicit TorrentFileGuard(const Path &path = {});
+    explicit TorrentFileGuard(const Path& path = {});
     ~TorrentFileGuard();
+    TorrentFileGuard(const TorrentFileGuard&) = delete;
+    TorrentFileGuard& operator=(const TorrentFileGuard&) = delete;
+    TorrentFileGuard(TorrentFileGuard&&) = delete;
+    TorrentFileGuard& operator=(TorrentFileGuard&&) = delete;
 
     /// marks the torrent file as loaded (added) into the BitTorrent::Session
     void markAsAddedToSession();
     using FileGuard::setAutoRemove;
 
-    enum AutoDeleteMode : int     // do not change these names: they are stored in config file
+    enum AutoDeleteMode : int // do not change these names: they are stored in config file
     {
         Never,
         IfAdded,
@@ -74,7 +82,7 @@ public:
     static void setAutoDeleteMode(AutoDeleteMode mode);
 
 private:
-    TorrentFileGuard(const Path &path, AutoDeleteMode mode);
+    TorrentFileGuard(const Path& path, AutoDeleteMode mode);
 
     Q_ENUM(AutoDeleteMode)
     AutoDeleteMode m_mode;
