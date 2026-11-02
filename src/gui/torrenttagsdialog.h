@@ -47,7 +47,7 @@ public:
     explicit TorrentTagsDialog(const TagSet& initialTags, QWidget* parent = nullptr);
     ~TorrentTagsDialog() override;
 
-    TagSet tags() const;
+    [[nodiscard]] TagSet tags() const;
 
 private:
     void addNewTag();

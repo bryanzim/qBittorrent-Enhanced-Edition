@@ -133,7 +133,9 @@ bool SearchHandler::isActive() const
 void SearchHandler::cancelSearch()
 {
     if ((m_searchProcess->state() == QProcess::NotRunning) || m_searchCancelled)
+    {
         return;
+    }
 
 #ifdef Q_OS_WIN
     m_searchProcess->kill();
@@ -161,11 +163,17 @@ void SearchHandler::processFinished(const int exitcode)
     }
 
     if (m_searchCancelled)
+    {
         emit searchFinished(true);
+    }
     else if ((m_searchProcess->exitStatus() == QProcess::NormalExit) && (exitcode == 0))
+    {
         emit searchFinished(false);
+    }
     else
+    {
         emit searchFailed(errMsg);
+    }
 }
 
 // search QProcess return output as soon as it gets new
@@ -184,7 +192,9 @@ void SearchHandler::readSearchOutput()
     for (const QByteArrayView& line : asConst(lines))
     {
         if (SearchResult searchResult; parseSearchResult(line, searchResult))
+        {
             searchResultList.append(std::move(searchResult));
+        }
     }
 
     if (!searchResultList.isEmpty())
@@ -203,7 +213,9 @@ bool SearchHandler::parseSearchResult(const QByteArrayView line, SearchResult& s
     const qsizetype nbFields = parts.size();
 
     if (nbFields <= PL_ENGINE_URL)
+    {
         return false; // Anything after ENGINE_URL is optional
+    }
 
     searchResult = SearchResult();
     searchResult.fileUrl = QString::fromUtf8(parts.at(PL_DL_LINK).trimmed());                                       // download URL
@@ -214,23 +226,31 @@ bool SearchHandler::parseSearchResult(const QByteArrayView line, SearchResult& s
 
     searchResult.nbSeeders = parts.at(PL_SEEDS).trimmed().toLongLong(&ok); // Seeders
     if (!ok || (searchResult.nbSeeders < 0))
+    {
         searchResult.nbSeeders = -1;
+    }
 
     searchResult.nbLeechers = parts.at(PL_LEECHS).trimmed().toLongLong(&ok); // Leechers
     if (!ok || (searchResult.nbLeechers < 0))
+    {
         searchResult.nbLeechers = -1;
+    }
 
     searchResult.siteUrl = QString::fromUtf8(parts.at(PL_ENGINE_URL).trimmed());    // Search engine site URL
     searchResult.engineName = m_manager->pluginNameBySiteURL(searchResult.siteUrl); // Search engine name
 
     if (nbFields > PL_DESC_LINK)
+    {
         searchResult.descrLink = QString::fromUtf8(parts.at(PL_DESC_LINK).trimmed()); // Description Link
+    }
 
     if (nbFields > PL_PUB_DATE)
     {
         const qint64 secs = parts.at(PL_PUB_DATE).trimmed().toLongLong(&ok);
         if (ok && (secs > 0))
+        {
             searchResult.pubDate = QDateTime::fromSecsSinceEpoch(secs); // Date
+        }
     }
 
     return true;

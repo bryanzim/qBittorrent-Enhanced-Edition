@@ -46,9 +46,13 @@ namespace
         if (index.isValid())
         {
             if (!index.parent().isValid() && (index.row() == 1))
+            {
                 categoryFilter = u""_s; // Uncategorized
+            }
             else if (index.parent().isValid() || (index.row() > 1))
+            {
                 categoryFilter = model->categoryName(index);
+            }
         }
 
         return categoryFilter;
@@ -97,7 +101,9 @@ QString CategoryFilterWidget::currentCategory() const
     QModelIndex current;
     const auto selectedRows = selectionModel()->selectedRows();
     if (!selectedRows.isEmpty())
+    {
         current = selectedRows.first();
+    }
 
     return getCategoryFilter(static_cast<CategoryFilterProxyModel*>(model()), current);
 }
@@ -161,14 +167,18 @@ void CategoryFilterWidget::rowsInserted(const QModelIndex& parent, const int sta
     QTreeView::rowsInserted(parent, start, end);
 
     if (parent.isValid())
+    {
         adjustIndentation();
+    }
 
     // Expand all parents if the parent(s) of the node are not expanded.
     QModelIndex p = parent;
     while (p.isValid())
     {
         if (!isExpanded(p))
+        {
             expand(p);
+        }
         p = model()->parent(p);
     }
 
@@ -181,7 +191,9 @@ bool CategoryFilterWidget::hasAnySubcategory() const
     for (int row = 0; row < rowCount; ++row)
     {
         if (model()->hasChildren(model()->index(row, 0)))
+        {
             return true;
+        }
     }
 
     return false;
@@ -190,9 +202,13 @@ bool CategoryFilterWidget::hasAnySubcategory() const
 void CategoryFilterWidget::adjustIndentation()
 {
     if (hasAnySubcategory())
+    {
         resetIndentation();
+    }
     else
+    {
         setIndentation(0);
+    }
 }
 
 void CategoryFilterWidget::addCategory()
@@ -227,7 +243,9 @@ void CategoryFilterWidget::removeUnusedCategories()
     for (const QString& category : asConst(session->categories()))
     {
         if (model()->data(static_cast<CategoryFilterProxyModel*>(model())->index(category), Qt::UserRole) == 0)
+        {
             session->removeCategory(category);
+        }
     }
     updateGeometry();
 }

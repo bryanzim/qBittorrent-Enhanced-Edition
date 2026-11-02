@@ -47,8 +47,10 @@ Http::ResponseWriterImpl::~ResponseWriterImpl()
 void Http::ResponseWriterImpl::prepare(const Request& request)
 {
     Q_ASSERT((m_state != State::Running) && (m_state != State::Failed));
-    if ((m_state == State::Running) || (m_state == State::Failed)) [[unlikely]]
-        return;
+    if ((m_state == State::Running) || (m_state == State::Failed))
+    {
+        [[unlikely]] return;
+    }
 
     m_state = State::Ready;
     m_request = request;
@@ -57,8 +59,10 @@ void Http::ResponseWriterImpl::prepare(const Request& request)
 void Http::ResponseWriterImpl::setResponse(const Response& response)
 {
     Q_ASSERT(m_state == State::Ready);
-    if (m_state != State::Ready) [[unlikely]]
-        return;
+    if (m_state != State::Ready)
+    {
+        [[unlikely]] return;
+    }
 
     m_state = State::Running;
 
@@ -75,8 +79,10 @@ void Http::ResponseWriterImpl::setResponse(const Response& response)
 void Http::ResponseWriterImpl::streamFile(const Path& filePath, const HeaderMap& headers)
 {
     Q_ASSERT(m_state == State::Ready);
-    if (m_state != State::Ready) [[unlikely]]
-        return;
+    if (m_state != State::Ready)
+    {
+        [[unlikely]] return;
+    }
 
     m_asyncFileSender = new AsyncFileSender(m_request, filePath, headers, m_socket);
 
@@ -104,8 +110,10 @@ bool Http::ResponseWriterImpl::isFinished() const
 void Http::ResponseWriterImpl::fail()
 {
     Q_ASSERT(m_state == State::Running);
-    if (m_state != State::Running) [[unlikely]]
-        return;
+    if (m_state != State::Running)
+    {
+        [[unlikely]] return;
+    }
 
     m_state = State::Failed;
     emit failed();
@@ -114,8 +122,10 @@ void Http::ResponseWriterImpl::fail()
 void Http::ResponseWriterImpl::finish()
 {
     Q_ASSERT(m_state == State::Running);
-    if (m_state != State::Running) [[unlikely]]
-        return;
+    if (m_state != State::Running)
+    {
+        [[unlikely]] return;
+    }
 
     m_state = State::Finished;
     emit finished();

@@ -41,13 +41,15 @@ namespace
     {
         // need to satisfy UniformRandomBitGenerator requirements
     public:
-        using result_type = uint32_t;
+        using result_type = std::uint32_t;
 
         RandomLayer()
             : m_processPrng{ Utils::OS::loadWinAPI<PPROCESSPRNG>(u"BCryptPrimitives.dll"_s, "ProcessPrng") }
         {
             if (!m_processPrng)
+            {
                 qFatal("Failed to load ProcessPrng().");
+            }
         }
 
         static constexpr result_type min()
@@ -65,7 +67,9 @@ namespace
             result_type buf = 0;
             const bool result = m_processPrng(reinterpret_cast<PBYTE>(&buf), sizeof(buf));
             if (!result)
+            {
                 qFatal("ProcessPrng() failed.");
+            }
 
             return buf;
         }

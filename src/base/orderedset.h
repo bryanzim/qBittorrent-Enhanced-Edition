@@ -48,7 +48,7 @@ public:
 
     // The following are custom functions that are in line with Qt API interface, such as `QSet`
 
-    int count() const
+    [[nodiscard]] int count() const
     {
         return static_cast<int>(BaseType::size());
     }
@@ -61,7 +61,7 @@ public:
         return *this;
     }
 
-    bool isEmpty() const
+    [[nodiscard]] bool isEmpty() const
     {
         return BaseType::empty();
     }

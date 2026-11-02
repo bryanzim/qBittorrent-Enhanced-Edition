@@ -68,39 +68,43 @@ namespace Utils
             static_assert((sizeof...(Ts) >= Mandatory), "Not enough parameters provided");
         }
 
-        constexpr bool isValid() const
+        [[nodiscard]] constexpr bool isValid() const
         {
             bool hasValid = false;
             for (const int i : m_components)
             {
                 if (i < 0)
+                {
                     return false;
+                }
                 if (i > 0)
+                {
                     hasValid = true;
+                }
             }
             return hasValid;
         }
 
-        constexpr int majorNumber() const
+        [[nodiscard]] constexpr int majorNumber() const
         {
             return m_components[0];
         }
 
-        constexpr int minorNumber() const
+        [[nodiscard]] constexpr int minorNumber() const
         {
             static_assert((N >= 2), "The number of version components is too small");
 
             return m_components[1];
         }
 
-        constexpr int revisionNumber() const
+        [[nodiscard]] constexpr int revisionNumber() const
         {
             static_assert((N >= 3), "The number of version components is too small");
 
             return m_components[2];
         }
 
-        constexpr int patchNumber() const
+        [[nodiscard]] constexpr int patchNumber() const
         {
             static_assert((N >= 4), "The number of version components is too small");
 
@@ -112,19 +116,25 @@ namespace Utils
             return m_components.at(i);
         }
 
-        QString toString() const
+        [[nodiscard]] QString toString() const
         {
             // find the last one non-zero component
             int lastSignificantIndex = N - 1;
             while ((lastSignificantIndex > 0) && (m_components[lastSignificantIndex] == 0))
+            {
                 --lastSignificantIndex;
+            }
 
-            if ((lastSignificantIndex + 1) < Mandatory) // lastSignificantIndex >= 0
-                lastSignificantIndex = Mandatory - 1;   // and Mandatory >= 1
+            if ((lastSignificantIndex + 1) < Mandatory)
+            {                                         // lastSignificantIndex >= 0
+                lastSignificantIndex = Mandatory - 1; // and Mandatory >= 1
+            }
 
             QString res = QString::number(m_components[0]);
             for (int i = 1; i <= lastSignificantIndex; ++i)
+            {
                 res += (u'.' + QString::number(m_components[i]));
+            }
             return res;
         }
 
@@ -144,7 +154,9 @@ namespace Utils
             const qsizetype count = stringParts.size();
 
             if ((count > N) || (count < Mandatory))
+            {
                 return defaultVersion;
+            }
 
             Version version;
             for (int i = 0; i < count; ++i)
@@ -152,7 +164,9 @@ namespace Utils
                 bool ok = false;
                 version.m_components[i] = stringParts[i].toInt(&ok);
                 if (!ok)
+                {
                     return defaultVersion;
+                }
             }
 
             return version;

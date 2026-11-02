@@ -61,7 +61,7 @@ class AddTorrentManager : public ApplicationComponent<QObject>
 public:
     AddTorrentManager(IApplication* app, BitTorrent::Session* btSession, QObject* parent = nullptr);
 
-    BitTorrent::Session* btSession() const;
+    [[nodiscard]] BitTorrent::Session* btSession() const;
     bool addTorrent(const QString& source, const BitTorrent::AddTorrentParams& params = {});
 
 signals:

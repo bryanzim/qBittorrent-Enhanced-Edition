@@ -115,25 +115,35 @@ Private::FileSystemPathValidator::testPath(const Path& path) const
     const QFileInfo info{ path.data() };
 
     if (!info.exists())
+    {
         return existingOnly() ? TestResult::DoesNotExist : TestResult::OK;
+    }
 
     if (filesOnly())
     {
         if (!info.isFile())
+        {
             return TestResult::NotAFile;
+        }
     }
 
     if (directoriesOnly())
     {
         if (!info.isDir())
+        {
             return TestResult::NotADir;
+        }
     }
 
     if (checkReadPermission() && !info.isReadable())
+    {
         return TestResult::CantRead;
+    }
 
     if (checkWritePermission() && !info.isWritable())
+    {
         return TestResult::CantWrite;
+    }
 
     return TestResult::OK;
 }
@@ -187,7 +197,9 @@ void Private::FileLineEdit::setFilenameFilters(const QStringList& filters)
 {
     m_filenameFilters = filters;
     if (m_completerModel)
+    {
         m_completerModel->setNameFilters(m_filenameFilters);
+    }
 }
 
 void Private::FileLineEdit::setBrowseAction(QAction* action)
@@ -265,7 +277,9 @@ void Private::FileLineEdit::validateText()
 {
     const auto* validator = qobject_cast<const FileSystemPathValidator*>(this->validator());
     if (!validator)
+    {
         return;
+    }
 
     const FileSystemPathValidator::TestResult lastTestResult = validator->lastTestResult();
     const QValidator::State lastState = validator->lastValidationState();
@@ -287,9 +301,13 @@ void Private::FileLineEdit::validateText()
     if (m_warningAction)
     {
         if (lastState == QValidator::Invalid)
+        {
             m_warningAction->setIcon(style()->standardIcon(QStyle::SP_MessageBoxCritical));
+        }
         else if (lastState == QValidator::Intermediate)
+        {
             m_warningAction->setIcon(style()->standardIcon(QStyle::SP_MessageBoxInformation));
+        }
         m_warningAction->setToolTip(warningText(lastTestResult));
     }
 }

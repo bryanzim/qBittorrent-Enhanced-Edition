@@ -40,12 +40,12 @@
 #include "randomlayer_other.cpp"
 #endif
 
-uint32_t Utils::Random::rand(const uint32_t min, const uint32_t max)
+std::uint32_t Utils::Random::rand(const std::uint32_t min, const std::uint32_t max)
 {
     static const RandomLayer layer;
 
     // new distribution is cheap: https://stackoverflow.com/a/19036349
-    std::uniform_int_distribution<uint32_t> uniform(min, max);
+    std::uniform_int_distribution<std::uint32_t> uniform(min, max);
 
     return uniform(layer);
 }

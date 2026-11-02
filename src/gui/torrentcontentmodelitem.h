@@ -66,34 +66,34 @@ public:
     TorrentContentModelItem();
     virtual ~TorrentContentModelItem();
 
-    bool isRootItem() const;
-    TorrentContentModelFolder* parent() const;
-    virtual ItemType itemType() const = 0;
+    [[nodiscard]] bool isRootItem() const;
+    [[nodiscard]] TorrentContentModelFolder* parent() const;
+    [[nodiscard]] virtual ItemType itemType() const = 0;
 
-    QString name() const;
+    [[nodiscard]] QString name() const;
     void setName(const QString& name);
 
-    qulonglong size() const;
-    qreal progress() const;
-    qulonglong remaining() const;
+    [[nodiscard]] qulonglong size() const;
+    [[nodiscard]] qreal progress() const;
+    [[nodiscard]] qulonglong remaining() const;
 
-    qreal availability() const;
+    [[nodiscard]] qreal availability() const;
 
-    BitTorrent::DownloadPriority priority() const;
+    [[nodiscard]] BitTorrent::DownloadPriority priority() const;
     virtual void setPriority(BitTorrent::DownloadPriority newPriority, bool updateParent = true) = 0;
 
-    int columnCount() const;
-    QString displayData(int column) const;
-    QVariant underlyingData(int column) const;
-    int row() const;
+    [[nodiscard]] int columnCount() const;
+    [[nodiscard]] QString displayData(int column) const;
+    [[nodiscard]] QVariant underlyingData(int column) const;
+    [[nodiscard]] int row() const;
 
 protected:
     // Root item members
     QList<QString> m_itemData;
     // Non-root item members
     QString m_name;
-    qulonglong m_size = 0;
-    qulonglong m_remaining = 0;
+    qulonglong m_size = 0U;
+    qulonglong m_remaining = 0U;
     BitTorrent::DownloadPriority m_priority = BitTorrent::DownloadPriority::Normal;
     qreal m_progress = 0;
     qreal m_availability = -1;

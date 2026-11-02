@@ -38,10 +38,9 @@
 #ifdef Q_OS_WIN
 #include <Windows.h>
 
-#include <shellapi.h>
-
 #include <functional>
 #include <memory>
+#include <shellapi.h>
 #elif defined(Q_OS_UNIX)
 #include <sys/resource.h>
 #endif
@@ -223,7 +222,9 @@ namespace
     {
         const qsizetype sepIndex = param.indexOf(u'=');
         if (sepIndex >= 0)
+        {
             return { param.first(sepIndex), param.sliced(sepIndex + 1) };
+        }
 
         return { param, {} };
     }
@@ -242,25 +243,39 @@ namespace
         const BitTorrent::AddTorrentParams& addTorrentParams = params.addTorrentParams;
 
         if (!addTorrentParams.savePath.isEmpty())
+        {
             result.append(bindParamValue(PARAM_SAVEPATH, addTorrentParams.savePath.data()));
+        }
 
         if (addTorrentParams.addStopped.has_value())
+        {
             result.append(bindParamValue(PARAM_ADDSTOPPED, (*addTorrentParams.addStopped ? u"1" : u"0")));
+        }
 
         if (addTorrentParams.seedMode)
+        {
             result.append(PARAM_SEEDMODE);
+        }
 
         if (!addTorrentParams.category.isEmpty())
+        {
             result.append(bindParamValue(PARAM_CATEGORY, addTorrentParams.category));
+        }
 
         if (addTorrentParams.sequential)
+        {
             result.append(PARAM_SEQUENTIAL);
+        }
 
         if (addTorrentParams.firstLastPiecePriority)
+        {
             result.append(PARAM_FIRSTLASTPIECEPRIORITY);
+        }
 
         if (params.skipDialog.has_value())
+        {
             result.append(bindParamValue(PARAM_SKIPDIALOG, (*params.skipDialog ? u"1" : u"0")));
+        }
 
         result += params.torrentSources;
 
@@ -375,7 +390,9 @@ Application::Application(int& argc, char** argv)
     else
     {
         if (!upgrade())
+        {
             throw RuntimeError(u"Failed migration of old settings"_s); // Not translatable. Translation isn't configured yet.
+        }
         handleChangedDefaults(DefaultPreferencesMode::Legacy);
     }
 
@@ -395,7 +412,9 @@ Application::Application(int& argc, char** argv)
     {
         LogMsg(tr("Running in portable mode. Auto detected profile folder at: %1").arg(profileDir.toString()));
         if (m_commandLineArgs.relativeFastresumePaths)
+        {
             LogMsg(tr("Redundant command line flag detected: \"%1\". Portable mode implies relative fastresume.").arg(u"--relative-fastresume"_s), Log::WARNING); // to avoid translating the `--relative-fastresume` string
+        }
     }
     else
     {
@@ -403,10 +422,14 @@ Application::Application(int& argc, char** argv)
     }
 
     if (isFileLoggerEnabled())
+    {
         m_fileLogger = new FileLogger(fileLoggerPath(), isFileLoggerBackup(), fileLoggerMaxSize(), isFileLoggerDeleteOld(), fileLoggerAge(), static_cast<FileLogger::FileLogAgeType>(fileLoggerAgeType()));
+    }
 
-    if (m_commandLineArgs.webUIPort > 0) // it will be -1 when user did not set any value
+    if (m_commandLineArgs.webUIPort > 0)
+    { // it will be -1 when user did not set any value
         Preferences::instance()->setWebUIPort(m_commandLineArgs.webUIPort);
+    }
 
     if (m_commandLineArgs.torrentingPort > 0) // it will be -1 when user did not set any value
     {
@@ -467,12 +490,16 @@ QString Application::instanceName() const
 void Application::setInstanceName(const QString& name)
 {
     if (name == instanceName())
+    {
         return;
+    }
 
     m_storeInstanceName = name;
 #ifndef DISABLE_GUI
     if (MainWindow* mw = mainWindow())
+    {
         mw->setTitleSuffix(name);
+    }
 #endif
 }
 
@@ -484,7 +511,9 @@ int Application::memoryWorkingSetLimit() const
 void Application::setMemoryWorkingSetLimit(const int size)
 {
     if (size == memoryWorkingSetLimit())
+    {
         return;
+    }
 
     m_storeMemoryWorkingSetLimit = size;
 #if defined(QBT_USES_LIBTORRENT2) && !defined(Q_OS_LINUX) && !defined(Q_OS_MACOS)
@@ -500,9 +529,13 @@ bool Application::isFileLoggerEnabled() const
 void Application::setFileLoggerEnabled(const bool value)
 {
     if (value && !m_fileLogger)
+    {
         m_fileLogger = new FileLogger(fileLoggerPath(), isFileLoggerBackup(), fileLoggerMaxSize(), isFileLoggerDeleteOld(), fileLoggerAge(), static_cast<FileLogger::FileLogAgeType>(fileLoggerAgeType()));
+    }
     else if (!value)
+    {
         delete m_fileLogger;
+    }
     m_storeFileLoggerEnabled = value;
 }
 
@@ -514,7 +547,9 @@ Path Application::fileLoggerPath() const
 void Application::setFileLoggerPath(const Path& path)
 {
     if (m_fileLogger)
+    {
         m_fileLogger->setPath(path);
+    }
     m_storeFileLoggerPath = path;
 }
 
@@ -526,7 +561,9 @@ bool Application::isFileLoggerBackup() const
 void Application::setFileLoggerBackup(const bool value)
 {
     if (m_fileLogger)
+    {
         m_fileLogger->setBackup(value);
+    }
     m_storeFileLoggerBackup = value;
 }
 
@@ -538,7 +575,9 @@ bool Application::isFileLoggerDeleteOld() const
 void Application::setFileLoggerDeleteOld(const bool value)
 {
     if (value && m_fileLogger)
+    {
         m_fileLogger->deleteOld(fileLoggerAge(), static_cast<FileLogger::FileLogAgeType>(fileLoggerAgeType()));
+    }
     m_storeFileLoggerDeleteOld = value;
 }
 
@@ -552,7 +591,9 @@ void Application::setFileLoggerMaxSize(const int bytes)
 {
     const int clampedValue = std::clamp(bytes, MIN_FILELOG_SIZE, MAX_FILELOG_SIZE);
     if (m_fileLogger)
+    {
         m_fileLogger->setMaxSize(clampedValue);
+    }
     m_storeFileLoggerMaxSize = clampedValue;
 }
 
@@ -607,9 +648,13 @@ void Application::processMessage(const QString& message)
     // If Application is not allowed to process params immediately
     // (i.e., other components are not ready) store params
     if (m_isProcessingParamsAllowed)
+    {
         processParams(params);
+    }
     else
+    {
         m_paramsQueue.append(params);
+    }
 }
 
 void Application::runExternalProgram(const QString& programTemplate, const BitTorrent::Torrent* torrent) const
@@ -623,7 +668,9 @@ void Application::runExternalProgram(const QString& programTemplate, const BitTo
         for (qsizetype i = (str.length() - 2); i >= 0; --i)
         {
             if (str[i] != u'%')
+            {
                 continue;
+            }
 
             const ushort specifier = str[i + 1].unicode();
             switch (specifier)
@@ -691,14 +738,18 @@ void Application::runExternalProgram(const QString& programTemplate, const BitTo
     // will strip off empty parameters.
     // E.g. `python.exe "1" "" "3"` will become `python.exe "1" "3"`
     int argCount = 0;
-    std::unique_ptr<LPWSTR[], decltype(&::LocalFree)> args{ ::CommandLineToArgvW(programWStr.c_str(), &argCount), ::LocalFree };
+    std::unique_ptr<LPWSTR[], decltype(&::LocalFree)> const args{ ::CommandLineToArgvW(programWStr.c_str(), &argCount), ::LocalFree };
 
     if (argCount <= 0)
+    {
         return;
+    }
 
     QStringList argList;
     for (int i = 1; i < argCount; ++i)
+    {
         argList += QString::fromWCharArray(args[i]);
+    }
 
     QProcess proc;
     proc.setProgram(QString::fromWCharArray(args[0]));
@@ -725,9 +776,13 @@ void Application::runExternalProgram(const QString& programTemplate, const BitTo
     });
 
     if (proc.startDetached())
+    {
         LogMsg(logMsg.arg(torrent->name(), program));
+    }
     else
+    {
         LogMsg(logMsgError.arg(torrent->name(), program));
+    }
 #else // Q_OS_WIN
     QStringList args = Utils::String::splitCommand(programTemplate);
 
@@ -797,7 +852,9 @@ void Application::torrentAdded(const BitTorrent::Torrent* torrent) const
 
     // AutoRun program
     if (pref->isAutoRunOnTorrentAddedEnabled())
+    {
         runExternalProgram(pref->getAutoRunOnTorrentAddedProgram().trimmed(), torrent);
+    }
 }
 
 void Application::torrentFinished(const BitTorrent::Torrent* torrent)
@@ -806,7 +863,9 @@ void Application::torrentFinished(const BitTorrent::Torrent* torrent)
 
     // AutoRun program
     if (pref->isAutoRunOnTorrentFinishedEnabled())
+    {
         runExternalProgram(pref->getAutoRunOnTorrentFinishedProgram().trimmed(), torrent);
+    }
 
     // Mail notification
     if (pref->isMailNotificationEnabled())
@@ -834,25 +893,35 @@ void Application::torrentFinished(const BitTorrent::Torrent* torrent)
 void Application::allTorrentsFinished()
 {
     Preferences* const pref = Preferences::instance();
-    bool isExit = pref->shutdownqBTWhenDownloadsComplete();
-    bool isShutdown = pref->shutdownWhenDownloadsComplete();
-    bool isSuspend = pref->suspendWhenDownloadsComplete();
-    bool isHibernate = pref->hibernateWhenDownloadsComplete();
-    bool isReboot = pref->rebootWhenDownloadsComplete();
+    bool const isExit = pref->shutdownqBTWhenDownloadsComplete();
+    bool const isShutdown = pref->shutdownWhenDownloadsComplete();
+    bool const isSuspend = pref->suspendWhenDownloadsComplete();
+    bool const isHibernate = pref->hibernateWhenDownloadsComplete();
+    bool const isReboot = pref->rebootWhenDownloadsComplete();
 
     const bool haveAction = isExit || isShutdown || isSuspend || isHibernate || isReboot;
     if (!haveAction)
+    {
         return;
+    }
 
     ShutdownDialogAction action = ShutdownDialogAction::Exit;
     if (isSuspend)
+    {
         action = ShutdownDialogAction::Suspend;
+    }
     else if (isHibernate)
+    {
         action = ShutdownDialogAction::Hibernate;
+    }
     else if (isShutdown)
+    {
         action = ShutdownDialogAction::Shutdown;
+    }
     else if (isReboot)
+    {
         action = ShutdownDialogAction::Reboot;
+    }
 
 #ifndef DISABLE_GUI
     // ask confirm
@@ -863,7 +932,9 @@ void Application::allTorrentsFinished()
     else
     {
         if (!ShutdownConfirmDialog::askForConfirmation(m_window, action))
+        {
             return;
+        }
     }
 #endif // DISABLE_GUI
 
@@ -899,9 +970,13 @@ void Application::processParams(const QBtCommandLineParameters& params)
     // should be overridden.
     AddTorrentOption addTorrentOption = AddTorrentOption::Default;
     if (params.skipDialog.has_value())
+    {
         addTorrentOption = params.skipDialog.value() ? AddTorrentOption::SkipDialog : AddTorrentOption::ShowDialog;
+    }
     for (const QString& torrentSource : params.torrentSources)
+    {
         m_addTorrentManager->addTorrent(torrentSource, params.addTorrentParams, addTorrentOption);
+    }
 #else
     for (const QString& torrentSource : params.torrentSources)
         m_addTorrentManager->addTorrent(torrentSource, params.addTorrentParams);
@@ -960,7 +1035,9 @@ int Application::exec()
         // Add a small delay to avoid "flashing" the progress dialog in case there are not many torrents to restore.
         m_startupProgressDialog->setMinimumDuration(1000);
         if (startUpWindowState() != WindowState::Normal)
+        {
             m_startupProgressDialog->setWindowState(Qt::WindowMinimized);
+        }
     }
     else
     {
@@ -995,7 +1072,9 @@ int Application::exec()
         });
         connect(m_addTorrentManager, &AddTorrentManager::torrentAdded, this, [this]([[maybe_unused]] const QString& source, const BitTorrent::Torrent* torrent) {
             if (isTorrentAddedNotificationsEnabled())
+            {
                 m_desktopIntegration->showNotification(tr("Torrent added"), tr("'%1' was added.", "e.g: xxx.avi was added.").arg(torrent->name()));
+            }
         });
         connect(m_addTorrentManager, &AddTorrentManager::addTorrentFailed, this, [this](const QString& source, const QString& reason) {
             m_desktopIntegration->showNotification(tr("Add torrent failed"), tr("Couldn't add torrent '%1', reason: %2.").arg(source, reason));
@@ -1062,13 +1141,17 @@ int Application::exec()
 
         m_isProcessingParamsAllowed = true;
         for (const QBtCommandLineParameters& params : asConst(m_paramsQueue))
+        {
             processParams(params);
+        }
         m_paramsQueue.clear();
     });
 
     const QBtCommandLineParameters params = commandLineArgs();
     if (!params.torrentSources.isEmpty())
+    {
         m_paramsQueue.append(params);
+    }
 
     return BaseApplication::exec();
 }
@@ -1154,7 +1237,9 @@ void Application::recursiveTorrentDownload(const BitTorrent::TorrentID& torrentI
 {
     const BitTorrent::Torrent* torrent = BitTorrent::Session::instance()->getTorrent(torrentID);
     if (!torrent)
+    {
         return;
+    }
 
     for (const Path& torrentRelpath : asConst(torrent->filePaths()))
     {
@@ -1248,7 +1333,7 @@ void Application::shutdownCleanup([[maybe_unused]] QSessionManager& manager)
 #if defined(QBT_USES_LIBTORRENT2) && !defined(Q_OS_LINUX) && !defined(Q_OS_MACOS)
 void Application::applyMemoryWorkingSetLimit() const
 {
-    const size_t MiB = 1024 * 1024;
+    const std::size_t MiB = 1024U * 1024U;
     const QString logMessage = tr("Failed to set physical memory (RAM) usage limit. Error code: %1. Error message: \"%2\"");
 
 #ifdef Q_OS_WIN
@@ -1274,7 +1359,7 @@ void Application::applyMemoryWorkingSetLimit() const
     if (::getrlimit(RLIMIT_RSS, &limit) != 0)
         return;
 
-    const size_t newSize = memoryWorkingSetLimit() * MiB;
+    const std::size_t newSize = memoryWorkingSetLimit() * MiB;
     if (newSize > limit.rlim_max)
     {
         // try to raise the hard limit
@@ -1309,7 +1394,9 @@ MemoryPriority Application::processMemoryPriority() const
 void Application::setProcessMemoryPriority(const MemoryPriority priority)
 {
     if (processMemoryPriority() == priority)
+    {
         return;
+    }
 
     m_processMemoryPriority = priority;
     applyMemoryPriority();
@@ -1319,13 +1406,17 @@ void Application::applyMemoryPriority() const
 {
     using SETPROCESSINFORMATION = BOOL(WINAPI*)(HANDLE, PROCESS_INFORMATION_CLASS, LPVOID, DWORD);
     const auto setProcessInformation = Utils::OS::loadWinAPI<SETPROCESSINFORMATION>(u"Kernel32.dll"_s, "SetProcessInformation");
-    if (!setProcessInformation) // only available on Windows >= 8
+    if (!setProcessInformation)
+    { // only available on Windows >= 8
         return;
+    }
 
     using SETTHREADINFORMATION = BOOL(WINAPI*)(HANDLE, THREAD_INFORMATION_CLASS, LPVOID, DWORD);
     const auto setThreadInformation = Utils::OS::loadWinAPI<SETTHREADINFORMATION>(u"Kernel32.dll"_s, "SetThreadInformation");
-    if (!setThreadInformation) // only available on Windows >= 8
+    if (!setThreadInformation)
+    { // only available on Windows >= 8
         return;
+    }
 
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN8)
     // this dummy struct is required to compile successfully when targeting older Windows version
@@ -1421,7 +1512,9 @@ void Application::cleanup()
 {
     // cleanup() can be called multiple times during shutdown. We only need it once.
     if (m_isCleanupRun.exchange(true, std::memory_order_acquire))
+    {
         return;
+    }
 
     LogMsg(tr("qBittorrent termination initiated"));
 
@@ -1431,7 +1524,9 @@ void Application::cleanup()
         m_desktopIntegration->disconnect();
         m_desktopIntegration->setToolTip(tr("qBittorrent is shutting down..."));
         if (m_desktopIntegration->menu())
+        {
             m_desktopIntegration->menu()->setEnabled(false);
+        }
     }
 
 #ifdef Q_OS_MACOS

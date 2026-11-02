@@ -43,7 +43,9 @@ namespace
     int threeWayCompare(const T& left, const T& right)
     {
         if (left == right)
+        {
             return 0;
+        }
         return (left < right) ? -1 : 1;
     }
 
@@ -53,7 +55,9 @@ namespace
         const bool isRightValid = right.isValid();
 
         if (isLeftValid == isRightValid)
+        {
             return threeWayCompare(left, right);
+        }
         return isLeftValid ? -1 : 1;
     }
 
@@ -65,7 +69,9 @@ namespace
         {
             const int result = compare(leftIter->toString(), rightIter->toString());
             if (result != 0)
+            {
                 return result;
+            }
         }
         return threeWayCompare(left.size(), right.size());
     }
@@ -79,9 +85,13 @@ namespace
         const bool isRightValid = (right >= 0);
 
         if (isLeftValid && isRightValid)
+        {
             return threeWayCompare(left, right);
+        }
         if (!isLeftValid && !isRightValid)
+        {
             return 0;
+        }
         return isLeftValid ? -1 : 1;
     }
 
@@ -90,9 +100,13 @@ namespace
         const bool leftValid = left.isValid();
         const bool rightValid = right.isValid();
         if (leftValid && rightValid)
+        {
             return threeWayCompare(left.toBool(), right.toBool());
+        }
         if (!leftValid && !rightValid)
+        {
             return 0;
+        }
         return leftValid ? -1 : 1;
     }
 
@@ -277,7 +291,9 @@ int TransferListSortModel::compare(const QModelIndex& left, const QModelIndex& r
         const auto activeL = leftValue.toInt();
         const auto activeR = rightValue.toInt();
         if (activeL != activeR)
+        {
             return threeWayCompare(activeL, activeR);
+        }
 
         const auto totalL = left.data(TransferListModel::AdditionalUnderlyingDataRole).toInt();
         const auto totalR = right.data(TransferListModel::AdditionalUnderlyingDataRole).toInt();
@@ -319,11 +335,15 @@ bool TransferListSortModel::matchFilter(const int sourceRow, const QModelIndex& 
 {
     const auto* model = qobject_cast<TransferListModel*>(sourceModel());
     if (!model)
+    {
         return false;
+    }
 
     const BitTorrent::Torrent* torrent = model->torrentHandle(model->index(sourceRow, 0, sourceParent));
     if (!torrent)
+    {
         return false;
+    }
 
     return m_filter.match(torrent);
 }

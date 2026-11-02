@@ -81,7 +81,9 @@ bool Item::isValidPath(const QString& path)
 QString Item::joinPath(const QString& path1, const QString& path2)
 {
     if (path1.isEmpty())
+    {
         return path2;
+    }
 
     return (path1 + Item::PathSeparator + path2);
 }
@@ -90,7 +92,9 @@ QStringList Item::expandPath(const QString& path)
 {
     QStringList result;
     if (path.isEmpty())
+    {
         return result;
+    }
     //    if (!isValidRSSFolderName(folder))
     //        return result;
 

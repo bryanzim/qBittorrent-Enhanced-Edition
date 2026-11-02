@@ -43,7 +43,7 @@ public:
     {
     }
 
-    T get(const T& defaultValue = {}) const
+    [[nodiscard]] T get(const T& defaultValue = {}) const
     {
         return SettingsStorage::instance()->loadValue(m_keyName, defaultValue);
     }
@@ -93,7 +93,9 @@ public:
     CachedSettingValue<T>& operator=(const T& value)
     {
         if (m_cache == value)
+        {
             return *this;
+        }
 
         m_setting = value;
         m_cache = value;

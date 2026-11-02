@@ -57,7 +57,7 @@ namespace Net
         static ServiceID fromURL(const QUrl& url);
     };
 
-    std::size_t qHash(const ServiceID& serviceID, std::size_t seed = 0);
+    std::size_t qHash(const ServiceID& serviceID, std::size_t seed = 0U);
     bool operator==(const ServiceID& lhs, const ServiceID& rhs);
 
     enum class DownloadStatus
@@ -73,29 +73,29 @@ namespace Net
         DownloadRequest(const QString& url);
         DownloadRequest(const DownloadRequest& other) = default;
 
-        QString url() const;
+        [[nodiscard]] QString url() const;
         DownloadRequest& url(const QString& value);
 
-        QString userAgent() const;
+        [[nodiscard]] QString userAgent() const;
         DownloadRequest& userAgent(const QString& value);
 
-        qint64 limit() const;
+        [[nodiscard]] qint64 limit() const;
         DownloadRequest& limit(qint64 value);
 
-        bool saveToFile() const;
+        [[nodiscard]] bool saveToFile() const;
         DownloadRequest& saveToFile(bool value);
 
         // if saveToFile is set, the file is saved in destFileName
         // (deprecated) if destFileName is not provided, the file will be saved
         // in a temporary file, the name of file is set in DownloadResult::filePath
-        Path destFileName() const;
+        [[nodiscard]] Path destFileName() const;
         DownloadRequest& destFileName(const Path& value);
 
         // when disabled, a redirection that downgrades HTTPS to a non-HTTPS scheme
         // makes the request fail instead of being followed, matching the policy
         // Qt applies by default (QNetworkRequest::NoLessSafeRedirectPolicy) but
         // that we opt out of by handling redirections manually
-        bool allowInsecureRedirect() const;
+        [[nodiscard]] bool allowInsecureRedirect() const;
         DownloadRequest& allowInsecureRedirect(bool value);
 
     private:
@@ -150,9 +150,9 @@ namespace Net
 
         void registerSequentialService(const ServiceID& serviceID, std::chrono::seconds delay = std::chrono::seconds(0));
 
-        QList<QNetworkCookie> cookiesForUrl(const QUrl& url) const;
+        [[nodiscard]] QList<QNetworkCookie> cookiesForUrl(const QUrl& url) const;
         bool setCookiesFromUrl(const QList<QNetworkCookie>& cookieList, const QUrl& url);
-        QList<QNetworkCookie> allCookies() const;
+        [[nodiscard]] QList<QNetworkCookie> allCookies() const;
         void setAllCookies(const QList<QNetworkCookie>& cookieList);
         bool deleteCookie(const QNetworkCookie& cookie);
 

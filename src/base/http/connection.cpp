@@ -65,16 +65,19 @@ Http::Connection::Connection(QTcpSocket* socket, IRequestHandler* requestHandler
     connect(&m_responseWriter, &ResponseWriter::failed, m_socket, &QAbstractSocket::abort);
     connect(&m_responseWriter, &ResponseWriter::finished, this, [this] {
         m_isProcessingRequest = false;
-        if (!m_receivedData.isEmpty())
+        if (!m_receivedData.isEmpty()) {
             processRequest(); // try to fetch next request
-        else if (m_isReadyRead)
-            read(); }, Qt::QueuedConnection); // need to use `Qt::QueuedConnection` to avoid possible recursion
+        } else if (m_isReadyRead) {
+            read(); 
+} }, Qt::QueuedConnection); // need to use `Qt::QueuedConnection` to avoid possible recursion
 }
 
 void Http::Connection::read()
 {
     if (m_isProcessingRequest)
+    {
         return;
+    }
 
     m_isReadyRead = false;
 
@@ -91,22 +94,28 @@ void Http::Connection::read()
             return;
         }
 
-        if (bytesRead < bytesAvailable) [[unlikely]]
-            m_receivedData.chop(bytesAvailable - bytesRead);
+        if (bytesRead < bytesAvailable)
+        {
+            [[unlikely]] m_receivedData.chop(bytesAvailable - bytesRead);
+        }
     }
 
     while (!m_receivedData.isEmpty() && !m_isProcessingRequest)
     {
         if (!processRequest())
+        {
             return;
+        }
     }
 }
 
 bool Http::Connection::processRequest()
 {
     Q_ASSERT(!m_isProcessingRequest);
-    if (m_isProcessingRequest) [[unlikely]]
-        return false;
+    if (m_isProcessingRequest)
+    {
+        [[unlikely]] return false;
+    }
 
     const RequestParser::ParseResult result = RequestParser::parse(m_receivedData);
     switch (result.status)
@@ -123,7 +132,9 @@ bool Http::Connection::processRequest()
         m_responseWriter.prepare(result.request);
         m_requestHandler->processRequest(result.request, env, m_responseWriter);
         if (!m_responseWriter.isFinished())
+        {
             m_isProcessingRequest = true;
+        }
     }
         return true;
 

@@ -50,12 +50,20 @@ namespace Utils::String
     T unquote(const T& str, const QString& quotes = u"\""_s)
     {
         if (str.length() < 2)
-            return str;
+        {
+            {
+                return str;
+            }
+        }
 
         for (const QChar quote : quotes)
         {
             if (str.startsWith(quote) && str.endsWith(quote))
-                return str.sliced(1, (str.length() - 2));
+            {
+                {
+                    return str.sliced(1, (str.length() - 2));
+                }
+            }
         }
 
         return str;
@@ -78,7 +86,11 @@ namespace Utils::String
         auto iter = container.cbegin();
         const auto end = container.cend();
         if (iter == end)
-            return {};
+        {
+            {
+                return {};
+            }
+        }
 
         const qsizetype totalLength = std::accumulate(iter, end, (separator.size() * (container.size() - 1)), [](const qsizetype total, const typename Container::value_type& value) {
             return total + QString(value).size();

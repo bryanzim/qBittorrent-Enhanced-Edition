@@ -223,7 +223,9 @@ void AdvancedSettings::showSpeedWidgetSetting()
     scrollTo(model()->index(ENABLE_SPEED_WIDGET, PROPERTY), QAbstractItemView::PositionAtCenter);
 
     if (QWidget* widget = cellWidget(ENABLE_SPEED_WIDGET, VALUE))
+    {
         widget->setFocus();
+    }
 }
 
 void AdvancedSettings::saveAdvancedSettings() const
@@ -796,7 +798,9 @@ void AdvancedSettings::loadAdvancedSettings()
     // Network interface
     m_comboBoxInterface.addItem(tr("Any interface", "i.e. Any network interface"), QString());
     for (const QNetworkInterface& iface : asConst(QNetworkInterface::allInterfaces()))
+    {
         m_comboBoxInterface.addItem(iface.humanReadableName(), iface.name());
+    }
 
     const QString currentInterface = session->networkInterface();
     const int ifaceIndex = m_comboBoxInterface.findData(currentInterface);
@@ -1026,7 +1030,9 @@ void AdvancedSettings::addRow(const int row, const QString& text, T* widget)
     setCellWidget(row, VALUE, widget);
 
     if constexpr (std::is_same_v<T, FileSystemPathLineEdit>)
+    {
         connect(widget, &FileSystemPathEdit::selectedPathChanged, this, &AdvancedSettings::settingsChanged);
+    }
     else if constexpr (std::is_same_v<T, QCheckBox>)
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
@@ -1036,9 +1042,15 @@ void AdvancedSettings::addRow(const int row, const QString& text, T* widget)
 #endif
     }
     else if constexpr (std::is_same_v<T, QComboBox>)
+    {
         connect(widget, qOverload<int>(&QComboBox::currentIndexChanged), this, &AdvancedSettings::settingsChanged);
+    }
     else if constexpr (std::is_same_v<T, QLineEdit>)
+    {
         connect(widget, &QLineEdit::textChanged, this, &AdvancedSettings::settingsChanged);
+    }
     else if constexpr (std::is_same_v<T, QSpinBox>)
+    {
         connect(widget, qOverload<int>(&QSpinBox::valueChanged), this, &AdvancedSettings::settingsChanged);
+    }
 }

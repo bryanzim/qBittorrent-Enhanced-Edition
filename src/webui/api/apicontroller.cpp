@@ -56,7 +56,9 @@ APIResult APIController::run(const QString& action, const StringMap& params, con
 
     const QByteArray methodName = action.toLatin1() + "Action";
     if (!QMetaObject::invokeMethod(this, methodName.constData()))
+    {
         throw APIError(APIErrorType::NotFound, tr("Endpoint does not exist"));
+    }
 
     return std::exchange(m_result, {});
 }
@@ -79,11 +81,15 @@ void APIController::requireParams(const QList<QString>& requiredParams) const
     for (const QString& requiredParam : requiredParams)
     {
         if (!params().contains(requiredParam))
+        {
             missingParams.append(requiredParam);
+        }
     }
 
     if (!missingParams.isEmpty())
+    {
         throw APIError(APIErrorType::BadParams, tr("Missing required parameters: %1").arg(missingParams.join(u", ")));
+    }
 }
 
 void APIController::setResult(const QString& result)

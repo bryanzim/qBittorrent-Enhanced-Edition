@@ -72,7 +72,9 @@ namespace
 void PluginsEngine::initInstance()
 {
     if (!PluginsEngine::m_instance)
+    {
         PluginsEngine::m_instance = new PluginsEngine;
+    }
 }
 
 void PluginsEngine::freeInstance()
@@ -107,7 +109,9 @@ PluginsEngine::PluginsEngine(QObject* parent)
 PluginsEngine::~PluginsEngine()
 {
     if (m_configIsDirty)
+    {
         storeConfig();
+    }
 }
 
 void PluginsEngine::loadConfig()
@@ -146,7 +150,9 @@ void PluginsEngine::loadConfig()
         const QString pluginID = it.key();
         const PluginEntryConfig pluginEntryConfig = parsePluginEntryConfig(it.value().toObject());
         if (const auto pluginsIter = m_plugins.find(pluginID); pluginsIter != m_plugins.end())
+        {
             pluginsIter->enabled = pluginEntryConfig.enabled;
+        }
     }
 }
 
@@ -192,7 +198,9 @@ QHash<QString, PluginInfo> PluginsEngine::allPlugins() const
     QHash<QString, PluginInfo> plugins;
     plugins.reserve(m_plugins.size());
     for (const auto& [pluginID, pluginEntry] : asConst(m_plugins).asKeyValueRange())
+    {
         plugins.emplace(pluginID, getPluginInfo(pluginEntry));
+    }
 
     return plugins;
 }
@@ -201,7 +209,9 @@ std::optional<PluginInfo> PluginsEngine::pluginInfo(const QString& pluginID) con
 {
     const auto pluginIter = m_plugins.constFind(pluginID);
     if (pluginIter == m_plugins.constEnd())
+    {
         return std::nullopt;
+    }
 
     return getPluginInfo(*pluginIter);
 }
@@ -226,7 +236,9 @@ bool PluginsEngine::installPlugin(const Path& pluginPath)
 
     m_pluginsToInstall.enqueue(pluginPath);
     if (m_pluginsToInstall.size() == 1)
+    {
         installPluginDeferred();
+    }
 
     return true;
 }
@@ -234,13 +246,17 @@ bool PluginsEngine::installPlugin(const Path& pluginPath)
 void PluginsEngine::installPluginDeferred()
 {
     if (!m_pluginsToInstall.isEmpty())
+    {
         QMetaObject::invokeMethod(this, &PluginsEngine::installPluginImpl, Qt::QueuedConnection);
+    }
 }
 
 void PluginsEngine::installPluginImpl()
 {
     if (m_pluginsToInstall.isEmpty())
+    {
         return;
+    }
 
     const Path pluginPath = m_pluginsToInstall.dequeue();
     installPluginDeferred();
@@ -260,7 +276,9 @@ void PluginsEngine::installPluginImpl()
     const auto [isExistingPlugin, existingPluginEntry] = std::invoke([this, pluginID]() -> std::pair<bool, PluginEntry> {
         const auto iter = m_plugins.constFind(pluginID);
         if (iter == m_plugins.constEnd())
+        {
             return std::make_pair(false, PluginEntry());
+        }
 
         return std::make_pair(true, *iter);
     });
@@ -323,7 +341,9 @@ void PluginsEngine::installPluginImpl()
     }
 
     if (isExistingPlugin)
+    {
         pluginEntry.enabled = existingPluginEntry.enabled;
+    }
 
     m_plugins.insert(pluginID, pluginEntry);
 
@@ -361,7 +381,9 @@ bool PluginsEngine::uninstallPlugin(const QString& pluginID)
 
     m_pluginsToUninstall.enqueue(pluginID);
     if (m_pluginsToUninstall.size() == 1)
+    {
         uninstallPluginDeferred();
+    }
 
     return true;
 }
@@ -369,15 +391,21 @@ bool PluginsEngine::uninstallPlugin(const QString& pluginID)
 void PluginsEngine::uninstallPluginDeferred()
 {
     if (!m_pluginsToUninstall.isEmpty())
+    {
         QMetaObject::invokeMethod(this, &PluginsEngine::uninstallPluginImpl, Qt::QueuedConnection);
+    }
     else
+    {
         storeConfig();
+    }
 }
 
 void PluginsEngine::uninstallPluginImpl()
 {
     if (m_pluginsToUninstall.isEmpty())
+    {
         return;
+    }
 
     const QString pluginID = m_pluginsToUninstall.dequeue();
     if (auto result = Utils::Fs::removeFile(pluginsPath() / Path(pluginID + u".lua")))
@@ -416,7 +444,9 @@ void PluginsEngine::loadPlugins()
     }
 
     if (!m_plugins.isEmpty())
+    {
         loadConfig();
+    }
 }
 
 void PluginsEngine::connectEventHandlers()
@@ -431,7 +461,9 @@ void PluginsEngine::connectEventHandlers()
         callEventHandlers("onTorrentAdded", torrent);
 
         if (torrent->hasMetadata())
+        {
             callEventHandlers("onTorrentMetadataReady", torrent);
+        }
     });
 
     connectEventHandler(&BT::Session::torrentMetadataReceived, "onTorrentMetadataReady");
@@ -470,7 +502,9 @@ void PluginsEngine::callEventHandlers(const char* eventHandlerName, Args&&... ar
     for (const PluginEntry& pluginEntry : asConst(m_plugins))
     {
         if (!pluginEntry.enabled)
+        {
             continue;
+        }
 
         try
         {
@@ -488,8 +522,10 @@ void PluginsEngine::callEventHandlers(const char* eventHandlerName, Args&&... ar
 void PluginsEngine::setPluginEnabled(const QString& pluginID, const bool enabled)
 {
     Q_ASSERT(m_plugins.contains(pluginID));
-    if (!m_plugins.contains(pluginID)) [[unlikely]]
-        return;
+    if (!m_plugins.contains(pluginID))
+    {
+        [[unlikely]] return;
+    }
 
     PluginEntry& pluginEntry = m_plugins[pluginID];
     if (pluginEntry.enabled != enabled)
@@ -504,12 +540,16 @@ void PluginsEngine::invokePlugin(const QString& pluginID)
 {
     const auto pluginIter = m_plugins.constFind(pluginID);
     Q_ASSERT(pluginIter != m_plugins.constEnd());
-    if (pluginIter == m_plugins.constEnd()) [[unlikely]]
-        return;
+    if (pluginIter == m_plugins.constEnd())
+    {
+        [[unlikely]] return;
+    }
 
     const PluginEntry& pluginEntry = *pluginIter;
     if (!pluginEntry.enabled)
+    {
         return;
+    }
 
     try
     {
@@ -527,7 +567,9 @@ nonstd::expected<PluginsEngine::PluginEntry, QString> PluginsEngine::loadPlugin(
 {
     auto loadResult = Plugin::load(path);
     if (!loadResult)
+    {
         return nonstd::make_unexpected(loadResult.error());
+    }
 
     PluginEntry pluginEntry{
         .plugin = loadResult.value(),

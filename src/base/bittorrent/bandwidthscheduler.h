@@ -45,7 +45,7 @@ signals:
     void bandwidthLimitRequested(bool alternative);
 
 private:
-    bool isTimeForAlternative() const;
+    [[nodiscard]] bool isTimeForAlternative() const;
     void onTimeout();
 
     QTimer m_timer;

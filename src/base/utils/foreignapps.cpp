@@ -72,7 +72,9 @@ namespace
         {
             QByteArray procOutput = proc.readAllStandardOutput();
             if (procOutput.isEmpty())
+            {
                 procOutput = proc.readAllStandardError();
+            }
             procOutput = procOutput.simplified();
 
             // Software 'Anaconda' installs its own python interpreter
@@ -80,7 +82,9 @@ namespace
             // "Python 3.4.3 :: Anaconda 2.3.0 (64-bit)"
             const QList<QByteArrayView> outputSplit = Utils::ByteArray::splitToViews(procOutput, " ");
             if (outputSplit.size() <= 1)
+            {
                 return false;
+            }
 
             // User reports: `python --version` -> "Python 3.6.6+"
             // So trim off unrelated characters
@@ -88,7 +92,9 @@ namespace
             const qsizetype idx = versionStr.indexOf(QRegularExpression(u"[^\\.\\d]"_s));
             const auto version = PythonInfo::Version::fromString(versionStr.left(idx));
             if (!version.isValid())
+            {
                 return false;
+            }
 
             info = { .executablePath = exePath, .version = version };
             LogMsg(QCoreApplication::translate("Utils::ForeignApps", "Found Python executable. Name: \"%1\". Version: \"%2\"")
@@ -114,7 +120,7 @@ namespace
         const REGSAM samDesired = KEY_READ | ((type == SYSTEM_64BIT) ? KEY_WOW64_64KEY : KEY_WOW64_32KEY);
         PathList ret;
 
-        HKEY hkPythonCore{ 0 };
+        HKEY hkPythonCore{ nullptr };
         if (::RegOpenKeyExW(hkRoot, L"SOFTWARE\\Python\\PythonCore", 0, samDesired, &hkPythonCore) == ERROR_SUCCESS)
         {
             [[maybe_unused]] const auto hkPythonCoreGuard = qScopeGuard([&hkPythonCore] { ::RegCloseKey(hkPythonCore); });
@@ -133,19 +139,25 @@ namespace
             {
                 const std::wstring version = (Path(versions.takeLast()) / Path(u"InstallPath"_s)).toString().toStdWString();
 
-                HKEY hkInstallPath{ 0 };
+                HKEY hkInstallPath{ nullptr };
                 if (::RegOpenKeyExW(hkPythonCore, version.c_str(), 0, samDesired, &hkInstallPath) == ERROR_SUCCESS)
                 {
                     [[maybe_unused]] const auto hkInstallPathGuard = qScopeGuard([&hkInstallPath] { ::RegCloseKey(hkInstallPath); });
 
                     const Path basePath{ Utils::Reg::getStringValue(hkInstallPath) };
                     if (basePath.isEmpty())
+                    {
                         continue;
+                    }
 
                     if (const Path path = (basePath / Path(u"python3.exe"_s)); path.exists())
+                    {
                         ret.append(path);
+                    }
                     if (const Path path = (basePath / Path(u"python.exe"_s)); path.exists())
+                    {
                         ret.append(path);
+                    }
                 }
             }
         }
@@ -165,9 +177,13 @@ namespace
             const Path absPath{ info.absoluteFilePath() };
 
             if (const Path path = (absPath / Path(u"python3.exe"_s)); path.exists())
+            {
                 ret.append(path);
+            }
             if (const Path path = (absPath / Path(u"python.exe"_s)); path.exists())
+            {
                 ret.append(path);
+            }
         }
 
         return ret;
@@ -191,7 +207,9 @@ PythonInfo Utils::ForeignApps::pythonInfo()
 
     const Path preferredPythonPath = Preferences::instance()->getPythonExecutablePath();
     if (pyInfo.isValid() && (preferredPythonPath == pyInfo.executablePath))
+    {
         return pyInfo;
+    }
 
     const QString invalidVersionMessage = QCoreApplication::translate("Utils::ForeignApps", "Python failed to meet minimum version requirement. Path: \"%1\". Found version: \"%2\". Minimum supported version: \"%3\".");
 
@@ -200,7 +218,9 @@ PythonInfo Utils::ForeignApps::pythonInfo()
         if (testPythonInstallation(preferredPythonPath, pyInfo))
         {
             if (pyInfo.isSupportedVersion())
+            {
                 return pyInfo;
+            }
 
             LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString(), pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::WARNING);
         }
@@ -224,7 +244,9 @@ PythonInfo Utils::ForeignApps::pythonInfo()
                 if (testPythonInstallation(Path(exeName), pyInfo))
                 {
                     if (pyInfo.isSupportedVersion())
+                    {
                         return pyInfo;
+                    }
 
                     LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString(), pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::INFO);
                 }
@@ -242,7 +264,9 @@ PythonInfo Utils::ForeignApps::pythonInfo()
                 if (testPythonInstallation(path, pyInfo))
                 {
                     if (pyInfo.isSupportedVersion())
+                    {
                         return pyInfo;
+                    }
 
                     LogMsg(invalidVersionMessage.arg(pyInfo.executablePath.toString(), pyInfo.version.toString(), PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), Log::INFO);
                 }

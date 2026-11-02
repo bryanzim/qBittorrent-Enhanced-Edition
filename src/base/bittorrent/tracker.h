@@ -59,11 +59,11 @@ namespace BitTorrent
         lt::entry::string_type address;
         lt::entry::string_type endpoint;
 
-        QByteArray uniqueID() const;
+        [[nodiscard]] QByteArray uniqueID() const;
     };
 
     bool operator==(const Peer& left, const Peer& right);
-    std::size_t qHash(const Peer& key, std::size_t seed = 0);
+    std::size_t qHash(const Peer& key, std::size_t seed = 0U);
 
     // *Basic* Bittorrent tracker implementation
     // [BEP-3] The BitTorrent Protocol Specification

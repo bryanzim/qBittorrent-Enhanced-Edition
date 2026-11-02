@@ -100,13 +100,19 @@ TrackerStatusFilterWidget::TrackerStatusFilterWidget(QWidget* parent, TransferLi
         const BitTorrent::TorrentAnnounceStatus announceStatus = torrent->announceStatus();
 
         if (announceStatus.testFlag(BitTorrent::TorrentAnnounceStatusFlag::HasWarning))
+        {
             m_warnings.insert(torrent);
+        }
 
         if (announceStatus.testFlag(BitTorrent::TorrentAnnounceStatusFlag::HasTrackerError))
+        {
             m_trackerErrors.insert(torrent);
+        }
 
         if (announceStatus.testFlag(BitTorrent::TorrentAnnounceStatusFlag::HasOtherError))
+        {
             m_errors.insert(torrent);
+        }
     }
 
     connect(btSession, &BitTorrent::Session::trackersRemoved, this, &TrackerStatusFilterWidget::handleTorrentTrackersRemoved);
@@ -183,19 +189,31 @@ void TrackerStatusFilterWidget::refreshItems(const BitTorrent::Torrent* torrent)
     const BitTorrent::TorrentAnnounceStatus announceStatus = torrent->announceStatus();
 
     if (announceStatus.testFlag(BitTorrent::TorrentAnnounceStatusFlag::HasWarning))
+    {
         m_warnings.insert(torrent);
+    }
     else
+    {
         m_warnings.remove(torrent);
+    }
 
     if (announceStatus.testFlag(BitTorrent::TorrentAnnounceStatusFlag::HasTrackerError))
+    {
         m_trackerErrors.insert(torrent);
+    }
     else
+    {
         m_trackerErrors.remove(torrent);
+    }
 
     if (announceStatus.testFlag(BitTorrent::TorrentAnnounceStatusFlag::HasOtherError))
+    {
         m_errors.insert(torrent);
+    }
     else
+    {
         m_errors.remove(torrent);
+    }
 
     item(OTHERERROR_ROW)->setText(formatItemText(OTHERERROR_ROW, m_errors.size()));
     item(TRACKERERROR_ROW)->setText(formatItemText(TRACKERERROR_ROW, m_trackerErrors.size()));

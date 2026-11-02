@@ -87,7 +87,7 @@ PreviewSelectDialog::PreviewSelectDialog(QWidget* parent, const BitTorrent::Torr
         const Path filePath = torrent->filePath(i);
         if (Utils::Misc::isPreviewable(filePath))
         {
-            int row = previewListModel->rowCount();
+            int const row = previewListModel->rowCount();
             previewListModel->insertRow(row);
             previewListModel->setData(previewListModel->index(row, NAME), filePath.filename(), Qt::DisplayRole);
             previewListModel->setData(previewListModel->index(row, NAME), filePath.filename(), SortRole);
@@ -126,7 +126,9 @@ void PreviewSelectDialog::previewButtonClicked()
 {
     const QModelIndexList selectedIndexes = m_ui->previewList->selectionModel()->selectedRows(FILE_INDEX);
     if (selectedIndexes.isEmpty())
+    {
         return;
+    }
 
     // Flush data
     m_torrent->flushCache();
@@ -141,7 +143,9 @@ void PreviewSelectDialog::previewButtonClicked()
         QWidget* parent = isSingleFile ? this->parentWidget() : this;
         QMessageBox::critical(parent, tr("Preview impossible"), tr("Sorry, we can't preview this file: \"%1\".").arg(path.toString()));
         if (isSingleFile)
+        {
             reject();
+        }
         return;
     }
 
@@ -159,7 +163,9 @@ void PreviewSelectDialog::displayColumnHeaderMenu()
         for (int i = 0, count = m_ui->previewList->header()->count(); i < count; ++i)
         {
             if (!m_ui->previewList->isColumnHidden(i))
+            {
                 m_ui->previewList->resizeColumnToContents(i);
+            }
         }
     });
     resizeAction->setToolTip(tr("Resize all non-hidden columns to the size of their contents"));
@@ -179,11 +185,15 @@ void PreviewSelectDialog::loadWindowState()
 {
     // Restore dialog size
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 
     // Restore TreeView Header state
     if (const QByteArray treeHeaderState = m_storeTreeHeaderState; !treeHeaderState.isEmpty())
+    {
         m_headerStateInitialized = m_ui->previewList->header()->restoreState(treeHeaderState);
+    }
 }
 
 void PreviewSelectDialog::showEvent(QShowEvent* event)
@@ -206,5 +216,7 @@ void PreviewSelectDialog::showEvent(QShowEvent* event)
 
     // Only one file, no choice
     if (m_ui->previewList->model()->rowCount() <= 1)
+    {
         previewButtonClicked();
+    }
 }

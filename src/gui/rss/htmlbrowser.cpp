@@ -62,7 +62,9 @@ QVariant HtmlBrowser::loadResource(int type, const QUrl& name)
     {
         QUrl url{ name };
         if (url.scheme().isEmpty())
+        {
             url.setScheme(u"http"_s);
+        }
 
         QIODevice* dev = m_diskCache->data(url);
         if (dev)
@@ -113,7 +115,9 @@ void HtmlBrowser::resourceLoaded(QNetworkReply* reply)
         metaData.setExpirationDate(currentDateTime.addDays(1));
         QIODevice* dev = m_diskCache->prepare(metaData);
         if (!dev)
+        {
             return;
+        }
 
         QApplication::style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(32, 32).save(dev, "PNG");
         m_diskCache->insert(dev);

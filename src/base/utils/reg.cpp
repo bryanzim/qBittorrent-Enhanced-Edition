@@ -40,7 +40,7 @@ QStringList Utils::Reg::getSubkeys(const HKEY handle)
 
     DWORD cSubKeys = 0;
     DWORD cMaxSubKeyLen = 0;
-    const LSTATUS result = ::RegQueryInfoKeyW(handle, NULL, NULL, NULL, &cSubKeys, &cMaxSubKeyLen, NULL, NULL, NULL, NULL, NULL, NULL);
+    const LSTATUS result = ::RegQueryInfoKeyW(handle, nullptr, nullptr, nullptr, &cSubKeys, &cMaxSubKeyLen, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     if (result == ERROR_SUCCESS)
     {
@@ -51,9 +51,11 @@ QStringList Utils::Reg::getSubkeys(const HKEY handle)
         for (DWORD i = 0; i < cSubKeys; ++i)
         {
             DWORD cName = cMaxSubKeyLen;
-            const LSTATUS res = ::RegEnumKeyExW(handle, i, lpName.get(), &cName, NULL, NULL, NULL, NULL);
+            const LSTATUS res = ::RegEnumKeyExW(handle, i, lpName.get(), &cName, nullptr, nullptr, nullptr, nullptr);
             if (res == ERROR_SUCCESS)
+            {
                 keys.append(QString::fromWCharArray(lpName.get()));
+            }
         }
     }
 
@@ -67,16 +69,20 @@ QString Utils::Reg::getStringValue(const HKEY handle, const QString& name)
     DWORD cbData = 0;
 
     // Discover the size of the value
-    ::RegQueryValueExW(handle, nameWStr.c_str(), NULL, &type, NULL, &cbData);
+    ::RegQueryValueExW(handle, nameWStr.c_str(), nullptr, &type, nullptr, &cbData);
     if (!((type == REG_SZ) || (type == REG_EXPAND_SZ)))
+    {
         return {};
+    }
 
     const int cBuffer = (cbData / sizeof(WCHAR)) + 1;
     const auto lpData = std::make_unique<WCHAR[]>(cBuffer);
 
-    const LSTATUS res = ::RegQueryValueExW(handle, nameWStr.c_str(), NULL, &type, reinterpret_cast<LPBYTE>(lpData.get()), &cbData);
+    const LSTATUS res = ::RegQueryValueExW(handle, nameWStr.c_str(), nullptr, &type, reinterpret_cast<LPBYTE>(lpData.get()), &cbData);
     if (res == ERROR_SUCCESS)
+    {
         return QString::fromWCharArray(lpData.get());
+    }
 
     return {};
 }
@@ -87,15 +93,19 @@ ulong Utils::Reg::getULongValue(const HKEY handle, const QString& name)
     DWORD type = 0;
     DWORD cbData = 0;
     // Discover the size of the value
-    ::RegQueryValueExW(handle, nameWStr.c_str(), NULL, &type, NULL, &cbData);
+    ::RegQueryValueExW(handle, nameWStr.c_str(), nullptr, &type, nullptr, &cbData);
 
     if (type != REG_DWORD)
+    {
         return 0;
+    }
 
     DWORD lpData = 0;
-    const LSTATUS res = ::RegQueryValueExW(handle, nameWStr.c_str(), NULL, &type, reinterpret_cast<LPBYTE>(&lpData), &cbData);
+    const LSTATUS res = ::RegQueryValueExW(handle, nameWStr.c_str(), nullptr, &type, reinterpret_cast<LPBYTE>(&lpData), &cbData);
     if (res == ERROR_SUCCESS)
+    {
         return lpData;
+    }
 
     return {};
 }

@@ -98,12 +98,16 @@ QString BitTorrent::InfoHash::toString() const
     const SHA1Hash v1Hash = v1();
     const bool v1IsValid = v1Hash.isValid();
     if (v1IsValid)
+    {
         ret += v1Hash.toString();
+    }
 
     if (const SHA256Hash v2Hash = v2(); v2Hash.isValid())
     {
         if (v1IsValid)
+        {
             ret += u", ";
+        }
         ret += v2Hash.toString();
     }
 

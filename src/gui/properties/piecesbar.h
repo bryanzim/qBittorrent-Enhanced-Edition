@@ -65,13 +65,13 @@ protected:
     virtual void updateColors();
     void redraw();
 
-    QColor backgroundColor() const;
-    QColor borderColor() const;
-    QColor pieceColor() const;
-    QColor highlightedPieceColor() const;
-    QColor colorBoxBorderColor() const;
+    [[nodiscard]] QColor backgroundColor() const;
+    [[nodiscard]] QColor borderColor() const;
+    [[nodiscard]] QColor pieceColor() const;
+    [[nodiscard]] QColor highlightedPieceColor() const;
+    [[nodiscard]] QColor colorBoxBorderColor() const;
 
-    const QList<QRgb>& pieceColors() const;
+    [[nodiscard]] const QList<QRgb>& pieceColors() const;
 
     // mix two colors by light model, ratio <0, 1>
     static QRgb mixTwoColors(QRgb rgb1, QRgb rgb2, float ratio);
@@ -82,7 +82,7 @@ private:
     void showToolTip(const QHelpEvent*);
     void highlightFile(int imagePos);
 
-    virtual QString simpleToolTipText() const = 0;
+    [[nodiscard]] virtual QString simpleToolTipText() const = 0;
     virtual QImage renderImage() = 0;
 
     void updateColorsImpl();

@@ -73,9 +73,9 @@ private:
     QVariant readPlainValue(quint32& offset, quint8 len) const;
 
     // Metadata
-    quint16 m_ipVersion = 0;
-    quint16 m_recordSize = 0;
-    quint32 m_nodeCount = 0;
+    quint16 m_ipVersion = 0U;
+    quint16 m_recordSize = 0U;
+    quint32 m_nodeCount = 0U;
     int m_nodeSize = 0;
     int m_indexSize = 0;
     int m_recordBytes = 0;

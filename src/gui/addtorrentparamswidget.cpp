@@ -44,7 +44,9 @@ namespace
     std::optional<bool> toOptionalBool(const QVariant& data)
     {
         if (!data.isValid())
+        {
             return std::nullopt;
+        }
 
         Q_ASSERT(data.userType() == QMetaType::Bool);
         return data.toBool();
@@ -167,12 +169,16 @@ void AddTorrentParamsWidget::populate()
     QStringList categories = BitTorrent::Session::instance()->categories();
     std::ranges::sort(categories, Utils::Compare::NaturalLessThan<Qt::CaseInsensitive>());
     if (!m_addTorrentParams.category.isEmpty())
+    {
         m_ui->categoryComboBox->addItem(m_addTorrentParams.category);
+    }
     m_ui->categoryComboBox->addItem(u""_s);
     for (const QString& category : asConst(categories))
     {
         if (category != m_addTorrentParams.category)
+        {
             m_ui->categoryComboBox->addItem(category);
+        }
     }
     connect(m_ui->categoryComboBox, &QComboBox::currentIndexChanged, this, [this] {
         m_addTorrentParams.category = m_ui->categoryComboBox->currentText();
@@ -216,9 +222,13 @@ void AddTorrentParamsWidget::populate()
     connect(m_ui->contentLayoutComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->contentLayoutComboBox->currentData();
         if (!data.isValid())
+        {
             m_addTorrentParams.contentLayout = std::nullopt;
+        }
         else
+        {
             m_addTorrentParams.contentLayout = data.value<BitTorrent::TorrentContentLayout>();
+        }
     });
 
     m_ui->stopConditionComboBox->disconnect(this);
@@ -228,9 +238,13 @@ void AddTorrentParamsWidget::populate()
     connect(m_ui->stopConditionComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->stopConditionComboBox->currentData();
         if (!data.isValid())
+        {
             m_addTorrentParams.stopCondition = std::nullopt;
+        }
         else
+        {
             m_addTorrentParams.stopCondition = data.value<BitTorrent::Torrent::StopCondition>();
+        }
     });
 
     m_ui->tagsLineEdit->setText(Utils::String::joinIntoString(m_addTorrentParams.tags, u", "_s));
@@ -242,9 +256,13 @@ void AddTorrentParamsWidget::populate()
     connect(m_ui->startTorrentComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->startTorrentComboBox->currentData();
         if (!data.isValid())
+        {
             m_addTorrentParams.addStopped = std::nullopt;
+        }
         else
+        {
             m_addTorrentParams.addStopped = !data.toBool();
+        }
     });
 
     m_ui->seedModeCheckBox->disconnect(this);
@@ -260,9 +278,13 @@ void AddTorrentParamsWidget::populate()
     connect(m_ui->addToQueueTopComboBox, &QComboBox::currentIndexChanged, this, [this] {
         const QVariant data = m_ui->addToQueueTopComboBox->currentData();
         if (!data.isValid())
+        {
             m_addTorrentParams.addToQueueTop = std::nullopt;
+        }
         else
+        {
             m_addTorrentParams.addToQueueTop = data.toBool();
+        }
     });
 
     resetShareLimitsWidgetDefaults();

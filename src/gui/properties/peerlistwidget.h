@@ -98,7 +98,7 @@ private slots:
 
 private:
     void updatePeer(int row, const BitTorrent::Torrent* torrent, const BitTorrent::PeerInfo& peer, bool hideZeroValues);
-    int visibleColumnsCount() const;
+    [[nodiscard]] int visibleColumnsCount() const;
 
     void wheelEvent(QWheelEvent* event) override;
 

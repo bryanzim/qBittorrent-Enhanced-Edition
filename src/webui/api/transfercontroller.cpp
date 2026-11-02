@@ -84,9 +84,13 @@ void TransferController::infoAction()
     dict[KEY_TRANSFER_LAST_EXTERNAL_ADDRESS_V6] = btSession->lastExternalIPv6Address();
     dict[KEY_TRANSFER_DHT_NODES] = static_cast<qint64>(sessionStatus.dhtNodes);
     if (!btSession->isListening())
+    {
         dict[KEY_TRANSFER_CONNECTION_STATUS] = u"disconnected"_s;
+    }
     else
+    {
         dict[KEY_TRANSFER_CONNECTION_STATUS] = sessionStatus.hasIncomingConnections ? u"connected"_s : u"firewalled"_s;
+    }
 
     setResult(dict);
 }
@@ -106,7 +110,9 @@ void TransferController::setUploadLimitAction()
     requireParams({ u"limit"_s });
     qlonglong limit = params()[u"limit"_s].toLongLong();
     if (limit == 0)
+    {
         limit = -1;
+    }
 
     BitTorrent::Session::instance()->setUploadSpeedLimit(limit);
 
@@ -118,7 +124,9 @@ void TransferController::setDownloadLimitAction()
     requireParams({ u"limit"_s });
     qlonglong limit = params()[u"limit"_s].toLongLong();
     if (limit == 0)
+    {
         limit = -1;
+    }
 
     BitTorrent::Session::instance()->setDownloadSpeedLimit(limit);
 
@@ -170,7 +178,9 @@ void TransferController::setSpeedLimitsModeAction()
 
     const std::optional<int> mode = Utils::String::parseInt(params().value(u"mode"_s));
     if (!mode)
+    {
         throw APIError(APIErrorType::BadParams, tr("'mode': invalid argument"));
+    }
 
     // Any non-zero values are considered as alternative mode
     BitTorrent::Session::instance()->setAltGlobalSpeedLimitEnabled(mode != 0);
@@ -187,7 +197,9 @@ void TransferController::banPeersAction()
     {
         const BitTorrent::PeerAddress addr = BitTorrent::PeerAddress::parse(peer.trimmed());
         if (!addr.ip.isNull())
+        {
             BitTorrent::Session::instance()->banIP(addr.ip.toString());
+        }
     }
 
     setResult(QString());
@@ -202,7 +214,9 @@ void TransferController::shadowbanPeersAction()
     {
         const BitTorrent::PeerAddress addr = BitTorrent::PeerAddress::parse(peer.trimmed());
         if (!addr.ip.isNull())
+        {
             BitTorrent::Session::instance()->shadowbanIP(addr.ip.toString());
+        }
     }
 }
 

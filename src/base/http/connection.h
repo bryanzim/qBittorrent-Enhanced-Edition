@@ -49,7 +49,7 @@ namespace Http
     public:
         Connection(QTcpSocket* socket, IRequestHandler* requestHandler, QObject* parent = nullptr);
 
-        bool hasExpired(qint64 timeout) const;
+        [[nodiscard]] bool hasExpired(qint64 timeout) const;
 
     signals:
         void closed();

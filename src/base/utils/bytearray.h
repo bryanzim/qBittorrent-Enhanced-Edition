@@ -47,12 +47,16 @@ namespace Utils::ByteArray
     T unquote(const T& arr, const QByteArrayView quotes = "\"")
     {
         if (arr.length() < 2)
+        {
             return arr;
+        }
 
         for (const char quote : quotes)
         {
             if (arr.startsWith(quote) && arr.endsWith(quote))
+            {
                 return arr.sliced(1, (arr.length() - 2));
+            }
         }
 
         return arr;

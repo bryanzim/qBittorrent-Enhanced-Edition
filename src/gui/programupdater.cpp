@@ -51,14 +51,18 @@ namespace
 
         const auto newVersion = Version::fromString(remoteVersion);
         if (!newVersion.isValid())
+        {
             return false;
+        }
 
         const Version currentVersion{ QBT_VERSION_MAJOR, QBT_VERSION_MINOR, QBT_VERSION_BUGFIX, QBT_VERSION_BUILD };
         if (newVersion == currentVersion)
         {
             const bool isDevVersion = QStringLiteral(QBT_VERSION_STATUS).contains(QRegularExpression(u"(alpha|beta|rc)"_s));
             if (isDevVersion)
+            {
                 return true;
+            }
         }
         return (newVersion > currentVersion);
     }
@@ -127,17 +131,29 @@ void ProgramUpdater::rssDownloadFinished(const Net::DownloadResult& result)
         if (xml.isStartElement())
         {
             if (xml.name() == u"item")
+            {
                 inItem = true;
+            }
             else if (inItem && (xml.name() == u"link"))
+            {
                 updateLink = getStringValue(xml);
+            }
             else if (inItem && (xml.name() == u"type"))
+            {
                 type = getStringValue(xml);
+            }
             else if (inItem && (xml.name() == u"version"))
+            {
                 version = getStringValue(xml);
+            }
             else if (inItem && (xml.name() == u"content"))
+            {
                 content = getStringValue(xml);
+            }
             else if (inItem && (xml.name() == u"update"))
+            {
                 nextUpdate = getStringValue(xml);
+            }
         }
         else if (xml.isEndElement())
         {

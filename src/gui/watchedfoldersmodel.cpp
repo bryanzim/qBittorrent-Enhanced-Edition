@@ -54,10 +54,14 @@ int WatchedFoldersModel::columnCount([[maybe_unused]] const QModelIndex& parent)
 QVariant WatchedFoldersModel::data(const QModelIndex& index, const int role) const
 {
     if (!index.isValid() || (index.row() >= rowCount()) || (index.column() >= columnCount()))
+    {
         return {};
+    }
 
     if (role == Qt::DisplayRole)
+    {
         return m_watchedFolders.at(index.row()).toString();
+    }
 
     return {};
 }
@@ -98,19 +102,29 @@ bool WatchedFoldersModel::removeRows(const int row, const int count, const QMode
 void WatchedFoldersModel::addFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     if (path.isEmpty())
+    {
         throw InvalidArgument(tr("Watched folder path cannot be empty."));
+    }
 
     if (path.isRelative())
+    {
         throw InvalidArgument(tr("Watched folder path cannot be relative."));
+    }
 
     if (m_watchedFoldersOptions.contains(path))
+    {
         throw RuntimeError(tr("Folder '%1' is already in watch list.").arg(path.toString()));
+    }
 
     const QDir watchDir{ path.data() };
     if (!watchDir.exists())
+    {
         throw RuntimeError(tr("Folder '%1' doesn't exist.").arg(path.toString()));
+    }
     if (!watchDir.isReadable())
+    {
         throw RuntimeError(tr("Folder '%1' isn't readable.").arg(path.toString()));
+    }
 
     m_deletedFolders.remove(path);
 
@@ -143,10 +157,14 @@ void WatchedFoldersModel::apply()
     // it will be cleared one element at a time in `onFolderRemoved()` handler
     m_deletedFolders.clear();
     for (const Path& path : deletedFolders)
+    {
         m_fsWatcher->removeWatchedFolder(path);
+    }
 
     for (const Path& path : asConst(m_watchedFolders))
+    {
         m_fsWatcher->setWatchedFolder(path, m_watchedFoldersOptions.value(path));
+    }
 }
 
 void WatchedFoldersModel::onFolderSet(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
@@ -170,7 +188,9 @@ void WatchedFoldersModel::onFolderRemoved(const Path& path)
 {
     const qsizetype row = m_watchedFolders.indexOf(path);
     if (row >= 0)
+    {
         removeRows(row, 1);
+    }
 
     m_deletedFolders.remove(path);
 }

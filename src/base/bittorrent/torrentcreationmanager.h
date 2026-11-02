@@ -52,12 +52,12 @@ namespace BitTorrent
         ~TorrentCreationManager() override;
 
         std::shared_ptr<TorrentCreationTask> createTask(const TorrentCreatorParams& params, bool startSeeding = true);
-        std::shared_ptr<TorrentCreationTask> getTask(const QString& id) const;
-        QList<std::shared_ptr<TorrentCreationTask>> tasks() const;
+        [[nodiscard]] std::shared_ptr<TorrentCreationTask> getTask(const QString& id) const;
+        [[nodiscard]] QList<std::shared_ptr<TorrentCreationTask>> tasks() const;
         bool deleteTask(const QString& id);
 
     private:
-        QString generateTaskID() const;
+        [[nodiscard]] QString generateTaskID() const;
 
         CachedSettingValue<qint32> m_maxTasks;
         CachedSettingValue<qint32> m_numThreads;

@@ -54,8 +54,8 @@ class UIThemeSource
 public:
     virtual ~UIThemeSource() = default;
 
-    virtual QColor getColor(const QString& colorId, ColorMode colorMode) const = 0;
-    virtual Path getIconPath(const QString& iconId, ColorMode colorMode) const = 0;
+    [[nodiscard]] virtual QColor getColor(const QString& colorId, ColorMode colorMode) const = 0;
+    [[nodiscard]] virtual Path getIconPath(const QString& iconId, ColorMode colorMode) const = 0;
     virtual QByteArray readStyleSheet() = 0;
 };
 
@@ -67,9 +67,9 @@ public:
     DefaultThemeSource();
 
     QByteArray readStyleSheet() override;
-    QColor getColor(const QString& colorId, ColorMode colorMode) const override;
-    Path getIconPath(const QString& iconId, ColorMode colorMode) const override;
-    Path getDefaultIconPath(const QString& iconId, ColorMode colorMode) const;
+    [[nodiscard]] QColor getColor(const QString& colorId, ColorMode colorMode) const override;
+    [[nodiscard]] Path getIconPath(const QString& iconId, ColorMode colorMode) const override;
+    [[nodiscard]] Path getDefaultIconPath(const QString& iconId, ColorMode colorMode) const;
 
 private:
     void loadColors();
@@ -84,17 +84,17 @@ class CustomThemeSource : public UIThemeSource
     Q_DECLARE_TR_FUNCTIONS(CustomThemeSource)
 
 public:
-    QColor getColor(const QString& colorId, ColorMode colorMode) const override;
-    Path getIconPath(const QString& iconId, ColorMode colorMode) const override;
+    [[nodiscard]] QColor getColor(const QString& colorId, ColorMode colorMode) const override;
+    [[nodiscard]] Path getIconPath(const QString& iconId, ColorMode colorMode) const override;
     QByteArray readStyleSheet() override;
 
 protected:
     explicit CustomThemeSource(const Path& themeRootPath);
 
-    DefaultThemeSource* defaultThemeSource() const;
+    [[nodiscard]] DefaultThemeSource* defaultThemeSource() const;
 
 private:
-    Path themeRootPath() const;
+    [[nodiscard]] Path themeRootPath() const;
     void loadColors();
 
     const std::unique_ptr<DefaultThemeSource> m_defaultThemeSource = std::make_unique<DefaultThemeSource>();

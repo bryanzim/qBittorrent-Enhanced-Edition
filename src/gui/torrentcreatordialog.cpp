@@ -152,7 +152,9 @@ TorrentCreatorDialog::~TorrentCreatorDialog()
 void TorrentCreatorDialog::updateInputPath(const Path& path)
 {
     if (path.isEmpty())
+    {
         return;
+    }
     m_ui->textInputPath->setSelectedPath(path);
     updateProgressBar(0);
 }
@@ -218,7 +220,9 @@ void TorrentCreatorDialog::dropEvent(QDropEvent* event)
 void TorrentCreatorDialog::dragEnterEvent(QDragEnterEvent* event)
 {
     if (event->mimeData()->hasFormat(u"text/plain"_s) || event->mimeData()->hasFormat(u"text/uri-list"_s))
+    {
         event->acceptProposedAction();
+    }
 }
 
 void TorrentCreatorDialog::onCalculatePiecesButtonClicked()
@@ -269,14 +273,18 @@ void TorrentCreatorDialog::onCreateButtonClicked()
     const Path lastSavePath = (m_storeLastSavePath.get(Utils::Fs::homePath()) / Path(inputPath.filename() + u".torrent"));
     Path destPath{ QFileDialog::getSaveFileName(this, tr("Select where to save the new torrent"), lastSavePath.data(), tr("Torrent Files (*.torrent)")) };
     if (destPath.isEmpty())
+    {
         return;
+    }
     if (!destPath.isValid())
     {
         QMessageBox::warning(this, tr("Invalid file name"), tr("The name is invalid: \"%1\"").arg(destPath.filename()));
         return;
     }
     if (!destPath.hasExtension(TORRENT_FILE_EXTENSION))
+    {
         destPath += TORRENT_FILE_EXTENSION;
+    }
     m_storeLastSavePath = destPath.parentPath();
 
     // Disable dialog & set busy cursor
@@ -436,7 +444,9 @@ void TorrentCreatorDialog::loadSettings()
     m_ui->lineEditSource->setText(m_storeSource);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 #include "torrentcreatordialog.moc"

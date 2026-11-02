@@ -49,7 +49,9 @@ IPSubnetWhitelistOptionsDialog::IPSubnetWhitelistOptionsDialog(QWidget* parent)
 
     QStringList authSubnetWhitelistStringList;
     for (const Utils::Net::Subnet& subnet : asConst(Preferences::instance()->getWebUIAuthSubnetWhitelist()))
+    {
         authSubnetWhitelistStringList << Utils::Net::subnetToString(subnet);
+    }
     m_model = new QStringListModel(authSubnetWhitelistStringList, this);
 
     m_sortFilter = new QSortFilterProxyModel(this);
@@ -61,7 +63,9 @@ IPSubnetWhitelistOptionsDialog::IPSubnetWhitelistOptionsDialog(QWidget* parent)
     m_ui->buttonWhitelistIPSubnet->setEnabled(false);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 IPSubnetWhitelistOptionsDialog::~IPSubnetWhitelistOptionsDialog()
@@ -78,7 +82,9 @@ void IPSubnetWhitelistOptionsDialog::on_buttonBox_accepted()
         QStringList subnets;
         // Operate on the m_sortFilter to grab the strings in sorted order
         for (int i = 0; i < m_sortFilter->rowCount(); ++i)
+        {
             subnets.append(m_sortFilter->index(i, 0).data().toString());
+        }
         Preferences::instance()->setWebUIAuthSubnetWhitelist(subnets);
         QDialog::accept();
     }
@@ -106,7 +112,9 @@ void IPSubnetWhitelistOptionsDialog::on_buttonWhitelistIPSubnet_clicked()
 void IPSubnetWhitelistOptionsDialog::on_buttonDeleteIPSubnet_clicked()
 {
     for (const auto& i : asConst(m_ui->whitelistedIPSubnetList->selectionModel()->selectedIndexes()))
+    {
         m_sortFilter->removeRow(i.row());
+    }
 
     m_modified = true;
 }

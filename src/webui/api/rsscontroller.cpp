@@ -52,7 +52,9 @@ void RSSController::addFolderAction()
     const QString path = params()[u"path"_s];
     const nonstd::expected<RSS::Folder*, QString> result = RSS::Session::instance()->addFolder(path);
     if (!result)
+    {
         throw APIError(APIErrorType::Conflict, result.error());
+    }
 
     setResult(QString());
 }
@@ -66,7 +68,9 @@ void RSSController::addFeedAction()
     const auto refreshInterval = std::max<qint64>(params()[u"refreshInterval"_s].toLongLong(), 0);
     const nonstd::expected<RSS::Feed*, QString> result = RSS::Session::instance()->addFeed(url, (path.isEmpty() ? url : path), std::chrono::seconds(refreshInterval));
     if (!result)
+    {
         throw APIError(APIErrorType::Conflict, result.error());
+    }
 
     setResult(QString());
 }
@@ -79,7 +83,9 @@ void RSSController::setFeedURLAction()
     const QString url = params()[u"url"_s];
     const nonstd::expected<void, QString> result = RSS::Session::instance()->setFeedURL(path, url);
     if (!result)
+    {
         throw APIError(APIErrorType::Conflict, result.error());
+    }
 
     setResult(QString());
 }
@@ -91,12 +97,16 @@ void RSSController::setFeedRefreshIntervalAction()
     bool ok = false;
     const auto refreshInterval = params()[u"refreshInterval"_s].toLongLong(&ok);
     if (!ok || (refreshInterval < 0))
+    {
         throw APIError(APIErrorType::BadParams, tr("Invalid 'refreshInterval' value"));
+    }
 
     const QString path = params()[u"path"_s];
     auto* feed = qobject_cast<RSS::Feed*>(RSS::Session::instance()->itemByPath(path));
     if (!feed)
+    {
         throw APIError(APIErrorType::Conflict, tr("Feed doesn't exist: %1.").arg(path));
+    }
 
     feed->setRefreshInterval(std::chrono::seconds(refreshInterval));
 }
@@ -108,7 +118,9 @@ void RSSController::removeItemAction()
     const QString path = params()[u"path"_s];
     const nonstd::expected<void, QString> result = RSS::Session::instance()->removeItem(path);
     if (!result)
+    {
         throw APIError(APIErrorType::Conflict, result.error());
+    }
 
     setResult(QString());
 }
@@ -121,7 +133,9 @@ void RSSController::moveItemAction()
     const QString destPath = params()[u"destPath"_s];
     const nonstd::expected<void, QString> result = RSS::Session::instance()->moveItem(itemPath, destPath);
     if (!result)
+    {
         throw APIError(APIErrorType::Conflict, result.error());
+    }
 
     setResult(QString());
 }
@@ -143,7 +157,9 @@ void RSSController::markAsReadAction()
 
     RSS::Item* item = RSS::Session::instance()->itemByPath(itemPath);
     if (!item)
+    {
         return;
+    }
 
     if (!articleId.isNull())
     {
@@ -152,7 +168,9 @@ void RSSController::markAsReadAction()
         {
             RSS::Article* article = feed->articleByGUID(articleId);
             if (article)
+            {
                 article->markAsRead();
+            }
         }
     }
     else
@@ -170,7 +188,9 @@ void RSSController::refreshItemAction()
     const QString itemPath{ params()[u"itemPath"_s] };
     RSS::Item* item = RSS::Session::instance()->itemByPath(itemPath);
     if (item)
+    {
         item->refresh();
+    }
 
     setResult(QString());
 }
@@ -198,7 +218,9 @@ void RSSController::exportRulesAction()
 void RSSController::importRulesAction()
 {
     if (data().size() != 1)
+    {
         throw APIError(APIErrorType::BadParams, tr("Exactly one rules file is required"));
+    }
 
     try
     {
@@ -249,7 +271,9 @@ void RSSController::rulesAction()
     const QList<RSS::AutoDownloadRule> rules{ RSS::AutoDownloader::instance()->rules() };
     QJsonObject jsonObj;
     for (const auto& rule : rules)
+    {
         jsonObj.insert(rule.name(), rule.toJsonObject());
+    }
 
     setResult(jsonObj);
 }
@@ -266,16 +290,22 @@ void RSSController::matchingArticlesAction()
     {
         const RSS::Feed* feed = RSS::Session::instance()->feedByURL(feedURL);
         if (!feed)
+        {
             continue; // feed doesn't exist
+        }
 
         QJsonArray matchingArticles;
         for (const RSS::Article* article : feed->articles())
         {
             if (rule.matches(article->data()))
+            {
                 matchingArticles << article->title();
+            }
         }
         if (!matchingArticles.isEmpty())
+        {
             jsonObj.insert(feed->name(), matchingArticles);
+        }
     }
 
     setResult(jsonObj);

@@ -98,20 +98,20 @@ namespace RSS
     public:
         static Session* instance();
 
-        bool isProcessingEnabled() const;
+        [[nodiscard]] bool isProcessingEnabled() const;
         void setProcessingEnabled(bool enabled);
 
-        QThread* workingThread() const;
-        AsyncFileStorage* confFileStorage() const;
-        AsyncFileStorage* dataFileStorage() const;
+        [[nodiscard]] QThread* workingThread() const;
+        [[nodiscard]] AsyncFileStorage* confFileStorage() const;
+        [[nodiscard]] AsyncFileStorage* dataFileStorage() const;
 
-        int maxArticlesPerFeed() const;
+        [[nodiscard]] int maxArticlesPerFeed() const;
         void setMaxArticlesPerFeed(int n);
 
-        int refreshInterval() const;
+        [[nodiscard]] int refreshInterval() const;
         void setRefreshInterval(int refreshInterval);
 
-        std::chrono::seconds fetchDelay() const;
+        [[nodiscard]] std::chrono::seconds fetchDelay() const;
         void setFetchDelay(std::chrono::seconds delay);
 
         nonstd::expected<Folder*, QString> addFolder(const QString& path);
@@ -122,12 +122,12 @@ namespace RSS
         nonstd::expected<void, QString> moveItem(Item* item, const QString& destPath);
         nonstd::expected<void, QString> removeItem(const QString& itemPath);
 
-        QList<Item*> items() const;
-        Item* itemByPath(const QString& path) const;
-        QList<Feed*> feeds() const;
-        Feed* feedByURL(const QString& url) const;
+        [[nodiscard]] QList<Item*> items() const;
+        [[nodiscard]] Item* itemByPath(const QString& path) const;
+        [[nodiscard]] QList<Feed*> feeds() const;
+        [[nodiscard]] Feed* feedByURL(const QString& url) const;
 
-        Folder* rootFolder() const;
+        [[nodiscard]] Folder* rootFolder() const;
 
     signals:
         void processingStateChanged(bool enabled);
@@ -144,7 +144,7 @@ namespace RSS
         void handleFeedTitleChanged(Feed* feed);
 
     private:
-        QUuid generateUID() const;
+        [[nodiscard]] QUuid generateUID() const;
         void load();
         bool loadFolder(const QJsonObject& jsonObj, Folder* folder);
         void loadLegacy();

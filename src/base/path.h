@@ -55,37 +55,37 @@ public:
     explicit Path(const QString& pathStr);
     explicit Path(std::string_view pathStr);
 
-    bool isValid() const;
-    bool isEmpty() const;
-    bool isAbsolute() const;
-    bool isRelative() const;
+    [[nodiscard]] bool isValid() const;
+    [[nodiscard]] bool isEmpty() const;
+    [[nodiscard]] bool isAbsolute() const;
+    [[nodiscard]] bool isRelative() const;
 
-    bool exists() const;
+    [[nodiscard]] bool exists() const;
 
-    Path rootItem() const;
-    Path parentPath() const;
+    [[nodiscard]] Path rootItem() const;
+    [[nodiscard]] Path parentPath() const;
 
-    QString filename() const;
+    [[nodiscard]] QString filename() const;
 
-    QString extension() const;
-    bool hasExtension(QStringView ext) const;
+    [[nodiscard]] QString extension() const;
+    [[nodiscard]] bool hasExtension(QStringView ext) const;
     void removeExtension();
-    Path removedExtension() const;
+    [[nodiscard]] Path removedExtension() const;
     void removeExtension(QStringView ext);
-    Path removedExtension(QStringView ext) const;
+    [[nodiscard]] Path removedExtension(QStringView ext) const;
 
-    bool hasAncestor(const Path& other, Qt::CaseSensitivity caseSensitivity = CASE_SENSITIVITY) const;
-    Path relativePathOf(const Path& childPath) const;
+    [[nodiscard]] bool hasAncestor(const Path& other, Qt::CaseSensitivity caseSensitivity = CASE_SENSITIVITY) const;
+    [[nodiscard]] Path relativePathOf(const Path& childPath) const;
 
-    QString data() const;
-    QString toString() const;
-    std::filesystem::path toStdFsPath() const;
+    [[nodiscard]] QString data() const;
+    [[nodiscard]] QString toString() const;
+    [[nodiscard]] std::filesystem::path toStdFsPath() const;
 
     Path& operator/=(const Path& other);
     Path& operator+=(QStringView str);
 
-    Iterator begin() const;
-    Iterator end() const;
+    [[nodiscard]] Iterator begin() const;
+    [[nodiscard]] Iterator end() const;
 
     static Path commonPath(const Path& left, const Path& right);
     static Path commonPath(const PathList& filePaths);
@@ -145,4 +145,4 @@ Path operator+(const Path& lhs, QStringView rhs);
 QDataStream& operator<<(QDataStream& out, const Path& path);
 QDataStream& operator>>(QDataStream& in, Path& path);
 
-std::size_t qHash(const Path& key, std::size_t seed = 0);
+std::size_t qHash(const Path& key, std::size_t seed = 0U);

@@ -47,12 +47,12 @@ public:
     {
     }
 
-    Tag tag() const
+    [[nodiscard]] Tag tag() const
     {
         return m_tag;
     }
 
-    int torrentsCount() const
+    [[nodiscard]] int torrentsCount() const
     {
         return m_torrentsCount;
     }
@@ -99,7 +99,9 @@ bool TagFilterModel::isSpecialItem(const QModelIndex& index)
 QVariant TagFilterModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || (index.column() != 0))
+    {
         return {};
+    }
 
     const int row = index.internalId();
     Q_ASSERT(isValidRow(row));
@@ -133,29 +135,39 @@ QVariant TagFilterModel::data(const QModelIndex& index, int role) const
 Qt::ItemFlags TagFilterModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
+    {
         return Qt::NoItemFlags;
+    }
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 QVariant TagFilterModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if ((orientation == Qt::Horizontal) && (role == Qt::DisplayRole))
+    {
         if (section == 0)
+        {
             return tr("Tags");
+        }
+    }
     return {};
 }
 
 QModelIndex TagFilterModel::index(int row, int, const QModelIndex&) const
 {
     if (!isValidRow(row))
+    {
         return {};
+    }
     return createIndex(row, 0, row);
 }
 
 int TagFilterModel::rowCount(const QModelIndex& parent) const
 {
     if (!parent.isValid())
+    {
         return m_tagItems.count();
+    }
     return 0;
 }
 
@@ -168,14 +180,18 @@ QModelIndex TagFilterModel::index(const Tag& tag) const
 {
     const int row = findRow(tag);
     if (!isValidRow(row))
+    {
         return {};
+    }
     return index(row, 0, QModelIndex());
 }
 
 Tag TagFilterModel::tag(const QModelIndex& index) const
 {
     if (!index.isValid())
+    {
         return {};
+    }
     const int row = index.internalId();
     Q_ASSERT(isValidRow(row));
     return m_tagItems[row].tag();
@@ -191,7 +207,7 @@ void TagFilterModel::tagAdded(const Tag& tag)
 
 void TagFilterModel::tagRemoved(const Tag& tag)
 {
-    QModelIndex i = index(tag);
+    QModelIndex const i = index(tag);
     beginRemoveRows(i.parent(), i.row(), i.row());
     removeFromModel(i.row());
     endRemoveRows();
@@ -226,7 +242,9 @@ void TagFilterModel::torrentTagRemoved(BitTorrent::Torrent* const torrent, const
 
     const int row = findRow(tag);
     if (row < 0)
+    {
         return;
+    }
 
     m_tagItems[row].decreaseTorrentsCount();
 
@@ -242,10 +260,14 @@ void TagFilterModel::torrentsLoaded(const QList<BitTorrent::Torrent*>& torrents)
 
         const QList<TagModelItem*> items = findItems(torrent->tags());
         if (items.isEmpty())
+        {
             untaggedItem()->increaseTorrentsCount();
+        }
 
         for (TagModelItem* item : items)
+        {
             item->increaseTorrentsCount();
+        }
     }
 
     emit dataChanged(index(0, 0), index((rowCount() - 1), 0));
@@ -272,8 +294,10 @@ void TagFilterModel::torrentAboutToBeRemoved(BitTorrent::Torrent* const torrent)
         {
             const int row = findRow(tag);
             Q_ASSERT(isValidRow(row));
-            if (!isValidRow(row)) [[unlikely]]
-                continue;
+            if (!isValidRow(row))
+            {
+                [[unlikely]] continue;
+            }
 
             m_tagItems[row].decreaseTorrentsCount();
             const QModelIndex i = index(row, 0);
@@ -316,12 +340,16 @@ void TagFilterModel::removeFromModel(int row)
 int TagFilterModel::findRow(const Tag& tag) const
 {
     if (!tag.isValid())
+    {
         return -1;
+    }
 
     for (qsizetype i = 0; i < m_tagItems.size(); ++i)
     {
         if (m_tagItems[i].tag() == tag)
+        {
             return i;
+        }
     }
 
     return -1;
@@ -331,7 +359,9 @@ TagModelItem* TagFilterModel::findItem(const Tag& tag)
 {
     const int row = findRow(tag);
     if (!isValidRow(row))
+    {
         return nullptr;
+    }
     return &m_tagItems[row];
 }
 
@@ -343,9 +373,13 @@ QList<TagModelItem*> TagFilterModel::findItems(const TagSet& tags)
     {
         TagModelItem* item = findItem(tag);
         if (item)
+        {
             items.push_back(item);
+        }
         else
+        {
             qWarning() << u"Requested tag '%1' missing from the model."_s.arg(tag.toString());
+        }
     }
     return items;
 }

@@ -44,7 +44,9 @@ namespace
     void updateSliderValue(QSlider* slider, const int value)
     {
         if (value > slider->maximum())
+        {
             slider->setMaximum(value);
+        }
         slider->setValue(value);
     }
 }
@@ -104,7 +106,9 @@ SpeedLimitDialog::SpeedLimitDialog(QWidget* parent)
     connect(m_ui->spinAltDownloadLimit, qOverload<int>(&QSpinBox::valueChanged), this, [this](const int value) { updateSliderValue(m_ui->sliderAltDownloadLimit, value); });
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 SpeedLimitDialog::~SpeedLimitDialog()
@@ -118,19 +122,27 @@ void SpeedLimitDialog::accept()
     auto* session = BitTorrent::Session::instance();
     const int uploadLimit = (m_ui->spinUploadLimit->value() * 1024);
     if (m_initialValues.uploadSpeedLimit != m_ui->spinUploadLimit->value())
+    {
         session->setGlobalUploadSpeedLimit(uploadLimit);
+    }
 
     const int downloadLimit = (m_ui->spinDownloadLimit->value() * 1024);
     if (m_initialValues.downloadSpeedLimit != m_ui->spinDownloadLimit->value())
+    {
         session->setGlobalDownloadSpeedLimit(downloadLimit);
+    }
 
     const int altUploadLimit = (m_ui->spinAltUploadLimit->value() * 1024);
     if (m_initialValues.altUploadSpeedLimit != m_ui->spinAltUploadLimit->value())
+    {
         session->setAltGlobalUploadSpeedLimit(altUploadLimit);
+    }
 
     const int altDownloadLimit = (m_ui->spinAltDownloadLimit->value() * 1024);
     if (m_initialValues.altDownloadSpeedLimit != m_ui->spinAltDownloadLimit->value())
+    {
         session->setAltGlobalDownloadSpeedLimit(altDownloadLimit);
+    }
 
     QDialog::accept();
 }

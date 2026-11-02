@@ -49,7 +49,9 @@ bool TrackerListSortModel::lessThan(const QModelIndex& left, const QModelIndex& 
     if (!left.parent().isValid() && !right.parent().isValid())
     {
         if ((left.row() < TrackerListModel::STICKY_ROW_COUNT) || (right.row() < TrackerListModel::STICKY_ROW_COUNT))
+        {
             return ((left.row() < right.row()) && (sortOrder() == Qt::AscendingOrder));
+        }
     }
 
     return QSortFilterProxyModel::lessThan(left, right);

@@ -66,7 +66,9 @@ namespace
         QList<QPersistentModelIndex> persistentIndexes;
         persistentIndexes.reserve(indexes.size());
         for (const QModelIndex& index : indexes)
+        {
             persistentIndexes.emplaceBack(index);
+        }
 
         return persistentIndexes;
     }
@@ -115,7 +117,9 @@ void TorrentContentWidget::setContentHandler(BitTorrent::TorrentContentHandler* 
 {
     m_model->setContentHandler(contentHandler);
     if (!contentHandler)
+    {
         return;
+    }
 }
 
 BitTorrent::TorrentContentHandler* TorrentContentWidget::contentHandler() const
@@ -138,7 +142,9 @@ bool TorrentContentWidget::openByEnterKey() const
 void TorrentContentWidget::setOpenByEnterKey(const bool value)
 {
     if (value == openByEnterKey())
+    {
         return;
+    }
 
     if (value)
     {
@@ -185,7 +191,9 @@ Path TorrentContentWidget::getItemPath(const QModelIndex& index) const
 {
     Path path;
     for (QModelIndex i = index; i.isValid(); i = i.parent())
+    {
         path = Path(i.data().toString()) / path;
+    }
     return path;
 }
 
@@ -218,13 +226,17 @@ void TorrentContentWidget::setFilterPattern(const QString& patternText, const Fi
 void TorrentContentWidget::checkAll()
 {
     for (int i = 0; i < model()->rowCount(); ++i)
+    {
         model()->setData(model()->index(i, TorrentContentModelItem::COL_NAME), Qt::Checked, Qt::CheckStateRole);
+    }
 }
 
 void TorrentContentWidget::checkNone()
 {
     for (int i = 0; i < model()->rowCount(); ++i)
+    {
         model()->setData(model()->index(i, TorrentContentModelItem::COL_NAME), Qt::Unchecked, Qt::CheckStateRole);
+    }
 }
 
 void TorrentContentWidget::setContentDragAllowed(const bool allowed)
@@ -271,25 +283,33 @@ void TorrentContentWidget::keyPressEvent(QKeyEvent* event)
     const QList<QPersistentModelIndex> selection = toPersistentIndexes(selectionModel()->selectedRows(TorrentContentModelItem::COL_NAME));
 
     for (const QPersistentModelIndex& index : selection)
+    {
         model()->setData(index, state, Qt::CheckStateRole);
+    }
 }
 
 void TorrentContentWidget::renameSelectedFile()
 {
     const QModelIndexList selectedIndexes = selectionModel()->selectedRows(0);
     if (selectedIndexes.size() != 1)
+    {
         return;
+    }
 
     const QPersistentModelIndex modelIndex = selectedIndexes.first();
     if (!modelIndex.isValid())
+    {
         return;
+    }
 
     // Ask for new name
     const bool isFile = (m_filterModel->itemType(modelIndex) == TorrentContentModelItem::FileType);
     bool ok = false;
-    QString newName = AutoExpandableDialog::getText(this, tr("Renaming"), tr("New name:"), QLineEdit::Normal, modelIndex.data().toString(), &ok, isFile).trimmed();
+    QString const newName = AutoExpandableDialog::getText(this, tr("Renaming"), tr("New name:"), QLineEdit::Normal, modelIndex.data().toString(), &ok, isFile).trimmed();
     if (!ok || !modelIndex.isValid())
+    {
         return;
+    }
 
     model()->setData(modelIndex, newName);
 }
@@ -299,7 +319,9 @@ void TorrentContentWidget::batchRenameFiles()
     const QModelIndexList selectedRows = selectionModel()->selectedRows();
     QSet<int> fileIndexes;
     for (const QModelIndex& rowIndex : selectedRows)
+    {
         fileIndexes.unite(m_filterModel->getFileIndexes(rowIndex));
+    }
 
     auto* dialog = new TorrentContentLayoutDialog(m_model->contentHandler(), fileIndexes, this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -353,7 +375,9 @@ void TorrentContentWidget::openSelectedFile()
 {
     const QModelIndexList selectedIndexes = selectionModel()->selectedRows(0);
     if (selectedIndexes.size() != 1)
+    {
         return;
+    }
     openItem(selectedIndexes.first());
 }
 
@@ -390,7 +414,9 @@ void TorrentContentWidget::displayColumnHeaderMenu()
                 setColumnHidden(i, !checked);
 
                 if (checked && (columnWidth(i) <= 5))
+                {
                     resizeColumnToContents(i);
+                }
 
                 emit stateChanged();
             });
@@ -398,7 +424,9 @@ void TorrentContentWidget::displayColumnHeaderMenu()
             action->setChecked(!isColumnHidden(i));
 
             if (i == TorrentContentModelItem::COL_NAME)
+            {
                 action->setEnabled(false);
+            }
         }
 
         menu->addSeparator();
@@ -408,7 +436,9 @@ void TorrentContentWidget::displayColumnHeaderMenu()
         for (int i = 0, count = header()->count(); i < count; ++i)
         {
             if (!isColumnHidden(i))
+            {
                 resizeColumnToContents(i);
+            }
         }
 
         emit stateChanged();
@@ -422,7 +452,9 @@ void TorrentContentWidget::displayContextMenu()
 {
     const QModelIndexList selectedRows = selectionModel()->selectedRows(0);
     if (selectedRows.empty())
+    {
         return;
+    }
 
     QMenu* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
@@ -472,7 +504,9 @@ void TorrentContentWidget::displayContextMenu()
 void TorrentContentWidget::openItem(const QModelIndex& index) const
 {
     if (!index.isValid())
+    {
         return;
+    }
 
     m_model->contentHandler()->flushCache(); // Flush data
     Utils::Gui::openPath(getFullPath(index));
@@ -514,13 +548,19 @@ void TorrentContentWidget::onItemDoubleClicked(const QModelIndex& index)
     const auto* contentHandler = m_model->contentHandler();
     Q_ASSERT(contentHandler && contentHandler->hasMetadata());
 
-    if (!contentHandler || !contentHandler->hasMetadata()) [[unlikely]]
-        return;
+    if (!contentHandler || !contentHandler->hasMetadata())
+    {
+        [[unlikely]] return;
+    }
 
     if (m_doubleClickAction == DoubleClickAction::Rename)
+    {
         renameSelectedFile();
+    }
     else
+    {
         openItem(index);
+    }
 }
 
 void TorrentContentWidget::expandRecursively()
@@ -556,7 +596,9 @@ void TorrentContentWidget::rowsInserted(const QModelIndex& parent, int start, in
     while (p.isValid())
     {
         if (!isExpanded(p))
+        {
             expand(p);
+        }
         p = model()->parent(p);
     }
 }

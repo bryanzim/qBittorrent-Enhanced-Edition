@@ -71,7 +71,9 @@ PeerAddress PeerAddress::parse(const QStringView address)
 
         ipPort = address.split(u':', Qt::KeepEmptyParts);
         if (ipPort.size() > 2)
+        {
             return {};
+        }
     }
     else
     {
@@ -80,11 +82,15 @@ PeerAddress PeerAddress::parse(const QStringView address)
 
     const QHostAddress ip{ ipPort[0].toString() };
     if (ip.isNull())
+    {
         return {};
+    }
 
     const ushort port{ ipPort[1].toUShort() };
     if (port == 0)
+    {
         return {};
+    }
 
     return { .ip = ip, .port = port };
 }
@@ -92,7 +98,9 @@ PeerAddress PeerAddress::parse(const QStringView address)
 QString PeerAddress::toString() const
 {
     if (ip.isNull())
+    {
         return {};
+    }
 
     const QString ipStr = (ip.protocol() == QAbstractSocket::IPv6Protocol)
                               ? (u'[' + ip.toString() + u']')

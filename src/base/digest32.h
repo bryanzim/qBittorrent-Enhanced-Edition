@@ -114,7 +114,7 @@ public:
         m_nativeDigest.assign(raw.constData());
     }
 
-    bool isValid() const { return m_isValid; }
+    constexpr bool isValid() const { return m_isValid; }
     UnderlyingType nativeDigest() const { return m_nativeDigest; }
 
     QString hashString() const
@@ -147,7 +147,7 @@ bool operator<(const Digest32<N>& left, const Digest32<N>& right)
 }
 
 template <int N>
-std::size_t qHash(const Digest32<N>& key, const std::size_t seed = 0)
+std::size_t qHash(const Digest32<N>& key, const std::size_t seed = 0U)
 {
     return ::qHash(static_cast<typename Digest32<N>::UnderlyingType>(key), seed);
 }

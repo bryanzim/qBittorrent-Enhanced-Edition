@@ -45,7 +45,9 @@ void TrackerListItemDelegate::initStyleOption(QStyleOptionViewItem* option, cons
     QStyledItemDelegate::initStyleOption(option, index);
 
     if (index.parent().isValid() || !m_view->isExpanded(index.siblingAtColumn(0)))
+    {
         return;
+    }
 
     switch (index.column())
     {

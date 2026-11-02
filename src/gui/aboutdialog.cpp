@@ -143,9 +143,13 @@ AboutDialog::AboutDialog(QWidget* parent)
     m_ui->labelDBIP->setText(DBIPText);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
     else
+    {
         adjustSize();
+    }
 }
 
 AboutDialog::~AboutDialog()

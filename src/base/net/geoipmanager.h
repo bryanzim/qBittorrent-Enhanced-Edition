@@ -50,7 +50,7 @@ namespace Net
         static void freeInstance();
         static GeoIPManager* instance();
 
-        QString lookup(const QHostAddress& hostAddr) const;
+        [[nodiscard]] QString lookup(const QHostAddress& hostAddr) const;
 
         static QString CountryName(const QString& countryISOCode);
 

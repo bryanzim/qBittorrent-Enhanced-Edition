@@ -42,10 +42,14 @@
 QByteArray Utils::Gzip::compress(const QByteArray& data, const int level, bool* ok)
 {
     if (ok)
+    {
         *ok = false;
+    }
 
     if (data.isEmpty())
+    {
         return {};
+    }
 
     z_stream strm{};
     strm.zalloc = Z_NULL;
@@ -59,7 +63,9 @@ QByteArray Utils::Gzip::compress(const QByteArray& data, const int level, bool* 
     // to write a simple gzip header and trailer around the compressed data instead of a zlib wrapper.
     const int initResult = deflateInit2(&strm, level, Z_DEFLATED, (15 + 16), 9, Z_DEFAULT_STRATEGY);
     if (initResult != Z_OK)
+    {
         return {};
+    }
 
     QByteArray ret{ static_cast<qsizetype>(deflateBound(&strm, data.size())), Qt::Uninitialized };
     strm.next_out = reinterpret_cast<Bytef*>(ret.data());
@@ -75,17 +81,23 @@ QByteArray Utils::Gzip::compress(const QByteArray& data, const int level, bool* 
     ret.truncate(strm.total_out);
 
     if (ok)
+    {
         *ok = true;
+    }
     return ret;
 }
 
 QByteArray Utils::Gzip::decompress(const QByteArray& data, bool* ok)
 {
     if (ok)
+    {
         *ok = false;
+    }
 
     if (data.isEmpty())
+    {
         return {};
+    }
 
     const int BUFSIZE = 1024 * 1024;
     std::vector<char> tmpBuf(BUFSIZE);
@@ -95,7 +107,7 @@ QByteArray Utils::Gzip::decompress(const QByteArray& data, bool* ok)
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
     strm.next_in = reinterpret_cast<const Bytef*>(data.constData());
-    strm.avail_in = uInt(data.size());
+    strm.avail_in = static_cast<uInt>(data.size());
     strm.next_out = reinterpret_cast<Bytef*>(tmpBuf.data());
     strm.avail_out = BUFSIZE;
 
@@ -103,7 +115,9 @@ QByteArray Utils::Gzip::decompress(const QByteArray& data, bool* ok)
     // Add 32 to windowBits to enable zlib and gzip decoding with automatic header detection
     int result = inflateInit2(&strm, (15 + 32));
     if (result != Z_OK)
+    {
         return {};
+    }
 
     QByteArray output;
     // from lzbench, level 9 average compression ratio is: 31.92%, which decompression ratio is: 1 / 0.3192 = 3.13
@@ -134,6 +148,8 @@ QByteArray Utils::Gzip::decompress(const QByteArray& data, bool* ok)
     inflateEnd(&strm);
 
     if (ok)
+    {
         *ok = true;
+    }
     return output;
 }

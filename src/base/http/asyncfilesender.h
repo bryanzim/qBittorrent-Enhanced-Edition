@@ -59,7 +59,7 @@ namespace Http
         AsyncFileSender(const Request& request, const Path& filePath, const HeaderMap& headers, QAbstractSocket* socket, QObject* parent = nullptr);
         ~AsyncFileSender() override;
 
-        State state() const;
+        [[nodiscard]] State state() const;
 
         void run();
 

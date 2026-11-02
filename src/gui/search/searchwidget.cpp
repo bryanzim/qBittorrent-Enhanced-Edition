@@ -153,8 +153,10 @@ namespace
     QString makeTabName(SearchJobWidget* searchJobWdget)
     {
         Q_ASSERT(searchJobWdget);
-        if (!searchJobWdget) [[unlikely]]
-            return {};
+        if (!searchJobWdget)
+        {
+            [[unlikely]] return {};
+        }
 
         QString tabName = searchJobWdget->searchPattern();
         tabName.replace(QRegularExpression(u"&{1}"_s), u"&&"_s);
@@ -167,7 +169,9 @@ namespace
         if (!readResult)
         {
             if (readResult.error().status == Utils::IO::ReadError::NotExist)
+            {
                 return {};
+            }
 
             return nonstd::make_unexpected(readResult.error().message);
         }
@@ -176,7 +180,9 @@ namespace
         QStringList history;
         history.reserve(lines.size());
         for (const QByteArrayView line : lines)
+        {
             history.append(QString::fromUtf8(line));
+        }
 
         return history;
     }
@@ -187,7 +193,9 @@ namespace
         if (!readResult)
         {
             if (readResult.error().status == Utils::IO::ReadError::NotExist)
+            {
                 return {};
+            }
 
             return nonstd::make_unexpected(readResult.error().message);
         }
@@ -196,43 +204,59 @@ namespace
         QJsonParseError jsonError;
         const QJsonDocument sessionDoc = QJsonDocument::fromJson(readResult.value(), &jsonError);
         if (jsonError.error != QJsonParseError::NoError)
+        {
             return nonstd::make_unexpected(jsonError.errorString());
+        }
 
         if (!sessionDoc.isObject())
+        {
             return nonstd::make_unexpected(formatErrorMsg);
+        }
 
         const QJsonObject sessionObj = sessionDoc.object();
         const QJsonValue tabsVal = sessionObj[KEY_SESSION_TABS];
         if (!tabsVal.isArray())
+        {
             return nonstd::make_unexpected(formatErrorMsg);
+        }
 
         QList<TabData> tabs;
         QSet<QString> tabIDs;
         for (const QJsonValue& tabVal : asConst(tabsVal.toArray()))
         {
             if (!tabVal.isObject())
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             const QJsonObject tabObj = tabVal.toObject();
 
             const QJsonValue tabIDVal = tabObj[KEY_TAB_ID];
             if (!tabIDVal.isString())
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             const QJsonValue patternVal = tabObj[KEY_TAB_SEARCHPATTERN];
             if (!patternVal.isString())
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             const QString tabID = tabIDVal.toString();
             tabIDs.insert(tabID);
             tabs.emplaceBack(TabData{ tabID, patternVal.toString() });
-            if (tabs.size() != tabIDs.size()) // duplicate ID
+            if (tabs.size() != tabIDs.size())
+            { // duplicate ID
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
         }
 
         const QJsonValue currentTabVal = sessionObj[KEY_SESSION_CURRENTTAB];
         if (!currentTabVal.isString())
+        {
             return nonstd::make_unexpected(formatErrorMsg);
+        }
 
         return SessionData{ .tabs = tabs, .currentTabID = currentTabVal.toString() };
     }
@@ -254,65 +278,107 @@ namespace
         QJsonParseError jsonError;
         const QJsonDocument searchResultsDoc = QJsonDocument::fromJson(readResult.value(), &jsonError);
         if (jsonError.error != QJsonParseError::NoError)
+        {
             return nonstd::make_unexpected(jsonError.errorString());
+        }
 
         if (!searchResultsDoc.isArray())
+        {
             return nonstd::make_unexpected(formatErrorMsg);
+        }
 
         const QJsonArray resultsList = searchResultsDoc.array();
         QList<SearchResult> searchResults;
         for (const QJsonValue& resultVal : resultsList)
         {
             if (!resultVal.isObject())
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             const QJsonObject resultObj = resultVal.toObject();
             SearchResult& searchResult = searchResults.emplaceBack();
 
             if (const QJsonValue fileNameVal = resultObj[KEY_RESULT_FILENAME]; fileNameVal.isString())
+            {
                 searchResult.fileName = fileNameVal.toString();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue fileURLVal = resultObj[KEY_RESULT_FILEURL]; fileURLVal.isString())
+            {
                 searchResult.fileUrl = fileURLVal.toString();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue fileSizeVal = resultObj[KEY_RESULT_FILESIZE]; fileSizeVal.isDouble())
+            {
                 searchResult.fileSize = fileSizeVal.toInteger();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue seedersCountVal = resultObj[KEY_RESULT_SEEDERSCOUNT]; seedersCountVal.isDouble())
+            {
                 searchResult.nbSeeders = seedersCountVal.toInteger();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue leechersCountVal = resultObj[KEY_RESULT_LEECHERSCOUNT]; leechersCountVal.isDouble())
+            {
                 searchResult.nbLeechers = leechersCountVal.toInteger();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue engineNameVal = resultObj[KEY_RESULT_ENGINENAME]; engineNameVal.isString())
+            {
                 searchResult.engineName = engineNameVal.toString();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue siteURLVal = resultObj[KEY_RESULT_SITEURL]; siteURLVal.isString())
+            {
                 searchResult.siteUrl = siteURLVal.toString();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue descrLinkVal = resultObj[KEY_RESULT_DESCRLINK]; descrLinkVal.isString())
+            {
                 searchResult.descrLink = descrLinkVal.toString();
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
 
             if (const QJsonValue pubDateVal = resultObj[KEY_RESULT_PUBDATE]; pubDateVal.isDouble())
+            {
                 searchResult.pubDate = QDateTime::fromSecsSinceEpoch(pubDateVal.toInteger());
+            }
             else
+            {
                 return nonstd::make_unexpected(formatErrorMsg);
+            }
         }
 
         return searchResults;
@@ -374,7 +440,9 @@ SearchWidget::SearchWidget(IGUIApplication* app, QWidget* parent)
 
     connect(m_ui->tabWidget, &QTabWidget::tabBarDoubleClicked, this, [this](const int tabIndex) {
         if (tabIndex < 0)
+        {
             return;
+        }
 
         // Reset current search pattern
         auto* searchJobWidget = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(tabIndex));
@@ -418,7 +486,9 @@ SearchWidget::SearchWidget(IGUIApplication* app, QWidget* parent)
     connect(closeTabHotkey, &QShortcut::activated, this, [this]() {
         const int currentIndex = m_ui->tabWidget->currentIndex();
         if (currentIndex >= 0)
+        {
             closeTab(currentIndex);
+        }
     });
 
     m_historyLength = Preferences::instance()->searchHistoryLength();
@@ -441,7 +511,9 @@ bool SearchWidget::eventFilter(QObject* object, QEvent* event)
     {
         // Close tabs when middle-clicked
         if (event->type() != QEvent::MouseButtonRelease)
+        {
             return false;
+        }
 
         const auto* mouseEvent = static_cast<QMouseEvent*>(event);
         const int tabIndex = m_ui->tabWidget->tabBar()->tabAt(mouseEvent->pos());
@@ -450,7 +522,9 @@ bool SearchWidget::eventFilter(QObject* object, QEvent* event)
             if (mouseEvent->button() == Qt::MiddleButton)
             {
                 if (Preferences::instance()->closeSearchTabWithMiddleClick())
+                {
                     closeTab(tabIndex);
+                }
 
                 return true;
             }
@@ -491,7 +565,9 @@ void SearchWidget::onPreferencesChanged()
     const bool storeOpenedTabsResults = pref->storeSearchJobResults();
     const bool isStoreOpenedTabsResultsChanged = storeOpenedTabsResults != m_storeOpenedTabsResults;
     if (isStoreOpenedTabsResultsChanged)
+    {
         m_storeOpenedTabsResults = storeOpenedTabsResults;
+    }
 
     if (isStoreOpenedTabsResultsChanged || isStoreOpenedTabsChanged)
     {
@@ -554,7 +630,9 @@ void SearchWidget::fillCatCombobox()
     QList<QStrPair> tmpList;
     const auto selectedPlugin = m_ui->selectPlugin->itemData(m_ui->selectPlugin->currentIndex()).toString();
     for (const QString& cat : asConst(SearchPluginManager::instance()->getPluginCategories(selectedPlugin)))
+    {
         tmpList << std::make_pair(SearchPluginManager::categoryFullName(cat), cat);
+    }
     std::ranges::sort(tmpList, [](const QStrPair& l, const QStrPair& r) { return (QString::localeAwareCompare(l.first, r.first) < 0); });
 
     for (const QStrPair& p : asConst(tmpList))
@@ -564,7 +642,9 @@ void SearchWidget::fillCatCombobox()
     }
 
     if (m_ui->comboCategory->count() > 1)
+    {
         m_ui->comboCategory->insertSeparator(1);
+    }
 }
 
 void SearchWidget::fillPluginComboBox()
@@ -577,14 +657,20 @@ void SearchWidget::fillPluginComboBox()
     using QStrPair = std::pair<QString, QString>;
     QList<QStrPair> tmpList;
     for (const QString& name : asConst(SearchPluginManager::instance()->enabledPlugins()))
+    {
         tmpList << std::make_pair(SearchPluginManager::instance()->pluginFullName(name), name);
+    }
     std::ranges::sort(tmpList, [](const QStrPair& l, const QStrPair& r) { return (QString::localeAwareCompare(l.first, r.first) < 0); });
 
     for (const QStrPair& p : asConst(tmpList))
+    {
         m_ui->selectPlugin->addItem(p.first, p.second);
+    }
 
     if (m_ui->selectPlugin->count() > 3)
+    {
         m_ui->selectPlugin->insertSeparator(3);
+    }
 }
 
 QString SearchWidget::selectedCategory() const
@@ -597,10 +683,14 @@ QStringList SearchWidget::selectedPlugins() const
     const auto itemText = m_ui->selectPlugin->itemData(m_ui->selectPlugin->currentIndex()).toString();
 
     if (itemText == u"all")
+    {
         return SearchPluginManager::instance()->allPlugins();
+    }
 
     if ((itemText == u"enabled") || (itemText == u"multi"))
+    {
         return SearchPluginManager::instance()->enabledPlugins();
+    }
 
     return { itemText };
 }
@@ -611,7 +701,9 @@ QString SearchWidget::generateTabID() const
     {
         const QString tabID = QString::number(qHash(QDateTime::currentDateTimeUtc()));
         if (!m_tabWidgets.contains(tabID))
+        {
             return tabID;
+        }
     }
 }
 
@@ -627,16 +719,22 @@ int SearchWidget::addTab(const QString& tabID, SearchJobWidget* searchJobWdget)
 void SearchWidget::updateHistory(const QString& newSearchPattern)
 {
     if (m_historyLength <= 0)
+    {
         return;
+    }
 
     if (m_searchPatternCompleterModel->stringList().contains(newSearchPattern))
+    {
         return;
+    }
 
     const int rowNum = m_searchPatternCompleterModel->rowCount();
     m_searchPatternCompleterModel->insertRow(rowNum);
     m_searchPatternCompleterModel->setData(m_searchPatternCompleterModel->index(rowNum, 0), newSearchPattern);
     if (m_searchPatternCompleterModel->rowCount() > m_historyLength)
+    {
         m_searchPatternCompleterModel->removeRow(0);
+    }
 
     QMetaObject::invokeMethod(m_dataStorage, [this, history = m_searchPatternCompleterModel->stringList()] {
         m_dataStorage->storeHistory(history);
@@ -646,23 +744,31 @@ void SearchWidget::updateHistory(const QString& newSearchPattern)
 void SearchWidget::loadHistory()
 {
     if (m_historyLength <= 0)
+    {
         return;
+    }
 
     createSearchPatternCompleter();
 
     connect(m_dataStorage, &DataStorage::historyLoaded, this, [this](const QStringList& storedHistory) {
         if (m_historyLength <= 0)
+        {
             return;
+        }
 
         QStringList history = storedHistory;
         for (const QString& newPattern : asConst(m_searchPatternCompleterModel->stringList()))
         {
             if (!history.contains(newPattern))
+            {
                 history.append(newPattern);
+            }
         }
 
         if (history.size() > m_historyLength)
+        {
             history.remove(0, (history.size() - m_historyLength));
+        }
 
         m_searchPatternCompleterModel->setStringList(history);
     });
@@ -673,7 +779,9 @@ void SearchWidget::loadHistory()
 void SearchWidget::saveSession() const
 {
     if (!m_storeOpenedTabs)
+    {
         return;
+    }
 
     const int currentIndex = m_ui->tabWidget->currentIndex();
     SessionData sessionData;
@@ -682,7 +790,9 @@ void SearchWidget::saveSession() const
         auto* searchJobWidget = static_cast<SearchJobWidget*>(m_ui->tabWidget->widget(tabIndex));
         sessionData.tabs.emplaceBack(TabData{ searchJobWidget->id(), searchJobWidget->searchPattern() });
         if (currentIndex == tabIndex)
+        {
             sessionData.currentTabID = searchJobWidget->id();
+        }
     }
 
     QMetaObject::invokeMethod(m_dataStorage, [this, sessionData] { m_dataStorage->storeSession(sessionData); });
@@ -705,7 +815,9 @@ void SearchWidget::createSearchPatternCompleter()
 void SearchWidget::restoreSession()
 {
     if (!m_storeOpenedTabs)
+    {
         return;
+    }
 
     connect(m_dataStorage, &DataStorage::tabLoaded, this, [this](const QString& tabID, const QString& searchPattern, const QList<SearchResult>& searchResults) {
         auto* restoredTab = new SearchJobWidget(tabID, searchPattern, searchResults, app(), this);
@@ -754,10 +866,14 @@ void SearchWidget::currentTabChanged(const int index)
                              : nullptr;
 
     if (!m_currentSearchTab)
+    {
         m_isNewQueryString = true;
+    }
 
     if (!m_isNewQueryString)
+    {
         m_ui->lineEditSearchPattern->setText(m_currentSearchTab->searchPattern());
+    }
 
     adjustSearchButton();
 }
@@ -766,7 +882,9 @@ void SearchWidget::selectMultipleBox([[maybe_unused]] const int index)
 {
     const auto itemText = m_ui->selectPlugin->itemData(m_ui->selectPlugin->currentIndex()).toString();
     if (itemText == u"multi")
+    {
         pluginsButtonClicked();
+    }
 }
 
 void SearchWidget::toggleFocusBetweenLineEdits()
@@ -897,7 +1015,9 @@ void SearchWidget::tabStatusChanged(SearchJobWidget* tab)
     if (tab->status() != SearchJobWidget::Status::Ongoing)
     {
         if (tab == m_currentSearchTab)
+        {
             adjustSearchButton();
+        }
 
         emit searchFinished(tab->status() == SearchJobWidget::Status::Error);
 

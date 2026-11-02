@@ -49,7 +49,7 @@ public:
     ~TrackerListWidget() override;
 
     void setTorrent(BitTorrent::Torrent* torrent);
-    BitTorrent::Torrent* torrent() const;
+    [[nodiscard]] BitTorrent::Torrent* torrent() const;
 
 public slots:
     void decreaseSelectedTrackerTiers();
@@ -65,8 +65,8 @@ private:
     void wheelEvent(QWheelEvent* event) override;
     void loadSettings();
     void saveSettings() const;
-    QModelIndexList getSelectedTrackerRows() const;
-    int visibleColumnsCount() const;
+    [[nodiscard]] QModelIndexList getSelectedTrackerRows() const;
+    [[nodiscard]] int visibleColumnsCount() const;
     void openAddTrackersDialog();
     void displayColumnHeaderMenu();
 

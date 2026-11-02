@@ -49,7 +49,7 @@ namespace
     {
         qreal arg = 0;
         Utils::Misc::SizeUnit unit{};
-        qlonglong sizeInBytes() const
+        [[nodiscard]] qlonglong sizeInBytes() const
         {
             return Utils::Misc::sizeInBytes(arg, unit);
         }
@@ -60,9 +60,13 @@ namespace
         using Utils::Misc::SizeUnit;
 
         if (value == 0.0)
+        {
             return { 0, SizeUnit::Byte };
+        }
         if (value <= 12.0)
+        {
             return { 12, SizeUnit::Byte };
+        }
 
         SizeUnit calculatedUnit = SizeUnit::Byte;
         while (value > 1024)
@@ -86,7 +90,9 @@ namespace
         for (const auto& roundedValue : roundingTable)
         {
             if (value <= roundedValue)
+            {
                 return { roundedValue, calculatedUnit };
+            }
         }
         return { 10.0, calculatedUnit };
     }
@@ -114,18 +120,24 @@ bool SpeedPlotView::Averager::push(const SampleData& sampleData)
     // This speed is inaccessible to an ordinary user.
     ++m_counter;
     for (int id = UP; id < NB_GRAPHS; ++id)
+    {
         m_accumulator[id] += sampleData[id];
+    }
 
     // system may go to sleep, that can cause very big elapsed interval
-    const milliseconds updateInterval{ static_cast<int64_t>(BitTorrent::Session::instance()->refreshInterval() * 1.25) };
+    const milliseconds updateInterval{ static_cast<std::int64_t>(BitTorrent::Session::instance()->refreshInterval() * 1.25) };
     const milliseconds maxElapsed{ std::max(updateInterval, m_resolution) };
     const milliseconds elapsed{ std::min(milliseconds{ m_lastSampleTime.elapsed() }, maxElapsed) };
     if (elapsed < m_resolution)
+    {
         return false; // still accumulating
+    }
 
     // it is time final averaging calculations
     for (int id = UP; id < NB_GRAPHS; ++id)
+    {
         m_accumulator[id] /= m_counter;
+    }
 
     m_currentDuration += elapsed;
 
@@ -204,7 +216,9 @@ void SpeedPlotView::pushPoint(const SpeedPlotView::SampleData& point)
         if (averager->push(point))
         {
             if (m_currentAverager == averager)
+            {
                 viewport()->update();
+            }
         }
     }
 }
@@ -255,12 +269,14 @@ quint64 SpeedPlotView::maxYValue() const
 {
     const DataCircularBuffer& queue = currentData();
 
-    quint64 maxYValue = 0;
+    quint64 maxYValue = 0U;
     for (int id = UP; id < NB_GRAPHS; ++id)
     {
 
         if (!m_properties[static_cast<GraphID>(id)].enable)
+        {
             continue;
+        }
 
         milliseconds duration{ 0 };
         for (int i = static_cast<int>(queue.size()) - 1; i >= 0; --i)
@@ -268,7 +284,9 @@ quint64 SpeedPlotView::maxYValue() const
             maxYValue = std::max(maxYValue, queue[i].data[id]);
             duration += queue[i].duration;
             if (duration >= m_currentMaxDuration)
+            {
                 break;
+            }
         }
     }
 
@@ -279,9 +297,9 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
 {
     QPainter painter(viewport());
 
-    QRect fullRect = viewport()->rect();
+    QRect const fullRect = viewport()->rect();
     QRect rect = viewport()->rect();
-    QFontMetrics fontMetrics = painter.fontMetrics();
+    QFontMetrics const fontMetrics = painter.fontMetrics();
 
     rect.adjust(4, 4, 0, -4); // Add padding
     const SplitValue niceScale = getRoundedYScale(maxYValue());
@@ -300,14 +318,16 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
     for (const QString& label : speedLabels)
     {
         if (fontMetrics.horizontalAdvance(label) > yAxisWidth)
+        {
             yAxisWidth = fontMetrics.horizontalAdvance(label);
+        }
     }
 
     int i = 0;
     for (const QString& label : speedLabels)
     {
-        QRectF labelRect(rect.topLeft() + QPointF(-yAxisWidth, (i++) * 0.25 * rect.height() - fontMetrics.height()),
-                         QSizeF(2 * yAxisWidth, fontMetrics.height()));
+        QRectF const labelRect(rect.topLeft() + QPointF(-yAxisWidth, (i++) * 0.25 * rect.height() - fontMetrics.height()),
+                               QSizeF(2 * yAxisWidth, fontMetrics.height()));
         painter.drawText(labelRect, label, Qt::AlignRight | Qt::AlignTop);
     }
 
@@ -351,7 +371,9 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
     for (int id = UP; id < NB_GRAPHS; ++id)
     {
         if (!m_properties[static_cast<GraphID>(id)].enable)
+        {
             continue;
+        }
 
         QList<QPoint> points;
         milliseconds duration{ 0 };
@@ -364,7 +386,9 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
 
             duration += queue[pointIndex].duration;
             if (duration >= m_currentMaxDuration)
+            {
                 break;
+            }
         }
 
         painter.setPen(m_properties[static_cast<GraphID>(id)].pen);
@@ -373,21 +397,25 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
     painter.setClipping(false);
 
     // draw legend
-    QPoint legendTopLeft(rect.left() + 4, fullRect.top() + 4);
+    QPoint const legendTopLeft(rect.left() + 4, fullRect.top() + 4);
 
     qreal legendHeight = 0;
     int legendWidth = 0;
     for (const auto& property : asConst(m_properties))
     {
         if (!property.enable)
+        {
             continue;
+        }
 
         if (fontMetrics.horizontalAdvance(property.name) > legendWidth)
+        {
             legendWidth = fontMetrics.horizontalAdvance(property.name);
+        }
         legendHeight += 1.5 * fontMetrics.height();
     }
 
-    QRectF legendBackgroundRect(QPoint(legendTopLeft.x() - 4, legendTopLeft.y() - 4), QSizeF(legendWidth + 8, legendHeight + 8));
+    QRectF const legendBackgroundRect(QPoint(legendTopLeft.x() - 4, legendTopLeft.y() - 4), QSizeF(legendWidth + 8, legendHeight + 8));
     QColor legendBackgroundColor = QWidget::palette().color(QWidget::backgroundRole());
     legendBackgroundColor.setAlpha(128); // 50% transparent
     painter.fillRect(legendBackgroundRect, legendBackgroundColor);
@@ -396,7 +424,9 @@ void SpeedPlotView::paintEvent(QPaintEvent*)
     for (const auto& property : asConst(m_properties))
     {
         if (!property.enable)
+        {
             continue;
+        }
 
         const int nameSize = fontMetrics.horizontalAdvance(property.name);
         const qreal indent = 1.5 * (i++) * fontMetrics.height();

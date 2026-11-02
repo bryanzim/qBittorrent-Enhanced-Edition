@@ -58,7 +58,9 @@ Net::DownloadHandlerImpl::DownloadHandlerImpl(DownloadManager* manager, const Do
 void Net::DownloadHandlerImpl::cancel()
 {
     if (m_isFinished)
+    {
         return;
+    }
 
     if (m_reply && m_reply->isRunning())
     {
@@ -84,7 +86,9 @@ void Net::DownloadHandlerImpl::assignNetworkReply(QNetworkReply* reply)
     m_reply = reply;
     m_reply->setParent(this);
     if (m_downloadRequest.limit() > 0)
+    {
         connect(m_reply, &QNetworkReply::downloadProgress, this, &DownloadHandlerImpl::checkDownloadSize);
+    }
     connect(m_reply, &QNetworkReply::finished, this, &DownloadHandlerImpl::processFinishedDownload);
 }
 
@@ -152,7 +156,9 @@ void Net::DownloadHandlerImpl::processFinishedDownload()
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
                 if (Preferences::instance()->isMarkOfTheWebEnabled())
+                {
                     Utils::OS::applyMarkOfTheWeb(m_result.filePath, m_result.url);
+                }
 #endif // Q_OS_MACOS || Q_OS_WIN
             }
             else
@@ -169,7 +175,9 @@ void Net::DownloadHandlerImpl::processFinishedDownload()
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
                 if (Preferences::instance()->isMarkOfTheWebEnabled())
+                {
                     Utils::OS::applyMarkOfTheWeb(m_result.filePath, m_result.url);
+                }
 #endif // Q_OS_MACOS || Q_OS_WIN
             }
             else

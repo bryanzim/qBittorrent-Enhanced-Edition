@@ -67,7 +67,9 @@ namespace
     const QByteArrayView viewWithoutEndingWith(const QByteArrayView in, const QByteArrayView str)
     {
         if (in.endsWith(str))
+        {
             return in.chopped(str.size());
+        }
         return in;
     }
 
@@ -116,7 +118,9 @@ RequestParser::ParseResult RequestParser::doParse(const QByteArrayView data)
 
     // handle supported methods
     if ((m_request.method == HEADER_REQUEST_METHOD_GET) || (m_request.method == HEADER_REQUEST_METHOD_HEAD))
+    {
         return { ParseStatus::OK, m_request, headerLength };
+    }
 
     if (m_request.method == HEADER_REQUEST_METHOD_POST)
     {
@@ -124,8 +128,10 @@ RequestParser::ParseResult RequestParser::doParse(const QByteArrayView data)
             // [rfc7230] 3.3.2. Content-Length
 
             const QString rawValue = m_request.headers.value(HEADER_CONTENT_LENGTH);
-            if (rawValue.isNull()) // `HEADER_CONTENT_LENGTH` does not exist
+            if (rawValue.isNull())
+            { // `HEADER_CONTENT_LENGTH` does not exist
                 return 0;
+            }
             return Utils::String::parseInt(rawValue).value_or(-1);
         };
 
@@ -184,16 +190,22 @@ bool RequestParser::parseStartLines(const QByteArrayView data)
     }
 
     if (requestLines.isEmpty())
+    {
         return false;
+    }
 
     if (!parseRequestLine(requestLines[0]))
+    {
         return false;
+    }
 
     for (auto i = ++(requestLines.begin()); i != requestLines.end(); ++i)
     {
         const std::optional<QStringPair> header = parseHeaderLine(*i);
         if (!header.has_value())
+        {
             return false;
+        }
 
         const auto [name, value] = header.value();
         m_request.headers[name] = value;
@@ -239,7 +251,9 @@ bool RequestParser::parseRequestLine(const QByteArrayView line)
         {
             const qsizetype eqCharPos = param.indexOf('=');
             if (eqCharPos <= 0)
+            {
                 continue; // ignores params without name
+            }
 
             const QByteArrayView nameComponent = param.first(eqCharPos);
             const QByteArrayView valueComponent = param.sliced(eqCharPos + 1);
@@ -278,7 +292,9 @@ bool RequestParser::parsePostMessage(const QByteArrayView data)
 
         const QList<QStringPair> pairs = QUrlQuery(QString::fromUtf8(processedData)).queryItems(QUrl::FullyDecoded);
         for (const QStringPair& pair : pairs)
+        {
             m_request.posts[pair.first] = pair.second;
+        }
 
         return true;
     }
@@ -345,7 +361,9 @@ bool RequestParser::parseFormData(const QByteArrayView data)
     {
         const std::optional<QStringPair> header = parseHeaderLine(line);
         if (!header.has_value())
+        {
             return false;
+        }
 
         const auto [name, value] = header.value();
 
@@ -358,7 +376,9 @@ bool RequestParser::parseFormData(const QByteArrayView data)
             {
                 const qsizetype idx = directive.indexOf(u'=');
                 if (idx < 0)
+                {
                     continue;
+                }
 
                 const QString name = QString::fromLatin1(directive.first(idx).trimmed()).toLower();
                 const QString value = QString::fromLatin1(unquote(directive.sliced(idx + 1).trimmed()));

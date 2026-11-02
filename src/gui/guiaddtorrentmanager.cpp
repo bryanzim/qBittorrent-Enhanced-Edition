@@ -58,17 +58,25 @@ namespace
 
         QPoint delta = screenGeometry.bottomRight() - dialogGeometry.bottomRight();
         if (delta.x() > 0)
+        {
             delta.setX(0);
+        }
         if (delta.y() > 0)
+        {
             delta.setY(0);
+        }
         dialogGeometry.translate(delta);
 
         const QPoint frameOffset{ 10, 40 };
         delta = screenGeometry.topLeft() - dialogGeometry.topLeft() + frameOffset;
         if (delta.x() < 0)
+        {
             delta.setX(0);
+        }
         if (delta.y() < 0)
+        {
             delta.setY(0);
+        }
         dialogGeometry.translate(delta);
 
         dialog->setGeometry(dialogGeometry);
@@ -98,7 +106,9 @@ bool GUIAddTorrentManager::addTorrent(const QString& source, const BitTorrent::A
     // `source`: .torrent file path,  magnet URI or URL
 
     if (source.isEmpty())
+    {
         return false;
+    }
 
     const auto* pref = Preferences::instance();
 
@@ -110,7 +120,9 @@ bool GUIAddTorrentManager::addTorrent(const QString& source, const BitTorrent::A
     if (Net::DownloadManager::hasSupportedScheme(source))
     {
         if (m_downloadedTorrents.contains(source))
+        {
             return true;
+        }
 
         LogMsg(tr("Downloading torrent... Source: \"%1\"").arg(source));
         // Launch downloader
@@ -139,7 +151,9 @@ bool GUIAddTorrentManager::addTorrent(const QString& source, const BitTorrent::A
         const BitTorrent::TorrentDescriptor& torrentDescriptor = loadResult.value();
         const bool isProcessing = processTorrent(source, torrentDescriptor, params);
         if (isProcessing)
+        {
             setTorrentFileGuard(source, torrentFileGuard);
+        }
         return isProcessing;
     }
     else
@@ -158,15 +172,23 @@ void GUIAddTorrentManager::onDownloadFinished(const Net::DownloadResult& result)
     {
     case Net::DownloadStatus::Success:
         if (const auto loadResult = BitTorrent::TorrentDescriptor::load(result.data))
+        {
             processTorrent(source, loadResult.value(), addTorrentParams);
+        }
         else
+        {
             handleAddTorrentFailed(source, loadResult.error());
+        }
         break;
     case Net::DownloadStatus::RedirectedToMagnet:
         if (const auto parseResult = BitTorrent::TorrentDescriptor::parse(result.magnetURI))
+        {
             processTorrent(source, parseResult.value(), addTorrentParams);
+        }
         else
+        {
             handleAddTorrentFailed(source, parseResult.error());
+        }
         break;
     default:
         handleAddTorrentFailed(source, result.errorString);
@@ -176,13 +198,17 @@ void GUIAddTorrentManager::onDownloadFinished(const Net::DownloadResult& result)
 void GUIAddTorrentManager::onMetadataDownloaded(const BitTorrent::TorrentInfo& metadata)
 {
     Q_ASSERT(metadata.isValid());
-    if (!metadata.isValid()) [[unlikely]]
-        return;
+    if (!metadata.isValid())
+    {
+        [[unlikely]] return;
+    }
 
     for (const auto& [infoHash, dialog] : asConst(m_dialogs).asKeyValueRange())
     {
         if (metadata.matchesInfoHash(infoHash))
+        {
             dialog->updateMetadata(metadata);
+        }
     }
 }
 
@@ -194,7 +220,9 @@ bool GUIAddTorrentManager::processTorrent(const QString& source, const BitTorren
     if (AddNewTorrentDialog* dialog = m_dialogs.value(infoHash))
     {
         if (hasMetadata)
+        {
             dialog->updateMetadata(*torrentDescr.info());
+        }
 
         dialog->setWindowState(dialog->windowState() & ~Qt::WindowMinimized);
         dialog->show();
@@ -242,7 +270,9 @@ bool GUIAddTorrentManager::processTorrent(const QString& source, const BitTorren
     }
 
     if (!hasMetadata)
+    {
         btSession()->downloadMetadata(torrentDescr);
+    }
 
 #ifdef Q_OS_MACOS
     const bool attached = false;
@@ -256,7 +286,9 @@ bool GUIAddTorrentManager::processTorrent(const QString& source, const BitTorren
     // Qt::Window is required to avoid showing only two dialog on top (see #12852).
     // Also improves the general convenience of adding multiple torrents.
     if (!attached)
+    {
         dlg->setWindowFlags(Qt::Window);
+    }
 
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     m_dialogs[infoHash] = dlg;
@@ -264,7 +296,9 @@ bool GUIAddTorrentManager::processTorrent(const QString& source, const BitTorren
         if (dlg->isDoNotDeleteTorrentChecked())
         {
             if (auto torrentFileGuard = releaseTorrentFileGuard(source))
+            {
                 torrentFileGuard->setAutoRemove(false);
+            }
         }
 
         addTorrentToSession(source, acceptedTorrent, acceptedParams);

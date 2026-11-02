@@ -48,8 +48,8 @@ class FeedListWidget final : public QTreeWidget
 public:
     explicit FeedListWidget(QWidget* parent);
 
-    QTreeWidgetItem* stickyItemAllArticles() const;
-    QTreeWidgetItem* stickyItemUnreadArticles() const;
+    [[nodiscard]] QTreeWidgetItem* stickyItemAllArticles() const;
+    [[nodiscard]] QTreeWidgetItem* stickyItemUnreadArticles() const;
     bool isStickyItem(QTreeWidgetItem* item) const;
     QList<QTreeWidgetItem*> getAllOpenedFolders(QTreeWidgetItem* parent = nullptr) const;
     RSS::Item* getRSSItem(QTreeWidgetItem* item) const;

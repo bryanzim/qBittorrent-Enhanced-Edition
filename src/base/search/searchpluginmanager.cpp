@@ -63,7 +63,9 @@ namespace
         PathList dirs = { path };
         QDirIterator iter{ path.data(), (QDir::AllDirs | QDir::NoDotAndDotDot), QDirIterator::Subdirectories };
         while (iter.hasNext())
+        {
             dirs += Path(iter.next());
+        }
 
         for (const Path& dir : asConst(dirs))
         {
@@ -109,7 +111,9 @@ SearchPluginManager::~SearchPluginManager()
 SearchPluginManager* SearchPluginManager::instance()
 {
     if (!m_instance)
+    {
         m_instance = new SearchPluginManager;
+    }
     return m_instance;
 }
 
@@ -129,7 +133,9 @@ QStringList SearchPluginManager::enabledPlugins() const
     for (const SearchPluginInfo* plugin : asConst(m_plugins))
     {
         if (plugin->enabled)
+        {
             plugins << plugin->name;
+        }
     }
 
     return plugins;
@@ -145,7 +151,9 @@ QStringList SearchPluginManager::supportedCategories() const
             for (const QString& cat : plugin->supportedCategories)
             {
                 if (!result.contains(cat))
+                {
                     result << cat;
+                }
             }
         }
     }
@@ -157,20 +165,30 @@ QStringList SearchPluginManager::getPluginCategories(const QString& pluginName) 
 {
     QStringList plugins;
     if (pluginName == u"all")
+    {
         plugins = allPlugins();
+    }
     else if ((pluginName == u"enabled") || (pluginName == u"multi"))
+    {
         plugins = enabledPlugins();
+    }
     else
+    {
         plugins << pluginName.trimmed();
+    }
 
     QSet<QString> categories;
     for (const QString& name : asConst(plugins))
     {
         const SearchPluginInfo* plugin = pluginInfo(name);
         if (!plugin)
+        {
             continue; // plugin wasn't found
+        }
         for (const QString& category : plugin->supportedCategories)
+        {
             categories << category;
+        }
     }
 
     return categories.values();
@@ -186,7 +204,9 @@ QString SearchPluginManager::pluginNameBySiteURL(const QString& siteURL) const
     for (const SearchPluginInfo* plugin : asConst(m_plugins))
     {
         if (plugin->url == siteURL)
+        {
             return plugin->name;
+        }
     }
 
     return {};
@@ -202,9 +222,13 @@ void SearchPluginManager::enablePlugin(const QString& name, const bool enabled)
         Preferences* const pref = Preferences::instance();
         QStringList disabledPlugins = pref->getSearchEngDisabled();
         if (enabled)
+        {
             disabledPlugins.removeAll(name);
+        }
         else if (!disabledPlugins.contains(name))
+        {
             disabledPlugins.append(name);
+        }
         pref->setSearchEngDisabled(disabledPlugins);
 
         emit pluginEnabled(name, enabled);
@@ -231,9 +255,13 @@ void SearchPluginManager::installPlugin(const QString& source)
     {
         const Path path{ source.startsWith(u"file:", Qt::CaseInsensitive) ? QUrl(source).toLocalFile() : source };
         if (const QString pyExt = u".py"_s; path.hasExtension(pyExt))
+        {
             installPlugin_impl(path.removedExtension(pyExt).filename(), path);
+        }
         else
+        {
             emit pluginInstallationFailed(path.filename(), tr("Unknown search engine plugin file format."));
+        }
     }
 }
 
@@ -276,16 +304,24 @@ void SearchPluginManager::installPlugin_impl(const QString& name, const Path& sr
             {
                 // restore backup
                 if (Utils::Fs::copyFile(backupPath, destPath))
+                {
                     std::ignore = Utils::Fs::removeFile(backupPath);
+                }
                 else
+                {
                     std::ignore = Utils::Fs::removeFile(destPath);
+                }
             }
 
             const QString errMsg = tr("Search plugin installation failed.");
             if (hasExistingPlugin)
+            {
                 emit pluginUpdateFailed(name, errMsg);
+            }
             else
+            {
                 emit pluginInstallationFailed(name, errMsg);
+            }
 
             return;
         }
@@ -301,7 +337,9 @@ void SearchPluginManager::installPlugin_impl(const QString& name, const Path& sr
         LogMsg(tr("Search plugin has been updated. Plugin name: \"%1\". Version: %2.").arg(name, incomingVersion.toString()), Log::INFO);
 
         if (hasBackup)
+        {
             std::ignore = Utils::Fs::removeFile(backupPath);
+        }
     }
     else
     {
@@ -325,9 +363,13 @@ void SearchPluginManager::installPlugin_impl(const QString& name, const Path& sr
 
         const QString errMsg = tr("Plugin is not supported.");
         if (hasExistingPlugin)
+        {
             emit pluginUpdateFailed(name, errMsg);
+        }
         else
+        {
             emit pluginInstallationFailed(name, errMsg);
+        }
     }
 }
 
@@ -353,7 +395,9 @@ bool SearchPluginManager::uninstallPlugin(const QString& name)
 void SearchPluginManager::updateIconPath(SearchPluginInfo* const plugin)
 {
     if (!plugin)
+    {
         return;
+    }
 
     const Path pluginsPath = pluginsLocation();
     Path iconPath = pluginsPath / Path(plugin->name + u".png");
@@ -365,7 +409,9 @@ void SearchPluginManager::updateIconPath(SearchPluginInfo* const plugin)
     {
         iconPath = pluginsPath / Path(plugin->name + u".ico");
         if (iconPath.exists())
+        {
             plugin->iconPath = iconPath;
+        }
     }
 }
 
@@ -509,9 +555,13 @@ void SearchPluginManager::applyProxySettings()
 void SearchPluginManager::versionInfoDownloadFinished(const Net::DownloadResult& result)
 {
     if (result.status == Net::DownloadStatus::Success)
+    {
         parseVersionInfo(result.data);
+    }
     else
+    {
         emit checkForUpdatesFailed(tr("Update server is temporarily unavailable. %1").arg(result.errorString));
+    }
 }
 
 void SearchPluginManager::pluginDownloadFinished(const Net::DownloadResult& result)
@@ -531,9 +581,13 @@ void SearchPluginManager::pluginDownloadFinished(const Net::DownloadResult& resu
                                        .replace(u".py"_s, u""_s, Qt::CaseInsensitive);
 
         if (pluginInfo(pluginName))
+        {
             emit pluginUpdateFailed(pluginName, tr("Failed to download the plugin file. %1").arg(result.errorString));
+        }
         else
+        {
             emit pluginInstallationFailed(pluginName, tr("Failed to download the plugin file. %1").arg(result.errorString));
+        }
     }
 }
 
@@ -545,13 +599,17 @@ void SearchPluginManager::updateNova()
 
     QFile packageFile{ (enginePath / Path(u"__init__.py"_s)).data() };
     if (packageFile.open(QIODevice::WriteOnly))
+    {
         packageFile.close();
+    }
 
     Utils::Fs::mkdir(enginePath / Path(u"engines"_s));
 
     QFile packageFile2{ (enginePath / Path(u"engines/__init__.py"_s)).data() };
     if (packageFile2.open(QIODevice::WriteOnly))
+    {
         packageFile2.close();
+    }
 
     // Copy search plugin files (if necessary)
     const auto updateFile = [&enginePath](const Path& filename) {
@@ -559,10 +617,14 @@ void SearchPluginManager::updateNova()
         const Path filePathDisk = enginePath / filename;
 
         if (getPluginVersion(filePathBundled) <= getPluginVersion(filePathDisk))
+        {
             return;
+        }
 
         if (Utils::Fs::removeFile(filePathDisk))
+        {
             Utils::Fs::copyFile(filePathBundled, filePathDisk);
+        }
     };
 
     updateFile(Path(u"helpers.py"_s));
@@ -629,7 +691,9 @@ void SearchPluginManager::update()
             {
                 cat = cat.trimmed();
                 if (!cat.isEmpty())
+                {
                     plugin->supportedCategories << cat;
+                }
             }
 
             const QStringList disabledEngines = Preferences::instance()->getSearchEngDisabled();
@@ -664,9 +728,13 @@ void SearchPluginManager::parseVersionInfo(const QByteArray& info)
         line = line.trimmed();
 
         if (line.isEmpty())
+        {
             continue;
+        }
         if (line.startsWith('#'))
+        {
             continue;
+        }
 
         const QList<QByteArrayView> list = Utils::ByteArray::splitToViews(line, ":");
         if (list.size() != 2)
@@ -707,9 +775,11 @@ bool SearchPluginManager::isUpdateNeeded(const QString& pluginName, const Search
 {
     const SearchPluginInfo* plugin = pluginInfo(pluginName);
     if (!plugin)
+    {
         return true;
+    }
 
-    SearchPluginVersion oldVersion = plugin->version;
+    SearchPluginVersion const oldVersion = plugin->version;
     return (newVersion > oldVersion);
 }
 
@@ -725,18 +795,24 @@ SearchPluginVersion SearchPluginManager::getPluginVersion(const Path& filePath)
 
     QFile pluginFile{ filePath.data() };
     if (!pluginFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
         return {};
+    }
 
     while (!pluginFile.atEnd())
     {
         const auto line = QString::fromUtf8(pluginFile.readLine(lineMaxLength)).remove(u' ');
         if (!line.startsWith(u"#VERSION:", Qt::CaseInsensitive))
+        {
             continue;
+        }
 
         const QString versionStr = line.sliced(9);
         const auto version = SearchPluginVersion::fromString(versionStr);
         if (version.isValid())
+        {
             return version;
+        }
 
         LogMsg(tr("Search plugin '%1' contains invalid version string ('%2')")
                    .arg(filePath.filename(), versionStr),

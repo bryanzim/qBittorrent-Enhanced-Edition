@@ -69,7 +69,9 @@ ApplicationInstanceManager::ApplicationInstanceManager(const Path& instancePath,
     }
 
     if (!sharedMem->isAttached())
+    {
         qCritical() << "Failed to initialize shared memory: " << sharedMem->errorString();
+    }
 #endif
 }
 

@@ -69,7 +69,9 @@ void LogController::mainAction()
     bool ok = false;
     int lastKnownId = params()[u"last_known_id"_s].toInt(&ok);
     if (!ok)
+    {
         lastKnownId = -1;
+    }
 
     Logger* const logger = Logger::instance();
     QJsonArray msgList;
@@ -77,7 +79,9 @@ void LogController::mainAction()
     for (const Log::Msg& msg : asConst(logger->getMessages(lastKnownId)))
     {
         if (!(((msg.type == Log::NORMAL) && isNormal) || ((msg.type == Log::INFO) && isInfo) || ((msg.type == Log::WARNING) && isWarning) || ((msg.type == Log::CRITICAL) && isCritical)))
+        {
             continue;
+        }
 
         msgList.append(QJsonObject{
             {          KEY_LOG_ID,        msg.id },
@@ -105,7 +109,9 @@ void LogController::peersAction()
     bool ok = false;
     int lastKnownId = params()[u"last_known_id"_s].toInt(&ok);
     if (!ok)
+    {
         lastKnownId = -1;
+    }
 
     Logger* const logger = Logger::instance();
     QJsonArray peerList;

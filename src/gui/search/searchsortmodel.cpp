@@ -41,7 +41,9 @@ SearchSortModel::SearchSortModel(QObject* parent)
 void SearchSortModel::enableNameFilter(const bool enabled)
 {
     if (m_isNameFilterEnabled == enabled)
+    {
         return;
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
@@ -56,16 +58,22 @@ void SearchSortModel::enableNameFilter(const bool enabled)
 void SearchSortModel::setNameFilter(const QString& searchTerm)
 {
     if (m_searchTerm == searchTerm)
+    {
         return;
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
 
     m_searchTerm = searchTerm;
     if ((searchTerm.length() > 2) && searchTerm.startsWith(u'"') && searchTerm.endsWith(u'"'))
+    {
         m_searchTermWords = QStringList(m_searchTerm.sliced(1, (m_searchTerm.length() - 2)));
+    }
     else
+    {
         m_searchTermWords = searchTerm.split(u' ', Qt::SkipEmptyParts);
+    }
 
     endFilterChange(Direction::Rows);
 #else
@@ -85,7 +93,9 @@ void SearchSortModel::setSizeFilter(qint64 minSize, qint64 maxSize)
     maxSize = std::max<qint64>(-1, maxSize);
 
     if ((m_minSize == minSize) && (m_maxSize == maxSize))
+    {
         return;
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
@@ -105,7 +115,9 @@ void SearchSortModel::setSeedsFilter(int minSeeds, int maxSeeds)
     maxSeeds = std::max(-1, maxSeeds);
 
     if ((m_minSeeds == minSeeds) && (m_maxSeeds == maxSeeds))
+    {
         return;
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
@@ -125,7 +137,9 @@ void SearchSortModel::setLeechesFilter(int minLeeches, int maxLeeches)
     maxLeeches = std::max(-1, maxLeeches);
 
     if ((m_minLeeches == minLeeches) && (m_maxLeeches == maxLeeches))
+    {
         return;
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     beginFilterChange();
@@ -194,7 +208,9 @@ bool SearchSortModel::filterAcceptsRow(const int sourceRow, const QModelIndex& s
         for (const QString& word : asConst(m_searchTermWords))
         {
             if (!name.contains(word, Qt::CaseInsensitive))
+            {
                 return false;
+            }
         }
     }
 
@@ -202,21 +218,27 @@ bool SearchSortModel::filterAcceptsRow(const int sourceRow, const QModelIndex& s
     {
         const qlonglong size = sourceModel->data(sourceModel->index(sourceRow, SIZE, sourceParent), UnderlyingDataRole).toLongLong();
         if (((m_minSize > 0) && (size < m_minSize)) || ((m_maxSize > 0) && (size > m_maxSize)))
+        {
             return false;
+        }
     }
 
     if ((m_minSeeds > 0) || (m_maxSeeds >= 0))
     {
         const int seeds = sourceModel->data(sourceModel->index(sourceRow, SEEDS, sourceParent), UnderlyingDataRole).toInt();
         if (((m_minSeeds > 0) && (seeds < m_minSeeds)) || ((m_maxSeeds > 0) && (seeds > m_maxSeeds)))
+        {
             return false;
+        }
     }
 
     if ((m_minLeeches > 0) || (m_maxLeeches >= 0))
     {
         const int leeches = sourceModel->data(sourceModel->index(sourceRow, LEECHES, sourceParent), UnderlyingDataRole).toInt();
         if (((m_minLeeches > 0) && (leeches < m_minLeeches)) || ((m_maxLeeches > 0) && (leeches > m_maxLeeches)))
+        {
             return false;
+        }
     }
 
     return base::filterAcceptsRow(sourceRow, sourceParent);

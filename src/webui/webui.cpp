@@ -99,7 +99,9 @@ void WebUI::configure()
         else
         {
             if ((m_httpServer->serverAddress() != serverAddress) || (m_httpServer->serverPort() != port))
+            {
                 m_httpServer->close();
+            }
         }
 
         m_webapp->setUsername(username);
@@ -116,9 +118,13 @@ void WebUI::configure()
 
             const bool success = m_httpServer->setupHttps(cert, key);
             if (success)
+            {
                 LogMsg(tr("WebUI: HTTPS setup successful"));
+            }
             else
+            {
                 LogMsg(tr("WebUI: HTTPS setup failed, fallback to HTTP"), Log::CRITICAL);
+            }
         }
         else
         {
@@ -145,9 +151,13 @@ void WebUI::configure()
         if (pref->isDynDNSEnabled())
         {
             if (!m_dnsUpdater)
+            {
                 m_dnsUpdater = new Net::DNSUpdater(this);
+            }
             else
+            {
                 m_dnsUpdater->updateCredentials();
+            }
         }
         else
         {
@@ -194,20 +204,26 @@ QString WebUI::errorMessage() const
 bool WebUI::isHttps() const
 {
     if (!m_httpServer)
+    {
         return false;
+    }
     return m_httpServer->isHttps();
 }
 
 QHostAddress WebUI::hostAddress() const
 {
     if (!m_httpServer)
+    {
         return {};
+    }
     return m_httpServer->serverAddress();
 }
 
 quint16 WebUI::port() const
 {
     if (!m_httpServer)
+    {
         return 0;
+    }
     return m_httpServer->serverPort();
 }

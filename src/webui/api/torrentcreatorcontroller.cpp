@@ -71,9 +71,13 @@ namespace
     BitTorrent::TorrentFormat parseTorrentFormat(const QString& str)
     {
         if (str == u"v1")
+        {
             return BitTorrent::TorrentFormat::V1;
+        }
         if (str == u"v2")
+        {
             return BitTorrent::TorrentFormat::V2;
+        }
         return BitTorrent::TorrentFormat::Hybrid;
     }
 
@@ -98,14 +102,18 @@ namespace
         QStringList urls;
         urls.reserve(encodedUrls.size());
         for (const QString& urlStr : encodedUrls)
+        {
             urls << QUrl::fromPercentEncoding(urlStr.toLatin1());
+        }
         return urls;
     }
 
     QString taskStatusString(const std::shared_ptr<BitTorrent::TorrentCreationTask> task)
     {
         if (task->isFailed())
+        {
             return u"Failed"_s;
+        }
 
         switch (task->state())
         {
@@ -151,7 +159,9 @@ void TorrentCreatorController::addTaskAction()
 
     const auto task = m_torrentCreationManager->createTask(createTorrentParams, startSeeding);
     if (!task)
+    {
         throw APIError(APIErrorType::Conflict, tr("Too many active tasks"));
+    }
 
     setResult(QJsonObject{
         { KEY_TASK_ID, task->id() }
@@ -164,7 +174,9 @@ void TorrentCreatorController::statusAction()
 
     const auto singleTask = m_torrentCreationManager->getTask(id);
     if (!id.isEmpty() && !singleTask)
+    {
         throw APIError(APIErrorType::NotFound);
+    }
 
     const QList<std::shared_ptr<BitTorrent::TorrentCreationTask>> tasks = id.isEmpty()
                                                                               ? m_torrentCreationManager->tasks()
@@ -189,25 +201,39 @@ void TorrentCreatorController::statusAction()
         };
 
         if (!task->params().comment.isEmpty())
+        {
             taskJson[KEY_COMMENT] = task->params().comment;
+        }
 
         if (!task->params().torrentFilePath.isEmpty())
+        {
             taskJson[KEY_TORRENT_FILE_PATH] = task->params().torrentFilePath.toString();
+        }
 
         if (!task->params().source.isEmpty())
+        {
             taskJson[KEY_SOURCE] = task->params().source;
+        }
 
         if (!task->params().trackers.isEmpty())
+        {
             taskJson[KEY_TRACKERS] = QJsonArray::fromStringList(task->params().trackers);
+        }
 
         if (!task->params().urlSeeds.isEmpty())
+        {
             taskJson[KEY_URL_SEEDS] = QJsonArray::fromStringList(task->params().urlSeeds);
+        }
 
         if (const QDateTime timeStarted = task->timeStarted(); !timeStarted.isNull())
+        {
             taskJson[KEY_TIME_STARTED] = Utils::DateTime::toSecsSinceEpoch(timeStarted);
+        }
 
         if (const QDateTime timeFinished = task->timeFinished(); !timeFinished.isNull())
+        {
             taskJson[KEY_TIME_FINISHED] = Utils::DateTime::toSecsSinceEpoch(timeFinished);
+        }
 
         if (task->isFinished())
         {
@@ -238,21 +264,31 @@ void TorrentCreatorController::torrentFileAction()
 
     const auto task = m_torrentCreationManager->getTask(id);
     if (!task)
+    {
         throw APIError(APIErrorType::NotFound);
+    }
 
     if (!task->isFinished())
+    {
         throw APIError(APIErrorType::Conflict, tr("Torrent creation is still unfinished."));
+    }
 
     if (task->isFailed())
+    {
         throw APIError(APIErrorType::Conflict, tr("Torrent creation failed."));
+    }
 
     const auto readResult = Utils::IO::readFile(task->result().torrentFilePath, Preferences::instance()->getTorrentFileSizeLimit());
     if (!readResult)
+    {
         throw APIError(APIErrorType::Conflict, readResult.error().message);
+    }
 
     QString filename = task->params().sourcePath.filename();
     if (filename.isEmpty())
+    {
         filename = id;
+    }
     filename += u".torrent";
 
     setResult(readResult.value(), u"application/x-bittorrent"_s, filename);
@@ -264,7 +300,9 @@ void TorrentCreatorController::deleteTaskAction()
     const QString id = params()[KEY_TASK_ID];
 
     if (!m_torrentCreationManager->deleteTask(id))
+    {
         throw APIError(APIErrorType::NotFound);
+    }
 
     setResult(QString());
 }

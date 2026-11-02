@@ -51,7 +51,9 @@ BitTorrent::TorrentCreationTask::TorrentCreationTask(IApplication* app, const QS
         m_result = result;
 
         if (!startSeeding)
+        {
             return;
+        }
 
         BitTorrent::AddTorrentParams params;
         // don't use global defaults and set a value for each one, otherwise 'start seeding' operation might fail unexpectedly when user changed the global default value
@@ -64,7 +66,9 @@ BitTorrent::TorrentCreationTask::TorrentCreationTask(IApplication* app, const QS
         params.useDownloadPath = false;
 
         if (!app->addTorrentManager()->addTorrent(result.torrentFilePath.data(), params))
+        {
             m_errorMsg = tr("Failed to start seeding.");
+        }
     });
 
     connect(torrentCreator, &BitTorrent::TorrentCreator::creationFailure, this, [this](const QString& errorMsg) {
@@ -86,9 +90,13 @@ const BitTorrent::TorrentCreatorParams& BitTorrent::TorrentCreationTask::params(
 BitTorrent::TorrentCreationTask::State BitTorrent::TorrentCreationTask::state() const
 {
     if (m_timeStarted.isNull())
+    {
         return Queued;
+    }
     if (m_timeFinished.isNull())
+    {
         return Running;
+    }
     return Finished;
 }
 

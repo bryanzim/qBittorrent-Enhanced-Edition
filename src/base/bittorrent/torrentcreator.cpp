@@ -102,7 +102,9 @@ void TorrentCreator::sendProgressSignal(const int currentPieceIdx, const int tot
 void TorrentCreator::checkInterruptionRequested() const
 {
     if (isInterruptionRequested())
+    {
         throw RuntimeError(tr("Operation aborted"));
+    }
 }
 
 void TorrentCreator::requestInterruption()
@@ -154,12 +156,16 @@ void TorrentCreator::run()
                 // .lnk to directory
                 // Windows users do not expect torrent creator to traverse into .lnk files so skip over them
                 if (dirInfo.isShortcut())
+                {
                     continue;
+                }
 #endif
 
                 const QString dirPath = dirInfo.filePath();
                 if (m_params.ignoreDotfiles && isDotfile(Path(dirPath)))
+                {
                     continue;
+                }
 
                 dirs.append(dirPath);
             }
@@ -178,7 +184,9 @@ void TorrentCreator::run()
                     const QFileInfo fileInfo = fileIter.nextFileInfo();
                     const Path filePath{ fileInfo.filePath() };
                     if (m_params.ignoreDotfiles && isDotfile(filePath))
+                    {
                         continue;
+                    }
 
                     qint64 fileSize = fileInfo.size();
 
@@ -186,13 +194,17 @@ void TorrentCreator::run()
                     // .lnk to file
                     // libtorrent couldn't handle .lnk files on Windows
                     if (fileInfo.isShortcut())
+                    {
                         continue;
+                    }
 
                     // file symbolic link
                     // QFileInfo::size() failed to return the target file size
                     // and we need to redirect it manually
                     if (fileInfo.isSymbolicLink())
+                    {
                         fileSize = QFileInfo(fileInfo.symLinkTarget()).size();
+                    }
 #endif
 
                     const Path relFilePath = parentPath.relativePathOf(filePath);
@@ -207,7 +219,9 @@ void TorrentCreator::run()
 #if LIBTORRENT_VERSION_NUM >= 20100
             files.reserve(static_cast<std::size_t>(fileNames.size()));
             for (const QString& fileName : asConst(fileNames))
+            {
                 files.emplace_back(fileName.toStdString(), fileSizeMap[fileName]);
+            }
 #else
             for (const QString& fileName : asConst(fileNames))
                 files.add_file(fileName.toStdString(), fileSizeMap[fileName]);
@@ -222,7 +236,9 @@ void TorrentCreator::run()
         const bool isFilesEmpty = files.num_files() == 0;
 #endif
         if (m_params.ignoreDotfiles && isFilesEmpty)
+        {
             throw RuntimeError(tr("All files have been filtered out by 'Ignore dotfiles' option"));
+        }
 
 #ifdef QBT_USES_LIBTORRENT2
         lt::create_torrent newTorrent{ files, m_params.pieceSize, toNativeTorrentFormatFlag(m_params.torrentFormat) };
@@ -235,16 +251,22 @@ void TorrentCreator::run()
         {
             seed = seed.trimmed();
             if (!seed.isEmpty())
+            {
                 newTorrent.add_url_seed(seed.toStdString());
+            }
         }
 
         int tier = 0;
         for (const QString& tracker : asConst(m_params.trackers))
         {
             if (tracker.isEmpty())
+            {
                 ++tier;
+            }
             else
+            {
                 newTorrent.add_tracker(tracker.trimmed().toStdString(), tier);
+            }
         }
 
         // calculate the hash for all pieces
@@ -266,22 +288,30 @@ void TorrentCreator::run()
 
         // add source field
         if (!m_params.source.isEmpty())
+        {
             entry["info"]["source"] = m_params.source.toStdString();
+        }
 
         checkInterruptionRequested();
 
         const auto result = std::invoke([torrentFilePath = m_params.torrentFilePath, entry]() -> nonstd::expected<Path, QString> {
             if (!torrentFilePath.isValid())
+            {
                 return Utils::IO::saveToTempFile(entry);
+            }
 
             const nonstd::expected<void, QString> result = Utils::IO::saveToFile(torrentFilePath, entry);
             if (!result)
+            {
                 return nonstd::make_unexpected(result.error());
+            }
 
             return torrentFilePath;
         });
         if (!result)
+        {
             throw RuntimeError(result.error());
+        }
 
         const BitTorrent::TorrentCreatorResult creatorResult{
             .torrentFilePath = result.value(),
@@ -318,13 +348,17 @@ int TorrentCreator::calculateTotalPieces(const Path& inputPath, const int pieceS
 #endif
 {
     if (inputPath.isEmpty())
+    {
         return 0;
+    }
 
     const auto& filter = ignoreDotfiles ? fileFilter : noopFilter;
 #if LIBTORRENT_VERSION_NUM >= 20100
     const std::vector<lt::create_file_entry> files = lt::list_files(inputPath.toString().toStdString(), filter);
     if (files.empty())
+    {
         return 0;
+    }
 #else
     lt::file_storage files;
     lt::add_files(files, inputPath.toString().toStdString(), filter);

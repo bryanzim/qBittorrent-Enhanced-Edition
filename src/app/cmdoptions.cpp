@@ -78,22 +78,22 @@ namespace
         {
         }
 
-        QString fullParameter() const
+        [[nodiscard]] QString fullParameter() const
         {
             return u"--" + m_name.toString();
         }
 
-        QString shortcutParameter() const
+        [[nodiscard]] QString shortcutParameter() const
         {
             return u"-" + m_shortcut;
         }
 
-        bool hasShortcut() const
+        [[nodiscard]] bool hasShortcut() const
         {
             return !m_shortcut.isNull();
         }
 
-        QString envVarName() const
+        [[nodiscard]] QString envVarName() const
         {
             return u"QBT_" + m_name.toString().toUpper().replace(u'-', u'_');
         }
@@ -104,7 +104,9 @@ namespace
             QString res = QString(USAGE_INDENTATION, u' ') + usage;
 
             if ((USAGE_TEXT_COLUMN - usage.length() - 4) > 0)
+            {
                 return res + QString((USAGE_TEXT_COLUMN - usage.length() - 4), u' ');
+            }
 
             return res;
         }
@@ -123,18 +125,20 @@ namespace
         {
         }
 
-        bool value(const QProcessEnvironment& env) const
+        [[nodiscard]] bool value(const QProcessEnvironment& env) const
         {
             const QString val = env.value(envVarName());
             // we accept "1" and "true" (upper or lower cased) as boolean 'true' values
             return isTrue(val);
         }
 
-        QString usage() const
+        [[nodiscard]] QString usage() const
         {
             QString res;
             if (hasShortcut())
+            {
                 res += shortcutParameter() + u" | ";
+            }
             res += fullParameter();
             return padUsageText(res);
         }
@@ -154,25 +158,27 @@ namespace
         {
         }
 
-        QString value(const QStringView arg) const
+        [[nodiscard]] QString value(const QStringView arg) const
         {
             const qsizetype index = arg.indexOf(u'=');
             if (index == -1)
+            {
                 throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "Parameter '%1' must follow syntax '%1=%2'",
                                                                             "e.g. Parameter '--webui-port' must follow syntax '--webui-port=value'")
                                                     .arg(fullParameter(), u"<value>"_s));
+            }
 
             const QStringView val = QStringView(arg).sliced(index + 1);
             return Utils::String::unquote(val, u"'\""_s).toString();
         }
 
-        QString value(const QProcessEnvironment& env, const QString& defaultValue = {}) const
+        [[nodiscard]] QString value(const QProcessEnvironment& env, const QString& defaultValue = {}) const
         {
-            QString val = env.value(envVarName());
+            QString const val = env.value(envVarName());
             return val.isEmpty() ? defaultValue : Utils::String::unquote(val, u"'\""_s);
         }
 
-        QString usage(const QString& valueName) const
+        [[nodiscard]] QString usage(const QString& valueName) const
         {
             return padUsageText(parameterAssignment() + u'<' + valueName + u'>');
         }
@@ -183,7 +189,7 @@ namespace
         }
 
     private:
-        QString parameterAssignment() const
+        [[nodiscard]] QString parameterAssignment() const
         {
             return fullParameter() + u'=';
         }
@@ -200,7 +206,7 @@ namespace
 
         using StringOption::usage;
 
-        int value(const QStringView arg) const
+        [[nodiscard]] int value(const QStringView arg) const
         {
             const QString val = StringOption::value(arg);
             bool ok = false;
@@ -214,14 +220,16 @@ namespace
             return res;
         }
 
-        int value(const QProcessEnvironment& env, int defaultValue) const
+        [[nodiscard]] int value(const QProcessEnvironment& env, int defaultValue) const
         {
-            QString val = env.value(envVarName());
+            QString const val = env.value(envVarName());
             if (val.isEmpty())
+            {
                 return defaultValue;
+            }
 
             bool ok;
-            int res = val.toInt(&ok);
+            int const res = val.toInt(&ok);
             if (!ok)
             {
                 qDebug() << QCoreApplication::translate("CMD Options", "Expected integer number in environment variable '%1', but got '%2'")
@@ -247,25 +255,31 @@ namespace
         {
         }
 
-        QString usage() const
+        [[nodiscard]] QString usage() const
         {
             return padUsageText(fullParameter() + u"=<true|false>");
         }
 
-        std::optional<bool> value(const QStringView arg) const
+        [[nodiscard]] std::optional<bool> value(const QStringView arg) const
         {
             const QList<QStringView> parts = arg.split(u'=');
 
             if (parts.size() == 1)
+            {
                 return m_defaultValue;
+            }
 
             if (parts.size() == 2)
             {
                 const QStringView val = parts[1];
                 if (isTrue(val))
+                {
                     return true;
+                }
                 if (isFalse(val))
+                {
                     return false;
+                }
             }
 
             throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "Parameter '%1' must follow syntax '%1=%2'",
@@ -274,18 +288,26 @@ namespace
                                                 .arg(fullParameter(), u"<true|false>"_s));
         }
 
-        std::optional<bool> value(const QProcessEnvironment& env) const
+        [[nodiscard]] std::optional<bool> value(const QProcessEnvironment& env) const
         {
             const QString val = env.value(envVarName(), u"-1"_s);
 
             if (val.isEmpty())
+            {
                 return m_defaultValue;
+            }
             if (val == u"-1")
+            {
                 return std::nullopt;
+            }
             if (isTrue(val))
+            {
                 return true;
+            }
             if (isFalse(val))
+            {
                 return false;
+            }
 
             qDebug() << QCoreApplication::translate("CMD Options", "Expected %1 in environment variable '%2', but got '%3'")
                             .arg(u"true|false"_s, envVarName(), val);
@@ -440,8 +462,10 @@ QBtCommandLineParameters parseCommandLine(const QStringList& args)
             {
                 result.webUIPort = WEBUI_PORT_OPTION.value(arg);
                 if ((result.webUIPort < 1) || (result.webUIPort > 65535))
+                {
                     throw CommandLineParameterError(QCoreApplication::translate("CMD Options", "%1 must specify a valid port (1 to 65535).")
                                                         .arg(u"--webui-port"_s));
+                }
             }
             else if (arg == TORRENTING_PORT_OPTION)
             {

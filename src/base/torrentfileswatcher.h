@@ -57,7 +57,7 @@ public:
     static void freeInstance();
     static TorrentFilesWatcher* instance();
 
-    QHash<Path, WatchedFolderOptions> folders() const;
+    [[nodiscard]] QHash<Path, WatchedFolderOptions> folders() const;
     void setWatchedFolder(const Path& path, const WatchedFolderOptions& options);
     void removeWatchedFolder(const Path& path);
 

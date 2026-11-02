@@ -31,11 +31,10 @@
 #include "os.h"
 
 #ifdef Q_OS_WIN
+#include <ShlObj.h>
 #include <powrprof.h>
 
 #include <Windows.h>
-
-#include <ShlObj.h>
 
 #include <algorithm>
 #endif // Q_OS_WIN
@@ -65,21 +64,25 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction& ac
     HANDLE hToken;        // handle to process token
     TOKEN_PRIVILEGES tkp; // pointer to token structure
     if (!::OpenProcessToken(::GetCurrentProcess(), (TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY), &hToken))
+    {
         return;
+    }
     // Get the LUID for shutdown privilege.
-    ::LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME, &tkp.Privileges[0].Luid);
+    ::LookupPrivilegeValue(nullptr, SE_SHUTDOWN_NAME, &tkp.Privileges[0].Luid);
 
     tkp.PrivilegeCount = 1; // one privilege to set
     tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
     // Get shutdown privilege for this process.
 
-    ::AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, NULL, 0);
+    ::AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, nullptr, nullptr);
 
     // Cannot test the return value of AdjustTokenPrivileges.
 
     if (::GetLastError() != ERROR_SUCCESS)
+    {
         return;
+    }
 
     if (action == ShutdownDialogAction::Suspend)
     {
@@ -102,7 +105,7 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction& ac
 
     // Disable shutdown privilege.
     tkp.Privileges[0].Attributes = 0;
-    ::AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, NULL, 0);
+    ::AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, nullptr, nullptr);
 
 #elif defined(Q_OS_MACOS)
     AEEventID EventToSend{};
@@ -240,7 +243,9 @@ bool Utils::OS::applyMarkOfTheWeb(const Path& file, const QString& url)
     // Trying to apply this to a non-existent file is unacceptable,
     // as it may unexpectedly create such a file.
     if (!file.exists())
+    {
         return false;
+    }
 
     Q_ASSERT(url.isEmpty() || url.startsWith(u"http:") || url.startsWith(u"https:"));
 
@@ -287,7 +292,9 @@ bool Utils::OS::applyMarkOfTheWeb(const Path& file, const QString& url)
 
     HANDLE handle = ::CreateFileW(zoneIDStream.toStdWString().c_str(), (GENERIC_READ | GENERIC_WRITE), (FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE), nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (handle == INVALID_HANDLE_VALUE)
+    {
         return false;
+    }
     [[maybe_unused]] const auto handleGuard = qScopeGuard([&handle] { ::CloseHandle(handle); });
 
     // 5.6.1 Zone.Identifier Stream Name
@@ -305,14 +312,20 @@ bool Utils::OS::applyMarkOfTheWeb(const Path& file, const QString& url)
             ::ReadFile(handle, buf.data(), expectedReadSize, &actualReadSize, nullptr) && (actualReadSize == expectedReadSize))
         {
             if (buf.startsWith("[ZoneTransfer]\r\n") && buf.contains("\r\nZoneId=3\r\n") && buf.contains("\r\nHostUrl="))
+            {
                 return true;
+            }
         }
     }
 
     if (!::SetFilePointerEx(handle, {}, nullptr, FILE_BEGIN))
+    {
         return false;
+    }
     if (!::SetEndOfFile(handle))
+    {
         return false;
+    }
 
     DWORD written = 0;
     const BOOL writeResult = ::WriteFile(handle, zoneID.constData(), zoneID.size(), &written, nullptr);

@@ -69,26 +69,26 @@ public:
     };
     Q_ENUM(Mode)
 
-    Mode mode() const;
+    [[nodiscard]] Mode mode() const;
     void setMode(Mode mode);
 
-    Path selectedPath() const;
+    [[nodiscard]] Path selectedPath() const;
     void setSelectedPath(const Path& path);
 
-    Path basePath() const;
+    [[nodiscard]] Path basePath() const;
     void setBasePath(const Path& basePath);
 
-    QString fileNameFilter() const;
+    [[nodiscard]] QString fileNameFilter() const;
     void setFileNameFilter(const QString& val);
 
-    QString placeholder() const;
+    [[nodiscard]] QString placeholder() const;
     void setPlaceholder(const QString& val);
 
     /// The browse button caption is "..." if true, and "Browse" otherwise
-    bool briefBrowseButtonCaption() const;
+    [[nodiscard]] bool briefBrowseButtonCaption() const;
     void setBriefBrowseButtonCaption(bool brief);
 
-    QString dialogCaption() const;
+    [[nodiscard]] QString dialogCaption() const;
     void setDialogCaption(const QString& caption);
 
     virtual void clear() = 0;
@@ -100,7 +100,7 @@ protected:
     explicit FileSystemPathEdit(Private::IFileEditorWithCompletion* editor, QWidget* parent);
 
     template <class Widget>
-    Widget* editWidget() const
+    [[nodiscard]] Widget* editWidget() const
     {
         return static_cast<Widget*>(editWidgetImpl());
     }
@@ -111,11 +111,11 @@ protected slots:
 private:
     Q_DECLARE_PRIVATE(FileSystemPathEdit)
 
-    virtual QString editWidgetText() const = 0;
+    [[nodiscard]] virtual QString editWidgetText() const = 0;
     virtual void setEditWidgetText(const QString& text) = 0;
 
-    QWidget* editWidgetImpl() const;
-    Path getResolvedPath() const;
+    [[nodiscard]] QWidget* editWidgetImpl() const;
+    [[nodiscard]] Path getResolvedPath() const;
 
     FileSystemPathEditPrivate* d_ptr = nullptr;
 
@@ -135,7 +135,7 @@ public:
     void clear() override;
 
 private:
-    QString editWidgetText() const override;
+    [[nodiscard]] QString editWidgetText() const override;
     void setEditWidgetText(const QString& text) override;
 };
 
@@ -150,18 +150,18 @@ public:
 
     void clear() override;
 
-    int count() const;
-    Path item(int index) const;
+    [[nodiscard]] int count() const;
+    [[nodiscard]] Path item(int index) const;
     void addItem(const Path& path);
     void insertItem(int index, const Path& path);
 
-    int currentIndex() const;
+    [[nodiscard]] int currentIndex() const;
     void setCurrentIndex(int index);
 
-    int maxVisibleItems() const;
+    [[nodiscard]] int maxVisibleItems() const;
     void setMaxVisibleItems(int maxItems);
 
 private:
-    QString editWidgetText() const override;
+    [[nodiscard]] QString editWidgetText() const override;
     void setEditWidgetText(const QString& text) override;
 };

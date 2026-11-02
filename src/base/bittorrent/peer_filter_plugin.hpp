@@ -84,13 +84,17 @@ protected:
     void handle_peer(bool handshake = false)
     {
         if (m_stop_filtering)
+        {
             return;
+        }
 
         lt::peer_info info;
         m_peer_connection.get_peer_info(info);
 
         if (m_filter(info, handshake, &m_stop_filtering))
+        {
             m_action(m_peer_connection);
+        }
     }
 
 private:

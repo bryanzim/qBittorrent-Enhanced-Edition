@@ -105,7 +105,7 @@ private:
         QByteArray bootid;
     };
 
-    std::optional<LockInfo> getLockInfo() const;
+    [[nodiscard]] std::optional<LockInfo> getLockInfo() const;
 
     const QString m_socketName;
     QLocalServer* m_server = nullptr;

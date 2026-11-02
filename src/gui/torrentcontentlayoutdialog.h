@@ -60,7 +60,7 @@ private slots:
     void showColumnHeaderMenu();
 
 private:
-    PathList selectedPaths() const;
+    [[nodiscard]] PathList selectedPaths() const;
     void populateCommonPath();
     void onCommonPathEdited(const QString& pathStr);
     void apply();

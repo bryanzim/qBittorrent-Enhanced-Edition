@@ -39,7 +39,7 @@ namespace MacUtils
         Badger();
         ~Badger();
 
-        void updateSpeed(int64_t dlRate, int64_t ulRate);
+        void updateSpeed(std::int64_t dlRate, std::int64_t ulRate);
 
     private:
         struct Impl;

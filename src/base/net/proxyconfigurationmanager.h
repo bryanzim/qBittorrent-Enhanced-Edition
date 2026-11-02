@@ -61,7 +61,7 @@ namespace Net
         static void freeInstance();
         static ProxyConfigurationManager* instance();
 
-        ProxyConfiguration proxyConfiguration() const;
+        [[nodiscard]] ProxyConfiguration proxyConfiguration() const;
         void setProxyConfiguration(const ProxyConfiguration& config);
 
     signals:

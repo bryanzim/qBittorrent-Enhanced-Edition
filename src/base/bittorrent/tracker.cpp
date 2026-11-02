@@ -115,7 +115,9 @@ namespace
             QByteArray ret;
             ret.reserve(sizeof(Q_IPV6ADDR));
             for (const quint8 i : ipv6.c)
+            {
                 ret.append(i);
+            }
             return ret;
         }
 
@@ -175,12 +177,16 @@ void Tracker::TorrentStats::setPeer(const Peer& peer)
     {
         // Too many peers, remove a random one
         if (peers.size() >= MAX_PEERS_PER_TORRENT)
+        {
             removePeer(*peers.begin());
+        }
     }
 
     // add peer
     if (peer.isSeeder)
+    {
         ++seeders;
+    }
     peers.insert(peer);
 }
 
@@ -188,10 +194,14 @@ bool Tracker::TorrentStats::removePeer(const Peer& peer)
 {
     const auto iter = peers.find(peer);
     if (iter == peers.end())
+    {
         return false;
+    }
 
     if (iter->isSeeder)
+    {
         --seeders;
+    }
     peers.remove(*iter);
     return true;
 }
@@ -247,12 +257,18 @@ void Tracker::processRequest(const Http::Request& request, const Http::Environme
     {
         // Is it a GET request?
         if (request.method != Http::HEADER_REQUEST_METHOD_GET)
+        {
             throw MethodNotAllowedHTTPError();
+        }
 
         if (request.path.startsWith(ANNOUNCE_REQUEST_PATH, Qt::CaseInsensitive))
+        {
             processAnnounceRequest();
+        }
         else
+        {
             throw NotFoundHTTPError();
+        }
     }
     catch (const HTTPError& error)
     {
@@ -289,43 +305,59 @@ void Tracker::processAnnounceRequest()
     announceReq.socketAddress = m_env.clientAddress;
     announceReq.claimedAddress = queryParams.value(ANNOUNCE_REQUEST_IP);
     if (announceReq.claimedAddress.size() > MAX_CLAIMED_ADDRESS_SIZE)
+    {
         throw TrackerError(u"Invalid \"ip\" parameter"_s);
+    }
 
     // Enforce using IPv4 if address is indeed IPv4 or if it is an IPv4-mapped IPv6 address
     bool ok = false;
     const qint32 decimalIPv4 = announceReq.socketAddress.toIPv4Address(&ok);
     if (ok)
+    {
         announceReq.socketAddress = QHostAddress(decimalIPv4);
+    }
 
     // 1. info_hash
     const auto infoHashIter = queryParams.find(ANNOUNCE_REQUEST_INFO_HASH);
     if (infoHashIter == queryParams.end())
+    {
         throw TrackerError(u"Missing \"info_hash\" parameter"_s);
+    }
 
     const auto torrentID = TorrentID::fromString(QString::fromLatin1(infoHashIter->toHex()));
     if (!torrentID.isValid())
+    {
         throw TrackerError(u"Invalid \"info_hash\" parameter"_s);
+    }
 
     announceReq.torrentID = torrentID;
 
     // 2. peer_id
     const auto peerIdIter = queryParams.find(ANNOUNCE_REQUEST_PEER_ID);
     if (peerIdIter == queryParams.end())
+    {
         throw TrackerError(u"Missing \"peer_id\" parameter"_s);
+    }
 
     if (peerIdIter->size() > PEER_ID_SIZE)
+    {
         throw TrackerError(u"Invalid \"peer_id\" parameter"_s);
+    }
 
     announceReq.peer.peerId = *peerIdIter;
 
     // 3. port
     const auto portIter = queryParams.find(ANNOUNCE_REQUEST_PORT);
     if (portIter == queryParams.end())
+    {
         throw TrackerError(u"Missing \"port\" parameter"_s);
+    }
 
     const ushort portNum = portIter->toUShort();
     if (portNum == 0)
+    {
         throw TrackerError(u"Invalid \"port\" parameter"_s);
+    }
 
     announceReq.peer.port = portNum;
 
@@ -335,7 +367,9 @@ void Tracker::processAnnounceRequest()
     {
         const int num = numWantIter->toInt();
         if (num < 0)
+        {
             throw TrackerError(u"Invalid \"numwant\" parameter"_s);
+        }
         announceReq.numwant = num;
     }
 
@@ -388,7 +422,9 @@ void Tracker::registerPeer(const TrackerAnnounceRequest& announceReq)
     {
         // Reached max size, remove a random torrent
         if (m_torrents.size() >= MAX_TORRENTS)
+        {
             m_torrents.erase(m_torrents.cbegin());
+        }
     }
 
     m_torrents[announceReq.torrentID].setPeer(announceReq.peer);
@@ -398,12 +434,16 @@ void Tracker::unregisterPeer(const TrackerAnnounceRequest& announceReq)
 {
     const auto torrentStatsIter = m_torrents.find(announceReq.torrentID);
     if (torrentStatsIter == m_torrents.end())
+    {
         return;
+    }
 
     torrentStatsIter->removePeer(announceReq.peer);
 
     if (torrentStatsIter->peers.isEmpty())
+    {
         m_torrents.erase(torrentStatsIter);
+    }
 }
 
 void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest& announceReq)
@@ -434,18 +474,26 @@ void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest& announceReq)
             for (const Peer& peer : asConst(torrentStats.peers))
             {
                 if (counter++ >= announceReq.numwant)
+                {
                     break;
+                }
 
-                if (peer.endpoint.size() == 6) // IPv4 + port
+                if (peer.endpoint.size() == 6)
+                { // IPv4 + port
                     peers.append(peer.endpoint);
-                else if (peer.endpoint.size() == 18) // IPv6 + port
+                }
+                else if (peer.endpoint.size() == 18)
+                { // IPv6 + port
                     peers6.append(peer.endpoint);
+                }
             }
         }
 
         replyDict[ANNOUNCE_RESPONSE_PEERS] = peers; // required, even it's empty
         if (!peers6.empty())
+        {
             replyDict[ANNOUNCE_RESPONSE_PEERS6] = peers6;
+        }
     }
     else
     {
@@ -457,7 +505,9 @@ void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest& announceReq)
             for (const Peer& peer : torrentStats.peers)
             {
                 if (counter++ >= announceReq.numwant)
+                {
                     break;
+                }
 
                 lt::entry::dictionary_type peerDict = {
                     {   ANNOUNCE_RESPONSE_PEERS_IP, peer.address },
@@ -465,7 +515,9 @@ void Tracker::prepareAnnounceResponse(const TrackerAnnounceRequest& announceReq)
                 };
 
                 if (!announceReq.noPeerId)
+                {
                     peerDict[ANNOUNCE_RESPONSE_PEERS_PEER_ID] = toEntryString(peer.peerId);
+                }
 
                 peerList.emplace_back(peerDict);
             }

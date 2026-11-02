@@ -53,19 +53,19 @@ namespace BitTorrent
 
         TorrentCreationTask(IApplication* app, const QString& id, TorrentCreator* torrentCreator, bool startSeeding, QObject* parent = nullptr);
 
-        QString id() const;
-        const TorrentCreatorParams& params() const;
-        State state() const;
-        bool isQueued() const;
-        bool isRunning() const;
-        bool isFinished() const;
-        bool isFailed() const;
-        QDateTime timeAdded() const;
-        QDateTime timeStarted() const;
-        QDateTime timeFinished() const;
-        int progress() const;
-        const TorrentCreatorResult& result() const;
-        QString errorMsg() const;
+        [[nodiscard]] QString id() const;
+        [[nodiscard]] const TorrentCreatorParams& params() const;
+        [[nodiscard]] State state() const;
+        [[nodiscard]] bool isQueued() const;
+        [[nodiscard]] bool isRunning() const;
+        [[nodiscard]] bool isFinished() const;
+        [[nodiscard]] bool isFailed() const;
+        [[nodiscard]] QDateTime timeAdded() const;
+        [[nodiscard]] QDateTime timeStarted() const;
+        [[nodiscard]] QDateTime timeFinished() const;
+        [[nodiscard]] int progress() const;
+        [[nodiscard]] const TorrentCreatorResult& result() const;
+        [[nodiscard]] QString errorMsg() const;
 
     private:
         QString m_id;

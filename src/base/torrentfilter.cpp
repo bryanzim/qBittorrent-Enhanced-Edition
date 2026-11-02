@@ -49,7 +49,9 @@ QString getTrackerHost(const QString& url)
 {
     // We want the hostname.
     if (const QString host = QUrl(url).host(); !host.isEmpty())
+    {
         return host;
+    }
 
     // If failed to parse the domain, original input should be returned
     return url;
@@ -140,8 +142,10 @@ bool TorrentFilter::setAnnounceStatus(const std::optional<TorrentAnnounceStatus>
 bool TorrentFilter::match(const Torrent* const torrent) const
 {
     Q_ASSERT(torrent);
-    if (!torrent) [[unlikely]]
-        return false;
+    if (!torrent)
+    {
+        [[unlikely]] return false;
+    }
 
     return (matchStatus(torrent) && matchHash(torrent) && matchCategory(torrent) && matchTag(torrent) && matchPrivate(torrent) && matchTracker(torrent));
 }
@@ -191,7 +195,9 @@ bool TorrentFilter::matchStatus(const Torrent* const torrent) const
 bool TorrentFilter::matchHash(const Torrent* const torrent) const
 {
     if (!m_idSet)
+    {
         return true;
+    }
 
     return m_idSet->contains(torrent->id());
 }
@@ -199,7 +205,9 @@ bool TorrentFilter::matchHash(const Torrent* const torrent) const
 bool TorrentFilter::matchCategory(const Torrent* const torrent) const
 {
     if (!m_category)
+    {
         return true;
+    }
 
     return (torrent->belongsToCategory(*m_category));
 }
@@ -207,11 +215,15 @@ bool TorrentFilter::matchCategory(const Torrent* const torrent) const
 bool TorrentFilter::matchTag(const Torrent* const torrent) const
 {
     if (!m_tag)
+    {
         return true;
+    }
 
     // Empty tag is a special value to indicate we're filtering for untagged torrents.
     if (m_tag->isEmpty())
+    {
         return torrent->tags().isEmpty();
+    }
 
     return torrent->hasTag(*m_tag);
 }
@@ -219,7 +231,9 @@ bool TorrentFilter::matchTag(const Torrent* const torrent) const
 bool TorrentFilter::matchPrivate(const Torrent* const torrent) const
 {
     if (!m_private)
+    {
         return true;
+    }
 
     return m_private == torrent->isPrivate();
 }
@@ -229,26 +243,36 @@ bool TorrentFilter::matchTracker(const Torrent* torrent) const
     if (!m_trackerHost)
     {
         if (!m_announceStatus)
+        {
             return true;
+        }
 
         const TorrentAnnounceStatus announceStatus = torrent->announceStatus();
         const TorrentAnnounceStatus& testAnnounceStatus = *m_announceStatus;
         if (!testAnnounceStatus)
+        {
             return !announceStatus;
+        }
 
         return announceStatus.testAnyFlags(testAnnounceStatus);
     }
 
     // Trackerless torrent
     if (m_trackerHost->isEmpty())
+    {
         return torrent->trackers().isEmpty() && !m_announceStatus;
+    }
 
     return std::ranges::any_of(asConst(torrent->trackers()), [trackerHost = m_trackerHost, announceStatus = m_announceStatus](const TrackerEntryStatus& trackerEntryStatus) {
         if (getTrackerHost(trackerEntryStatus.url) != trackerHost)
+        {
             return false;
+        }
 
         if (!announceStatus)
+        {
             return true;
+        }
 
         switch (trackerEntryStatus.state)
         {

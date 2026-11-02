@@ -103,20 +103,28 @@ namespace
 
         const int lengthOffset = sizeof(quint32);
         if (data.size() < lengthOffset)
+        {
             return nonstd::make_unexpected(ParseMessageErrorType::DataIncomplete);
+        }
 
         QDataStream ds{ data };
-        quint32 remaining = 0;
+        quint32 remaining = 0U;
         ds >> remaining;
 
         if (remaining == 0)
+        {
             return QString();
+        }
 
-        if (remaining > MAX_MESSAGE_SIZE) // drop suspiciously large data
+        if (remaining > MAX_MESSAGE_SIZE)
+        { // drop suspiciously large data
             return nonstd::make_unexpected(ParseMessageErrorType::DataInvalid);
+        }
 
         if ((data.size() - lengthOffset) < remaining)
+        {
             return nonstd::make_unexpected(ParseMessageErrorType::DataIncomplete);
+        }
 
         return QString::fromUtf8((data.constData() + lengthOffset), remaining);
     }
@@ -132,7 +140,9 @@ LocalPeer::LocalPeer(const QString& path, QObject* parent)
 bool LocalPeer::isClient()
 {
     if (m_lockFile.isLocked())
+    {
         return false;
+    }
 
     if (!m_lockFile.tryLock())
     {
@@ -141,7 +151,9 @@ bool LocalPeer::isClient()
         // created by previous qBittorrent version exist when new one is starting.
         // The following code is intended to prevent this issue by removing stale lockfile.
         if (m_lockFile.error() != QLockFile::LockFailedError)
+        {
             return true;
+        }
 
         if (const std::optional<LockInfo> lockInfo = getLockInfo())
         {
@@ -151,16 +163,20 @@ bool LocalPeer::isClient()
             }
 
             if (!m_lockFile.removeStaleLockFile() || !m_lockFile.tryLock())
+            {
                 return true;
+            }
         }
         else
         {
             if (!m_lockFile.removeStaleLockFile() || !m_lockFile.tryLock())
+            {
                 return true;
+            }
         }
     }
 
-    bool res = m_server->listen(m_socketName);
+    bool const res = m_server->listen(m_socketName);
 #if defined(Q_OS_UNIX)
     // ### Workaround
     if (!res && m_server->serverError() == QAbstractSocket::AddressInUseError)
@@ -170,7 +186,9 @@ bool LocalPeer::isClient()
     }
 #endif
     if (!res)
+    {
         qWarning("LocalPeer: failed to listen on local socket. Error: %s", qUtf8Printable(m_server->errorString()));
+    }
 
     connect(m_server, &QLocalServer::newConnection, this, &LocalPeer::receivedConnection);
     return false;
@@ -179,11 +197,15 @@ bool LocalPeer::isClient()
 bool LocalPeer::sendMessage(const QString& message, const std::chrono::milliseconds timeout)
 {
     if (!isClient())
+    {
         return false;
+    }
 
     const QByteArray buffer = message.toUtf8();
-    if (buffer.size() > MAX_MESSAGE_SIZE) // drop suspiciously large data
+    if (buffer.size() > MAX_MESSAGE_SIZE)
+    { // drop suspiciously large data
         return false;
+    }
 
     QLocalSocket socket;
     bool isConnected = false;
@@ -195,7 +217,9 @@ bool LocalPeer::sendMessage(const QString& message, const std::chrono::milliseco
         socket.connectToServer(m_socketName);
         isConnected = socket.waitForConnected(timeout.count() / retries);
         if (isConnected)
+        {
             break;
+        }
 
         QThread::sleep(250ms);
     }
@@ -230,8 +254,10 @@ bool LocalPeer::sendMessage(const QString& message, const std::chrono::milliseco
 void LocalPeer::receivedConnection()
 {
     QLocalSocket* socket = m_server->nextPendingConnection();
-    if (!socket) [[unlikely]]
-        return;
+    if (!socket)
+    {
+        [[unlikely]] return;
+    }
 
     auto* buffer = new QByteArray;
 
@@ -275,20 +301,28 @@ std::optional<LocalPeer::LockInfo> LocalPeer::getLockInfo() const
 {
     const auto readResult = Utils::IO::readFile(Path(m_lockFile.fileName()), 1024);
     if (!readResult)
+    {
         return std::nullopt;
+    }
 
     const QList<QByteArrayView> lines = Utils::ByteArray::splitToViews(readResult.value(), "\n", Qt::KeepEmptyParts);
     if (lines.size() < 5)
+    {
         return std::nullopt;
+    }
 
     const QByteArrayView pidLine = lines.at(0);
     if (pidLine.isEmpty())
+    {
         return std::nullopt;
+    }
 
     bool ok = false;
     const qint64 pid = pidLine.toLongLong(&ok);
     if (!ok || (pid <= 0))
+    {
         return std::nullopt;
+    }
 
     return LockInfo{
         .pid = pid,

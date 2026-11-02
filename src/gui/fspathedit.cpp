@@ -49,7 +49,7 @@ namespace
         const char* source = nullptr;
         const char* comment = nullptr;
 
-        QString tr() const
+        [[nodiscard]] QString tr() const
         {
             return QCoreApplication::translate("FileSystemPathEdit", source, comment);
         }
@@ -75,7 +75,7 @@ private:
 
     void modeChanged();
     void browseActionTriggered();
-    QString dialogCaptionOrDefault() const;
+    [[nodiscard]] QString dialogCaptionOrDefault() const;
 
     FileSystemPathEdit* q_ptr = nullptr;
     std::unique_ptr<Private::IFileEditorWithCompletion> m_editor;
@@ -136,13 +136,17 @@ void FileSystemPathEdit::FileSystemPathEditPrivate::browseActionTriggered()
     }
 
     if (!newPath.isEmpty())
+    {
         q->setSelectedPath(Path(newPath));
+    }
 }
 
 QString FileSystemPathEdit::FileSystemPathEditPrivate::dialogCaptionOrDefault() const
 {
     if (!m_dialogCaption.isEmpty())
+    {
         return m_dialogCaption;
+    }
 
     switch (m_mode)
     {
@@ -202,7 +206,9 @@ Path FileSystemPathEdit::selectedPath() const
 void FileSystemPathEdit::setSelectedPath(const Path& path)
 {
     if (path != m_path)
+    {
         setEditWidgetText(path.toString());
+    }
 }
 
 Path FileSystemPathEdit::basePath() const
@@ -213,7 +219,9 @@ Path FileSystemPathEdit::basePath() const
 void FileSystemPathEdit::setBasePath(const Path& basePath)
 {
     if (basePath == m_basePath)
+    {
         return;
+    }
 
     m_basePath = basePath;
 

@@ -64,7 +64,9 @@ CookiesDialog::CookiesDialog(QWidget* parent)
     }
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 
     m_ui->treeView->header()->restoreState(m_storeViewState);
 }
@@ -84,7 +86,7 @@ void CookiesDialog::accept()
 
 void CookiesDialog::onButtonAddClicked()
 {
-    int row = m_ui->treeView->selectionModel()->currentIndex().row() + 1;
+    int const row = m_ui->treeView->selectionModel()->currentIndex().row() + 1;
 
     m_cookiesModel->insertRow(row);
     m_ui->treeView->selectionModel()->setCurrentIndex(
@@ -101,5 +103,7 @@ void CookiesDialog::onButtonDeleteClicked()
     });
 
     for (const QModelIndex& idx : asConst(idxs))
+    {
         m_cookiesModel->removeRow(idx.row());
+    }
 }

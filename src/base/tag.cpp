@@ -56,7 +56,9 @@ Tag::Tag(const std::string& tagStr)
 bool Tag::isValid() const
 {
     if (isEmpty())
+    {
         return false;
+    }
 
     return !m_tagStr.contains(u',');
 }

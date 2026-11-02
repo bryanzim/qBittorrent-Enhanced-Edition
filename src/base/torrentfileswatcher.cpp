@@ -125,7 +125,9 @@ TorrentFilesWatcher* TorrentFilesWatcher::m_instance = nullptr;
 void TorrentFilesWatcher::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new TorrentFilesWatcher;
+    }
 }
 
 void TorrentFilesWatcher::freeInstance()
@@ -276,10 +278,14 @@ void TorrentFilesWatcher::setWatchedFolder(const Path& path, const WatchedFolder
 void TorrentFilesWatcher::doSetWatchedFolder(const Path& path, const WatchedFolderOptions& options)
 {
     if (path.isEmpty())
+    {
         throw InvalidArgument(tr("Watched folder Path cannot be empty."));
+    }
 
     if (path.isRelative())
+    {
         throw InvalidArgument(tr("Watched folder Path cannot be relative."));
+    }
 
     m_watchedFolders[path] = options;
 
@@ -326,15 +332,21 @@ TorrentFilesWatcher::Worker::Worker(QFileSystemWatcher* watcher)
 void TorrentFilesWatcher::Worker::onTimeout()
 {
     for (const Path& path : asConst(m_watchedByTimeoutFolders))
+    {
         processWatchedFolder(path);
+    }
 }
 
 void TorrentFilesWatcher::Worker::setWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
 {
     if (m_watchedFolders.contains(path))
+    {
         updateWatchedFolder(path, options);
+    }
     else
+    {
         addWatchedFolder(path, options);
+    }
 }
 
 void TorrentFilesWatcher::Worker::removeWatchedFolder(const Path& path)
@@ -344,11 +356,15 @@ void TorrentFilesWatcher::Worker::removeWatchedFolder(const Path& path)
     m_watcher->removePath(path.data());
     m_watchedByTimeoutFolders.remove(path);
     if (m_watchedByTimeoutFolders.isEmpty())
+    {
         m_watchTimer->stop();
+    }
 
     m_failedTorrents.remove(path);
     if (m_failedTorrents.isEmpty())
+    {
         m_retryTorrentTimer->stop();
+    }
 }
 
 void TorrentFilesWatcher::Worker::scheduleWatchedFolderProcessing(const Path& path)
@@ -364,7 +380,9 @@ void TorrentFilesWatcher::Worker::processWatchedFolder(const Path& path)
     processFolder(path, path, options);
 
     if (!m_failedTorrents.empty() && !m_retryTorrentTimer->isActive())
+    {
         m_retryTorrentTimer->start(WATCH_INTERVAL);
+    }
 }
 
 void TorrentFilesWatcher::Worker::processFolder(const Path& path, const Path& watchedFolderPath, const TorrentFilesWatcher::WatchedFolderOptions& options)
@@ -406,9 +424,13 @@ void TorrentFilesWatcher::Worker::processFolder(const Path& path, const Path& wa
                     {
                         const auto line = QString::fromLatin1(file.readLine()).trimmed();
                         if (const auto parseResult = BitTorrent::TorrentDescriptor::parse(line))
+                        {
                             emit torrentFound(parseResult.value(), addTorrentParams);
+                        }
                         else
+                        {
                             LogMsg(tr("Invalid Magnet URI. URI: %1. Reason: %2").arg(line, parseResult.error()), Log::WARNING);
+                        }
                     }
 
                     file.close();
@@ -449,7 +471,9 @@ void TorrentFilesWatcher::Worker::processFolder(const Path& path, const Path& wa
             const Path folderPath{ iter.next() };
             // Skip processing of subdirectory that is explicitly set as watched folder
             if (!m_watchedFolders.contains(folderPath))
+            {
                 processFolder(folderPath, watchedFolderPath, options);
+            }
         }
     }
 }
@@ -461,7 +485,9 @@ void TorrentFilesWatcher::Worker::processFailedTorrents()
         const TorrentFilesWatcher::WatchedFolderOptions options = m_watchedFolders.value(watchedFolderPath);
         Algorithm::removeIf(partialTorrents, [this, &watchedFolderPath, &options](const Path& torrentPath, int& value) {
             if (!torrentPath.exists())
+            {
                 return true;
+            }
 
             if (const auto loadResult = BitTorrent::TorrentDescriptor::loadFromFile(torrentPath))
             {
@@ -500,16 +526,22 @@ void TorrentFilesWatcher::Worker::processFailedTorrents()
         });
 
         if (partialTorrents.isEmpty())
+        {
             return true;
+        }
 
         return false;
     });
 
     // Stop the partial timer if necessary
     if (m_failedTorrents.empty())
+    {
         m_retryTorrentTimer->stop();
+    }
     else
+    {
         m_retryTorrentTimer->start(WATCH_INTERVAL);
+    }
 }
 
 void TorrentFilesWatcher::Worker::addWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options)
@@ -519,7 +551,9 @@ void TorrentFilesWatcher::Worker::addWatchedFolder(const Path& path, const Torre
     {
         m_watchedByTimeoutFolders.insert(path);
         if (!m_watchTimer->isActive())
+        {
             m_watchTimer->start(WATCH_INTERVAL);
+        }
     }
     else
     {
@@ -543,13 +577,17 @@ void TorrentFilesWatcher::Worker::updateWatchedFolder(const Path& path, const To
 
             m_watchedByTimeoutFolders.insert(path);
             if (!m_watchTimer->isActive())
+            {
                 m_watchTimer->start(WATCH_INTERVAL);
+            }
         }
         else
         {
             m_watchedByTimeoutFolders.remove(path);
             if (m_watchedByTimeoutFolders.isEmpty())
+            {
                 m_watchTimer->stop();
+            }
 
             m_watcher->addPath(path.data());
             scheduleWatchedFolderProcessing(path);

@@ -50,8 +50,8 @@ protected:
 #else
         const lt::tcp::endpoint endpoint = info.ip;
 #endif
-        QString peer_ip = QString::fromStdString(endpoint.address().to_string());
-        QStringList shadowbannedIPs =
+        QString const peer_ip = QString::fromStdString(endpoint.address().to_string());
+        QStringList const shadowbannedIPs =
             CachedSettingValue<QStringList>(u"State/ShadowBannedIPs"_s, QStringList(), Algorithm::sorted<QStringList>).get();
 
         return shadowbannedIPs.contains(peer_ip);
@@ -78,7 +78,9 @@ std::shared_ptr<lt::torrent_plugin> create_peer_shadowban_plugin(const lt::torre
 {
     // ignore private torrents
     if (th.torrent_file() && th.torrent_file()->priv())
+    {
         return nullptr;
+    }
 
     return std::make_shared<peer_shadowban_action_plugin>();
 }

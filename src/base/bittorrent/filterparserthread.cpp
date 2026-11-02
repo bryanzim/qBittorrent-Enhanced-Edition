@@ -45,7 +45,7 @@ namespace
     public:
         bool tryParse(const char* str)
         {
-            unsigned char octetIndex = 0;
+            unsigned char octetIndex = 0U;
 
             const char* octetStart = str;
             char* endptr = nullptr;
@@ -55,14 +55,22 @@ namespace
                 {
                     const long int extractedNum = strtol(octetStart, &endptr, 10);
                     if ((extractedNum >= 0L) && (extractedNum <= 255L))
+                    {
                         m_buf[octetIndex++] = static_cast<unsigned char>(extractedNum);
+                    }
                     else
+                    {
                         return false;
+                    }
 
                     if (endptr != str)
+                    {
                         return false;
+                    }
                     if (octetIndex == 4)
+                    {
                         return true;
+                    }
 
                     octetStart = str + 1;
                 }
@@ -72,18 +80,24 @@ namespace
             {
                 const long int extractedNum = strtol(octetStart, &endptr, 10);
                 if ((extractedNum >= 0L) && (extractedNum <= 255L))
+                {
                     m_buf[octetIndex] = static_cast<unsigned char>(extractedNum);
+                }
                 else
+                {
                     return false;
+                }
 
                 if ((endptr == str) && (octetIndex == 3))
+                {
                     return true;
+                }
             }
 
             return false;
         }
 
-        lt::address_v4::bytes_type parsed() const
+        [[nodiscard]] lt::address_v4::bytes_type parsed() const
         {
             return m_buf;
         }
@@ -98,9 +112,13 @@ namespace
         lt::error_code ec;
 
         if (parser.tryParse(data))
+        {
             address = lt::address_v4(parser.parsed());
+        }
         else
+        {
             address = lt::make_address(data, ec);
+        }
 
         return !ec;
     }
@@ -126,7 +144,9 @@ int FilterParserThread::parseDATFilterFile()
     int ruleCount = 0;
     QFile file{ m_filePath.data() };
     if (!file.exists())
+    {
         return ruleCount;
+    }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -143,17 +163,23 @@ int FilterParserThread::parseDATFilterFile()
     int parseErrorCount = 0;
     const auto addLog = [&parseErrorCount](const QString& msg) {
         if (parseErrorCount <= MAX_LOGGED_ERRORS)
+        {
             LogMsg(msg, Log::CRITICAL);
+        }
     };
 
     while (true)
     {
         bytesRead = file.read(buffer.data() + offset, BUFFER_SIZE - offset - 1);
         if (bytesRead < 0)
+        {
             break;
+        }
         const int dataSize = bytesRead + offset;
         if ((bytesRead == 0) && (dataSize == 0))
+        {
             break;
+        }
 
         for (start = 0; start < dataSize; ++start)
         {
@@ -202,7 +228,9 @@ int FilterParserThread::parseDATFilterFile()
             // The 3rd entry is access level and if above 127 the IP range isn't blocked.
             const int firstComma = findAndNullDelimiter(buffer.data(), ',', start, endOfLine);
             if (firstComma != -1)
+            {
                 findAndNullDelimiter(buffer.data(), ',', firstComma + 1, endOfLine);
+            }
 
             // Check if there is an access value (apparently not mandatory)
             if (firstComma != -1)
@@ -287,13 +315,17 @@ int FilterParserThread::parseDATFilterFile()
         }
 
         if (start >= dataSize)
+        {
             offset = 0;
+        }
     }
 
     if (parseErrorCount > MAX_LOGGED_ERRORS)
+    {
         LogMsg(tr("%1 extra IP filter parsing errors occurred.", "513 extra IP filter parsing errors occurred.")
                    .arg(parseErrorCount - MAX_LOGGED_ERRORS),
                Log::CRITICAL);
+    }
     return ruleCount;
 }
 
@@ -303,7 +335,9 @@ int FilterParserThread::parseP2PFilterFile()
     int ruleCount = 0;
     QFile file{ m_filePath.data() };
     if (!file.exists())
+    {
         return ruleCount;
+    }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -320,17 +354,23 @@ int FilterParserThread::parseP2PFilterFile()
     int parseErrorCount = 0;
     const auto addLog = [&parseErrorCount](const QString& msg) {
         if (parseErrorCount <= MAX_LOGGED_ERRORS)
+        {
             LogMsg(msg, Log::CRITICAL);
+        }
     };
 
     while (true)
     {
         bytesRead = file.read(buffer.data() + offset, BUFFER_SIZE - offset - 1);
         if (bytesRead < 0)
+        {
             break;
+        }
         const int dataSize = bytesRead + offset;
         if ((bytesRead == 0) && (dataSize == 0))
+        {
             break;
+        }
 
         for (start = 0; start < dataSize; ++start)
         {
@@ -404,7 +444,9 @@ int FilterParserThread::parseP2PFilterFile()
             {
                 const int nextColon = findAndNullDelimiter(buffer.data(), ':', searchStart, delimIP, false);
                 if (nextColon == -1)
+                {
                     break;
+                }
 
                 lt::address testAddr;
                 const int testStart = trim(buffer.data(), (nextColon + 1), (delimIP - 1));
@@ -479,13 +521,17 @@ int FilterParserThread::parseP2PFilterFile()
         }
 
         if (start >= dataSize)
+        {
             offset = 0;
+        }
     }
 
     if (parseErrorCount > MAX_LOGGED_ERRORS)
+    {
         LogMsg(tr("%1 extra IP filter parsing errors occurred.", "513 extra IP filter parsing errors occurred.")
                    .arg(parseErrorCount - MAX_LOGGED_ERRORS),
                Log::CRITICAL);
+    }
     return ruleCount;
 }
 
@@ -521,7 +567,9 @@ int FilterParserThread::parseP2BFilterFile()
     int ruleCount = 0;
     QFile file{ m_filePath.data() };
     if (!file.exists())
+    {
         return ruleCount;
+    }
 
     if (!file.open(QIODevice::ReadOnly))
     {
@@ -581,7 +629,7 @@ int FilterParserThread::parseP2BFilterFile()
 
         namecount = ntohl(namecount);
         // Reading names although, we don't really care about them
-        for (unsigned int i = 0; i < namecount; ++i)
+        for (unsigned int i = 0U; i < namecount; ++i)
         {
             std::string name;
             if (!getlineInStream(stream, name, '\0'))
@@ -591,7 +639,9 @@ int FilterParserThread::parseP2BFilterFile()
             }
 
             if (m_abort)
+            {
                 return ruleCount;
+            }
         }
 
         // Reading the ranges
@@ -604,7 +654,7 @@ int FilterParserThread::parseP2BFilterFile()
 
         rangecount = ntohl(rangecount);
         unsigned int name, start, end;
-        for (unsigned int i = 0; i < rangecount; ++i)
+        for (unsigned int i = 0U; i < rangecount; ++i)
         {
             if (!stream.readRawData(reinterpret_cast<char*>(&name), sizeof(name)) || !stream.readRawData(reinterpret_cast<char*>(&start), sizeof(start)) || !stream.readRawData(reinterpret_cast<char*>(&end), sizeof(end)))
             {
@@ -628,7 +678,9 @@ int FilterParserThread::parseP2BFilterFile()
             }
 
             if (m_abort)
+            {
                 return ruleCount;
+            }
         }
     }
     else
@@ -686,7 +738,9 @@ void FilterParserThread::run()
     }
 
     if (m_abort)
+    {
         return;
+    }
 
     try
     {
@@ -731,7 +785,9 @@ int FilterParserThread::findAndNullDelimiter(char* const data, const char delimi
 int FilterParserThread::trim(char* const data, const int start, const int end)
 {
     if (start >= end)
+    {
         return start;
+    }
     int newStart = start;
 
     for (int i = start; i <= end; ++i)
@@ -750,9 +806,13 @@ int FilterParserThread::trim(char* const data, const int start, const int end)
     for (int i = end; i >= start; --i)
     {
         if (isspace(data[i]) != 0)
+        {
             data[i] = '\0';
+        }
         else
+        {
             break;
+        }
     }
 
     return newStart;

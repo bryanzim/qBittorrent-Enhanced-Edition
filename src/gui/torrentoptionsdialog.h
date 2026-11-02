@@ -61,7 +61,7 @@ public:
     explicit TorrentOptionsDialog(QWidget* parent, const QList<BitTorrent::Torrent*>& torrents);
     ~TorrentOptionsDialog() override;
 
-    QSize sizeHint() const override;
+    [[nodiscard]] QSize sizeHint() const override;
 
 public slots:
     void accept() override;

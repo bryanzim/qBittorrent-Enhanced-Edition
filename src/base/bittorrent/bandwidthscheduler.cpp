@@ -89,16 +89,22 @@ bool BandwidthScheduler::isTimeForAlternative() const
             const int offset = static_cast<int>(Scheduler::Days::Monday) - 1;
             const int dayOfWeek = static_cast<int>(schedulerDays) - offset;
             if (day == dayOfWeek)
+            {
                 alternative = !alternative;
+            }
         }
         break;
         case Scheduler::Days::Weekday:
             if ((day >= 1) && (day <= 5))
+            {
                 alternative = !alternative;
+            }
             break;
         case Scheduler::Days::Weekend:
             if ((day == 6) || (day == 7))
+            {
                 alternative = !alternative;
+            }
             break;
         default:
             Q_UNREACHABLE();

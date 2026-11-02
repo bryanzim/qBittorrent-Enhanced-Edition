@@ -55,7 +55,9 @@ Utils::IO::FileDeviceOutputIterator::~FileDeviceOutputIterator()
     if (m_buffer.use_count() == 1)
     {
         if (m_device->error() == QFileDevice::NoError)
+        {
             m_device->write(*m_buffer);
+        }
         m_buffer->clear();
     }
 }
@@ -66,7 +68,9 @@ Utils::IO::FileDeviceOutputIterator& Utils::IO::FileDeviceOutputIterator::operat
     if (m_buffer->size() >= m_bufferSize)
     {
         if (m_device->error() == QFileDevice::NoError)
+        {
             m_device->write(*m_buffer);
+        }
         m_buffer->clear();
     }
     return *this;
@@ -128,25 +132,35 @@ nonstd::expected<QByteArray, Utils::IO::ReadError> Utils::IO::readFile(const Pat
 nonstd::expected<void, QString> Utils::IO::saveToFile(const Path& path, const QByteArray& data)
 {
     if (const Path parentPath = path.parentPath(); !parentPath.isEmpty())
+    {
         Utils::Fs::mkpath(parentPath);
+    }
     QSaveFile file{ path.data() };
     if (!file.open(QIODevice::WriteOnly) || (file.write(data) != data.size()) || !file.flush() || !file.commit())
+    {
         return nonstd::make_unexpected(file.errorString());
+    }
     return {};
 }
 
 nonstd::expected<void, QString> Utils::IO::saveToFile(const Path& path, const lt::entry& data)
 {
     if (const Path parentPath = path.parentPath(); !parentPath.isEmpty())
+    {
         Utils::Fs::mkpath(parentPath);
+    }
 
     QSaveFile file{ path.data() };
     if (!file.open(QIODevice::WriteOnly))
+    {
         return nonstd::make_unexpected(file.errorString());
+    }
 
     const int bencodedDataSize = lt::bencode(Utils::IO::FileDeviceOutputIterator{ file }, data);
     if ((file.size() != bencodedDataSize) || !file.flush() || !file.commit())
+    {
         return nonstd::make_unexpected(file.errorString());
+    }
 
     return {};
 }
@@ -155,7 +169,9 @@ nonstd::expected<Path, QString> Utils::IO::saveToTempFile(const QByteArray& data
 {
     QTemporaryFile file{ (Utils::Fs::tempPath() / Path(u"file_"_s)).data() };
     if (!file.open() || (file.write(data) != data.length()) || !file.flush())
+    {
         return nonstd::make_unexpected(file.errorString());
+    }
 
     file.setAutoRemove(false);
     return Path(file.fileName());
@@ -165,11 +181,15 @@ nonstd::expected<Path, QString> Utils::IO::saveToTempFile(const lt::entry& data)
 {
     QTemporaryFile file{ (Utils::Fs::tempPath() / Path(u"file_"_s)).data() };
     if (!file.open())
+    {
         return nonstd::make_unexpected(file.errorString());
+    }
 
     const int bencodedDataSize = lt::bencode(Utils::IO::FileDeviceOutputIterator{ file }, data);
     if ((file.size() != bencodedDataSize) || !file.flush())
+    {
         return nonstd::make_unexpected(file.errorString());
+    }
 
     file.setAutoRemove(false);
     return Path(file.fileName());

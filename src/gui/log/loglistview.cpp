@@ -94,8 +94,10 @@ namespace
             // until they are set explicitly, and we have to manually set some font properties
             QFont font = option.font;
             font.setFamily(option.font.family());
-            if (option.font.pointSizeF() > 0) // for better scaling we use floating point version
+            if (option.font.pointSizeF() > 0)
+            { // for better scaling we use floating point version
                 font.setPointSizeF(option.font.pointSizeF());
+            }
             painter->setFont(font);
 
             QPalette palette = option.palette;
@@ -116,7 +118,7 @@ namespace
             painter->restore();
         }
 
-        QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
+        [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
         {
             const QSize minimumFontPadding(4, 4);
             const QSize fontSize = option.fontMetrics.size(0, logText(index)) + minimumFontPadding;
@@ -145,9 +147,13 @@ LogListView::LogListView(QWidget* parent)
 void LogListView::keyPressEvent(QKeyEvent* event)
 {
     if (event->matches(QKeySequence::Copy))
+    {
         copySelection();
+    }
     else
+    {
         QListView::keyPressEvent(event);
+    }
 }
 
 void LogListView::copySelection() const
@@ -155,6 +161,8 @@ void LogListView::copySelection() const
     QStringList list;
     const QModelIndexList selectedIndexes = selectionModel()->selectedRows();
     for (const QModelIndex& index : selectedIndexes)
+    {
         list.append(logText(index));
+    }
     QApplication::clipboard()->setText(list.join(u'\n'));
 }

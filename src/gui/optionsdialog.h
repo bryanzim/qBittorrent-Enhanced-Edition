@@ -154,50 +154,50 @@ private:
     void initializeLanguageCombo();
     void initializeStyleCombo();
     void initializeColorSchemeOptions();
-    QString getLocale() const;
-    bool isSplashScreenDisabled() const;
+    [[nodiscard]] QString getLocale() const;
+    [[nodiscard]] bool isSplashScreenDisabled() const;
 #ifdef Q_OS_WIN
-    bool WinStartup() const;
+    [[nodiscard]] bool WinStartup() const;
 #endif
     // Downloads
-    bool preAllocateAllFiles() const;
-    bool useAdditionDialog() const;
-    bool addTorrentsStopped() const;
+    [[nodiscard]] bool preAllocateAllFiles() const;
+    [[nodiscard]] bool useAdditionDialog() const;
+    [[nodiscard]] bool addTorrentsStopped() const;
     // Connection options
-    int getPort() const;
-    bool isUPnPEnabled() const;
+    [[nodiscard]] int getPort() const;
+    [[nodiscard]] bool isUPnPEnabled() const;
     // Bittorrent options
-    int getMaxConnections() const;
-    int getMaxConnectionsPerTorrent() const;
-    int getMaxUploads() const;
-    int getMaxUploadsPerTorrent() const;
-    bool isDHTEnabled() const;
-    bool isLSDEnabled() const;
-    int getEncryptionSetting() const;
-    qreal getMaxRatio() const;
-    int getMaxSeedingMinutes() const;
-    int getMaxInactiveSeedingMinutes() const;
+    [[nodiscard]] int getMaxConnections() const;
+    [[nodiscard]] int getMaxConnectionsPerTorrent() const;
+    [[nodiscard]] int getMaxUploads() const;
+    [[nodiscard]] int getMaxUploadsPerTorrent() const;
+    [[nodiscard]] bool isDHTEnabled() const;
+    [[nodiscard]] bool isLSDEnabled() const;
+    [[nodiscard]] int getEncryptionSetting() const;
+    [[nodiscard]] qreal getMaxRatio() const;
+    [[nodiscard]] int getMaxSeedingMinutes() const;
+    [[nodiscard]] int getMaxInactiveSeedingMinutes() const;
     // Proxy options
-    bool isProxyEnabled() const;
-    QString getProxyIp() const;
-    unsigned short getProxyPort() const;
-    QString getProxyUsername() const;
-    QString getProxyPassword() const;
-    Net::ProxyType getProxyType() const;
+    [[nodiscard]] bool isProxyEnabled() const;
+    [[nodiscard]] QString getProxyIp() const;
+    [[nodiscard]] unsigned short getProxyPort() const;
+    [[nodiscard]] QString getProxyUsername() const;
+    [[nodiscard]] QString getProxyPassword() const;
+    [[nodiscard]] Net::ProxyType getProxyType() const;
     // IP Filter
-    bool isIPFilteringEnabled() const;
-    Path getFilter() const;
-    bool isShadowBanEnabled() const;
+    [[nodiscard]] bool isIPFilteringEnabled() const;
+    [[nodiscard]] Path getFilter() const;
+    [[nodiscard]] bool isShadowBanEnabled() const;
     // Queueing system
-    bool isQueueingSystemEnabled() const;
-    int getMaxActiveDownloads() const;
-    int getMaxActiveUploads() const;
-    int getMaxActiveTorrents() const;
+    [[nodiscard]] bool isQueueingSystemEnabled() const;
+    [[nodiscard]] int getMaxActiveDownloads() const;
+    [[nodiscard]] int getMaxActiveUploads() const;
+    [[nodiscard]] int getMaxActiveTorrents() const;
     // WebUI
 #ifndef DISABLE_WEBUI
-    bool isWebUIEnabled() const;
-    QString webUIUsername() const;
-    QString webUIPassword() const;
+    [[nodiscard]] bool isWebUIEnabled() const;
+    [[nodiscard]] QString webUIUsername() const;
+    [[nodiscard]] QString webUIPassword() const;
     bool webUIAuthenticationOk();
     bool isAlternativeWebUIPathValid();
 #endif

@@ -68,7 +68,9 @@ void RaisedMessageBox::showEvent(QShowEvent* event)
     QMessageBox::showEvent(event);
 
     if (parentWidget() && parentWidget()->isMinimized())
+    {
         move(Utils::Gui::screenCenter(this));
+    }
 
     activateWindow();
     raise();

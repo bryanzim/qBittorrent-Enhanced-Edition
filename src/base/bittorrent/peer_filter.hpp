@@ -28,30 +28,36 @@ class peer_filter
 public:
     explicit peer_filter(const QString& filter_file)
     {
-        QString log_tag = QFileInfo(filter_file).fileName();
+        QString const log_tag = QFileInfo(filter_file).fileName();
 
         std::ifstream ifs(filter_file.toStdString());
         std::string peer_id, client;
         while (ifs >> peer_id >> client)
         {
-            QRegularExpression peer_id_re(QString::fromStdString(peer_id));
-            QRegularExpression client_re(QString::fromStdString(client));
+            QRegularExpression const peer_id_re(QString::fromStdString(peer_id));
+            QRegularExpression const client_re(QString::fromStdString(client));
 
             auto msg_tmpl = u"'%1': invalid %2 matching expression '%3' detected at line %4, ignoring rule"_s;
-            int line = m_filters.size() + 1;
+            int const line = m_filters.size() + 1;
 
             if (!peer_id_re.isValid())
+            {
                 LogMsg(msg_tmpl.arg(log_tag).arg(u"peer id"_s).arg(peer_id_re.pattern()).arg(line), Log::WARNING);
+            }
 
             if (!client_re.isValid())
+            {
                 LogMsg(msg_tmpl.arg(log_tag).arg(u"client name"_s).arg(client_re.pattern()).arg(line), Log::WARNING);
+            }
 
             if (peer_id_re.isValid() && client_re.isValid())
+            {
                 m_filters.append({ peer_id_re, client_re });
+            }
         }
     }
 
-    bool match_peer(const lt::peer_info& info, bool skip_name) const
+    [[nodiscard]] bool match_peer(const lt::peer_info& info, bool skip_name) const
     {
         QString peer_id = QString::fromLatin1(info.pid.data(), 8);
         QString client = QString::fromStdString(info.client);
@@ -62,8 +68,8 @@ public:
                            });
     }
 
-    bool is_empty() const { return m_filters.isEmpty(); }
-    int rules_count() const { return m_filters.size(); }
+    [[nodiscard]] bool is_empty() const { return m_filters.isEmpty(); }
+    [[nodiscard]] int rules_count() const { return m_filters.size(); }
 
 private:
     QVector<QVector<QRegularExpression>> m_filters;

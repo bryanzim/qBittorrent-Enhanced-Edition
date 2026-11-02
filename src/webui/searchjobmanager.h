@@ -60,15 +60,15 @@ public:
     bool stopSearch(int id);
     bool deleteSearch(int id);
 
-    std::optional<JobInfo> getJobInfo(int id) const;
-    QList<JobInfo> getAllJobInfos() const;
+    [[nodiscard]] std::optional<JobInfo> getJobInfo(int id) const;
+    [[nodiscard]] QList<JobInfo> getAllJobInfos() const;
 
 private slots:
     void onPreferencesChanged();
 
 private:
     void onSearchStopped(int id);
-    int generateSearchId() const;
+    [[nodiscard]] int generateSearchId() const;
     void loadSession();
     void saveSession() const;
     void saveSearchResults(int searchId) const;

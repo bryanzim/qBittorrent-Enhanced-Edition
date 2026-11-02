@@ -50,7 +50,7 @@ public:
 
     explicit PropTabBar(QWidget* parent = nullptr);
 
-    int currentIndex() const;
+    [[nodiscard]] int currentIndex() const;
 
 signals:
     void tabChanged(int index);

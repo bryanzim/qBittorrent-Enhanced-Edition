@@ -392,7 +392,9 @@ void TorrentShareLimitsWidget::onRatioLimitModeChanged(const int currentIndex, c
     m_ui->spinBoxRatioValue->setEnabled(currentIndex == AssignedComboModeIndex);
 
     if (previousIndex == AssignedComboModeIndex)
+    {
         m_ratioLimit = m_ui->spinBoxRatioValue->value();
+    }
 
     if (currentIndex == AssignedComboModeIndex)
     {
@@ -413,7 +415,9 @@ void TorrentShareLimitsWidget::onSeedingTimeLimitModeChanged(const int currentIn
     m_ui->spinBoxSeedingTimeValue->setEnabled(currentIndex == AssignedComboModeIndex);
 
     if (previousIndex == AssignedComboModeIndex)
+    {
         m_seedingTimeLimit = m_ui->spinBoxSeedingTimeValue->value();
+    }
 
     if (currentIndex == AssignedComboModeIndex)
     {
@@ -437,7 +441,9 @@ void TorrentShareLimitsWidget::onInactiveSeedingTimeLimitModeChanged(const int c
     m_ui->spinBoxInactiveSeedingTimeValue->setEnabled(currentIndex == AssignedComboModeIndex);
 
     if (previousIndex == AssignedComboModeIndex)
+    {
         m_inactiveSeedingTimeLimit = m_ui->spinBoxInactiveSeedingTimeValue->value();
+    }
 
     if (currentIndex == AssignedComboModeIndex)
     {

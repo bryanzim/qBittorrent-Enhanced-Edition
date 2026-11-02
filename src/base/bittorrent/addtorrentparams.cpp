@@ -66,7 +66,9 @@ namespace
     {
         TagSet tags;
         for (const QJsonValue& jsonVal : jsonArr)
+        {
             tags.insert(Tag(jsonVal.toString()));
+        }
 
         return tags;
     }
@@ -75,7 +77,9 @@ namespace
     {
         QJsonArray arr;
         for (const Tag& tag : tags)
+        {
             arr.append(tag.toString());
+        }
 
         return arr;
     }
@@ -84,7 +88,9 @@ namespace
     {
         const QJsonValue jsonVal = jsonObj.value(key);
         if (jsonVal.isUndefined() || jsonVal.isNull())
+        {
             return std::nullopt;
+        }
 
         return jsonVal.toBool();
     }
@@ -94,7 +100,9 @@ namespace
     {
         const QJsonValue jsonVal = jsonObj.value(key);
         if (jsonVal.isUndefined() || jsonVal.isNull())
+        {
             return std::nullopt;
+        }
 
         return Utils::String::toEnum<Enum>(jsonVal.toString(), {});
     }
@@ -164,17 +172,29 @@ QJsonObject BitTorrent::serializeAddTorrentParams(const AddTorrentParams& params
     };
 
     if (params.addToQueueTop)
+    {
         jsonObj[PARAM_QUEUETOP] = *params.addToQueueTop;
+    }
     if (params.addStopped)
+    {
         jsonObj[PARAM_STOPPED] = *params.addStopped;
+    }
     if (params.stopCondition)
+    {
         jsonObj[PARAM_STOPCONDITION] = Utils::String::fromEnum(*params.stopCondition);
+    }
     if (params.contentLayout)
+    {
         jsonObj[PARAM_CONTENTLAYOUT] = Utils::String::fromEnum(*params.contentLayout);
+    }
     if (params.useAutoTMM)
+    {
         jsonObj[PARAM_AUTOTMM] = *params.useAutoTMM;
+    }
     if (params.useDownloadPath)
+    {
         jsonObj[PARAM_USEDOWNLOADPATH] = *params.useDownloadPath;
+    }
 
     return jsonObj;
 }

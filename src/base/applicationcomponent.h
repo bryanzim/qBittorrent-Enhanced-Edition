@@ -42,7 +42,7 @@ class ApplicationComponentBase
 public:
     virtual ~ApplicationComponentBase() = default;
 
-    IApplication* app() const;
+    [[nodiscard]] IApplication* app() const;
 
 protected:
     explicit ApplicationComponentBase(IApplication* app);

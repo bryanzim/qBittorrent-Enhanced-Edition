@@ -67,7 +67,9 @@ GeoIPManager::~GeoIPManager()
 void GeoIPManager::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new GeoIPManager;
+    }
 }
 
 void GeoIPManager::freeInstance()
@@ -111,16 +113,22 @@ void GeoIPManager::manageDatabaseUpdate()
         const QDate curDate = QDateTime::currentDateTimeUtc().date();
 
         if ((testDate.year() < curDate.year()) && (curDate.day() > 1))
+        {
             return true;
+        }
 
         if ((testDate.month() < curDate.month()) && (curDate.day() > 1))
+        {
             return true;
+        }
 
         return false;
     };
 
     if (!m_geoIPDatabase || expired(m_geoIPDatabase->buildEpoch()))
+    {
         downloadDatabaseFile();
+    }
 }
 
 void GeoIPManager::downloadDatabaseFile()
@@ -134,7 +142,9 @@ void GeoIPManager::downloadDatabaseFile()
 QString GeoIPManager::lookup(const QHostAddress& hostAddr) const
 {
     if (m_enabled && m_geoIPDatabase)
+    {
         return m_geoIPDatabase->lookup(hostAddr);
+    }
 
     return {};
 }
@@ -449,7 +459,9 @@ void GeoIPManager::downloadFinished(const DownloadResult& result)
                    Log::INFO);
             const Path targetPath = specialFolderLocation(SpecialFolder::Data) / Path(GEODB_FOLDER);
             if (!targetPath.exists())
+            {
                 Utils::Fs::mkpath(targetPath);
+            }
 
             const auto path = targetPath / Path(GEODB_FILENAME);
             const nonstd::expected<void, QString> saveResult = Utils::IO::saveToFile(path, data);

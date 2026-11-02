@@ -46,7 +46,9 @@ namespace
     QJsonObject parseThemeConfig(const QByteArray& data)
     {
         if (data.isEmpty())
+        {
             return {};
+        }
 
         QJsonParseError jsonError;
         const QJsonDocument configJsonDoc = QJsonDocument::fromJson(data, &jsonError);
@@ -93,11 +95,15 @@ namespace
     {
         const Path pathSvg = dir / Path(iconId + u".svg");
         if (pathSvg.exists())
+        {
             return pathSvg;
+        }
 
         const Path pathPng = dir / Path(iconId + u".png");
         if (pathPng.exists())
+        {
             return pathPng;
+        }
 
         return {};
     }
@@ -120,8 +126,10 @@ QColor DefaultThemeSource::getColor(const QString& colorId, const ColorMode colo
 {
     const auto iter = m_colors.constFind(colorId);
     Q_ASSERT(iter != m_colors.constEnd());
-    if (iter == m_colors.constEnd()) [[unlikely]]
-        return {};
+    if (iter == m_colors.constEnd())
+    {
+        [[unlikely]] return {};
+    }
 
     return (colorMode == ColorMode::Light)
                ? iter.value().light
@@ -174,14 +182,18 @@ void DefaultThemeSource::loadColors()
     if (!readResult)
     {
         if (readResult.error().status != Utils::IO::ReadError::NotExist)
+        {
             LogMsg(tr("Failed to load default theme colors. %1").arg(readResult.error().message), Log::WARNING);
+        }
 
         return;
     }
 
     const QByteArray& configData = readResult.value();
     if (configData.isEmpty())
+    {
         return;
+    }
 
     const QJsonObject config = parseThemeConfig(configData);
 
@@ -190,7 +202,9 @@ void DefaultThemeSource::loadColors()
     {
         const auto it = m_colors.find(overridesIt.key());
         if (it != m_colors.end())
+        {
             it.value().light = overridesIt.value();
+        }
     }
 
     const QHash<QString, QColor> darkModeColorOverrides = colorsFromJSON(config.value(KEY_COLORS_DARK).toObject());
@@ -198,7 +212,9 @@ void DefaultThemeSource::loadColors()
     {
         const auto it = m_colors.find(overridesIt.key());
         if (it != m_colors.end())
+        {
             it.value().dark = overridesIt.value();
+        }
     }
 }
 
@@ -253,7 +269,9 @@ QByteArray CustomThemeSource::readStyleSheet()
     if (!readResult)
     {
         if (readResult.error().status != Utils::IO::ReadError::NotExist)
+        {
             LogMsg(tr("Failed to load custom theme style sheet. %1").arg(readResult.error().message), Log::WARNING);
+        }
 
         return {};
     }
@@ -277,14 +295,18 @@ void CustomThemeSource::loadColors()
     if (!readResult)
     {
         if (readResult.error().status != Utils::IO::ReadError::NotExist)
+        {
             LogMsg(tr("Failed to load custom theme colors. %1").arg(readResult.error().message), Log::WARNING);
+        }
 
         return;
     }
 
     const QByteArray& configData = readResult.value();
     if (configData.isEmpty())
+    {
         return;
+    }
 
     const QJsonObject config = parseThemeConfig(configData);
 

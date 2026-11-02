@@ -58,7 +58,9 @@ StatsDialog::StatsDialog(QWidget* parent)
     update();
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 StatsDialog::~StatsDialog()

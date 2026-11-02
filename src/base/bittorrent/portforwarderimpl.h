@@ -48,7 +48,7 @@ public:
     explicit PortForwarderImpl(BitTorrent::SessionImpl* provider, QObject* parent = nullptr);
     ~PortForwarderImpl() override;
 
-    bool isEnabled() const override;
+    [[nodiscard]] bool isEnabled() const override;
     void setEnabled(bool enabled) override;
 
     void setPorts(const QString& profile, QSet<quint16> ports) override;

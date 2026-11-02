@@ -81,7 +81,9 @@ namespace
     std::optional<SplitToFriendlyUnitResult> splitToFriendlyUnit(const qint64 bytes, const int unitThreshold = 1024)
     {
         if (bytes < 0)
+        {
             return std::nullopt;
+        }
 
         int i = 0;
         auto value = static_cast<qreal>(bytes);
@@ -102,7 +104,9 @@ QString Utils::Misc::unitString(const SizeUnit unit, const bool isSpeed)
     const auto& unitString = units[static_cast<int>(unit)];
     QString ret = QCoreApplication::translate("misc", unitString.source, unitString.comment);
     if (isSpeed)
+    {
         ret += QCoreApplication::translate("misc", "/s", "per second");
+    }
     return ret;
 }
 
@@ -110,7 +114,9 @@ QString Utils::Misc::friendlyUnit(const qint64 bytes, const bool isSpeed, const 
 {
     const std::optional<SplitToFriendlyUnitResult> result = splitToFriendlyUnit(bytes);
     if (!result)
+    {
         return QCoreApplication::translate("misc", "Unknown", "Unknown (size)");
+    }
 
     const int digitPrecision = (precision >= 0) ? precision : friendlyUnitPrecision(result->unit);
     return Utils::String::fromDouble(result->value, digitPrecision) + QChar::Nbsp + unitString(result->unit, isSpeed);
@@ -121,13 +127,19 @@ QString Utils::Misc::friendlyUnitCompact(const qint64 bytes)
     // avoid 1000-1023 values, use next larger unit instead
     const std::optional<SplitToFriendlyUnitResult> result = splitToFriendlyUnit(bytes, 1000);
     if (!result)
+    {
         return QCoreApplication::translate("misc", "Unknown", "Unknown (size)");
+    }
 
     int precision = 0; // >= 100
     if (result->value < 10)
+    {
         precision = 2; // 0 - 9.99
+    }
     else if (result->value < 100)
+    {
         precision = 1; // 10 - 99.9
+    }
 
     return Utils::String::fromDouble(result->value, precision)
            // use only one character for unit representation
@@ -154,7 +166,9 @@ int Utils::Misc::friendlyUnitPrecision(const SizeUnit unit)
 qlonglong Utils::Misc::sizeInBytes(qreal size, const Utils::Misc::SizeUnit unit)
 {
     for (int i = 0; i < static_cast<int>(unit); ++i)
+    {
         size *= 1024;
+    }
     return size;
 }
 
@@ -222,24 +236,34 @@ bool Utils::Misc::isTorrentLink(const QString& str)
 QString Utils::Misc::userFriendlyDuration(const qlonglong seconds, const qlonglong maxCap, const TimeResolution resolution)
 {
     if (seconds < 0)
+    {
         return C_INFINITY;
+    }
     if ((maxCap >= 0) && (seconds >= maxCap))
+    {
         return C_INFINITY;
+    }
 
     if (seconds == 0)
+    {
         return u"0"_s;
+    }
 
     if (seconds < 60)
     {
         if (resolution == TimeResolution::Minutes)
+        {
             return QCoreApplication::translate("misc", "< 1m", "< 1 minute");
+        }
 
         return QCoreApplication::translate("misc", "%1s", "e.g: 10 seconds").arg(QString::number(seconds));
     }
 
     qlonglong minutes = (seconds / 60);
     if (minutes < 60)
+    {
         return QCoreApplication::translate("misc", "%1m", "e.g: 10 minutes").arg(QString::number(minutes));
+    }
 
     qlonglong hours = (minutes / 60);
     if (hours < 24)
@@ -255,7 +279,7 @@ QString Utils::Misc::userFriendlyDuration(const qlonglong seconds, const qlonglo
         return QCoreApplication::translate("misc", "%1d %2h", "e.g: 2 days 10 hours").arg(QString::number(days), QString::number(hours));
     }
 
-    qlonglong years = (days / 365);
+    qlonglong const years = (days / 365);
     days -= (years * 365);
     return QCoreApplication::translate("misc", "%1y %2d", "e.g: 2 years 10 days").arg(QString::number(years), QString::number(days));
 }
@@ -375,7 +399,9 @@ QString Utils::Misc::languageToLocalizedString(const QStringView localeStr)
         return C_LOCALE_POLISH;
     case QLocale::Portuguese:
         if (locale.territory() == QLocale::Brazil)
+        {
             return C_LOCALE_PORTUGUESE_BRAZIL;
+        }
         return C_LOCALE_PORTUGUESE;
     case QLocale::Romanian:
         return C_LOCALE_ROMANIAN;
@@ -383,7 +409,9 @@ QString Utils::Misc::languageToLocalizedString(const QStringView localeStr)
         return C_LOCALE_RUSSIAN;
     case QLocale::Serbian:
         if (localeStr.contains(u"latin", Qt::CaseInsensitive))
+        {
             return C_LOCALE_SERBIAN_LATIN;
+        }
         return C_LOCALE_SERBIAN;
     case QLocale::Slovak:
         return C_LOCALE_SLOVAK;

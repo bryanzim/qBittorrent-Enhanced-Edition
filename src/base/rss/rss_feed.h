@@ -74,25 +74,25 @@ namespace RSS
         ~Feed() override;
 
     public:
-        QList<Article*> articles() const override;
-        int unreadCount() const override;
+        [[nodiscard]] QList<Article*> articles() const override;
+        [[nodiscard]] int unreadCount() const override;
         void markAsRead() override;
         void refresh() override;
         void updateFetchDelay() override;
 
-        QUuid uid() const;
-        QString url() const;
-        QString title() const;
-        QString lastBuildDate() const;
-        bool hasError() const;
-        bool isLoading() const;
-        Article* articleByGUID(const QString& guid) const;
-        Path iconPath() const;
+        [[nodiscard]] QUuid uid() const;
+        [[nodiscard]] QString url() const;
+        [[nodiscard]] QString title() const;
+        [[nodiscard]] QString lastBuildDate() const;
+        [[nodiscard]] bool hasError() const;
+        [[nodiscard]] bool isLoading() const;
+        [[nodiscard]] Article* articleByGUID(const QString& guid) const;
+        [[nodiscard]] Path iconPath() const;
 
-        std::chrono::seconds refreshInterval() const;
+        [[nodiscard]] std::chrono::seconds refreshInterval() const;
         void setRefreshInterval(std::chrono::seconds refreshInterval);
 
-        QJsonValue toJsonValue(bool withData = false) const override;
+        [[nodiscard]] QJsonValue toJsonValue(bool withData = false) const override;
 
     signals:
         void iconLoaded(Feed* feed = nullptr);

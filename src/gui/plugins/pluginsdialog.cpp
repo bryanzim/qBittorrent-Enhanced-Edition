@@ -85,10 +85,14 @@ PluginsDialog::PluginsDialog(PluginsEngine* pluginsEngine, QWidget* parent)
     connect(m_pluginsEngine, &PluginsEngine::pluginEnabledChanged, this, &PluginsDialog::pluginEnabledChanged);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 
     if (const QByteArray state = m_storeHeaderState; !state.isEmpty())
+    {
         m_ui->pluginsTree->header()->restoreState(state);
+    }
 }
 
 PluginsDialog::~PluginsDialog()
@@ -122,13 +126,17 @@ void PluginsDialog::dropEvent(QDropEvent* event)
         for (const QUrl& url : asConst(mimeData->urls()))
         {
             if (url.isLocalFile())
+            {
                 installPlugin(Path(url.toLocalFile()));
+            }
         }
     }
     else
     {
         for (const QString& pathStr : asConst(mimeData->text().split(u'\n')))
+        {
             installPlugin(Path(pathStr));
+        }
     }
 }
 
@@ -138,10 +146,14 @@ void PluginsDialog::onActionInstallTriggered()
         nullptr, tr("Select plugins"), m_storeLastPath.get(QDir::homePath()), (tr("qBittorrent plugin") + u" (*.lua)"));
 
     for (const QString& pathStr : pathsList)
+    {
         installPlugin(Path(pathStr));
+    }
 
     if (!pathsList.isEmpty())
+    {
         m_storeLastPath = Path(pathsList.at(0)).parentPath().data();
+    }
 }
 
 void PluginsDialog::onActionUninstallTriggered()
@@ -150,8 +162,10 @@ void PluginsDialog::onActionUninstallTriggered()
     {
         const int index = m_ui->pluginsTree->indexOfTopLevelItem(item);
         Q_ASSERT(index != -1);
-        if (index == -1) [[unlikely]]
-            continue;
+        if (index == -1)
+        {
+            [[unlikely]] continue;
+        }
 
         const QString pluginID = item->text(PLUGIN_ID);
         if (m_pluginsEngine->uninstallPlugin(pluginID))
@@ -173,7 +187,9 @@ void PluginsDialog::displayContextMenu()
 {
     const QList<QTreeWidgetItem*> items = m_ui->pluginsTree->selectedItems();
     if (items.isEmpty())
+    {
         return;
+    }
 
     QMenu* myContextMenu = new QMenu(this);
     myContextMenu->setAttribute(Qt::WA_DeleteOnClose);
@@ -197,10 +213,12 @@ void PluginsDialog::enableSelection(const bool enable)
     {
         const int index = m_ui->pluginsTree->indexOfTopLevelItem(item);
         Q_ASSERT(index != -1);
-        if (index == -1) [[unlikely]]
-            continue;
+        if (index == -1)
+        {
+            [[unlikely]] continue;
+        }
 
-        QString id = item->text(PLUGIN_ID);
+        QString const id = item->text(PLUGIN_ID);
         m_pluginsEngine->setPluginEnabled(id, enable);
         if (enable)
         {
@@ -230,7 +248,9 @@ QTreeWidgetItem* PluginsDialog::findItem(const QString& pluginID)
     {
         QTreeWidgetItem* item = m_ui->pluginsTree->topLevelItem(i);
         if (pluginID == item->text(PLUGIN_ID))
+        {
             return item;
+        }
     }
 
     return nullptr;
@@ -241,7 +261,9 @@ void PluginsDialog::loadPlugins()
     // Some clean up first
     m_ui->pluginsTree->clear();
     for (const PluginInfo& pluginInfo : asConst(m_pluginsEngine->allPlugins()))
+    {
         addNewPlugin(pluginInfo);
+    }
 }
 
 void PluginsDialog::addNewPlugin(const PluginInfo& pluginInfo)
@@ -269,7 +291,9 @@ void PluginsDialog::updatePlugin(const PluginInfo& pluginInfo)
 {
     QTreeWidgetItem* item = findItem(pluginInfo.id);
     if (!item)
+    {
         return;
+    }
 
     item->setText(PLUGIN_NAME, pluginInfo.name);
     item->setText(PLUGIN_INVOCABLE, (pluginInfo.invocable ? tr("Yes") : tr("No")));
@@ -289,14 +313,18 @@ void PluginsDialog::startAsyncOp()
 {
     ++m_asyncOps;
     if (m_asyncOps == 1)
+    {
         setCursor(QCursor(Qt::WaitCursor));
+    }
 }
 
 void PluginsDialog::finishAsyncOp()
 {
     --m_asyncOps;
     if (m_asyncOps == 0)
+    {
         setCursor(QCursor(Qt::ArrowCursor));
+    }
 }
 
 void PluginsDialog::pluginInstalled(const Path& pluginPath, const PluginInfo& pluginInfo)
@@ -341,7 +369,9 @@ void PluginsDialog::pluginUninstalled(const QString& pluginID)
 {
     const QTreeWidgetItem* item = findItem(pluginID);
     if (!item)
+    {
         return;
+    }
 
     if (m_uninstallingPlugins.remove(pluginID))
     {
@@ -355,7 +385,9 @@ void PluginsDialog::pluginUninstallationFailed(const QString& pluginID, const QS
 {
     const QTreeWidgetItem* item = findItem(pluginID);
     if (!item)
+    {
         return;
+    }
 
     if (m_uninstallingPlugins.remove(pluginID))
     {
@@ -370,7 +402,9 @@ void PluginsDialog::pluginEnabledChanged(const QString& pluginID, bool isEnabled
 {
     QTreeWidgetItem* item = findItem(pluginID);
     if (!item)
+    {
         return;
+    }
 
     item->setData(PLUGIN_STATE, Qt::UserRole, isEnabled);
     if (isEnabled)

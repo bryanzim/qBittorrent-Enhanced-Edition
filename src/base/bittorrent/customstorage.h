@@ -76,7 +76,7 @@ public:
     void async_set_file_priority(lt::storage_index_t storage, lt::aux::vector<lt::download_priority_t, lt::file_index_t> priorities, std::function<void(const lt::storage_error&, lt::aux::vector<lt::download_priority_t, lt::file_index_t>)> handler) override;
     void async_clear_piece(lt::storage_index_t storage, lt::piece_index_t index, std::function<void(lt::piece_index_t)> handler) override;
     void update_stats_counters(lt::counters& counters) const override;
-    std::vector<lt::open_file_state> get_status(lt::storage_index_t index) const override;
+    [[nodiscard]] std::vector<lt::open_file_state> get_status(lt::storage_index_t index) const override;
     void abort(bool wait) override;
     void submit_jobs() override;
     void settings_updated() override;

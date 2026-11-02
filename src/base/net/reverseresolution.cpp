@@ -50,7 +50,9 @@ ReverseResolution* ReverseResolution::m_instance = nullptr;
 void ReverseResolution::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new ReverseResolution;
+    }
 }
 
 void ReverseResolution::freeInstance()
@@ -73,18 +75,24 @@ ReverseResolution::~ReverseResolution()
 {
     // abort on-going lookups instead of waiting them
     for (const LookupRequest& data : m_lookups)
+    {
         QHostInfo::abortHostLookup(data.id);
+    }
 }
 
 QString ReverseResolution::resolve(const QHostAddress& ip)
 {
     const QString* hostname = m_cache.object(ip);
     if (hostname)
+    {
         return *hostname;
+    }
 
     // in-flight requests
     if (const auto& byAddress = m_lookups.get<ByAddress>(); byAddress.find(ip) != byAddress.end())
+    {
         return {};
+    }
 
     // do reverse lookup: IP -> hostname
     const int lookupId = QHostInfo::lookupHost(ip.toString(), this, &ReverseResolution::hostResolved);

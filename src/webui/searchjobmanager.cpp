@@ -89,12 +89,16 @@ namespace
         const Path resultsFilePath = makeResultsFilePath(searchId);
         const auto readResult = Utils::IO::readFile(resultsFilePath, RESULTS_FILE_MAX_SIZE);
         if (!readResult)
+        {
             return {};
+        }
 
         QJsonParseError jsonError;
         const QJsonDocument jsonDoc = QJsonDocument::fromJson(readResult.value(), &jsonError);
         if ((jsonError.error != QJsonParseError::NoError) || !jsonDoc.isArray())
+        {
             return {};
+        }
 
         const QJsonArray resultsArray = jsonDoc.array();
         QList<SearchResult> results;
@@ -130,7 +134,9 @@ SearchJobManager::SearchJobManager(QObject* parent)
 nonstd::expected<int, QString> SearchJobManager::startSearch(const QString& pattern, const QString& category, const QStringList& plugins)
 {
     if (m_searchHandlers.size() >= MAX_CONCURRENT_SEARCHES)
+    {
         return nonstd::make_unexpected(tr("Unable to create more than %1 concurrent searches.").arg(MAX_CONCURRENT_SEARCHES));
+    }
 
     const int id = generateSearchId();
     const std::shared_ptr<SearchHandler> searchHandler = std::shared_ptr<SearchHandler>(SearchPluginManager::instance()->startSearch(pattern, category, plugins));
@@ -140,7 +146,9 @@ nonstd::expected<int, QString> SearchJobManager::startSearch(const QString& patt
     connect(searchHandler.get(), &SearchHandler::newSearchResults, this, [this, id, handler = searchHandler.get()] {
         const auto jobIter = m_jobs.find(id);
         if (jobIter == m_jobs.end())
+        {
             return;
+        }
 
         jobIter->results = handler->results();
     });
@@ -162,11 +170,15 @@ nonstd::expected<int, QString> SearchJobManager::startSearch(const QString& patt
 bool SearchJobManager::stopSearch(const int id)
 {
     if (!m_jobs.contains(id))
+    {
         return false;
+    }
 
     const std::shared_ptr<SearchHandler> searchHandler = m_searchHandlers.value(id);
     if (searchHandler && searchHandler->isActive())
+    {
         searchHandler->cancelSearch();
+    }
 
     return true;
 }
@@ -174,10 +186,14 @@ bool SearchJobManager::stopSearch(const int id)
 bool SearchJobManager::deleteSearch(const int id)
 {
     if (!m_jobs.remove(id))
+    {
         return false;
+    }
 
     if (const std::shared_ptr<SearchHandler> searchHandler = m_searchHandlers.take(id))
+    {
         searchHandler->cancelSearch();
+    }
 
     m_searchOrder.removeOne(id);
     removeSearchResults(id);
@@ -190,7 +206,9 @@ std::optional<SearchJobManager::JobInfo> SearchJobManager::getJobInfo(const int 
 {
     const auto iter = m_jobs.constFind(id);
     if (iter == m_jobs.cend())
+    {
         return std::nullopt;
+    }
 
     return *iter;
 }
@@ -203,8 +221,10 @@ QList<SearchJobManager::JobInfo> SearchJobManager::getAllJobInfos() const
     {
         const auto info = getJobInfo(id);
         Q_ASSERT(info);
-        if (info) [[likely]]
-            result.append(*info);
+        if (info)
+        {
+            [[likely]] result.append(*info);
+        }
     }
     return result;
 }
@@ -213,13 +233,17 @@ void SearchJobManager::onSearchStopped(const int id)
 {
     const auto jobIter = m_jobs.find(id);
     if (jobIter == m_jobs.end())
+    {
         return;
+    }
 
     jobIter->active = false;
     m_searchHandlers.remove(id);
 
     if (m_storeSearchJobs && m_storeSearchJobResults)
+    {
         saveSearchResults(id);
+    }
 }
 
 int SearchJobManager::generateSearchId() const
@@ -228,14 +252,18 @@ int SearchJobManager::generateSearchId() const
     {
         const int id = Utils::Random::rand(1, std::numeric_limits<int>::max());
         if (!m_jobs.contains(id))
+        {
             return id;
+        }
     }
 }
 
 void SearchJobManager::loadSession()
 {
     if (!m_storeSearchJobs)
+    {
         return;
+    }
 
     const Path sessionFilePath = makeDataFilePath(SESSION_FILE_NAME);
     const auto readResult = Utils::IO::readFile(sessionFilePath, SESSION_FILE_MAX_SIZE);
@@ -270,17 +298,23 @@ void SearchJobManager::loadSession()
         const QString searchPattern = jobObj[KEY_JOB_SEARCH_PATTERN].toString();
 
         if ((jobId <= 0) || searchPattern.isEmpty())
+        {
             continue;
+        }
 
         JobInfo jobInfo;
         jobInfo.id = jobId;
         jobInfo.pattern = searchPattern;
         jobInfo.category = jobObj[KEY_JOB_CATEGORY].toString();
         for (const QJsonValue& pluginValue : jobObj[KEY_JOB_PLUGINS].toArray())
+        {
             jobInfo.plugins.append(pluginValue.toString());
+        }
 
         if (m_storeSearchJobResults)
+        {
             jobInfo.results = loadSearchResults(jobId);
+        }
 
         m_jobs.insert(jobId, jobInfo);
         m_searchOrder.append(jobId);
@@ -302,8 +336,10 @@ void SearchJobManager::saveSession() const
     {
         const auto jobInfo = getJobInfo(searchId);
         Q_ASSERT(jobInfo);
-        if (!jobInfo) [[unlikely]]
-            continue;
+        if (!jobInfo)
+        {
+            [[unlikely]] continue;
+        }
 
         jobsArray.append(QJsonObject{
             {             KEY_JOB_ID,                                     searchId },
@@ -335,8 +371,10 @@ void SearchJobManager::saveSearchResults(const int searchId) const
 {
     const auto jobInfo = getJobInfo(searchId);
     Q_ASSERT(jobInfo);
-    if (!jobInfo) [[unlikely]]
-        return;
+    if (!jobInfo)
+    {
+        [[unlikely]] return;
+    }
 
     QJsonArray resultsArray;
     for (const SearchResult& result : jobInfo->results)
@@ -388,7 +426,9 @@ void SearchJobManager::removeAllResultFiles() const
     for (const QString& entry : entries)
     {
         if (entry != SESSION_FILE_NAME)
+        {
             std::ignore = Utils::Fs::removeFile(dataFolderPath / Path(entry));
+        }
     }
 }
 
@@ -413,7 +453,9 @@ void SearchJobManager::onPreferencesChanged()
             for (const JobInfo& job : asConst(m_jobs))
             {
                 if (!job.active)
+                {
                     saveSearchResults(job.id);
+                }
             }
         }
         else

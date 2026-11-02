@@ -36,7 +36,9 @@ PortForwarderImpl::PortForwarderImpl(BitTorrent::SessionImpl* provider, QObject*
     : Net::PortForwarder(parent), m_storeActive{ u"Network/PortForwardingEnabled"_s, true }, m_provider{ provider }
 {
     if (isEnabled())
+    {
         start();
+    }
 }
 
 PortForwarderImpl::~PortForwarderImpl()
@@ -52,12 +54,18 @@ bool PortForwarderImpl::isEnabled() const
 void PortForwarderImpl::setEnabled(const bool enabled)
 {
     if (m_storeActive == enabled)
+    {
         return;
+    }
 
     if (enabled)
+    {
         start();
+    }
     else
+    {
         stop();
+    }
     m_storeActive = enabled;
 }
 
@@ -81,7 +89,9 @@ void PortForwarderImpl::start()
 {
     m_provider->enablePortMapping();
     for (const QSet<quint16>& ports : asConst(m_portProfiles))
+    {
         m_provider->addMappedPorts(ports);
+    }
 }
 
 void PortForwarderImpl::stop()

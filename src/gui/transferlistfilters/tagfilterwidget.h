@@ -41,7 +41,7 @@ class TagFilterWidget final : public QTreeView
 public:
     explicit TagFilterWidget(QWidget* parent = nullptr);
 
-    std::optional<Tag> currentTag() const;
+    [[nodiscard]] std::optional<Tag> currentTag() const;
 
 signals:
     void tagChanged(const std::optional<Tag>& tag);
@@ -59,8 +59,8 @@ private slots:
     void removeUnusedTags();
 
 private:
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
+    [[nodiscard]] QSize sizeHint() const override;
+    [[nodiscard]] QSize minimumSizeHint() const override;
     void rowsInserted(const QModelIndex& parent, int start, int end) override;
     Tag askTagName();
 };

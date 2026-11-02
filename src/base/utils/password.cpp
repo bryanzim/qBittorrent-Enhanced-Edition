@@ -63,7 +63,9 @@ bool Utils::Password::slowEquals(const QByteArrayView left, const QByteArrayView
 
     qsizetype diff = lengthLeft ^ lengthRight;
     for (qsizetype i = 0; (i < lengthLeft) && (i < lengthRight); ++i)
+    {
         diff |= left[i] ^ right[i];
+    }
 
     return (diff == 0);
 }
@@ -91,14 +93,16 @@ QByteArray Utils::Password::PBKDF2::generate(const QString& password)
 
 QByteArray Utils::Password::PBKDF2::generate(const QByteArray& password)
 {
-    const std::array<uint32_t, 4> salt{
+    const std::array<std::uint32_t, 4> salt{
         { Random::rand(), Random::rand(), Random::rand(), Random::rand() }
     };
 
     std::array<unsigned char, 64> outBuf{};
     const int hmacResult = PKCS5_PBKDF2_HMAC(password.constData(), password.size(), reinterpret_cast<const unsigned char*>(salt.data()), static_cast<int>(sizeof(salt[0]) * salt.size()), hashIterations, hashMethod, static_cast<int>(outBuf.size()), outBuf.data());
     if (hmacResult != 1)
+    {
         return {};
+    }
 
     const QByteArray saltView = QByteArray::fromRawData(
         reinterpret_cast<const char*>(salt.data()), static_cast<int>(sizeof(salt[0]) * salt.size()));
@@ -117,7 +121,9 @@ bool Utils::Password::PBKDF2::verify(const QByteArray& secret, const QByteArray&
 {
     const QList<QByteArrayView> list = ByteArray::splitToViews(secret, ":");
     if (list.size() != 2)
+    {
         return false;
+    }
 
     const QByteArray salt = QByteArray::fromBase64(Utils::ByteArray::asQByteArray(list[0]));
     const QByteArray key = QByteArray::fromBase64(Utils::ByteArray::asQByteArray(list[1]));
@@ -125,7 +131,9 @@ bool Utils::Password::PBKDF2::verify(const QByteArray& secret, const QByteArray&
     std::array<unsigned char, 64> outBuf{};
     const int hmacResult = PKCS5_PBKDF2_HMAC(password.constData(), password.size(), reinterpret_cast<const unsigned char*>(salt.constData()), salt.size(), hashIterations, hashMethod, static_cast<int>(outBuf.size()), outBuf.data());
     if (hmacResult != 1)
+    {
         return false;
+    }
 
     const QByteArray outBufView = QByteArray::fromRawData(
         reinterpret_cast<const char*>(outBuf.data()), static_cast<int>(outBuf.size()));

@@ -32,8 +32,9 @@
 #include <QtSystemDetection>
 
 #ifdef Q_OS_WIN
-#include <objbase.h>
 #include <ShlObj.h>
+
+#include <objbase.h>
 
 #include <shellapi.h>
 #endif
@@ -181,22 +182,30 @@ QPoint Utils::Gui::screenCenter(const QWidget* w)
     // Returns the QPoint which the widget will be placed center on screen (where parent resides)
 
     if (!w)
+    {
         return {};
+    }
 
     QRect r = QGuiApplication::primaryScreen()->availableGeometry();
     const QPoint primaryScreenCenter{ (r.x() + (r.width() - w->frameSize().width()) / 2), (r.y() + (r.height() - w->frameSize().height()) / 2) };
 
     const QWidget* parent = w->parentWidget();
     if (!parent)
+    {
         return primaryScreenCenter;
+    }
 
     const QWindow* window = parent->window()->windowHandle();
     if (!window)
+    {
         return primaryScreenCenter;
+    }
 
     const QScreen* screen = window->screen();
     if (!screen)
+    {
         return primaryScreenCenter;
+    }
 
     r = screen->availableGeometry();
     return { (r.x() + (r.width() - w->frameSize().width()) / 2), (r.y() + (r.height() - w->frameSize().height()) / 2) };
@@ -209,7 +218,7 @@ void Utils::Gui::openPath(const Path& path)
 
 #ifdef Q_OS_WIN
     auto* thread = QThread::create([path]() {
-        if (SUCCEEDED(::CoInitializeEx(NULL, (COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE))))
+        if (SUCCEEDED(::CoInitializeEx(nullptr, (COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE))))
         {
             const std::wstring pathWStr = path.toString().toStdWString();
 
@@ -239,7 +248,7 @@ void Utils::Gui::openFolderSelect(const Path& path)
 
 #ifdef Q_OS_WIN
     auto* thread = QThread::create([path]() {
-        if (SUCCEEDED(::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
+        if (SUCCEEDED(::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
         {
             const std::wstring pathWStr = path.toString().toStdWString();
             PIDLIST_ABSOLUTE pidl = ::ILCreateFromPathW(pathWStr.c_str());
@@ -297,7 +306,9 @@ Tag Utils::Gui::widgetTextToTag(const QString& text)
         {
             amp = !amp;
             if (amp)
+            {
                 continue;
+            }
         }
 
         cleanedText.append(c);

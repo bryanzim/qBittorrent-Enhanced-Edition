@@ -53,11 +53,15 @@ FileLogger::FileLogger(const Path& path, const bool backup, const int maxSize, c
 
     setPath(path);
     if (deleteOld)
+    {
         this->deleteOld(age, ageType);
+    }
 
     const Logger* const logger = Logger::instance();
     for (const Log::Msg& msg : asConst(logger->getMessages()))
+    {
         addLogMessage(msg);
+    }
 
     connect(logger, &Logger::newLogMessage, this, &FileLogger::addLogMessage);
 }
@@ -72,7 +76,9 @@ void FileLogger::setPath(const Path& newPath)
     const Path newPathAbs = newPath.isAbsolute() ? newPath : (specialFolderLocation(SpecialFolder::Data) / newPath);
     // compare paths as strings to perform case sensitive comparison on all the platforms
     if (newPathAbs.data() == m_logsFolderPath.data())
+    {
         return;
+    }
 
     closeLogFile();
 
@@ -104,7 +110,9 @@ void FileLogger::deleteOld(const int age, const FileLogAgeType ageType)
             modificationDate = modificationDate.addYears(age);
         }
         if (modificationDate > date)
+        {
             break;
+        }
         std::ignore = Utils::Fs::removeFile(Path(file.absoluteFilePath()));
     }
 }
@@ -122,7 +130,9 @@ void FileLogger::setMaxSize(const int value)
 void FileLogger::addLogMessage(const Log::Msg& msg)
 {
     if (!m_logFile.isOpen())
+    {
         return;
+    }
 
     QTextStream stream(&m_logFile);
 
@@ -162,14 +172,18 @@ void FileLogger::addLogMessage(const Log::Msg& msg)
     else
     {
         if (!m_flusher.isActive())
+        {
             m_flusher.start();
+        }
     }
 }
 
 void FileLogger::flushLog()
 {
     if (m_logFile.isOpen())
+    {
         m_logFile.flush();
+    }
 }
 
 void FileLogger::openLogFile()

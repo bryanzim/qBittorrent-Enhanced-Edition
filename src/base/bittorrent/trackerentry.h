@@ -45,5 +45,5 @@ namespace BitTorrent
     QList<TrackerEntry> parseTrackerEntries(QStringView str);
 
     bool operator==(const TrackerEntry& left, const TrackerEntry& right);
-    std::size_t qHash(const TrackerEntry& key, std::size_t seed = 0);
+    std::size_t qHash(const TrackerEntry& key, std::size_t seed = 0U);
 }

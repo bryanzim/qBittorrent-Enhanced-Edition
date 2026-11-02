@@ -44,7 +44,9 @@ ClientDataStorage::ClientDataStorage(QObject* parent)
     : QObject(parent), m_clientDataFilePath(specialFolderLocation(SpecialFolder::Data) / Path(CLIENT_DATA_FILE_NAME))
 {
     if (!m_clientDataFilePath.exists())
+    {
         return;
+    }
 
     const auto readResult = Utils::IO::readFile(m_clientDataFilePath, CLIENT_DATA_FILE_MAX_SIZE);
     if (!readResult)
@@ -111,10 +113,14 @@ nonstd::expected<void, QString> ClientDataStorage::storeData(const QJsonObject& 
     {
         const QByteArray json = QJsonDocument(clientData).toJson(QJsonDocument::Compact);
         if (json.size() > CLIENT_DATA_FILE_MAX_SIZE)
+        {
             return nonstd::make_unexpected(tr("Total web client data must not be larger than %1 bytes").arg(CLIENT_DATA_FILE_MAX_SIZE));
+        }
         const nonstd::expected<void, QString> result = Utils::IO::saveToFile(m_clientDataFilePath, json);
         if (!result)
+        {
             return nonstd::make_unexpected(tr("Failed to save web client data. Error: \"%1\"").arg(result.error()));
+        }
 
         m_clientData = clientData;
     }
@@ -133,7 +139,9 @@ QJsonObject ClientDataStorage::loadData(const QStringList& keys) const
     for (const QString& key : keys)
     {
         if (const auto iter = m_clientData.constFind(key); iter != m_clientData.constEnd())
+        {
             clientData.insert(key, iter.value());
+        }
     }
     return clientData;
 }

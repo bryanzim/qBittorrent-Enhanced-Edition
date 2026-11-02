@@ -59,18 +59,18 @@ public:
     static void freeInstance();
     static const Profile* instance();
 
-    Path location(SpecialFolder folder) const;
-    std::unique_ptr<QSettings> applicationSettings(const QString& name) const;
+    [[nodiscard]] Path location(SpecialFolder folder) const;
+    [[nodiscard]] std::unique_ptr<QSettings> applicationSettings(const QString& name) const;
 
-    Path rootPath() const;
-    QString configurationName() const;
+    [[nodiscard]] Path rootPath() const;
+    [[nodiscard]] QString configurationName() const;
 
     /// Returns either default name for configuration file (QCoreApplication::applicationName())
     /// or the value, supplied via parameters
-    QString profileName() const;
+    [[nodiscard]] QString profileName() const;
 
-    Path toPortablePath(const Path& absolutePath) const;
-    Path fromPortablePath(const Path& portablePath) const;
+    [[nodiscard]] Path toPortablePath(const Path& absolutePath) const;
+    [[nodiscard]] Path fromPortablePath(const Path& portablePath) const;
 
 private:
     Profile(const Path& rootProfilePath, const QString& configurationName, bool convertPathsToProfileRelative);

@@ -66,14 +66,20 @@ FilterPatternFormatMenu::FilterPatternFormatMenu(const FilterPatternFormat forma
 
     connect(plainTextAction, &QAction::toggled, this, [this](const bool checked) {
         if (checked)
+        {
             emit patternFormatChanged(FilterPatternFormat::PlainText);
+        }
     });
     connect(wildcardsAction, &QAction::toggled, this, [this](const bool checked) {
         if (checked)
+        {
             emit patternFormatChanged(FilterPatternFormat::Wildcards);
+        }
     });
     connect(regexAction, &QAction::toggled, this, [this](const bool checked) {
         if (checked)
+        {
             emit patternFormatChanged(FilterPatternFormat::Regex);
+        }
     });
 }

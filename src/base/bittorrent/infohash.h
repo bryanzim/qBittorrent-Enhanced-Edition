@@ -75,13 +75,13 @@ namespace BitTorrent
         InfoHash(const SHA1Hash& v1, const SHA256Hash& v2);
 #endif
 
-        bool isValid() const;
-        bool isHybrid() const;
-        SHA1Hash v1() const;
-        SHA256Hash v2() const;
-        TorrentID toTorrentID() const;
+        [[nodiscard]] bool isValid() const;
+        [[nodiscard]] bool isHybrid() const;
+        [[nodiscard]] SHA1Hash v1() const;
+        [[nodiscard]] SHA256Hash v2() const;
+        [[nodiscard]] TorrentID toTorrentID() const;
 
-        QString toString() const;
+        [[nodiscard]] QString toString() const;
 
         operator WrappedType() const;
 
@@ -90,8 +90,8 @@ namespace BitTorrent
         WrappedType m_nativeHash;
     };
 
-    std::size_t qHash(const TorrentID& key, std::size_t seed = 0);
-    std::size_t qHash(const InfoHash& key, std::size_t seed = 0);
+    std::size_t qHash(const TorrentID& key, std::size_t seed = 0U);
+    std::size_t qHash(const InfoHash& key, std::size_t seed = 0U);
 
     bool operator==(const InfoHash& left, const InfoHash& right);
 }

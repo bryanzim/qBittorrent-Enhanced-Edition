@@ -41,31 +41,31 @@ namespace Private
     public:
         virtual ~Profile() = default;
 
-        virtual Path rootPath() const = 0;
+        [[nodiscard]] virtual Path rootPath() const = 0;
 
         /**
          * @brief The base path against to which portable (relative) paths are resolved
          */
-        virtual Path basePath() const = 0;
+        [[nodiscard]] virtual Path basePath() const = 0;
 
-        virtual Path cacheLocation() const = 0;
-        virtual Path configLocation() const = 0;
-        virtual Path dataLocation() const = 0;
-        virtual Path downloadLocation() const = 0;
+        [[nodiscard]] virtual Path cacheLocation() const = 0;
+        [[nodiscard]] virtual Path configLocation() const = 0;
+        [[nodiscard]] virtual Path dataLocation() const = 0;
+        [[nodiscard]] virtual Path downloadLocation() const = 0;
 
-        virtual std::unique_ptr<QSettings> applicationSettings(const QString& name) const = 0;
+        [[nodiscard]] virtual std::unique_ptr<QSettings> applicationSettings(const QString& name) const = 0;
 
-        QString configurationName() const;
+        [[nodiscard]] QString configurationName() const;
 
         /**
          * @brief QCoreApplication::applicationName() with optional configuration name appended
          */
-        QString profileName() const;
+        [[nodiscard]] QString profileName() const;
 
     protected:
         explicit Profile(const QString& configurationName);
 
-        QString configurationSuffix() const;
+        [[nodiscard]] QString configurationSuffix() const;
 
     private:
         QString m_configurationName;
@@ -77,13 +77,13 @@ namespace Private
     public:
         explicit DefaultProfile(const QString& configurationName);
 
-        Path rootPath() const override;
-        Path basePath() const override;
-        Path cacheLocation() const override;
-        Path configLocation() const override;
-        Path dataLocation() const override;
-        Path downloadLocation() const override;
-        std::unique_ptr<QSettings> applicationSettings(const QString& name) const override;
+        [[nodiscard]] Path rootPath() const override;
+        [[nodiscard]] Path basePath() const override;
+        [[nodiscard]] Path cacheLocation() const override;
+        [[nodiscard]] Path configLocation() const override;
+        [[nodiscard]] Path dataLocation() const override;
+        [[nodiscard]] Path downloadLocation() const override;
+        [[nodiscard]] std::unique_ptr<QSettings> applicationSettings(const QString& name) const override;
 
     private:
         /**
@@ -92,7 +92,7 @@ namespace Private
          * @param location location kind
          * @return QStandardPaths::writableLocation(location) / configurationName()
          */
-        Path locationWithConfigurationName(QStandardPaths::StandardLocation location) const;
+        [[nodiscard]] Path locationWithConfigurationName(QStandardPaths::StandardLocation location) const;
     };
 
     /// Custom tree: creates directories under the specified root directory
@@ -101,13 +101,13 @@ namespace Private
     public:
         CustomProfile(const Path& rootPath, const QString& configurationName);
 
-        Path rootPath() const override;
-        Path basePath() const override;
-        Path cacheLocation() const override;
-        Path configLocation() const override;
-        Path dataLocation() const override;
-        Path downloadLocation() const override;
-        std::unique_ptr<QSettings> applicationSettings(const QString& name) const override;
+        [[nodiscard]] Path rootPath() const override;
+        [[nodiscard]] Path basePath() const override;
+        [[nodiscard]] Path cacheLocation() const override;
+        [[nodiscard]] Path configLocation() const override;
+        [[nodiscard]] Path dataLocation() const override;
+        [[nodiscard]] Path downloadLocation() const override;
+        [[nodiscard]] std::unique_ptr<QSettings> applicationSettings(const QString& name) const override;
 
     private:
         const Path m_rootPath;
@@ -121,24 +121,24 @@ namespace Private
     class PathConverter
     {
     public:
-        virtual Path toPortablePath(const Path& path) const = 0;
-        virtual Path fromPortablePath(const Path& portablePath) const = 0;
+        [[nodiscard]] virtual Path toPortablePath(const Path& path) const = 0;
+        [[nodiscard]] virtual Path fromPortablePath(const Path& portablePath) const = 0;
         virtual ~PathConverter() = default;
     };
 
     class NoConvertConverter final : public PathConverter
     {
     public:
-        Path toPortablePath(const Path& path) const override;
-        Path fromPortablePath(const Path& portablePath) const override;
+        [[nodiscard]] Path toPortablePath(const Path& path) const override;
+        [[nodiscard]] Path fromPortablePath(const Path& portablePath) const override;
     };
 
     class Converter final : public PathConverter
     {
     public:
         explicit Converter(const Path& basePath);
-        Path toPortablePath(const Path& path) const override;
-        Path fromPortablePath(const Path& portablePath) const override;
+        [[nodiscard]] Path toPortablePath(const Path& path) const override;
+        [[nodiscard]] Path fromPortablePath(const Path& portablePath) const override;
 
     private:
         Path m_basePath;

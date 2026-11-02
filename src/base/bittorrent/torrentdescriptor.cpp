@@ -92,7 +92,9 @@ namespace
     {
         const QUrl trackerURL{ url };
         if (!trackerURL.isValid() || trackerURL.host().isEmpty())
+        {
             return false;
+        }
 
         const QString scheme = trackerURL.scheme();
         return ((scheme == u"http") || (scheme == u"https") || (scheme == u"udp"));
@@ -101,18 +103,22 @@ namespace
     void removeUnsupportedTrackers(lt::add_torrent_params& params)
     {
         if (params.trackers.empty())
+        {
             return;
+        }
 
         std::vector<std::string> trackers;
         trackers.reserve(params.trackers.size());
         std::vector<int> trackerTiers;
         trackerTiers.reserve(params.trackers.size());
 
-        for (std::size_t i = 0; i < params.trackers.size(); ++i)
+        for (std::size_t i = 0U; i < params.trackers.size(); ++i)
         {
             const QString tracker = QString::fromStdString(params.trackers[i]);
             if (!isSupportedTrackerURL(tracker))
+            {
                 continue;
+            }
 
             trackers.push_back(params.trackers[i]);
             trackerTiers.push_back((i < params.tracker_tiers.size()) ? params.tracker_tiers[i] : 0);
@@ -163,9 +169,13 @@ try
 {
     QString magnetURI = str;
     if (isV2Hash(str))
+    {
         magnetURI = u"magnet:?xt=urn:btmh:1220" + str; // 0x12 0x20 is the "multihash format" tag for the SHA-256 hashing scheme.
+    }
     else if (isV1Hash(str))
+    {
         magnetURI = u"magnet:?xt=urn:btih:" + str;
+    }
 
     lt::add_torrent_params params = lt::parse_magnet_uri(magnetURI.toStdString());
     removeUnsupportedTrackers(params);
@@ -188,7 +198,9 @@ try
     const lt::entry torrentEntry = lt::write_torrent_file(m_ltAddTorrentParams);
     const nonstd::expected<void, QString> result = Utils::IO::saveToFile(path, torrentEntry);
     if (!result)
+    {
         return nonstd::make_unexpected(result.error());
+    }
 
     return {};
 }
@@ -229,7 +241,9 @@ BitTorrent::TorrentDescriptor::TorrentDescriptor(lt::add_torrent_params ltAddTor
         m_info.emplace(*m_ltAddTorrentParams.ti);
 #if LIBTORRENT_VERSION_NUM >= 20100
         if (m_ltAddTorrentParams.creation_date > 0)
+        {
             m_creationDate = QDateTime::fromSecsSinceEpoch(m_ltAddTorrentParams.creation_date);
+        }
         m_creator = QString::fromStdString(m_ltAddTorrentParams.created_by);
         m_comment = QString::fromStdString(m_ltAddTorrentParams.comment);
 #else
@@ -309,7 +323,9 @@ QList<BitTorrent::TrackerEntry> BitTorrent::TorrentDescriptor::trackers() const
     {
         const auto tracker = QString::fromStdString(m_ltAddTorrentParams.trackers[i]);
         if (i < tierCount)
+        {
             tier = m_ltAddTorrentParams.tracker_tiers[i];
+        }
         ret.append({ .url = tracker, .tier = tier });
     }
 
@@ -322,7 +338,9 @@ QList<QUrl> BitTorrent::TorrentDescriptor::urlSeeds() const
     urlSeeds.reserve(static_cast<decltype(urlSeeds)::size_type>(m_ltAddTorrentParams.url_seeds.size()));
 
     for (const std::string& nativeURLSeed : m_ltAddTorrentParams.url_seeds)
+    {
         urlSeeds.append(QUrl(QString::fromStdString(nativeURLSeed)));
+    }
 
     return urlSeeds;
 }

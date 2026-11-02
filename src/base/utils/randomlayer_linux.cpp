@@ -41,11 +41,11 @@ namespace
     {
         // need to satisfy UniformRandomBitGenerator requirements
     public:
-        using result_type = uint32_t;
+        using result_type = std::uint32_t;
 
         RandomLayer()
         {
-            if (unsigned char buf = 0; ::getrandom(&buf, sizeof(buf), 0) < 0)
+            if (unsigned char buf = 0U; ::getrandom(&buf, sizeof(buf), 0) < 0)
             {
                 if (errno == ENOSYS)
                 {

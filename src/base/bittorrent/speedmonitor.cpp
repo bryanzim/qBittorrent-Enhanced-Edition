@@ -37,7 +37,9 @@ SpeedMonitor::SpeedMonitor()
 void SpeedMonitor::addSample(const SpeedSample& sample)
 {
     if (m_speedSamples.full())
+    {
         m_sum -= m_speedSamples.front();
+    }
 
     m_speedSamples.push_back(sample);
     m_sum += sample;
@@ -46,9 +48,11 @@ void SpeedMonitor::addSample(const SpeedSample& sample)
 SpeedSampleAvg SpeedMonitor::average() const
 {
     if (m_speedSamples.empty())
+    {
         return {};
+    }
 
-    const qreal k = qreal(1.) / m_speedSamples.size();
+    const qreal k = static_cast<qreal>(1.) / m_speedSamples.size();
     return { m_sum.download * k, m_sum.upload * k };
 }
 

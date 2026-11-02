@@ -42,8 +42,8 @@ public:
     ClientDataStorage(QObject* parent = nullptr);
 
     nonstd::expected<void, QString> storeData(const QJsonObject& object);
-    QJsonObject loadData() const;
-    QJsonObject loadData(const QStringList& keys) const;
+    [[nodiscard]] QJsonObject loadData() const;
+    [[nodiscard]] QJsonObject loadData(const QStringList& keys) const;
 
 private:
     Path m_clientDataFilePath;

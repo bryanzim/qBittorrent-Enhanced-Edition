@@ -198,9 +198,13 @@ int main(int argc, char* argv[])
         const char envName[] = "_NT_SYMBOL_PATH";
         const QString envValue = qEnvironmentVariable(envName);
         if (envValue.isEmpty())
+        {
             qputenv(envName, Application::applicationDirPath().toLocal8Bit());
+        }
         else
+        {
             qputenv(envName, u"%1;%2"_s.arg(envValue, Application::applicationDirPath()).toLocal8Bit());
+        }
 #endif
 
         const QBtCommandLineParameters params = app->commandLineArgs();
@@ -252,7 +256,9 @@ int main(int argc, char* argv[])
 
         CachedSettingValue<bool> legalNoticeShown{ u"LegalNotice/Accepted"_s, false };
         if (params.confirmLegalNotice)
+        {
             legalNoticeShown = true;
+        }
 
         if (!legalNoticeShown)
         {
@@ -266,7 +272,9 @@ int main(int argc, char* argv[])
 #endif
             showLegalNotice(isInteractive);
             if (isInteractive)
+            {
                 legalNoticeShown = true;
+            }
         }
 
 #ifdef Q_OS_MACOS
@@ -280,7 +288,9 @@ int main(int argc, char* argv[])
         app->setAttribute(Qt::AA_DontShowIconsInMenus);
 #else
         if (!Preferences::instance()->iconsInMenusEnabled())
+        {
             app->setAttribute(Qt::AA_DontShowIconsInMenus);
+        }
 #endif
 
 #if defined(DISABLE_GUI) && !defined(Q_OS_WIN)
@@ -312,7 +322,9 @@ int main(int argc, char* argv[])
         }
 #elif !defined(DISABLE_GUI)
         if (!(params.noSplash || Preferences::instance()->isSplashScreenDisabled()))
+        {
             showSplashScreen();
+        }
 #endif
 
         registerSignalHandlers();

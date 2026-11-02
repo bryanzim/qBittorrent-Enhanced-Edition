@@ -49,7 +49,9 @@ void BitTorrent::TorrentContentRemover::performJob(const QString& torrentName, c
         {
             const Path rootItem = fileName.rootItem();
             if (rootItem != fileName)
+            {
                 topLevelFolders.insert(rootItem);
+            }
 
             if (const auto result = removeFileFn(basePath / fileName); !result && errorMessage.isEmpty())
             {
@@ -58,7 +60,9 @@ void BitTorrent::TorrentContentRemover::performJob(const QString& torrentName, c
         }
 
         for (const Path& topLevelFolder : asConst(topLevelFolders))
+        {
             Utils::Fs::smartRemoveEmptyFolderTree(basePath / topLevelFolder);
+        }
     }
 
     emit jobFinished(torrentName, errorMessage);

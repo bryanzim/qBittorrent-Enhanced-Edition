@@ -70,12 +70,12 @@ public:
     explicit PropertiesWidget(QWidget* parent);
     ~PropertiesWidget() override;
 
-    BitTorrent::Torrent* getCurrentTorrent() const;
-    TrackerListWidget* getTrackerList() const;
-    PeerListWidget* getPeerList() const;
-    QTreeView* getFilesList() const;
-    PropTabBar* tabBar() const;
-    LineEdit* contentFilterLine() const;
+    [[nodiscard]] BitTorrent::Torrent* getCurrentTorrent() const;
+    [[nodiscard]] TrackerListWidget* getTrackerList() const;
+    [[nodiscard]] PeerListWidget* getPeerList() const;
+    [[nodiscard]] QTreeView* getFilesList() const;
+    [[nodiscard]] PropTabBar* tabBar() const;
+    [[nodiscard]] LineEdit* contentFilterLine() const;
 
 signals:
     void openAdvancedSettingsLinkActivated();

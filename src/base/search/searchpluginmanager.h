@@ -69,12 +69,12 @@ public:
     static SearchPluginManager* instance();
     static void freeInstance();
 
-    QStringList allPlugins() const;
-    QStringList enabledPlugins() const;
-    QStringList supportedCategories() const;
-    QStringList getPluginCategories(const QString& pluginName) const;
-    SearchPluginInfo* pluginInfo(const QString& name) const;
-    QString pluginNameBySiteURL(const QString& siteURL) const;
+    [[nodiscard]] QStringList allPlugins() const;
+    [[nodiscard]] QStringList enabledPlugins() const;
+    [[nodiscard]] QStringList supportedCategories() const;
+    [[nodiscard]] QStringList getPluginCategories(const QString& pluginName) const;
+    [[nodiscard]] SearchPluginInfo* pluginInfo(const QString& name) const;
+    [[nodiscard]] QString pluginNameBySiteURL(const QString& siteURL) const;
 
     void enablePlugin(const QString& name, bool enabled = true);
     void updatePlugin(const QString& name);
@@ -86,11 +86,11 @@ public:
     SearchHandler* startSearch(const QString& pattern, const QString& category, const QStringList& usedPlugins);
     SearchDownloadHandler* downloadTorrent(const QString& pluginName, const QString& url);
 
-    QProcessEnvironment proxyEnvironment() const;
+    [[nodiscard]] QProcessEnvironment proxyEnvironment() const;
 
     static SearchPluginVersion getPluginVersion(const Path& filePath);
     static QString categoryFullName(const QString& categoryName);
-    QString pluginFullName(const QString& pluginName) const;
+    [[nodiscard]] QString pluginFullName(const QString& pluginName) const;
     static Path pluginsLocation();
     static Path engineLocation();
 
@@ -111,7 +111,7 @@ private:
     void updateNova();
     void parseVersionInfo(const QByteArray& info);
     void installPlugin_impl(const QString& name, const Path& srcPath);
-    bool isUpdateNeeded(const QString& pluginName, const SearchPluginVersion& newVersion) const;
+    [[nodiscard]] bool isUpdateNeeded(const QString& pluginName, const SearchPluginVersion& newVersion) const;
 
     void versionInfoDownloadFinished(const Net::DownloadResult& result);
     void pluginDownloadFinished(const Net::DownloadResult& result);

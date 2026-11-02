@@ -82,12 +82,12 @@ public:
     SearchJobWidget(const QString& id, SearchHandler* searchHandler, IGUIApplication* app, QWidget* parent = nullptr);
     ~SearchJobWidget() override;
 
-    QString id() const;
-    QString searchPattern() const;
-    QList<SearchResult> searchResults() const;
-    Status status() const;
-    int visibleResultsCount() const;
-    LineEdit* lineEditSearchResultsFilter() const;
+    [[nodiscard]] QString id() const;
+    [[nodiscard]] QString searchPattern() const;
+    [[nodiscard]] QList<SearchResult> searchResults() const;
+    [[nodiscard]] Status status() const;
+    [[nodiscard]] int visibleResultsCount() const;
+    [[nodiscard]] LineEdit* lineEditSearchResultsFilter() const;
 
     void assignSearchHandler(SearchHandler* searchHandler);
     void cancelSearch();
@@ -122,8 +122,8 @@ private:
     void downloadTorrent(const QModelIndex& rowIndex, AddTorrentOption option = AddTorrentOption::Default);
     void addTorrentToSession(const QString& source, AddTorrentOption option = AddTorrentOption::Default);
     void fillFilterComboBoxes();
-    QHeaderView* header() const;
-    int visibleColumnsCount() const;
+    [[nodiscard]] QHeaderView* header() const;
+    [[nodiscard]] int visibleColumnsCount() const;
     void setRowColor(int row, const QColor& color);
     void setRowVisited(int row);
     void onUIThemeChanged();

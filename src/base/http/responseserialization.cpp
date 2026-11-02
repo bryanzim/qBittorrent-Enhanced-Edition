@@ -58,21 +58,29 @@ namespace
 
         const auto matchEncoding = [](const QStringView encodingEntry, const QStringView encoding) -> bool {
             if (!encodingEntry.startsWith(encoding))
+            {
                 return false;
+            }
 
             // without quality values
             if (encodingEntry == encoding)
+            {
                 return true;
+            }
 
             // [rfc7231] 5.3.1. Quality Values
             const QStringView qualityStr = encodingEntry.sliced(encoding.size() + 1).trimmed(); // ex. skip over "gzip;"
             if (!qualityStr.startsWith(u"q="))
+            {
                 return false;
+            }
 
             bool ok = false;
             const double qvalue = qualityStr.sliced(2).toDouble(&ok);
             if (ok && (qvalue > 0))
+            {
                 return true;
+            }
 
             return false;
         };
@@ -86,11 +94,15 @@ namespace
     bool needCompressContent(const Http::Response& response, const Http::Request& request)
     {
         if (!acceptsGzipEncoding(request.headers.value(u"accept-encoding"_s)))
+        {
             return false;
+        }
 
         // for very small files, compressing them only wastes cpu cycles
-        if (response.content.size() <= 1024) // 1 kb
+        if (response.content.size() <= 1024)
+        { // 1 kb
             return false;
+        }
 
         // filter out known hard-to-compress types
         const QString contentType = response.headers[Http::HEADER_CONTENT_TYPE];
@@ -125,9 +137,13 @@ QByteArray Http::serializeResponseHead(const Http::ResponseStatus& responseStatu
     // Header Fields
     serializeHeader(Http::HEADER_DATE, httpDate());
     if (!responseHeaders.contains(Http::HEADER_CONNECTION))
+    {
         serializeHeader(Http::HEADER_CONNECTION, u"keep-alive"_s);
+    }
     for (const auto& [headerName, headerValue] : responseHeaders.asKeyValueRange())
+    {
         serializeHeader(headerName, headerValue);
+    }
 
     // the first empty line
     buf.append(Http::CRLF);
@@ -165,7 +181,9 @@ QByteArray Http::serializeResponse(const Http::Response& response, const Http::R
 
     QByteArray data = serializeResponseHead(response.status, responseHeaders);
     if (request.method != Http::HEADER_REQUEST_METHOD_HEAD)
+    {
         data.append(responseContent);
+    }
 
     return data;
 }

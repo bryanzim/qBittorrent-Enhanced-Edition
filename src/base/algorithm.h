@@ -42,7 +42,9 @@ namespace Algorithm
     {
         auto it = dict.begin();
         while (it != dict.end())
+        {
             it = (p(it.key(), it.value()) ? dict.erase(it) : ++it);
+        }
     }
 
     template <typename List>

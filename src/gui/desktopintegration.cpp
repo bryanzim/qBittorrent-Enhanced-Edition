@@ -84,7 +84,9 @@ DesktopIntegration::DesktopIntegration(QObject* parent)
     m_menu->setAsDockMenu();
 #else
     if (Preferences::instance()->systemTrayEnabled())
+    {
         createTrayIcon();
+    }
 
 #ifdef QBT_USES_DBUS
     if (isNotificationsEnabled())
@@ -99,7 +101,9 @@ DesktopIntegration::DesktopIntegration(QObject* parent)
 #ifndef Q_OS_MACOS
     connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, [this] {
         if (m_systrayIcon)
+        {
             m_systrayIcon->setIcon(getSystrayIcon());
+        }
     });
 #endif
 }
@@ -126,12 +130,16 @@ QString DesktopIntegration::toolTip() const
 void DesktopIntegration::setToolTip(const QString& toolTip)
 {
     if (m_toolTip == toolTip)
+    {
         return;
+    }
 
     m_toolTip = toolTip;
 #ifndef Q_OS_MACOS
     if (m_systrayIcon)
+    {
         m_systrayIcon->setToolTip(m_toolTip);
+    }
 #endif
 }
 
@@ -148,7 +156,9 @@ bool DesktopIntegration::isNotificationsEnabled() const
 void DesktopIntegration::setNotificationsEnabled(const bool value)
 {
     if (m_storeNotificationEnabled == value)
+    {
         return;
+    }
 
     m_storeNotificationEnabled = value;
 
@@ -185,7 +195,9 @@ void DesktopIntegration::setNotificationTimeout(const int value)
 void DesktopIntegration::showNotification(const QString& title, const QString& msg) const
 {
     if (!isNotificationsEnabled())
+    {
         return;
+    }
 
 #ifdef Q_OS_MACOS
     MacUtils::displayNotification(title, msg);
@@ -194,7 +206,9 @@ void DesktopIntegration::showNotification(const QString& title, const QString& m
     m_notifier->showMessage(title, msg, notificationTimeout());
 #else
     if (m_systrayIcon && QSystemTrayIcon::supportsMessages())
+    {
         m_systrayIcon->showMessage(title, msg, QSystemTrayIcon::Information, notificationTimeout());
+    }
 #endif
 #endif
 }
@@ -233,11 +247,15 @@ void DesktopIntegration::createTrayIcon()
     m_systrayIcon->setToolTip(m_toolTip);
 
     if (m_menu)
+    {
         m_systrayIcon->setContextMenu(m_menu);
+    }
 
     connect(m_systrayIcon, &QSystemTrayIcon::activated, this, [this](const QSystemTrayIcon::ActivationReason reason) {
         if (reason == QSystemTrayIcon::Trigger)
+        {
             emit activationRequested();
+        }
     });
 #ifndef QBT_USES_DBUS
     connect(m_systrayIcon, &QSystemTrayIcon::messageClicked, this, &DesktopIntegration::notificationClicked);

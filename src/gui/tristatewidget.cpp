@@ -89,7 +89,9 @@ void TriStateWidget::paintEvent(QPaintEvent*)
         opt.state |= QStyle::State_Selected;
 
         if (QApplication::mouseButtons() != Qt::NoButton)
+        {
             opt.state |= QStyle::State_Sunken;
+        }
     }
 
     QPainter painter{ this };
