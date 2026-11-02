@@ -65,11 +65,14 @@ Http::Connection::Connection(QTcpSocket* socket, IRequestHandler* requestHandler
     connect(&m_responseWriter, &ResponseWriter::failed, m_socket, &QAbstractSocket::abort);
     connect(&m_responseWriter, &ResponseWriter::finished, this, [this] {
         m_isProcessingRequest = false;
-        if (!m_receivedData.isEmpty()) {
+        if (!m_receivedData.isEmpty())
+        {
             processRequest(); // try to fetch next request
-        } else if (m_isReadyRead) {
-            read(); 
-} }, Qt::QueuedConnection); // need to use `Qt::QueuedConnection` to avoid possible recursion
+        }
+        else if (m_isReadyRead)
+        {
+            read();
+        } }, Qt::QueuedConnection); // need to use `Qt::QueuedConnection` to avoid possible recursion
 }
 
 void Http::Connection::read()

@@ -176,7 +176,7 @@ bool LocalPeer::isClient()
         }
     }
 
-    bool const res = m_server->listen(m_socketName);
+    bool res = m_server->listen(m_socketName);
 #if defined(Q_OS_UNIX)
     // ### Workaround
     if (!res && m_server->serverError() == QAbstractSocket::AddressInUseError)

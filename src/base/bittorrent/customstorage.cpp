@@ -125,14 +125,16 @@ void CustomDiskIOThread::async_move_storage(lt::storage_index_t storage, std::st
     m_nativeDiskIO->async_move_storage(storage, path, flags, [=, this, handler = std::move(handler)](lt::status_t status, const std::string& path, const lt::storage_error& error) {
 #if LIBTORRENT_VERSION_NUM < 20100
         if ((status != lt::status_t::fatal_disk_error) && (status != lt::status_t::file_exist))
+        {
 #else
-        if ((status != lt::disk_status::fatal_disk_error) && (status != lt::disk_status::file_exist)) {
+        if ((status != lt::disk_status::fatal_disk_error) && (status != lt::disk_status::file_exist))
+        {
 #endif
             m_storageData[storage].savePath = newSavePath;
-}
+        }
 
         handler(status, path, error);
-});
+    });
 }
 
 void CustomDiskIOThread::async_release_files(lt::storage_index_t storage, std::function<void()> handler)
@@ -158,10 +160,10 @@ void CustomDiskIOThread::async_rename_file(lt::storage_index_t storage, lt::file
         {
 #if LIBTORRENT_VERSION_NUM >= 20100
             m_storageData[storage].renamedFiles.rename_file(m_storageData[storage].files, index, name);
-        }
 #else
             m_storageData[storage].files.rename_file(index, name);
 #endif
+        }
         handler(name, index, error);
     });
 }
@@ -216,7 +218,7 @@ void CustomDiskIOThread::handleCompleteFiles(lt::storage_index_t storage, const 
     const lt::filenames fileNames{ storageData.files, storageData.renamedFiles };
     const auto& fileStorage = fileNames;
 #else
-        const lt::file_storage& fileStorage = storageData.files;
+    const lt::file_storage& fileStorage = storageData.files;
 #endif
     for (const lt::file_index_t fileIndex : fileStorage.file_range())
     {
