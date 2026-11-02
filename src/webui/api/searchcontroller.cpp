@@ -100,7 +100,9 @@ void SearchController::startAction()
     requireParams({ u"pattern"_s, u"category"_s, u"plugins"_s });
 
     if (!Utils::ForeignApps::pythonInfo().isValid())
+    {
         throw APIError(APIErrorType::Conflict, tr("Python must be installed to use the Search Engine."));
+    }
 
     const QString pattern = params()[u"pattern"_s].trimmed();
     const QString category = params()[u"category"_s].trimmed();
@@ -111,11 +113,17 @@ void SearchController::startAction()
     {
         const QString pluginsLower = plugins[0].toLower();
         if (pluginsLower == u"all")
+        {
             pluginsToUse = SearchPluginManager::instance()->allPlugins();
+        }
         else if ((pluginsLower == u"enabled") || (pluginsLower == u"multi"))
+        {
             pluginsToUse = SearchPluginManager::instance()->enabledPlugins();
+        }
         else
+        {
             pluginsToUse << plugins;
+        }
     }
     else
     {
@@ -124,7 +132,9 @@ void SearchController::startAction()
 
     const auto startSearchResult = m_searchJobManager->startSearch(pattern, category, pluginsToUse);
     if (!startSearchResult)
+    {
         throw APIError(APIErrorType::Conflict, startSearchResult.error());
+    }
 
     const QJsonObject result = {
         { u"id"_s, *startSearchResult }
@@ -139,7 +149,9 @@ void SearchController::stopAction()
     const int id = params()[u"id"_s].toInt();
 
     if (!m_searchJobManager->stopSearch(id))
+    {
         throw APIError(APIErrorType::NotFound);
+    }
 
     setResult(QString());
 }
@@ -152,7 +164,9 @@ void SearchController::statusAction()
     {
         const auto jobInfo = m_searchJobManager->getJobInfo(id);
         if (!jobInfo)
+        {
             throw APIError(APIErrorType::NotFound);
+        }
 
         const QJsonArray statusArray{ jobInfoToJSON(*jobInfo) };
         setResult(statusArray);
@@ -161,7 +175,9 @@ void SearchController::statusAction()
 
     QJsonArray statusArray;
     for (const auto& jobInfo : asConst(m_searchJobManager->getAllJobInfos()))
+    {
         statusArray << jobInfoToJSON(jobInfo);
+    }
 
     setResult(statusArray);
 }
@@ -176,26 +192,40 @@ void SearchController::resultsAction()
 
     const auto jobInfo = m_searchJobManager->getJobInfo(id);
     if (!jobInfo)
+    {
         throw APIError(APIErrorType::NotFound);
+    }
 
     const QList<SearchResult>& searchResults = jobInfo->results;
     const qsizetype size = searchResults.size();
 
     if (offset > size)
+    {
         throw APIError(APIErrorType::Conflict, tr("Offset is out of range"));
+    }
 
     // normalize values
     if (offset < 0)
+    {
         offset = size + offset;
-    if (offset < 0) // check again
+    }
+    if (offset < 0)
+    { // check again
         throw APIError(APIErrorType::Conflict, tr("Offset is out of range"));
+    }
     if (limit <= 0)
+    {
         limit = -1;
+    }
 
     if ((limit > 0) || (offset > 0))
+    {
         setResult(getResults(searchResults.mid(offset, limit), jobInfo->active, size));
+    }
     else
+    {
         setResult(getResults(searchResults, jobInfo->active, size));
+    }
 }
 
 void SearchController::deleteAction()
@@ -205,7 +235,9 @@ void SearchController::deleteAction()
     const int id = params()[u"id"_s].toInt();
 
     if (!m_searchJobManager->deleteSearch(id))
+    {
         throw APIError(APIErrorType::NotFound);
+    }
 
     setResult(QString());
 }
@@ -245,7 +277,9 @@ void SearchController::installPluginAction()
 
     const QStringList sources = params()[u"sources"_s].split(u'|');
     for (const QString& source : sources)
+    {
         SearchPluginManager::instance()->installPlugin(source);
+    }
 
     setResult(QString());
 }
@@ -256,7 +290,9 @@ void SearchController::uninstallPluginAction()
 
     const QStringList names = params()[u"names"_s].split(u'|');
     for (const QString& name : names)
+    {
         SearchPluginManager::instance()->uninstallPlugin(name.trimmed());
+    }
 
     setResult(QString());
 }
@@ -269,7 +305,9 @@ void SearchController::enablePluginAction()
     const bool enable = Utils::String::parseBool(params()[u"enable"_s].trimmed()).value_or(false);
 
     for (const QString& name : names)
+    {
         SearchPluginManager::instance()->enablePlugin(name.trimmed(), enable);
+    }
 
     setResult(QString());
 }

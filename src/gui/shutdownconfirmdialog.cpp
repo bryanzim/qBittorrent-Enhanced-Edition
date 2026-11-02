@@ -48,13 +48,17 @@ ShutdownConfirmDialog::ShutdownConfirmDialog(QWidget* parent, const ShutdownDial
     m_ui->setupUi(this);
 
     initText();
-    QIcon warningIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
+    QIcon const warningIcon(style()->standardIcon(QStyle::SP_MessageBoxWarning));
     m_ui->warningLabel->setPixmap(warningIcon.pixmap(32));
 
     if (m_action == ShutdownDialogAction::Exit)
+    {
         m_ui->neverShowAgainCheckbox->setVisible(true);
+    }
     else
+    {
         m_ui->neverShowAgainCheckbox->setVisible(false);
+    }
 
     // Cancel Button
     QPushButton* cancelButton = m_ui->buttonBox->button(QDialogButtonBox::Cancel);

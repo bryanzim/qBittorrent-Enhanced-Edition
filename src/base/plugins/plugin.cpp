@@ -57,7 +57,9 @@ namespace
     {
         const QDeadlineTimer& deadlineTimer = LUA_DEADLINES_REGISTRY.value(luaState);
         if (deadlineTimer.hasExpired())
+        {
             luaL_error(luaState, Plugin::tr("Timed out.").toUtf8().constData());
+        }
     }
 
     void resetLuaDeadline(lua_State* luaState)
@@ -71,7 +73,9 @@ nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path& plug
 {
     lua_State* luaState = luaL_newstate();
     if (!luaState)
+    {
         return nonstd::make_unexpected(tr("Failed to allocate Lua state."));
+    }
 
     LUA_DEADLINES_REGISTRY.emplace(luaState);
 
@@ -84,7 +88,9 @@ nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path& plug
 
     const auto result = Utils::IO::readFile(pluginPath, 1024 * 1024);
     if (!result)
+    {
         return nonstd::make_unexpected(result.error().message);
+    }
 
     using namespace luabridge;
 
@@ -100,7 +106,7 @@ nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path& plug
     luaL_openselectedlibs(luaState, libLoadMask, 0);
 
     {
-        LuaRef baseLib = getGlobal(luaState, LUA_GNAME);
+        LuaRef const baseLib = getGlobal(luaState, LUA_GNAME);
         baseLib["collectgarbage"] = nullptr;
         baseLib["dofile"] = nullptr;
         baseLib["getmetatable"] = nullptr;
@@ -115,7 +121,7 @@ nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path& plug
     }
 
     {
-        LuaRef stringLib = getGlobal(luaState, LUA_STRLIBNAME);
+        LuaRef const stringLib = getGlobal(luaState, LUA_STRLIBNAME);
         stringLib["dump"] = nullptr;
     }
 
@@ -128,14 +134,18 @@ nonstd::expected<std::shared_ptr<Plugin>, QString> Plugin::load(const Path& plug
 
     const auto pluginName = getGlobal(luaState, "NAME").cast<QString>().valueOr(u""_s);
     if (pluginName.isEmpty())
+    {
         return nonstd::make_unexpected(tr("Plugin name is missing or invalid."));
+    }
 
     const PluginVersion pluginVersion = std::invoke([luaState] {
         const auto pluginVersionStr = getGlobal(luaState, "VERSION").cast<QString>().valueOr(u""_s);
         return PluginVersion::fromString(pluginVersionStr);
     });
     if (!pluginVersion.isValid())
+    {
         return nonstd::make_unexpected(tr("Plugin version is missing or invalid."));
+    }
 
     scopeGuard.dismiss();
     return std::shared_ptr<Plugin>(new Plugin(luaState, pluginName, pluginVersion));

@@ -17,7 +17,7 @@ For programming languages other than C++ (e.g. JavaScript) used in this reposito
   * [c. Blocks in switch's case labels](#c-blocks-in-switchs-case-labels)
   * [d. If-else statements](#d-if-else-statements)
   * [e. Single statement if blocks](#e-single-statement-if-blocks)
-  * [f. Acceptable conditions to omit braces](#f-acceptable-conditions-to-omit-braces)
+  * [f. Braces on every branch](#f-braces-on-every-branch)
   * [g. Brace enclosed initializers](#g-brace-enclosed-initializers)
 * [2. Indentation](#2-indentation)
 * [3. File encoding and line endings](#3-file-encoding-and-line-endings)
@@ -47,8 +47,8 @@ int myFunction(int a)
 
 void myFunction() {} // empty body
 
-MyClass::MyClass(int *parent)
-    : m_parent {parent}
+MyClass::MyClass(int* parent)
+    : m_parent{ parent }
 {
     // initialize
 }
@@ -155,51 +155,40 @@ else
 
 ### e. Single statement if blocks
 
-Most single statement if blocks should look like this:
+`if`, `for`, `while`, `do`, and `else` bodies are wrapped in braces, including a single statement:
 
 ```c++
 if (condition)
+{
     a = a + b;
-```
+}
 
-One acceptable exception to this can be `return`, `break` or `continue` statements,
-provided that the test condition isn't very long and its body statement occupies only one line.
-However you can still choose to use the first rule.
-
-```c++
-if (a > 0) return;
+if (a > 0)
+{
+    return;
+}
 
 while (p)
 {
     // ...
-    if (!b) continue;
+    if (!b)
+    {
+        continue;
+    }
 }
 ```
 
-### f. Acceptable conditions to omit braces
+### f. Braces on every branch
 
-When the conditional statement in `if`/`else` has only one line and its body occupy only one line,
-this also applies to loops statements. \
-Notice that for a series of `if - else` branches, if one branch needs braces then all branches must add braces.
+Every branch of an `if` / `else` chain uses braces.
 
 ```c++
-if (a < b)  // conditional statement
-    do(a);  // body
-
-if (a < b)
-    do(a);
-else if (a > b)
-    do(b);
-else
-    do(c);
-
 if (a < b)
 {
     do(a);
 }
 else if (a > b)
 {
-    // curly braces required here, then all branches should also add them
     do(b);
     do(d);
 }
@@ -211,14 +200,13 @@ else
 
 ### g. Brace enclosed initializers
 
-Unlike single-line functions, you must not insert spaces between the brackets and concluded expressions. \
-But you must insert a space between the variable name and initializer.
+Do not put a space between the name and `{`. When the braces are not empty, put a space after `{` and before `}`.
 
 ```c++
-Class obj {}; // empty
-Class obj {expr};
-Class obj {expr1, /*...,*/ exprN};
-QVariantMap map {{"key1", 5}, {"key2", 10}};
+Class obj{}; // empty
+Class obj{ expr };
+Class obj{ expr1, /*...,*/ exprN };
+QVariantMap map{ { "key1", 5 }, { "key2", 10 } };
 ```
 
 ## 2. Indentation
@@ -235,10 +223,10 @@ Initialization lists should be vertical. This will allow for more easily readabl
 
 ```c++
 myClass::myClass(int a, int b, int c, int d)
-    : m_a {a}
-    , m_b {b}
-    , m_c {c}
-    , m_d {d}
+    : m_a{ a }
+    , m_b{ b }
+    , m_c{ c }
+    , m_d{ d }
 {
     // code
 }
@@ -307,68 +295,43 @@ class MyClass
 The headers should be placed in the following group order:
 
 1. Module header (in .cpp)
-2. C++ Standard Library headers
-3. System headers
-4. Boost library headers
-5. Libtorrent headers
-6. Qt headers
-7. qBittorrent's own headers, starting from the *base* headers.
+2. Other qBittorrent headers, in quotes
+3. External libraries (Boost, libtorrent, Qt, and other angle-bracket headers that are not the C or C++ standard library and not the operating system)
+4. Operating-system headers, in one `#ifdef` / `#elif defined` chain. On Windows, `<winsock2.h>` comes before `<Windows.h>`.
+5. C and C++ standard headers
 
-The headers should be ordered alphabetically within each group. \
-If there are conditionals for the same header group, then put them at the bottom of the respective group. \
-If there are conditionals that contain headers from several different header groups, then put them above the "qBittorrent's own headers" group.
-
-One exception is the header containing the library version (for example, QtVersionChecks), this particular header isn't constrained by the aforementioned order.
+The headers should be ordered lexicographically within each group. `.clang-format` sorts case-sensitively, so uppercase names come before lowercase names in the same group. \
+Keep a conditional that belongs to one group at the bottom of that group. \
+A conditional that pulls in headers from several groups stays with the earliest group it needs.
 
 Example:
 
 ```c++
 // file: examplewidget.cpp
 
-// Module header
 #include "examplewidget.h"
 
-// exceptions, headers containing version number
-#include <boost/version.hpp>
-#include <libtorrent/version.hpp>
-#include <QtVersionChecks>
-
-// C++ Standard Library headers
-#include <cstdio>
-
-#ifdef Q_OS_WIN  // conditional
-#include <cmath>
-#endif
-
-// System headers
-#ifdef Q_OS_WIN
-#include <windows.h>
-#endif
-
-// Boost library headers
-#include <boost/circular_buffer.hpp>
-
-// Libtorrent headers
-#include <libtorrent/session.hpp>
-
-// Qt headers
-#include <QString>
-#include <QUrl>
-
-#ifdef Q_OS_MACOS  // conditional
-#include <QFont>
-#endif
-
-// conditional that contains headers from several different header groups
-#if LIBTORRENT_VERSION_NUM >= 10100
-#include <memory>
-#include <QElapsedTimer>
-#endif
-
-// qBittorrent's own headers
-#include "base/bittorrent/infohash.h"
 #include "anothermodule.h"
+#include "base/bittorrent/infohash.h"
 #include "ui_examplewidget.h"
+
+#include <QtVersionChecks>
+#include <boost/circular_buffer.hpp>
+#include <boost/version.hpp>
+#include <libtorrent/session.hpp>
+#include <libtorrent/version.hpp>
+
+#ifdef Q_OS_WIN
+#include <winsock2.h>
+#include <Windows.h>
+#elif defined(Q_OS_MACOS)
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <memory>
 ```
 
 ## 8. Include guard
@@ -413,9 +376,9 @@ class ExampleWidget : public QWidget
 
     ```c++
     template <typename List>
-    void doSomethingWithList(const List &list)
+    void doSomethingWithList(const List& list)
     {
-        foreach (const auto &item, list)
+        foreach (const auto& item, list)
         {
             // we don't know item type here so we use 'auto' keyword
             // do something with item
@@ -465,7 +428,7 @@ class ExampleWidget : public QWidget
 
   ```c++
   // Cannot omit return type
-  const auto findMetricIndex = [](const char *name) -> int
+  const auto findMetricIndex = [](const char* name) -> int
   {
       const int index = lt::find_metric_idx(name);
       assert(index >= 0);
@@ -473,7 +436,7 @@ class ExampleWidget : public QWidget
   };
 
   // Return type omittable
-  std::ranges::all_of(strings, [](const std::string &url)
+  std::ranges::all_of(strings, [](const std::string& url)
   {
       return url.starts_with("magnet:");
   });

@@ -39,7 +39,7 @@ namespace
     {
         // need to satisfy UniformRandomBitGenerator requirements
     public:
-        using result_type = uint32_t;
+        using result_type = std::uint32_t;
 
         RandomLayer()
             : m_randDev{ fopen("/dev/urandom", "rb") }

@@ -38,25 +38,35 @@ Profile* Profile::m_instance = nullptr;
 Profile::Profile(const Path& rootProfilePath, const QString& configurationName, const bool convertPathsToProfileRelative)
 {
     if (rootProfilePath.isEmpty())
+    {
         m_profileImpl = std::make_unique<Private::DefaultProfile>(configurationName);
+    }
     else
+    {
         m_profileImpl = std::make_unique<Private::CustomProfile>(rootProfilePath, configurationName);
+    }
 
     ensureDirectoryExists(SpecialFolder::Cache);
     ensureDirectoryExists(SpecialFolder::Config);
     ensureDirectoryExists(SpecialFolder::Data);
 
     if (convertPathsToProfileRelative)
+    {
         m_pathConverterImpl = std::make_unique<Private::Converter>(m_profileImpl->basePath());
+    }
     else
+    {
         m_pathConverterImpl = std::make_unique<Private::NoConvertConverter>();
+    }
 }
 
 void Profile::initInstance(const Path& rootProfilePath, const QString& configurationName,
                            const bool convertPathsToProfileRelative)
 {
     if (m_instance)
+    {
         return;
+    }
     m_instance = new Profile(rootProfilePath, configurationName, convertPathsToProfileRelative);
 }
 
@@ -116,7 +126,9 @@ void Profile::ensureDirectoryExists(const SpecialFolder folder) const
 {
     const Path locationPath = location(folder);
     if (!locationPath.isEmpty() && !Utils::Fs::mkpath(locationPath))
+    {
         qFatal("Could not create required directory '%s'", qUtf8Printable(locationPath.toString()));
+    }
 }
 
 Path Profile::toPortablePath(const Path& absolutePath) const

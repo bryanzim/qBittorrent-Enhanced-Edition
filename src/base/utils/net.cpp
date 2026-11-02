@@ -49,22 +49,32 @@ namespace
     {
         const QList<QStringView> octets = ip.split(IPV4_SEPARATOR, Qt::SkipEmptyParts);
         if (octets.size() != 4)
+        {
             return false;
+        }
 
         for (const QStringView octet : octets)
         {
             const qsizetype len = octet.length();
             if (len > 3)
+            {
                 return false;
+            }
             if ((len > 1) && octet.startsWith(u'0'))
+            {
                 return false;
+            }
 
             if (std::ranges::any_of(octet, [](const QChar c) { return !c.isDigit(); }))
+            {
                 return false;
+            }
 
             const int value = octet.toInt();
             if (value > 255)
+            {
                 return false;
+            }
         }
 
         return true;
@@ -73,13 +83,21 @@ namespace
     bool isValidIPRange(const QHostAddress& first, const QHostAddress& last)
     {
         if (first.isNull() || last.isNull())
+        {
             return false;
+        }
         if (first.protocol() != last.protocol())
+        {
             return false;
+        }
         if (first.protocol() == QAbstractSocket::IPv4Protocol)
+        {
             return first.toIPv4Address() <= last.toIPv4Address();
+        }
         if (first.protocol() == QAbstractSocket::IPv6Protocol)
+        {
             return std::ranges::lexicographical_compare(first.toIPv6Address().c, last.toIPv6Address().c, std::less_equal());
+        }
         return false;
     }
 }
@@ -98,7 +116,9 @@ namespace Utils
             const Subnet subnet = QHostAddress::parseSubnet(subnetStr);
             const Subnet invalid = { QHostAddress(), -1 };
             if (subnet == invalid)
+            {
                 return std::nullopt;
+            }
             return subnet;
         }
 
@@ -153,7 +173,9 @@ namespace Utils
             {
                 // Special case: /128 is a single IP
                 if (prefixLength == 128)
+                {
                     return std::make_pair(address, address);
+                }
 
                 Q_IPV6ADDR addressBytes = address.toIPv6Address();
 
@@ -166,7 +188,9 @@ namespace Utils
 
                 addressBytes[headBytes] |= ~maskByte;
                 for (int i = headBytes + 1; i < 16; ++i)
+                {
                     addressBytes[i] = 0xFF;
+                }
                 const QHostAddress end{ addressBytes };
 
                 return std::make_pair(start, end);
@@ -190,17 +214,23 @@ namespace Utils
             // as scope id. Furthermore, QHostAddress doesn't have any convenient method to
             // affect this, so we jump through hoops here.
             if (addr.protocol() != QAbstractSocket::IPv6Protocol)
+            {
                 return QHostAddress{ addr.toIPv6Address() };
+            }
 
             // QHostAddress::setScopeId(addr.scopeId()); // Even though the docs say that setScopeId
             // will convert a name to a number, this doesn't happen. Probably a Qt bug.
             const QString scopeIdTxt = addr.scopeId();
             if (scopeIdTxt.isEmpty())
+            {
                 return addr;
+            }
 
             const int id = QNetworkInterface::interfaceIndexFromName(scopeIdTxt);
-            if (id == 0) // This failure might mean that the scope id was already a number
+            if (id == 0)
+            { // This failure might mean that the scope id was already a number
                 return addr;
+            }
 
             QHostAddress canonical(addr.toIPv6Address());
             canonical.setScopeId(QString::number(id));
@@ -211,22 +241,30 @@ namespace Utils
         {
             // only a trusted proxy may declare an address on the client's behalf
             if (!isIPInSubnets(peerAddress, trustedProxies))
+            {
                 return peerAddress;
+            }
 
             const QList<QStringView> hops = forwardedFor.split(u',', Qt::SkipEmptyParts);
             if (hops.isEmpty())
+            {
                 return peerAddress;
+            }
 
             QHostAddress hopAddress;
             for (const QStringView hop : std::views::reverse(hops))
             {
-                if (!hopAddress.setAddress(hop.trimmed().toString())) // the chain is unresolvable past this point
+                if (!hopAddress.setAddress(hop.trimmed().toString()))
+                { // the chain is unresolvable past this point
                     return peerAddress;
+                }
 
                 // anything beyond the nearest hop that no trusted proxy vouches for was
                 // supplied by the client itself and cannot be relied upon
                 if (!isIPInSubnets(hopAddress, trustedProxies))
+                {
                     return hopAddress;
+                }
             }
 
             // every hop is itself a trusted proxy
@@ -262,7 +300,9 @@ namespace Utils
                 firstIPStr = filterStr.first(filterStr.indexOf(CIDR_INDICATOR));
                 const std::optional<Subnet> subnet = parseSubnet(filterStr.toString());
                 if (!subnet)
+                {
                     return std::nullopt;
+                }
 
                 const IPRange ipRange = subnetToIPRange(subnet.value());
                 first = ipRange.first;
@@ -283,7 +323,9 @@ namespace Utils
                 }
             }
             if (!isValidIPRange(first, last))
+            {
                 return std::nullopt;
+            }
             return std::make_pair(first, last);
         }
 
@@ -292,7 +334,9 @@ namespace Utils
             const QHostAddress firstIP = ipRange.first;
             const QHostAddress lastIP = ipRange.second;
             if (firstIP == lastIP)
+            {
                 return firstIP.toString();
+            }
 
             return (firstIP.toString() + u" - " + lastIP.toString());
         }
@@ -317,7 +361,9 @@ namespace Utils
             const QAbstractSocket::NetworkLayerProtocol rightProtocol = right.protocol();
 
             if (leftProtocol != rightProtocol)
+            {
                 return leftProtocol < rightProtocol;
+            }
 
             switch (leftProtocol)
             {

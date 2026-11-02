@@ -107,7 +107,7 @@ public:
     using QNetworkCookieJar::allCookies;
     using QNetworkCookieJar::setAllCookies;
 
-    QList<QNetworkCookie> cookiesForUrl(const QUrl& url) const override
+    [[nodiscard]] QList<QNetworkCookie> cookiesForUrl(const QUrl& url) const override
     {
         const QDateTime now = QDateTime::currentDateTime();
         QList<QNetworkCookie> cookies = QNetworkCookieJar::cookiesForUrl(url);
@@ -139,7 +139,9 @@ Net::DownloadManager::DownloadManager(QObject* parent)
     connect(m_networkManager, &QNetworkAccessManager::sslErrors, this, [](QNetworkReply* reply, const QList<QSslError>& errors) {
         QStringList errorList;
         for (const QSslError& error : errors)
+        {
             errorList += error.errorString();
+        }
 
         QString errorMsg;
         if (!Preferences::instance()->isIgnoreSSLErrors())
@@ -164,7 +166,9 @@ Net::DownloadManager::DownloadManager(QObject* parent)
 void Net::DownloadManager::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new DownloadManager;
+    }
 }
 
 void Net::DownloadManager::freeInstance()
@@ -204,7 +208,9 @@ Net::DownloadHandler* Net::DownloadManager::download(const DownloadRequest& down
     {
         qDebug("Downloading %s...", qUtf8Printable(downloadRequest.url()));
         if (isSequentialService)
+        {
             m_busyServices.insert(serviceID);
+        }
         processRequest(downloadHandler);
     }
 

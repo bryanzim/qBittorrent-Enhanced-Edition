@@ -84,7 +84,11 @@ void BaseFilterWidget::toggleFilter(const bool checked)
 {
     setVisible(checked);
     if (checked)
+    {
         applyFilter(currentRow());
+    }
     else
+    {
         applyFilter(ALL_ROW);
+    }
 }

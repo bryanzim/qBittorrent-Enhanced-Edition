@@ -48,7 +48,7 @@ namespace BitTorrent
         ShareLimits shareLimits;
 
         static CategoryOptions fromJSON(const QJsonObject& jsonObj);
-        QJsonObject toJSON() const;
+        [[nodiscard]] QJsonObject toJSON() const;
 
         friend bool operator==(const CategoryOptions&, const CategoryOptions&) = default;
     };

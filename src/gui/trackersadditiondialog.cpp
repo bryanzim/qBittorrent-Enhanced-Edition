@@ -77,7 +77,9 @@ void TrackersAdditionDialog::onAccepted() const
 
     QList<BitTorrent::TrackerEntry> entries = BitTorrent::parseTrackerEntries(m_ui->textEditTrackersList->toPlainText());
     for (BitTorrent::TrackerEntry& entry : entries)
+    {
         entry.tier = Utils::Number::clampingAdd(entry.tier, baseTier);
+    }
 
     m_torrent->addTrackers(entries);
 }
@@ -113,7 +115,9 @@ void TrackersAdditionDialog::onTorrentListDownloadFinished(const Net::DownloadRe
     // Add fetched trackers to the list
     const QString existingText = m_ui->textEditTrackersList->toPlainText();
     if (!existingText.isEmpty() && !existingText.endsWith(u'\n'))
+    {
         m_ui->textEditTrackersList->insertPlainText(u"\n"_s);
+    }
 
     // append the data as-is
     const auto trackers = QString::fromUtf8(result.data).trimmed();
@@ -129,6 +133,8 @@ void TrackersAdditionDialog::saveSettings()
 void TrackersAdditionDialog::loadSettings()
 {
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
     m_ui->lineEditListURL->setText(m_storeTrackersListURL);
 }

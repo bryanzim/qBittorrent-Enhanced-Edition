@@ -49,12 +49,14 @@ namespace
 {
     QByteArray hmacMD5(QByteArray key, const QByteArray& msg)
     {
-        const int blockSize = 64;     // HMAC-MD5 block size
-        if (key.length() > blockSize) // if key is longer than block size (64), reduce key length with MD5 compression
+        const int blockSize = 64; // HMAC-MD5 block size
+        if (key.length() > blockSize)
+        { // if key is longer than block size (64), reduce key length with MD5 compression
             key = QCryptographicHash::hash(key, QCryptographicHash::Md5);
+        }
 
-        QByteArray innerPadding(blockSize, char(0x36)); // initialize inner padding with char "6"
-        QByteArray outerPadding(blockSize, char(0x5c)); // initialize outer padding with char "\"
+        QByteArray innerPadding(blockSize, static_cast<char>(0x36)); // initialize inner padding with char "6"
+        QByteArray outerPadding(blockSize, static_cast<char>(0x5c)); // initialize outer padding with char "\"
         // ascii characters 0x36 ("6") and 0x5c ("\") are selected because they have large
         // Hamming distance (http://en.wikipedia.org/wiki/Hamming_distance)
 
@@ -76,7 +78,9 @@ namespace
     {
         QString hostname = QHostInfo::localHostName();
         if (hostname.isEmpty())
+        {
             hostname = u"localhost"_s;
+        }
 
         return hostname.toLocal8Bit();
     }
@@ -105,7 +109,9 @@ namespace
         for (QChar& ch : value)
         {
             if ((ch < QChar(0x20)) || (ch == QChar(0x7f)))
+            {
                 ch = u' ';
+            }
         }
 
         return value;
@@ -118,7 +124,9 @@ namespace
         QByteArray rv = "";
         QByteArray line = key.toLatin1() + ": ";
         if (!prefix.isEmpty())
+        {
             line += prefix;
+        }
         if (!value.contains(u"=?") && canEncodeAsASCII(value))
         {
             bool firstWord = true;
@@ -130,9 +138,13 @@ namespace
                     line.clear();
                 }
                 if (firstWord)
+                {
                     line += word;
+                }
                 else
+                {
                     line += ' ' + word;
+                }
                 firstWord = false;
             }
         }
@@ -165,7 +177,9 @@ namespace
         // prepended, so that the mail data cannot end the DATA phase on its own.
         // [rfc5321] 4.5.2. Transparency
         if (message.startsWith('.'))
+        {
             message.prepend('.');
+        }
         message.replace("\r\n.", "\r\n..");
 
         return message;
@@ -204,7 +218,9 @@ Net::SMTPClient::SMTPClient(const QString& sender, const QStringList& recipients
     QString crlfBody = body;
     const QByteArray b = crlfBody.replace(u"\n"_s, u"\r\n"_s).toUtf8().toBase64();
     for (qsizetype i = 0, end = b.length(); i < end; i += 78)
+    {
         m_message += b.mid(i, 78);
+    }
 
     // Authentication
     if (pref->getMailNotificationSMTPAuth())
@@ -250,7 +266,9 @@ void Net::SMTPClient::readyRead()
     {
         const qsizetype pos = m_buffer.indexOf("\r\n");
         if (pos < 0)
+        {
             return; // Loop exit condition
+        }
         const QByteArray line = m_buffer.first(pos);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
         m_buffer.slice(pos + 2);
@@ -269,7 +287,9 @@ void Net::SMTPClient::readyRead()
                 // The server may send a multiline greeting/INIT/220 response.
                 // We wait until it finishes.
                 if (line[3] != ' ')
+                {
                     break;
+                }
                 // Connection was successful
                 ehlo();
             }
@@ -312,11 +332,17 @@ void Net::SMTPClient::readyRead()
         case AuthRequestSent:
         case AuthUsernameSent:
             if (m_authType == AuthPlain)
+            {
                 authPlain();
+            }
             else if (m_authType == AuthLogin)
+            {
                 authLogin();
+            }
             else
+            {
                 authCramMD5(line.mid(4));
+            }
             break;
         case AuthSent:
         case Authenticated:
@@ -344,14 +370,20 @@ void Net::SMTPClient::readyRead()
                 }
 
                 if (!m_recipientsIterator.hasNext())
+                {
                     m_state = Data;
+                }
             }
             else
             {
                 if (m_recipientsIterator.hasPrevious())
+                {
                     logError(tr("<rcpt to> was rejected by server, msg: %1").arg(QString::fromUtf8(line)));
+                }
                 else
+                {
                     logError(tr("<mail from> was rejected by server, msg: %1").arg(QString::fromUtf8(line)));
+                }
                 m_state = Close;
             }
             break;
@@ -463,11 +495,15 @@ void Net::SMTPClient::parseEhloResponse(const QByteArray& code, const bool conti
                  << line.section(u' ', 1);
         m_extensions[line.section(u' ', 0, 0).toUpper()] = line.section(u' ', 1);
         if (!continued)
+        {
             m_state = EhloDone;
+        }
     }
 
     if (m_state != EhloDone)
+    {
         return;
+    }
 
     const Net::SMTPEncryptionType encryptionType = pref->getMailNotificationSMTPEncryptionType();
     // Check if STARTTLS is available and should be used
@@ -620,6 +656,8 @@ void Net::SMTPClient::error(QAbstractSocket::SocketError socketError)
     {
         logError(m_socket->errorString());
         if ((socketError == QAbstractSocket::SslHandshakeFailedError) && (pref->getMailNotificationSMTPEncryptionType() == Net::SMTPEncryptionType::SMTPS))
+        {
             logError(tr("Check the email server supports SMTPS (SMTP over SSL) and you are using the correct port"));
+        }
     }
 }

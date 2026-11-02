@@ -76,10 +76,14 @@ APIController* WebSession::getAPIController(const QString& scope) const
 {
     const auto iter = m_apiControllers.find(scope);
     if (iter == m_apiControllers.end())
+    {
         return nullptr;
+    }
 
     if (!iter->instance)
+    {
         iter->instance = std::invoke(iter->create);
+    }
 
     return iter->instance;
 }
@@ -93,7 +97,9 @@ bool CookieBasedWebSession::hasExpired(const std::chrono::milliseconds duration)
 {
     // don't expire for special values
     if (duration <= 0ms)
+    {
         return false;
+    }
 
     return timestamp().durationElapsed() > duration;
 }

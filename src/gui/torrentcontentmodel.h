@@ -64,26 +64,26 @@ public:
     ~TorrentContentModel() override;
 
     void setContentHandler(BitTorrent::TorrentContentHandler* contentHandler);
-    BitTorrent::TorrentContentHandler* contentHandler() const;
+    [[nodiscard]] BitTorrent::TorrentContentHandler* contentHandler() const;
 
     void refresh();
 
-    QList<BitTorrent::DownloadPriority> getFilePriorities() const;
-    TorrentContentModelItem::ItemType itemType(const QModelIndex& index) const;
-    int getFileIndex(const QModelIndex& index) const;
-    QSet<int> getFileIndexes(const QModelIndex& itemIndex) const;
-    Path getItemPath(const QModelIndex& index) const;
+    [[nodiscard]] QList<BitTorrent::DownloadPriority> getFilePriorities() const;
+    [[nodiscard]] TorrentContentModelItem::ItemType itemType(const QModelIndex& index) const;
+    [[nodiscard]] int getFileIndex(const QModelIndex& index) const;
+    [[nodiscard]] QSet<int> getFileIndexes(const QModelIndex& itemIndex) const;
+    [[nodiscard]] Path getItemPath(const QModelIndex& index) const;
 
-    int columnCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
-    QModelIndex parent(const QModelIndex& index) const override;
-    int rowCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex& index) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    [[nodiscard]] QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QModelIndex parent(const QModelIndex& index) const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
 
-    QModelIndex index(const Path& itemPath) const;
+    [[nodiscard]] QModelIndex index(const Path& itemPath) const;
     QModelIndex index(const TorrentContentModelItem* item) const;
 
 signals:
@@ -98,8 +98,8 @@ private:
         SuppressInsertRowsNotify = 1
     };
 
-    QMimeData* mimeData(const QModelIndexList& indexes) const override;
-    QStringList mimeTypes() const override;
+    [[nodiscard]] QMimeData* mimeData(const QModelIndexList& indexes) const override;
+    [[nodiscard]] QStringList mimeTypes() const override;
     void populate();
     TorrentContentModelFolder* populateFolder(const Path& folderPath, PopulateFolderFlags flags = None);
     void removeEmptyBranch(const Path& folderPath);

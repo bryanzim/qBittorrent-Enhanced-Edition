@@ -42,7 +42,7 @@ public:
 
     void store(const Path& filePath, const QByteArray& data);
 
-    Path storageDir() const;
+    [[nodiscard]] Path storageDir() const;
 
 signals:
     void failed(const Path& filePath, const QString& errorString);

@@ -49,7 +49,7 @@ public:
     explicit WatchedFolderOptionsDialog(const TorrentFilesWatcher::WatchedFolderOptions& watchedFolderOptions, QWidget* parent);
     ~WatchedFolderOptionsDialog() override;
 
-    TorrentFilesWatcher::WatchedFolderOptions watchedFolderOptions() const;
+    [[nodiscard]] TorrentFilesWatcher::WatchedFolderOptions watchedFolderOptions() const;
 
 private:
     void populateSavePaths();

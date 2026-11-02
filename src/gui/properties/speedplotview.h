@@ -106,7 +106,7 @@ private:
 
         bool push(const SampleData& sampleData); // returns true if there is new data to display
 
-        const DataCircularBuffer& data() const;
+        [[nodiscard]] const DataCircularBuffer& data() const;
 
     private:
         const milliseconds m_resolution;
@@ -128,8 +128,8 @@ private:
         bool enable;
     };
 
-    quint64 maxYValue() const;
-    const DataCircularBuffer& currentData() const;
+    [[nodiscard]] quint64 maxYValue() const;
+    [[nodiscard]] const DataCircularBuffer& currentData() const;
 
     Averager m_averager5Min{ 5min, 1s };
     Averager m_averager30Min{ 30min, 6s };

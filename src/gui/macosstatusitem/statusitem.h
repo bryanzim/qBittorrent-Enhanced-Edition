@@ -38,7 +38,7 @@ namespace MacUtils
         StatusItem();
         ~StatusItem();
 
-        void updateSpeed(int64_t downloadRate, int64_t uploadRate);
+        void updateSpeed(std::int64_t downloadRate, std::int64_t uploadRate);
         void setVisible(bool visible);
 
     private:

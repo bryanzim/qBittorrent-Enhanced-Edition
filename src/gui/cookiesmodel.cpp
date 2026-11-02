@@ -66,7 +66,9 @@ QModelIndex CookiesModel::index(const int row, const int column, const QModelInd
 {
     if (parent.isValid() // no items with valid parent
         || (row < 0) || (row >= m_cookies.size()) || (column < 0) || (column >= NB_COLUMNS))
+    {
         return {};
+    }
 
     return createIndex(row, column);
 }
@@ -79,7 +81,9 @@ QModelIndex CookiesModel::parent([[maybe_unused]] const QModelIndex& index) cons
 int CookiesModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
+    {
         return 0;
+    }
 
     return m_cookies.size();
 }
@@ -92,7 +96,9 @@ int CookiesModel::columnCount([[maybe_unused]] const QModelIndex& parent) const
 QVariant CookiesModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || (index.row() >= m_cookies.size()) || ((role != Qt::DisplayRole) && (role != Qt::EditRole)))
+    {
         return {};
+    }
 
     switch (index.column())
     {
@@ -114,7 +120,9 @@ QVariant CookiesModel::data(const QModelIndex& index, int role) const
 bool CookiesModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (role != Qt::EditRole)
+    {
         return false;
+    }
 
     switch (index.column())
     {
@@ -144,14 +152,18 @@ bool CookiesModel::setData(const QModelIndex& index, const QVariant& value, int 
 bool CookiesModel::insertRows(int row, int count, const QModelIndex& parent)
 {
     if ((row < 0) || (row > m_cookies.size()))
+    {
         return false;
+    }
 
     QNetworkCookie newCookie;
     newCookie.setExpirationDate(QDateTime::currentDateTime().addYears(2));
 
     beginInsertRows(parent, row, (row + count - 1));
     while (count-- > 0)
+    {
         m_cookies.insert(row, newCookie);
+    }
     endInsertRows();
 
     return true;
@@ -160,11 +172,15 @@ bool CookiesModel::insertRows(int row, int count, const QModelIndex& parent)
 bool CookiesModel::removeRows(int row, int count, const QModelIndex& parent)
 {
     if ((m_cookies.isEmpty()) || (row >= m_cookies.size()) || ((row + count) > m_cookies.size()))
+    {
         return false;
+    }
 
     beginRemoveRows(parent, row, (row + count - 1));
     while (count-- > 0)
+    {
         m_cookies.removeAt(row);
+    }
     endRemoveRows();
 
     return true;
@@ -173,7 +189,9 @@ bool CookiesModel::removeRows(int row, int count, const QModelIndex& parent)
 Qt::ItemFlags CookiesModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
+    {
         return Qt::NoItemFlags;
+    }
 
     return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }

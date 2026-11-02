@@ -51,9 +51,13 @@ BitTorrent::CategoryOptions BitTorrent::CategoryOptions::fromJSON(const QJsonObj
 
     const QJsonValue downloadPathValue = jsonObj.value(OPTION_DOWNLOADPATH);
     if (downloadPathValue.isBool())
+    {
         options.downloadPath = { downloadPathValue.toBool(), {} };
+    }
     else if (downloadPathValue.isString())
+    {
         options.downloadPath = { true, Path(downloadPathValue.toString()) };
+    }
 
     options.shareLimits.ratioLimit = jsonObj.value(OPTION_RATIOLIMIT).toDouble(DEFAULT_RATIO_LIMIT);
     options.shareLimits.seedingTimeLimit = jsonObj.value(OPTION_SEEDINGTIMELIMIT).toInt(DEFAULT_SEEDING_TIME_LIMIT);
@@ -70,9 +74,13 @@ QJsonObject BitTorrent::CategoryOptions::toJSON() const
     if (downloadPath)
     {
         if (downloadPath->enabled)
+        {
             downloadPathValue = downloadPath->path.data();
+        }
         else
+        {
             downloadPathValue = false;
+        }
     }
 
     return {

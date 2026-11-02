@@ -56,10 +56,10 @@ public:
     ~TorrentCategoryDialog() override;
 
     void setCategoryNameEditable(bool editable);
-    QString categoryName() const;
+    [[nodiscard]] QString categoryName() const;
     void setCategoryName(const QString& categoryName);
     void setCategoryOptions(const BitTorrent::CategoryOptions& categoryOptions);
-    BitTorrent::CategoryOptions categoryOptions() const;
+    [[nodiscard]] BitTorrent::CategoryOptions categoryOptions() const;
 
 private slots:
     void categoryNameChanged(const QString& categoryName);

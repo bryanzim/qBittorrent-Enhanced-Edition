@@ -46,7 +46,7 @@ class ApplicationInstanceManager final : public QObject
 public:
     explicit ApplicationInstanceManager(const Path& instancePath, QObject* parent = nullptr);
 
-    bool isFirstInstance() const;
+    [[nodiscard]] bool isFirstInstance() const;
 
 public slots:
     bool sendMessage(const QString& message, std::chrono::milliseconds timeout = 5000ms);

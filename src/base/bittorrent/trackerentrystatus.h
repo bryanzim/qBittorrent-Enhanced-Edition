@@ -87,5 +87,5 @@ namespace BitTorrent
     };
 
     bool operator==(const TrackerEntryStatus& left, const TrackerEntryStatus& right);
-    std::size_t qHash(const TrackerEntryStatus& key, std::size_t seed = 0);
+    std::size_t qHash(const TrackerEntryStatus& key, std::size_t seed = 0U);
 }

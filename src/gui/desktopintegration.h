@@ -50,17 +50,17 @@ public:
     explicit DesktopIntegration(QObject* parent = nullptr);
     ~DesktopIntegration() override;
 
-    bool isActive() const;
+    [[nodiscard]] bool isActive() const;
 
-    QString toolTip() const;
+    [[nodiscard]] QString toolTip() const;
     void setToolTip(const QString& toolTip);
 
-    QMenu* menu() const;
+    [[nodiscard]] QMenu* menu() const;
 
-    bool isNotificationsEnabled() const;
+    [[nodiscard]] bool isNotificationsEnabled() const;
     void setNotificationsEnabled(bool value);
 
-    int notificationTimeout() const;
+    [[nodiscard]] int notificationTimeout() const;
 #ifdef QBT_USES_DBUS
     void setNotificationTimeout(int value);
 #endif
@@ -76,7 +76,7 @@ private:
     void onPreferencesChanged();
 #ifndef Q_OS_MACOS
     void createTrayIcon();
-    QIcon getSystrayIcon() const;
+    [[nodiscard]] QIcon getSystrayIcon() const;
 #endif // Q_OS_MACOS
 
     CachedSettingValue<bool> m_storeNotificationEnabled;

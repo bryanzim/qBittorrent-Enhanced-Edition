@@ -88,10 +88,10 @@ private:
     void fillPluginComboBox();
     void selectActivePage();
 
-    QString selectedCategory() const;
-    QStringList selectedPlugins() const;
+    [[nodiscard]] QString selectedCategory() const;
+    [[nodiscard]] QStringList selectedPlugins() const;
 
-    QString generateTabID() const;
+    [[nodiscard]] QString generateTabID() const;
     int addTab(const QString& tabID, SearchJobWidget* searchJobWdget);
 
     void loadHistory();

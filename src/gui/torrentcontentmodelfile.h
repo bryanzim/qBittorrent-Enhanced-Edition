@@ -41,11 +41,11 @@ class TorrentContentModelFile final : public TorrentContentModelItem
 public:
     TorrentContentModelFile(const QString& fileName, qulonglong fileSize, int fileIndex);
 
-    int fileIndex() const;
+    [[nodiscard]] int fileIndex() const;
     void setPriority(BitTorrent::DownloadPriority newPriority, bool updateParent = true) override;
     void setProgress(qreal progress);
     void setAvailability(qreal availability);
-    ItemType itemType() const override;
+    [[nodiscard]] ItemType itemType() const override;
 
 private:
     int m_fileIndex;

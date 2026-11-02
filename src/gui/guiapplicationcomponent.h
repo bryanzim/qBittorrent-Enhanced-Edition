@@ -42,7 +42,7 @@ public:
     {
     }
 
-    IGUIApplication* app() const
+    [[nodiscard]] IGUIApplication* app() const
     {
         return reinterpret_cast<IGUIApplication*>(ApplicationComponentBase::app());
     }
@@ -58,7 +58,7 @@ public:
     {
     }
 
-    IGUIApplication* app() const
+    [[nodiscard]] IGUIApplication* app() const
     {
         return reinterpret_cast<IGUIApplication*>(ApplicationComponentBase::app());
     }

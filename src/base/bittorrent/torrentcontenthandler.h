@@ -46,21 +46,21 @@ namespace BitTorrent
     public:
         using QObject::QObject;
 
-        virtual bool hasMetadata() const = 0;
-        virtual int filesCount() const = 0;
-        virtual Path filePath(int index) const = 0;
-        virtual qlonglong fileSize(int index) const = 0;
-        virtual Path actualStorageLocation() const = 0;
-        virtual Path actualFilePath(int fileIndex) const = 0;
-        virtual QList<DownloadPriority> filePriorities() const = 0;
-        virtual QList<qreal> filesProgress() const = 0;
+        [[nodiscard]] virtual bool hasMetadata() const = 0;
+        [[nodiscard]] virtual int filesCount() const = 0;
+        [[nodiscard]] virtual Path filePath(int index) const = 0;
+        [[nodiscard]] virtual qlonglong fileSize(int index) const = 0;
+        [[nodiscard]] virtual Path actualStorageLocation() const = 0;
+        [[nodiscard]] virtual Path actualFilePath(int fileIndex) const = 0;
+        [[nodiscard]] virtual QList<DownloadPriority> filePriorities() const = 0;
+        [[nodiscard]] virtual QList<qreal> filesProgress() const = 0;
         /**
          * @brief fraction of file pieces that are available at least from one peer
          *
          * This is not the same as torrent availability, it is just a fraction of pieces
          * that can be downloaded right now. It varies between 0 and 1.
          */
-        virtual QFuture<QList<qreal>> fetchAvailableFileFractions() const = 0;
+        [[nodiscard]] virtual QFuture<QList<qreal>> fetchAvailableFileFractions() const = 0;
 
         virtual void renameFile(int index, const Path& newPath) = 0;
         virtual void prioritizeFiles(const QList<DownloadPriority>& priorities) = 0;

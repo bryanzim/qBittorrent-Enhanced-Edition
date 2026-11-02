@@ -121,7 +121,9 @@ TransferListModel::TransferListModel(QObject* parent)
     connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, [this] {
         loadUIThemeResources();
         if (const int rCount = rowCount(); rCount > 0)
+        {
             emit dataChanged(index(0, 0), index((rCount - 1), (columnCount() - 1)), { Qt::DecorationRole, Qt::ForegroundRole });
+        }
     });
 
     // Load the torrents
@@ -290,13 +292,19 @@ QString TransferListModel::displayValue(const BitTorrent::Torrent* torrent, cons
 {
     bool hideValues = false;
     if (m_hideZeroValuesMode == HideZeroValuesMode::Always)
+    {
         hideValues = true;
+    }
     else if (m_hideZeroValuesMode == HideZeroValuesMode::Stopped)
+    {
         hideValues = (torrent->state() == BitTorrent::TorrentState::StoppedDownloading);
+    }
 
     const auto availabilityString = [hideValues](const qreal value) -> QString {
         if (hideValues && (value == 0))
+        {
             return {};
+        }
         return (value >= 0)
                    ? Utils::String::fromDouble(value, 3)
                    : tr("N/A");
@@ -310,7 +318,9 @@ QString TransferListModel::displayValue(const BitTorrent::Torrent* torrent, cons
 
     const auto limitString = [hideValues](const qint64 value) -> QString {
         if (hideValues && (value <= 0))
+        {
             return {};
+        }
 
         return (value > 0)
                    ? Utils::Misc::friendlyUnit(value, true)
@@ -319,19 +329,25 @@ QString TransferListModel::displayValue(const BitTorrent::Torrent* torrent, cons
 
     const auto amountString = [hideValues](const qint64 value, const qint64 total) -> QString {
         if (hideValues && (value == 0) && (total == 0))
+        {
             return {};
+        }
         return u"%1 (%2)"_s.arg(QString::number(value), QString::number(total));
     };
 
     const auto etaString = [hideValues](const qlonglong value) -> QString {
         if (hideValues && (value >= MAX_ETA))
+        {
             return {};
+        }
         return Utils::Misc::userFriendlyDuration(value, MAX_ETA);
     };
 
     const auto ratioString = [hideValues](const qreal value) -> QString {
         if (hideValues && (value <= 0))
+        {
             return {};
+        }
 
         return ((static_cast<int>(value) == -1) || (value >= BitTorrent::Torrent::MAX_RATIO))
                    ? C_INFINITY
@@ -344,11 +360,15 @@ QString TransferListModel::displayValue(const BitTorrent::Torrent* torrent, cons
 
     const auto lastActivityString = [hideValues](qint64 value) -> QString {
         if (hideValues && ((value < 0) || (value >= MAX_ETA)))
+        {
             return {};
+        }
 
         // Show '< 1m ago' when elapsed time is 0
         if (value == 0)
+        {
             value = 1;
+        }
 
         return (value >= 0)
                    ? tr("%1 ago", "e.g.: 1h 20m ago").arg(Utils::Misc::userFriendlyDuration(value))
@@ -359,7 +379,9 @@ QString TransferListModel::displayValue(const BitTorrent::Torrent* torrent, cons
         if (seedingTime <= 0)
         {
             if (hideValues && (elapsedTime == 0))
+            {
                 return {};
+            }
             return Utils::Misc::userFriendlyDuration(elapsedTime);
         }
 
@@ -381,21 +403,29 @@ QString TransferListModel::displayValue(const BitTorrent::Torrent* torrent, cons
 
     const auto hashString = [hideValues](const auto& hash) -> QString {
         if (hideValues && !hash.isValid())
+        {
             return {};
+        }
         return hash.isValid() ? hash.toString() : tr("N/A");
     };
 
     const auto reannounceString = [hideValues](const qint64 time) -> QString {
         if (hideValues && (time == 0))
+        {
             return {};
+        }
         return Utils::Misc::userFriendlyDuration(time);
     };
 
     const auto privateString = [hideValues](const bool isPrivate, const bool hasMetadata) -> QString {
         if (hideValues && !isPrivate)
+        {
             return {};
+        }
         if (hasMetadata)
+        {
             return isPrivate ? tr("Yes") : tr("No");
+        }
         return tr("N/A");
     };
 
@@ -570,17 +600,23 @@ QVariant TransferListModel::internalValue(const BitTorrent::Torrent* torrent, co
 QVariant TransferListModel::data(const QModelIndex& index, const int role) const
 {
     if (!index.isValid())
+    {
         return {};
+    }
 
     const BitTorrent::Torrent* torrent = torrentHandle(index);
     if (!torrent)
+    {
         return {};
+    }
 
     switch (role)
     {
     case Qt::ForegroundRole:
         if (m_useTorrentStatesColors)
+        {
             return m_stateThemeColors.value(torrent->state());
+        }
         break;
     case Qt::DisplayRole:
         return displayValue(torrent, index.column());
@@ -590,7 +626,9 @@ QVariant TransferListModel::data(const QModelIndex& index, const int role) const
         return internalValue(torrent, index.column(), true);
     case Qt::DecorationRole:
         if (index.column() == TR_NAME)
+        {
             return getIconByState(torrent->state());
+        }
         break;
     case Qt::ToolTipRole:
         switch (index.column())
@@ -645,11 +683,15 @@ QVariant TransferListModel::data(const QModelIndex& index, const int role) const
 bool TransferListModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (!index.isValid() || (role != Qt::DisplayRole))
+    {
         return false;
+    }
 
     BitTorrent::Torrent* const torrent = torrentHandle(index);
     if (!torrent)
+    {
         return false;
+    }
 
     // Category and Name columns can be edited
     switch (index.column())
@@ -670,9 +712,11 @@ bool TransferListModel::setData(const QModelIndex& index, const QVariant& value,
 void TransferListModel::addTorrents(const QList<BitTorrent::Torrent*>& torrents)
 {
     if (torrents.isEmpty())
+    {
         return;
+    }
 
-    qsizetype row = m_torrents.size();
+    qsizetype const row = m_torrents.size();
     const qsizetype total = row + torrents.size();
 
     beginInsertRows({}, row, (total - 1));
@@ -689,7 +733,9 @@ void TransferListModel::addTorrents(const QList<BitTorrent::Torrent*>& torrents)
 Qt::ItemFlags TransferListModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
+    {
         return Qt::NoItemFlags;
+    }
 
     return QAbstractListModel::flags(index);
 }
@@ -697,7 +743,9 @@ Qt::ItemFlags TransferListModel::flags(const QModelIndex& index) const
 BitTorrent::Torrent* TransferListModel::torrentHandle(const QModelIndex& index) const
 {
     if (!index.isValid() || (index.row() >= static_cast<qsizetype>(m_torrents.size())))
+    {
         return nullptr;
+    }
 
     return m_torrents.get<ByIndex>().at(index.row());
 }
@@ -759,9 +807,13 @@ void TransferListModel::configure()
     if (pref->getHideZeroValues())
     {
         if (pref->getHideZeroComboValues() == 1)
+        {
             hideZeroValuesMode = HideZeroValuesMode::Stopped;
+        }
         else
+        {
             hideZeroValuesMode = HideZeroValuesMode::Always;
+        }
     }
 
     bool isDataChanged = false;
@@ -781,7 +833,9 @@ void TransferListModel::configure()
     if (isDataChanged)
     {
         if (const int rCount = rowCount(); rCount > 0)
+        {
             emit dataChanged(index(0, 0), index((rCount - 1), (columnCount() - 1)));
+        }
     }
 }
 

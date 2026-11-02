@@ -48,12 +48,12 @@ namespace Net
 
         void cancel() override;
 
-        QString url() const;
-        DownloadRequest downloadRequest() const;
-        bool useProxy() const;
+        [[nodiscard]] QString url() const;
+        [[nodiscard]] DownloadRequest downloadRequest() const;
+        [[nodiscard]] bool useProxy() const;
 
         void assignNetworkReply(QNetworkReply* reply);
-        QNetworkReply* assignedNetworkReply() const;
+        [[nodiscard]] QNetworkReply* assignedNetworkReply() const;
 
     private:
         void processFinishedDownload();

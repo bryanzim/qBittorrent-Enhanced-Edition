@@ -65,7 +65,9 @@ bool PeerInfo::fromLSD() const
 QString PeerInfo::country() const
 {
     if (m_country.isEmpty())
+    {
         m_country = Net::GeoIPManager::instance()->lookup(address().ip);
+    }
     return m_country;
 }
 
@@ -129,8 +131,8 @@ bool PeerInfo::isShadowBanned() const
     {
         return false;
     }
-    QString peer_ip = address().ip.toString();
-    QStringList shadowbannedIPs =
+    QString const peer_ip = address().ip.toString();
+    QStringList const shadowbannedIPs =
         CachedSettingValue<QStringList>(u"State/ShadowBannedIPs"_s, QStringList(), Algorithm::sorted<QStringList>).get();
 
     return shadowbannedIPs.contains(peer_ip);
@@ -189,7 +191,9 @@ bool PeerInfo::isPlaintextEncrypted() const
 PeerAddress PeerInfo::address() const
 {
     if (useI2PSocket())
+    {
         return {};
+    }
 
 #if LIBTORRENT_VERSION_NUM >= 20100
     const lt::tcp::endpoint ip = m_nativeInfo.remote_endpoint();
@@ -206,7 +210,9 @@ PeerAddress PeerInfo::address() const
 QString PeerInfo::I2PAddress() const
 {
     if (!useI2PSocket())
+    {
         return {};
+    }
 
 #if defined(QBT_USES_LIBTORRENT2) && TORRENT_USE_I2P
     if (m_I2PAddress.isEmpty())
@@ -235,7 +241,9 @@ QString PeerInfo::peerIdClient() const
     // when peer ID is not known yet it contains only zero bytes,
     // do not create string in such case, return empty string instead
     if (m_nativeInfo.pid.is_all_zeros())
+    {
         return {};
+    }
 
     QString result;
 
@@ -247,7 +255,9 @@ QString PeerInfo::peerIdClient() const
         // ensure that the peer ID slice consists only of printable ASCII characters,
         // this should filter out most of the improper IDs
         if ((c < 32) || (c > 126))
+        {
             return tr("Unknown");
+        }
 
         result += QChar::fromLatin1(c);
     }
@@ -288,7 +298,9 @@ QBitArray PeerInfo::pieces() const
 QString PeerInfo::connectionType() const
 {
     if (m_nativeInfo.flags & lt::peer_info::utp_socket)
+    {
         return C_UTP;
+    }
 
     return (m_nativeInfo.connection_type == lt::peer_info::standard_bittorrent)
                ? u"BT"_s
@@ -299,7 +311,9 @@ qreal PeerInfo::calcRelevance(const QBitArray& allPieces) const
 {
     const qsizetype localMissing = allPieces.count(false);
     if (localMissing <= 0)
+    {
         return 0;
+    }
 
     const QBitArray peerPieces = pieces();
     const qsizetype remoteHaves = (peerPieces & (~allPieces)).count(true);
@@ -348,51 +362,75 @@ void PeerInfo::determineFlags()
 
     // K = Peer is unchoking your client, but your client is not interested
     if (!isRemoteChocked() && !isInteresting())
+    {
         updateFlags(u'K', tr("Not interested (local) and unchoked (peer)"));
+    }
 
     // ? = Your client unchoked the peer but the peer is not interested
     if (!isChocked() && !isRemoteInterested())
+    {
         updateFlags(u'?', tr("Not interested (peer) and unchoked (local)"));
+    }
 
     // O = Optimistic unchoke
     if (optimisticUnchoke())
+    {
         updateFlags(u'O', tr("Optimistic unchoke"));
+    }
 
     // S = Peer is snubbed
     if (isSnubbed())
+    {
         updateFlags(u'S', tr("Peer snubbed"));
+    }
 
     // I = Peer is an incoming connection
     if (!isLocalConnection())
+    {
         updateFlags(u'I', tr("Incoming connection"));
+    }
 
     // H = Peer was obtained through DHT
     if (fromDHT())
+    {
         updateFlags(u'H', tr("Peer from DHT"));
+    }
 
     // X = Peer was included in peerlists obtained through Peer Exchange (PEX)
     if (fromPeX())
+    {
         updateFlags(u'X', tr("Peer from PEX"));
+    }
 
     // L = Peer is local
     if (fromLSD())
+    {
         updateFlags(u'L', tr("Peer from LSD"));
+    }
 
     // E = Peer is using Protocol Encryption (all traffic)
     if (isRC4Encrypted())
+    {
         updateFlags(u'E', tr("Encrypted traffic"));
+    }
 
     // e = Peer is using Protocol Encryption (handshake)
     if (isPlaintextEncrypted())
+    {
         updateFlags(u'e', tr("Encrypted handshake"));
+    }
 
     // P = Peer is using uTorrent uTP
     if (useUTPSocket())
+    {
         updateFlags(u'P', C_UTP);
+    }
 
     // h = Peer is using NAT hole punching
     if (isHolepunched())
+    {
         updateFlags(u'h', tr("Peer is using NAT hole punching"));
+    }
 
     m_flags.chop(1);
     m_flagsDescription.chop(1);

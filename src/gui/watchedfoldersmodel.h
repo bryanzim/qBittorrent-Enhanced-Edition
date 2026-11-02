@@ -45,15 +45,15 @@ class WatchedFoldersModel final : public QAbstractListModel
 public:
     explicit WatchedFoldersModel(TorrentFilesWatcher* fsWatcher, QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex& parent = {}) const override;
-    int columnCount(const QModelIndex& parent = {}) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
     void addFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options);
 
-    TorrentFilesWatcher::WatchedFolderOptions folderOptions(int row) const;
+    [[nodiscard]] TorrentFilesWatcher::WatchedFolderOptions folderOptions(int row) const;
     void setFolderOptions(int row, const TorrentFilesWatcher::WatchedFolderOptions& options);
 
     void apply();

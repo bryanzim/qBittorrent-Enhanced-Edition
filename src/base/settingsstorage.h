@@ -96,15 +96,25 @@ public:
     void storeValue(const QString& key, const T& value)
     {
         if constexpr (std::same_as<T, QVariant>)
+        {
             storeValueImpl(key, value);
+        }
         else if constexpr (Stringable<T>)
+        {
             storeValueImpl(key, value.toString());
+        }
         else if constexpr (std::is_enum_v<T>)
+        {
             storeValueImpl(key, Utils::String::fromEnum(value));
+        }
         else if constexpr (IsQFlags<T>)
+        {
             storeValueImpl(key, static_cast<typename T::Int>(value));
+        }
         else
+        {
             storeValueImpl(key, QVariant::fromValue(value));
+        }
     }
 
     void removeValue(const QString& key);

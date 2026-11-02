@@ -104,14 +104,14 @@ public:
 
     explicit TransferListModel(QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex& parent = {}) const override;
-    int columnCount(const QModelIndex& parent = {}) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    BitTorrent::Torrent* torrentHandle(const QModelIndex& index) const;
+    [[nodiscard]] BitTorrent::Torrent* torrentHandle(const QModelIndex& index) const;
 
 private slots:
     void addTorrents(const QList<BitTorrent::Torrent*>& torrents);
@@ -126,7 +126,7 @@ private:
     void loadUIThemeResources();
     QString displayValue(const BitTorrent::Torrent* torrent, int column) const;
     QVariant internalValue(const BitTorrent::Torrent* torrent, int column, bool alt) const;
-    QIcon getIconByState(BitTorrent::TorrentState state) const;
+    [[nodiscard]] QIcon getIconByState(BitTorrent::TorrentState state) const;
 
     using TorrentList = boost::multi_index_container<
         BitTorrent::Torrent*,

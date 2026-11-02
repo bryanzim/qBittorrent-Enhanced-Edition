@@ -11,9 +11,9 @@
 // filter factory function
 std::unique_ptr<peer_filter> create_peer_filter(const QString& filename)
 {
-    Path qbt_data_dir = specialFolderLocation(SpecialFolder::Data) / Path(filename);
+    Path const qbt_data_dir = specialFolderLocation(SpecialFolder::Data) / Path(filename);
 
-    QString filter_file = qbt_data_dir.toString();
+    QString const filter_file = qbt_data_dir.toString();
     // do not create plugin if filter file doesn't exists
     if (!QFile::exists(filter_file))
     {
@@ -56,11 +56,15 @@ public:
     {
         // do not waste CPU and memory for useless objects when no filters are enabled
         if (!m_blacklist && !m_whitelist)
+        {
             return nullptr;
+        }
 
         // ignore private torrents
         if (th.torrent_file() && th.torrent_file()->priv())
+        {
             return nullptr;
+        }
 
         return std::make_shared<peer_action_plugin>([this](auto&&... args) { return filter(args...); }, drop_peer_connection);
     }
@@ -71,7 +75,7 @@ protected:
         if (m_blacklist)
         {
             // always match with both pid & client name when applying blacklist
-            bool matched_blacklist = m_blacklist->match_peer(info, false);
+            bool const matched_blacklist = m_blacklist->match_peer(info, false);
             if (matched_blacklist)
             {
                 *stop_filtering = true;
@@ -81,7 +85,7 @@ protected:
 
         if (m_whitelist)
         {
-            bool matched_whitelist = m_whitelist->match_peer(info, handshake);
+            bool const matched_whitelist = m_whitelist->match_peer(info, handshake);
             if (!matched_whitelist)
             {
                 *stop_filtering = true;

@@ -61,7 +61,9 @@ Logger* Logger::instance()
 void Logger::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new Logger;
+    }
 }
 
 void Logger::freeInstance()
@@ -98,10 +100,14 @@ QList<Log::Msg> Logger::getMessages(const int lastKnownId) const
     const int size = static_cast<int>(m_messages.size());
 
     if ((lastKnownId == -1) || (diff >= size))
+    {
         return loadFromBuffer(m_messages);
+    }
 
     if (diff <= 0)
+    {
         return {};
+    }
 
     return loadFromBuffer(m_messages, (size - diff));
 }
@@ -114,10 +120,14 @@ QList<Log::Peer> Logger::getPeers(const int lastKnownId) const
     const int size = static_cast<int>(m_peers.size());
 
     if ((lastKnownId == -1) || (diff >= size))
+    {
         return loadFromBuffer(m_peers);
+    }
 
     if (diff <= 0)
+    {
         return {};
+    }
 
     return loadFromBuffer(m_peers, (size - diff));
 }

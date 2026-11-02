@@ -34,7 +34,7 @@ class QStringView;
 struct ISession
 {
     virtual ~ISession() = default;
-    virtual QString id() const = 0;
+    [[nodiscard]] virtual QString id() const = 0;
 };
 
 struct ISessionManager
@@ -43,5 +43,5 @@ struct ISessionManager
     virtual ISession* session() = 0;
     virtual void sessionStart() = 0;
     virtual void sessionEnd() = 0;
-    virtual bool validateCredentials(QStringView username, QStringView password) const = 0;
+    [[nodiscard]] virtual bool validateCredentials(QStringView username, QStringView password) const = 0;
 };

@@ -39,10 +39,10 @@ public:
     explicit Tag(const QString& tagStr);
     explicit Tag(const std::string& tagStr);
 
-    bool isValid() const;
-    bool isEmpty() const;
+    [[nodiscard]] bool isValid() const;
+    [[nodiscard]] bool isEmpty() const;
 
-    QString toString() const noexcept;
+    [[nodiscard]] QString toString() const noexcept;
 
     explicit operator QString() const noexcept;
 
@@ -60,7 +60,7 @@ QDataStream& operator>>(QDataStream& in, Tag& tag);
 template <>
 struct std::hash<Tag>
 {
-    std::size_t operator()(const Tag& tag, const std::size_t seed = 0) const noexcept
+    std::size_t operator()(const Tag& tag, const std::size_t seed = 0U) const noexcept
     {
         return qHash(tag.toString(), seed);
     }

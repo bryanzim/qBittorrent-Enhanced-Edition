@@ -65,7 +65,9 @@ TorrentInfo::TorrentInfo(const lt::torrent_info& nativeInfo)
     for (const lt::file_index_t nativeIndex : fileStorage.file_range())
     {
         if (!fileStorage.pad_file_at(nativeIndex))
+        {
             m_nativeIndexes.append(nativeIndex);
+        }
     }
 }
 
@@ -87,7 +89,9 @@ bool TorrentInfo::isValid() const
 InfoHash TorrentInfo::infoHash() const
 {
     if (!isValid())
+    {
         return {};
+    }
 
 #ifdef QBT_USES_LIBTORRENT2
     return m_nativeInfo->info_hashes();
@@ -99,7 +103,9 @@ InfoHash TorrentInfo::infoHash() const
 QString TorrentInfo::name() const
 {
     if (!isValid())
+    {
         return {};
+    }
 
     return QString::fromStdString(getFileStorage(*m_nativeInfo).name());
 }
@@ -107,7 +113,9 @@ QString TorrentInfo::name() const
 bool TorrentInfo::isPrivate() const
 {
     if (!isValid())
+    {
         return false;
+    }
 
     return m_nativeInfo->priv();
 }
@@ -115,7 +123,9 @@ bool TorrentInfo::isPrivate() const
 qlonglong TorrentInfo::totalSize() const
 {
     if (!isValid())
+    {
         return -1;
+    }
 
     return m_nativeInfo->total_size();
 }
@@ -123,7 +133,9 @@ qlonglong TorrentInfo::totalSize() const
 int TorrentInfo::filesCount() const
 {
     if (!isValid())
+    {
         return -1;
+    }
 
     return m_nativeIndexes.size();
 }
@@ -131,7 +143,9 @@ int TorrentInfo::filesCount() const
 int TorrentInfo::pieceLength() const
 {
     if (!isValid())
+    {
         return -1;
+    }
 
     return m_nativeInfo->piece_length();
 }
@@ -139,7 +153,9 @@ int TorrentInfo::pieceLength() const
 int TorrentInfo::pieceLength(const int index) const
 {
     if (!isValid())
+    {
         return -1;
+    }
 
     return m_nativeInfo->piece_size(lt::piece_index_t{ index });
 }
@@ -147,7 +163,9 @@ int TorrentInfo::pieceLength(const int index) const
 int TorrentInfo::piecesCount() const
 {
     if (!isValid())
+    {
         return -1;
+    }
 
     return m_nativeInfo->num_pieces();
 }
@@ -155,12 +173,16 @@ int TorrentInfo::piecesCount() const
 Path TorrentInfo::filePath(const int index) const
 {
     if (!isValid())
+    {
         return {};
+    }
 
     Q_ASSERT(index >= 0);
     Q_ASSERT(index < m_nativeIndexes.size());
     if ((index < 0) || (index >= m_nativeIndexes.size()))
+    {
         return {};
+    }
 
     return Path(getFileStorage(*m_nativeInfo).file_path(m_nativeIndexes[index]));
 }
@@ -170,7 +192,9 @@ PathList TorrentInfo::filePaths() const
     PathList list;
     list.reserve(filesCount());
     for (int i = 0; i < filesCount(); ++i)
+    {
         list << filePath(i);
+    }
 
     return list;
 }
@@ -178,12 +202,16 @@ PathList TorrentInfo::filePaths() const
 qlonglong TorrentInfo::fileSize(const int index) const
 {
     if (!isValid())
+    {
         return -1;
+    }
 
     Q_ASSERT(index >= 0);
     Q_ASSERT(index < m_nativeIndexes.size());
     if ((index < 0) || (index >= m_nativeIndexes.size()))
+    {
         return -1;
+    }
 
     return getFileStorage(*m_nativeInfo).file_size(m_nativeIndexes[index]);
 }
@@ -191,12 +219,16 @@ qlonglong TorrentInfo::fileSize(const int index) const
 qlonglong TorrentInfo::fileOffset(const int index) const
 {
     if (!isValid())
+    {
         return -1;
+    }
 
     Q_ASSERT(index >= 0);
     Q_ASSERT(index < m_nativeIndexes.size());
     if ((index < 0) || (index >= m_nativeIndexes.size()))
+    {
         return -1;
+    }
 
     return getFileStorage(*m_nativeInfo).file_offset(m_nativeIndexes[index]);
 }
@@ -204,7 +236,9 @@ qlonglong TorrentInfo::fileOffset(const int index) const
 QByteArray TorrentInfo::rawData() const
 {
     if (!isValid())
+    {
         return {};
+    }
 #ifdef QBT_USES_LIBTORRENT2
     const lt::span<const char> infoSection{ m_nativeInfo->info_section() };
     return { infoSection.data(), static_cast<qsizetype>(infoSection.size()) };
@@ -221,7 +255,9 @@ PathList TorrentInfo::filesForPiece(const int pieceIndex) const
     PathList res;
     res.reserve(fileIndices.size());
     for (const int i : fileIndices)
+    {
         res.push_back(filePath(i));
+    }
 
     return res;
 }
@@ -229,7 +265,9 @@ PathList TorrentInfo::filesForPiece(const int pieceIndex) const
 QList<int> TorrentInfo::fileIndicesForPiece(const int pieceIndex) const
 {
     if (!isValid() || (pieceIndex < 0) || (pieceIndex >= piecesCount()))
+    {
         return {};
+    }
 
     const std::vector<lt::file_slice> files = m_nativeInfo->map_block(
         lt::piece_index_t{ pieceIndex }, 0, m_nativeInfo->piece_size(lt::piece_index_t{ pieceIndex }));
@@ -239,7 +277,9 @@ QList<int> TorrentInfo::fileIndicesForPiece(const int pieceIndex) const
     {
         const qsizetype index = m_nativeIndexes.indexOf(fileSlice.file_index);
         if (index >= 0)
+        {
             res.append(index);
+        }
     }
 
     return res;
@@ -248,14 +288,18 @@ QList<int> TorrentInfo::fileIndicesForPiece(const int pieceIndex) const
 QList<QByteArray> TorrentInfo::pieceHashes() const
 {
     if (!isValid())
+    {
         return {};
+    }
 
     const int count = piecesCount();
     QList<QByteArray> hashes;
     hashes.reserve(count);
 
     for (int i = 0; i < count; ++i)
+    {
         hashes += { m_nativeInfo->hash_for_piece_ptr(lt::piece_index_t{ i }), SHA1Hash::length() };
+    }
 
     return hashes;
 }
@@ -268,10 +312,14 @@ TorrentInfo::PieceRange TorrentInfo::filePieces(const Path& filePath) const
 TorrentInfo::PieceRange TorrentInfo::filePieces(const int fileIndex) const
 {
     if (!isValid())
+    {
         return {};
+    }
 
     if ((fileIndex < 0) || (fileIndex >= filesCount()))
+    {
         return {};
+    }
 
     const lt::file_storage& files = getFileStorage(*m_nativeInfo);
     const auto fileSize = files.file_size(m_nativeIndexes[fileIndex]);
@@ -281,14 +329,18 @@ TorrentInfo::PieceRange TorrentInfo::filePieces(const int fileIndex) const
     const int endIdx = ((fileOffset + fileSize - 1) / pieceLength());
 
     if (fileSize <= 0)
+    {
         return { beginIdx, 0 };
+    }
     return makeInterval(beginIdx, endIdx);
 }
 
 bool TorrentInfo::matchesInfoHash(const InfoHash& otherInfoHash) const
 {
     if (!isValid())
+    {
         return false;
+    }
 
     const InfoHash thisInfoHash = infoHash();
 
@@ -303,10 +355,14 @@ bool TorrentInfo::matchesInfoHash(const InfoHash& otherInfoHash) const
     }
 
     if (!thisInfoHash.v1().isValid() && otherInfoHash.v1().isValid())
+    {
         return false;
+    }
 
     if (!thisInfoHash.v2().isValid() && otherInfoHash.v2().isValid())
+    {
         return false;
+    }
 
     return true;
 }
@@ -318,7 +374,9 @@ int TorrentInfo::fileIndex(const Path& filePath) const
     for (int i = 0; i < filesCount(); ++i)
     {
         if (filePath == this->filePath(i))
+        {
             return i;
+        }
     }
 
     return -1;
@@ -327,7 +385,9 @@ int TorrentInfo::fileIndex(const Path& filePath) const
 std::shared_ptr<lt::torrent_info> TorrentInfo::nativeInfo() const
 {
     if (!isValid())
+    {
         return nullptr;
+    }
 
     return std::make_shared<lt::torrent_info>(*m_nativeInfo);
 }

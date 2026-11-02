@@ -238,7 +238,9 @@ private:
         if (rangeRequest)
         {
             if (!initializeRangeRequest(*rangeRequest, file, remainingSize, offset))
+            {
                 return;
+            }
         }
 
         const Http::ResponseStatus responseStatus = rangeRequest
@@ -252,7 +254,9 @@ private:
 
         const QByteArray headData = serializeResponseHead(responseStatus, m_responseHeaders);
         if (m_request.method == HEADER_REQUEST_METHOD_HEAD)
+        {
             remainingSize = 0;
+        }
         m_dataPipe->write(headData, (remainingSize == 0));
 
         while ((remainingSize > 0) && !isInterruptionRequested())
@@ -304,8 +308,10 @@ Http::AsyncFileSender::State Http::AsyncFileSender::state() const
 void Http::AsyncFileSender::run()
 {
     Q_ASSERT(m_state == State::Ready);
-    if (m_state != State::Ready) [[unlikely]]
-        return;
+    if (m_state != State::Ready)
+    {
+        [[unlikely]] return;
+    }
 
     m_dataPipe = std::make_shared<DataPipe>();
     m_worker = new Worker(m_filePath, m_request, m_headers, m_dataPipe);
@@ -327,12 +333,16 @@ void Http::AsyncFileSender::run()
 void Http::AsyncFileSender::processNextData()
 {
     if (m_state != State::Running)
+    {
         return;
+    }
 
     const qint64 bufferedDataSize = m_socket->bytesToWrite();
     const qint64 allowedDataSizeToWrite = adjustDataSize(MAX_BUFFER_SIZE - bufferedDataSize);
     if (allowedDataSizeToWrite <= 0)
+    {
         return;
+    }
 
     const auto [dataToWrite, atEnd] = m_dataPipe->read(allowedDataSizeToWrite);
     if (!dataToWrite.isEmpty())
@@ -349,18 +359,24 @@ void Http::AsyncFileSender::processNextData()
 
         const qint64 bytesToWrite = m_socket->bytesToWrite();
         if (bytesToWrite >= MAX_BUFFER_SIZE)
+        {
             m_socket->flush();
+        }
     }
 
     if (atEnd)
+    {
         finish();
+    }
 }
 
 void Http::AsyncFileSender::fail()
 {
     Q_ASSERT(m_state == State::Running);
-    if (m_state != State::Running) [[unlikely]]
-        return;
+    if (m_state != State::Running)
+    {
+        [[unlikely]] return;
+    }
 
     m_state = State::Failed;
     emit failed();
@@ -369,8 +385,10 @@ void Http::AsyncFileSender::fail()
 void Http::AsyncFileSender::finish()
 {
     Q_ASSERT(m_state == State::Running);
-    if (m_state != State::Running) [[unlikely]]
-        return;
+    if (m_state != State::Running)
+    {
+        [[unlikely]] return;
+    }
 
     m_state = State::Finished;
     emit finished();

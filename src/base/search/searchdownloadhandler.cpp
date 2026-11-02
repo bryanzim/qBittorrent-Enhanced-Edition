@@ -74,7 +74,9 @@ void SearchDownloadHandler::downloadProcessFinished(const int exitcode)
         const QString line = QString::fromUtf8(m_downloadProcess->readAllStandardOutput()).trimmed();
         const QList<QStringView> parts = QStringView(line).split(u' ');
         if (parts.size() == 2)
+        {
             path = parts[0].toString();
+        }
     }
 
     emit downloadFinished(path, errMsg);

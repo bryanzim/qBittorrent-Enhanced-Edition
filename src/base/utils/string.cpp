@@ -99,7 +99,9 @@ QStringList Utils::String::splitCommand(const QString& command)
     }
 
     if (!tmp.isEmpty())
+    {
         ret.append(tmp);
+    }
 
     return ret;
 }
@@ -107,9 +109,13 @@ QStringList Utils::String::splitCommand(const QString& command)
 std::optional<bool> Utils::String::parseBool(const QString& string)
 {
     if (string.compare(u"true", Qt::CaseInsensitive) == 0)
+    {
         return true;
+    }
     if (string.compare(u"false", Qt::CaseInsensitive) == 0)
+    {
         return false;
+    }
 
     return std::nullopt;
 }
@@ -119,7 +125,9 @@ std::optional<int> Utils::String::parseInt(const QString& string)
     bool ok = false;
     const int result = string.toInt(&ok);
     if (ok)
+    {
         return result;
+    }
 
     return std::nullopt;
 }
@@ -129,7 +137,9 @@ std::optional<double> Utils::String::parseDouble(const QString& string)
     bool ok = false;
     const double result = string.toDouble(&ok);
     if (ok)
+    {
         return result;
+    }
 
     return std::nullopt;
 }

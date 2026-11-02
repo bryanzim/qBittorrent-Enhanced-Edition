@@ -36,9 +36,9 @@ namespace Http
     struct Environment
     {
         QHostAddress localAddress;
-        quint16 localPort = 0;
+        quint16 localPort = 0U;
 
         QHostAddress clientAddress;
-        quint16 clientPort = 0;
+        quint16 clientPort = 0U;
     };
 }

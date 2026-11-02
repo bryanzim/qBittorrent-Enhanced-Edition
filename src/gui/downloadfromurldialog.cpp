@@ -81,10 +81,14 @@ DownloadFromURLDialog::DownloadFromURLDialog(QWidget* parent)
         url = url.trimmed();
 
         if (url.isEmpty())
+        {
             continue;
+        }
 
         if (const QString urlString = url.toString(); isDownloadable(urlString))
+        {
             urls << urlString;
+        }
     }
 
     if (!urls.isEmpty())
@@ -95,7 +99,9 @@ DownloadFromURLDialog::DownloadFromURLDialog(QWidget* parent)
     }
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 DownloadFromURLDialog::~DownloadFromURLDialog()
@@ -119,7 +125,9 @@ void DownloadFromURLDialog::onSubmit()
         url = url.trimmed();
 
         if (url.isEmpty())
+        {
             continue;
+        }
 
         if (!uniqueURLs.contains(url))
         {

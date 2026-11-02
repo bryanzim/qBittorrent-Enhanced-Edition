@@ -75,7 +75,9 @@ void UIThemeManager::freeInstance()
 void UIThemeManager::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new UIThemeManager;
+    }
 }
 
 UIThemeManager::UIThemeManager()
@@ -98,7 +100,9 @@ UIThemeManager::UIThemeManager()
     if (const QString styleName = Preferences::instance()->getStyle(); styleName.compare(u"system", Qt::CaseInsensitive) != 0)
     {
         if (!QApplication::setStyle(styleName))
+        {
             LogMsg(tr("Set app style failed. Unknown style: \"%1\"").arg(styleName), Log::WARNING);
+        }
     }
 
 #ifdef QBT_HAS_COLORSCHEME_OPTION
@@ -114,9 +118,13 @@ UIThemeManager::UIThemeManager()
         if (themePath.hasExtension(u".qbtheme"_s))
         {
             if (QResource::registerResource(themePath.data(), u"/uitheme"_s))
+            {
                 m_themeSource = std::make_unique<QRCThemeSource>();
+            }
             else
+            {
                 LogMsg(tr("Failed to load UI theme from file: \"%1\"").arg(themePath.toString()), Log::WARNING);
+            }
         }
         else if (themePath.filename() == CONFIG_FILE_NAME)
         {
@@ -125,7 +133,9 @@ UIThemeManager::UIThemeManager()
     }
 
     if (!m_themeSource)
+    {
         m_themeSource = std::make_unique<DefaultThemeSource>();
+    }
 
     if (m_useCustomTheme)
     {
@@ -148,7 +158,9 @@ ColorScheme UIThemeManager::colorScheme() const
 void UIThemeManager::setColorScheme(const ColorScheme value)
 {
     if (value == colorScheme())
+    {
         return;
+    }
 
     m_colorSchemeSetting = value;
 }
@@ -179,7 +191,9 @@ TrayIconStyle UIThemeManager::trayIconStyle() const
 void UIThemeManager::setTrayIconStyle(const TrayIconStyle value)
 {
     if (value == trayIconStyle())
+    {
         return;
+    }
 
     m_trayIconStyleSetting = value;
 }
@@ -203,7 +217,9 @@ QIcon UIThemeManager::getIcon(const QString& iconId, [[maybe_unused]] const QStr
 
     const auto iter = icons.find(iconId);
     if (iter != icons.end())
+    {
         return *iter;
+    }
 
 #if (defined(Q_OS_UNIX) && !defined(Q_OS_MACOS))
     // Don't cache system icons because users might change them at run time
@@ -255,12 +271,16 @@ QIcon UIThemeManager::getSystrayIcon() const
 QIcon UIThemeManager::getFlagIcon(const QString& countryIsoCode) const
 {
     if (countryIsoCode.isEmpty())
+    {
         return {};
+    }
 
     const QString key = countryIsoCode.toLower();
     const auto iter = m_flags.constFind(key);
     if (iter != m_flags.cend())
+    {
         return *iter;
+    }
 
     const QIcon icon{ u":/icons/flags/" + key + u".svg" };
     m_flags[key] = icon;
@@ -301,7 +321,9 @@ void UIThemeManager::updateSystemColorMode()
     HKEY hkPersonalize = nullptr;
     const LSTATUS status = ::RegOpenKeyExW(hkRoot, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, samDesired, &hkPersonalize);
     if (status != ERROR_SUCCESS)
+    {
         return;
+    }
 
     [[maybe_unused]] const auto hkPersonalizeGuard = qScopeGuard([&hkPersonalize] { ::RegCloseKey(hkPersonalize); });
 
@@ -359,7 +381,9 @@ void UIThemeManager::applyPalette() const
         // For backward compatibility, the palette color overrides are read from the section of the "light mode" colors
         const QColor newColor = m_themeSource->getColor(colorDescriptor.id, ColorMode::Light);
         if (newColor.isValid())
+        {
             palette.setColor(colorDescriptor.colorGroup, colorDescriptor.colorRole, newColor);
+        }
     }
 
     qApp->setPalette(palette);

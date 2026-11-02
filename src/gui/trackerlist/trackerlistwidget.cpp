@@ -88,14 +88,18 @@ TrackerListWidget::TrackerListWidget(QWidget* parent)
 
     // Ensure that at least one column is visible at all times
     if (visibleColumnsCount() == 0)
+    {
         setColumnHidden(TrackerListModel::COL_URL, false);
+    }
     // To also mitigate the above issue, we have to resize each column when
     // its size is 0, because explicitly 'showing' the column isn't enough
     // in the above scenario.
     for (int i = 0; i < TrackerListModel::COL_COUNT; ++i)
     {
         if ((columnWidth(i) <= 0) && !isColumnHidden(i))
+        {
             resizeColumnToContents(i);
+        }
     }
 
     connect(this, &QWidget::customContextMenuRequested, this, &TrackerListWidget::showTrackerListMenu);
@@ -144,12 +148,16 @@ void TrackerListWidget::decreaseSelectedTrackerTiers()
 {
     const QModelIndexList trackerIndexes = getSelectedTrackerRows();
     if (trackerIndexes.isEmpty())
+    {
         return;
+    }
 
     QSet<QString> trackerURLs;
     trackerURLs.reserve(trackerIndexes.size());
     for (const QModelIndex& index : trackerIndexes)
+    {
         trackerURLs.insert(index.siblingAtColumn(TrackerListModel::COL_URL).data().toString());
+    }
 
     const QList<BitTorrent::TrackerEntryStatus> trackers = m_model->torrent()->trackers();
     QList<BitTorrent::TrackerEntry> adjustedTrackers;
@@ -164,7 +172,9 @@ void TrackerListWidget::decreaseSelectedTrackerTiers()
         if (trackerURLs.contains(entry.url))
         {
             if (entry.tier > 0)
+            {
                 --entry.tier;
+            }
         }
         adjustedTrackers.append(entry);
     }
@@ -176,12 +186,16 @@ void TrackerListWidget::increaseSelectedTrackerTiers()
 {
     const QModelIndexList trackerIndexes = getSelectedTrackerRows();
     if (trackerIndexes.isEmpty())
+    {
         return;
+    }
 
     QSet<QString> trackerURLs;
     trackerURLs.reserve(trackerIndexes.size());
     for (const QModelIndex& index : trackerIndexes)
+    {
         trackerURLs.insert(index.siblingAtColumn(TrackerListModel::COL_URL).data().toString());
+    }
 
     const QList<BitTorrent::TrackerEntryStatus> trackers = m_model->torrent()->trackers();
     QList<BitTorrent::TrackerEntry> adjustedTrackers;
@@ -196,7 +210,9 @@ void TrackerListWidget::increaseSelectedTrackerTiers()
         if (trackerURLs.contains(entry.url))
         {
             if (entry.tier < std::numeric_limits<decltype(entry.tier)>::max())
+            {
                 ++entry.tier;
+            }
         }
         adjustedTrackers.append(entry);
     }
@@ -207,7 +223,9 @@ void TrackerListWidget::increaseSelectedTrackerTiers()
 void TrackerListWidget::openAddTrackersDialog()
 {
     if (!torrent())
+    {
         return;
+    }
 
     auto* dialog = new TrackersAdditionDialog(this, torrent());
     dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -217,11 +235,15 @@ void TrackerListWidget::openAddTrackersDialog()
 void TrackerListWidget::copyTrackerUrl()
 {
     if (!torrent())
+    {
         return;
+    }
 
     const QModelIndexList selectedTrackerIndexes = getSelectedTrackerRows();
     if (selectedTrackerIndexes.isEmpty())
+    {
         return;
+    }
 
     QStringList urlsToCopy;
     for (const QModelIndex& index : selectedTrackerIndexes)
@@ -238,11 +260,15 @@ void TrackerListWidget::copyTrackerUrl()
 void TrackerListWidget::deleteSelectedTrackers()
 {
     if (!torrent())
+    {
         return;
+    }
 
     const QModelIndexList selectedTrackerIndexes = getSelectedTrackerRows();
     if (selectedTrackerIndexes.isEmpty())
+    {
         return;
+    }
 
     QStringList urlsToRemove;
     for (const QModelIndex& index : selectedTrackerIndexes)
@@ -257,11 +283,15 @@ void TrackerListWidget::deleteSelectedTrackers()
 void TrackerListWidget::editSelectedTracker()
 {
     if (!torrent())
+    {
         return;
+    }
 
     const QModelIndexList selectedTrackerIndexes = getSelectedTrackerRows();
     if (selectedTrackerIndexes.isEmpty())
+    {
         return;
+    }
 
     // During multi-select only process item selected last
     const QUrl trackerURL = selectedTrackerIndexes.last().siblingAtColumn(TrackerListModel::COL_URL).data().toString();
@@ -269,7 +299,9 @@ void TrackerListWidget::editSelectedTracker()
     bool ok = false;
     const QUrl newTrackerURL = AutoExpandableDialog::getText(this, tr("Tracker editing"), tr("Tracker URL:"), QLineEdit::Normal, trackerURL.toString(), &ok).trimmed();
     if (!ok)
+    {
         return;
+    }
 
     if (!newTrackerURL.isValid())
     {
@@ -278,7 +310,9 @@ void TrackerListWidget::editSelectedTracker()
     }
 
     if (newTrackerURL == trackerURL)
+    {
         return;
+    }
 
     const QList<BitTorrent::TrackerEntryStatus> trackers = torrent()->trackers();
     QList<BitTorrent::TrackerEntry> entries;
@@ -314,23 +348,31 @@ void TrackerListWidget::editSelectedTracker()
 void TrackerListWidget::reannounceSelected()
 {
     if (!torrent())
+    {
         return;
+    }
 
     const auto& selectedItemIndexes = selectedIndexes();
     if (selectedItemIndexes.isEmpty())
+    {
         return;
+    }
 
     QSet<QString> trackerURLs;
     for (const QModelIndex& index : selectedItemIndexes)
     {
         if (index.parent().isValid())
+        {
             continue;
+        }
 
         if ((index.row() < TrackerListModel::STICKY_ROW_COUNT))
         {
             // DHT case
             if (index.row() == TrackerListModel::ROW_DHT)
+            {
                 torrent()->forceDHTAnnounce();
+            }
 
             continue;
         }
@@ -343,14 +385,18 @@ void TrackerListWidget::reannounceSelected()
     {
         const BitTorrent::TrackerEntryStatus& status = trackers.at(i);
         if (trackerURLs.contains(status.url))
+        {
             torrent()->forceReannounce(i);
+        }
     }
 }
 
 void TrackerListWidget::showTrackerListMenu()
 {
     if (!torrent())
+    {
         return;
+    }
 
     QMenu* menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
@@ -402,7 +448,9 @@ int TrackerListWidget::visibleColumnsCount() const
     for (int i = 0, iMax = header()->count(); i < iMax; ++i)
     {
         if (!isColumnHidden(i))
+        {
             ++count;
+        }
     }
 
     return count;
@@ -419,12 +467,16 @@ void TrackerListWidget::displayColumnHeaderMenu()
     {
         QAction* action = menu->addAction(model()->headerData(i, Qt::Horizontal).toString(), this, [this, i](const bool checked) {
             if (!checked && (visibleColumnsCount() <= 1))
+            {
                 return;
+            }
 
             setColumnHidden(i, !checked);
 
             if (checked && (columnWidth(i) <= 5))
+            {
                 resizeColumnToContents(i);
+            }
 
             saveSettings();
         });
@@ -437,7 +489,9 @@ void TrackerListWidget::displayColumnHeaderMenu()
         for (int i = 0, count = header()->count(); i < count; ++i)
         {
             if (!isColumnHidden(i))
+            {
                 resizeColumnToContents(i);
+            }
         }
         saveSettings();
     });

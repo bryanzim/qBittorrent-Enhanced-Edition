@@ -47,7 +47,7 @@ public:
     ~StatusFilterWidget() override;
 
 private:
-    QSize sizeHint() const override;
+    [[nodiscard]] QSize sizeHint() const override;
 
     // These 4 methods are virtual slots in the base class.
     // No need to redeclare them here as slots.

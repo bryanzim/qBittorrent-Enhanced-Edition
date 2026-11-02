@@ -80,26 +80,26 @@ namespace RSS
 
         static AutoDownloader* instance();
 
-        bool isProcessingEnabled() const;
+        [[nodiscard]] bool isProcessingEnabled() const;
         void setProcessingEnabled(bool enabled);
 
-        QStringList smartEpisodeFilters() const;
+        [[nodiscard]] QStringList smartEpisodeFilters() const;
         void setSmartEpisodeFilters(const QStringList& filters);
-        QRegularExpression smartEpisodeRegex() const;
+        [[nodiscard]] QRegularExpression smartEpisodeRegex() const;
 
-        bool downloadRepacks() const;
+        [[nodiscard]] bool downloadRepacks() const;
         void setDownloadRepacks(bool enabled);
 
-        bool hasRule(const QString& ruleName) const;
-        AutoDownloadRule ruleByName(const QString& ruleName) const;
-        QList<AutoDownloadRule> rules() const;
+        [[nodiscard]] bool hasRule(const QString& ruleName) const;
+        [[nodiscard]] AutoDownloadRule ruleByName(const QString& ruleName) const;
+        [[nodiscard]] QList<AutoDownloadRule> rules() const;
 
         void setRule(const AutoDownloadRule& rule);
         bool cloneRule(const QString& ruleName, const QString& cloneRuleName);
         bool renameRule(const QString& ruleName, const QString& newRuleName);
         void removeRule(const QString& ruleName);
 
-        QByteArray exportRules(RulesFileFormat format = RulesFileFormat::JSON) const;
+        [[nodiscard]] QByteArray exportRules(RulesFileFormat format = RulesFileFormat::JSON) const;
         void importRules(const QByteArray& data, RulesFileFormat format = RulesFileFormat::JSON);
 
     signals:
@@ -129,9 +129,9 @@ namespace RSS
         void loadRulesLegacy();
         void store();
         void storeDeferred();
-        QByteArray exportRulesToJSONFormat() const;
+        [[nodiscard]] QByteArray exportRulesToJSONFormat() const;
         void importRulesFromJSONFormat(const QByteArray& data);
-        QByteArray exportRulesToLegacyFormat() const;
+        [[nodiscard]] QByteArray exportRulesToLegacyFormat() const;
         void importRulesFromLegacyFormat(const QByteArray& data);
 
         static QPointer<AutoDownloader> m_instance;

@@ -35,12 +35,16 @@ using namespace Qt::StringLiterals;
 std::optional<Http::RangeRequest> Http::parseRangeHeader(const QStringView rangeHeader)
 {
     if (rangeHeader.isEmpty())
+    {
         return std::nullopt;
+    }
 
     const QRegularExpression rangeHeaderPattern{ u"^bytes=(((?<rangestart>\\d+)-(?<rangeend>\\d*))|(-(?<suffixlength>\\d+)))$"_s };
     const QRegularExpressionMatch match = rangeHeaderPattern.matchView(rangeHeader);
     if (!match.hasMatch())
+    {
         return std::nullopt;
+    }
 
     if (match.hasCaptured(u"rangestart"))
     {
@@ -50,15 +54,21 @@ std::optional<Http::RangeRequest> Http::parseRangeHeader(const QStringView range
         bool isValidNumber = false;
         const qint64 start = startStr.toLongLong(&isValidNumber);
         if (!isValidNumber)
+        {
             return std::nullopt;
+        }
 
         isValidNumber = true;
         const qint64 end = endStr.isEmpty() ? -1 : endStr.toLongLong(&isValidNumber);
         if (!isValidNumber)
+        {
             return std::nullopt;
+        }
 
         if ((end != -1) && (end < start))
+        {
             return std::nullopt;
+        }
 
         return Range{ .start = start, .end = end };
     }
@@ -68,7 +78,9 @@ std::optional<Http::RangeRequest> Http::parseRangeHeader(const QStringView range
     bool isValidNumber = false;
     const qint64 suffixlength = suffixlengthStr.toLongLong(&isValidNumber);
     if (!isValidNumber || (suffixlength <= 0))
+    {
         return std::nullopt;
+    }
 
     return suffixlength;
 }

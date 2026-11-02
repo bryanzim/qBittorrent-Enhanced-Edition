@@ -47,7 +47,7 @@ signals:
     void triggered(bool checked) const;
 
 private:
-    QSize minimumSizeHint() const override;
+    [[nodiscard]] QSize minimumSizeHint() const override;
 
     void paintEvent(QPaintEvent*) override;
     void mouseReleaseEvent(QMouseEvent* event) override;

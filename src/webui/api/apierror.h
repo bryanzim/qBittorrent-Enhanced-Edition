@@ -45,7 +45,7 @@ class APIError : public RuntimeError
 public:
     explicit APIError(APIErrorType type, const QString& message = {});
 
-    APIErrorType type() const;
+    [[nodiscard]] APIErrorType type() const;
 
 private:
     APIErrorType m_type;

@@ -73,17 +73,25 @@ void PowerManagement::setActivityState(const ActivityState state)
 void PowerManagement::setBusy()
 {
     if (m_state == ActivityState::Busy)
+    {
         return;
+    }
 
     if (m_inhibitor->requestBusy())
+    {
         m_state = ActivityState::Busy;
+    }
 }
 
 void PowerManagement::setIdle()
 {
     if (m_state == ActivityState::Idle)
+    {
         return;
+    }
 
     if (m_inhibitor->requestIdle())
+    {
         m_state = ActivityState::Idle;
+    }
 }

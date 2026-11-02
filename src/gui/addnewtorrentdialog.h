@@ -60,7 +60,7 @@ public:
     explicit AddNewTorrentDialog(const BitTorrent::TorrentDescriptor& torrentDescr, const BitTorrent::AddTorrentParams& inParams, QWidget* parent);
     ~AddNewTorrentDialog() override;
 
-    bool isDoNotDeleteTorrentChecked() const;
+    [[nodiscard]] bool isDoNotDeleteTorrentChecked() const;
     void updateMetadata(const BitTorrent::TorrentInfo& metadata);
 
 signals:

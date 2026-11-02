@@ -148,13 +148,17 @@ AutomatedRssDownloader::AutomatedRssDownloader(QWidget* parent)
 
     m_ui->ruleList->blockSignals(true);
     for (const RSS::AutoDownloadRule& rule : asConst(RSS::AutoDownloader::instance()->rules()))
+    {
         createRuleItem(rule);
+    }
     m_ui->ruleList->blockSignals(false);
 
     updateRuleDefinitionBox();
 
     if (RSS::AutoDownloader::instance()->isProcessingEnabled())
+    {
         m_ui->labelWarn->hide();
+    }
 
     connect(RSS::AutoDownloader::instance(), &RSS::AutoDownloader::processingStateChanged, this, &AutomatedRssDownloader::handleProcessingStateChanged);
 }
@@ -172,13 +176,19 @@ AutomatedRssDownloader::~AutomatedRssDownloader()
 void AutomatedRssDownloader::loadSettings()
 {
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 
     if (const QByteArray mainSplitterSize = m_storeMainSplitterState; !mainSplitterSize.isEmpty())
+    {
         m_ui->mainSplitter->restoreState(mainSplitterSize);
+    }
 
     if (const QByteArray ruleDefSplitterSize = m_storeRuleDefSplitterState; !ruleDefSplitterSize.isEmpty())
+    {
         m_ui->ruleDefSplitter->restoreState(ruleDefSplitterSize);
+    }
 }
 
 void AutomatedRssDownloader::saveSettings()
@@ -217,11 +227,15 @@ void AutomatedRssDownloader::updateFeedList()
     QList<QListWidgetItem*> selection;
 
     if (m_currentRuleItem)
+    {
         selection << m_currentRuleItem;
+    }
     else
+    {
         selection = m_ui->ruleList->selectedItems();
+    }
 
-    bool enable = !selection.isEmpty();
+    bool const enable = !selection.isEmpty();
 
     for (int i = 0; i < m_ui->listFeeds->count(); ++i)
     {
@@ -236,17 +250,27 @@ void AutomatedRssDownloader::updateFeedList()
         {
             const auto rule = RSS::AutoDownloader::instance()->ruleByName(ruleItem->text());
             if (rule.feedURLs().contains(feedURL))
+            {
                 anyEnabled = true;
+            }
             else
+            {
                 allEnabled = false;
+            }
         }
 
         if (anyEnabled && allEnabled)
+        {
             item->setCheckState(Qt::Checked);
+        }
         else if (anyEnabled)
+        {
             item->setCheckState(Qt::PartiallyChecked);
+        }
         else
+        {
             item->setCheckState(Qt::Unchecked);
+        }
     }
 
     m_ui->listFeeds->sortItems();
@@ -290,9 +314,13 @@ void AutomatedRssDownloader::updateRuleDefinitionBox()
         m_ui->lineContains->setText(m_currentRule.mustContain());
         m_ui->lineNotContains->setText(m_currentRule.mustNotContain());
         if (!m_currentRule.episodeFilter().isEmpty())
+        {
             m_ui->lineEFilter->setText(m_currentRule.episodeFilter());
+        }
         else
+        {
             m_ui->lineEFilter->clear();
+        }
         m_ui->checkRegex->blockSignals(true);
         m_ui->checkRegex->setChecked(m_currentRule.useRegex());
         m_ui->checkRegex->blockSignals(false);
@@ -300,12 +328,16 @@ void AutomatedRssDownloader::updateRuleDefinitionBox()
         m_ui->checkSmart->setChecked(m_currentRule.useSmartFilter());
         m_ui->checkSmart->blockSignals(false);
         m_ui->spinIgnorePeriod->setValue(m_currentRule.ignoreDays());
-        QDateTime dateTime = m_currentRule.lastMatch();
+        QDateTime const dateTime = m_currentRule.lastMatch();
         QString lMatch;
         if (dateTime.isValid())
+        {
             lMatch = tr("Last Match: %1 days ago").arg(dateTime.daysTo(QDateTime::currentDateTime()));
+        }
         else
+        {
             lMatch = tr("Last Match: Unknown");
+        }
         m_ui->lblLastMatch->setText(lMatch);
         updateMustLineValidity();
         updateMustNotLineValidity();
@@ -344,7 +376,9 @@ void AutomatedRssDownloader::clearRuleDefinitionBox()
 void AutomatedRssDownloader::updateEditedRule()
 {
     if (!m_currentRuleItem || !m_ui->ruleScrollArea->isEnabled())
+    {
         return;
+    }
 
     m_currentRule.setEnabled(m_currentRuleItem->checkState() != Qt::Unchecked);
     m_currentRule.setPriority(m_ui->prioritySpinBox->value());
@@ -361,7 +395,9 @@ void AutomatedRssDownloader::updateEditedRule()
 void AutomatedRssDownloader::saveEditedRule()
 {
     if (!m_currentRuleItem || !m_ui->ruleScrollArea->isEnabled())
+    {
         return;
+    }
 
     updateEditedRule();
     RSS::AutoDownloader::instance()->setRule(m_currentRule);
@@ -375,7 +411,9 @@ void AutomatedRssDownloader::onAddRuleBtnClicked()
     const QString ruleName = AutoExpandableDialog::getText(
         this, tr("New rule name"), tr("Please type the name of the new download rule."));
     if (ruleName.isEmpty())
+    {
         return;
+    }
 
     // Check if this rule name already exists
     if (RSS::AutoDownloader::instance()->hasRule(ruleName))
@@ -394,7 +432,9 @@ void AutomatedRssDownloader::onRemoveRuleBtnClicked()
 {
     const QList<QListWidgetItem*> selection = m_ui->ruleList->selectedItems();
     if (selection.isEmpty())
+    {
         return;
+    }
 
     // Ask for confirmation
     const QString confirmText = ((selection.count() == 1)
@@ -402,10 +442,14 @@ void AutomatedRssDownloader::onRemoveRuleBtnClicked()
                                            .arg(selection.first()->text())
                                      : tr("Are you sure you want to remove the selected download rules?"));
     if (QMessageBox::question(this, tr("Rule deletion confirmation"), confirmText, QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
+    {
         return;
+    }
 
     for (const QListWidgetItem* item : selection)
+    {
         RSS::AutoDownloader::instance()->removeRule(item->text());
+    }
 }
 
 void AutomatedRssDownloader::onRenameRuleBtnClicked()
@@ -426,7 +470,9 @@ void AutomatedRssDownloader::onExportBtnClicked()
         this, tr("Export RSS rules"), QDir::homePath(), u"%1;;%2"_s.arg(m_formatFilterJSON, m_formatFilterLegacy), &selectedFilter) };
 
     if (path.isEmpty())
+    {
         return;
+    }
 
     const RSS::AutoDownloader::RulesFileFormat format{
         (selectedFilter == m_formatFilterJSON)
@@ -437,12 +483,16 @@ void AutomatedRssDownloader::onExportBtnClicked()
     if (format == RSS::AutoDownloader::RulesFileFormat::JSON)
     {
         if (!path.hasExtension(EXT_JSON))
+        {
             path += EXT_JSON;
+        }
     }
     else
     {
         if (!path.hasExtension(EXT_LEGACY))
+        {
             path += EXT_LEGACY;
+        }
     }
 
     const QByteArray rules = RSS::AutoDownloader::instance()->exportRules(format);
@@ -464,7 +514,9 @@ void AutomatedRssDownloader::onImportBtnClicked()
     if (!readResult)
     {
         if (readResult.error().status == Utils::IO::ReadError::NotExist)
+        {
             return;
+        }
 
         QMessageBox::critical(this, tr("Import error"), tr("Failed to read the file. %1").arg(readResult.error().message));
         return;
@@ -521,7 +573,9 @@ void AutomatedRssDownloader::cloneSelectedRule()
 {
     const QList<QListWidgetItem*> selection = m_ui->ruleList->selectedItems();
     if (selection.isEmpty())
+    {
         return;
+    }
 
     auto* autoDownloader = RSS::AutoDownloader::instance();
     QListWidgetItem* item = selection.first();
@@ -531,7 +585,9 @@ void AutomatedRssDownloader::cloneSelectedRule()
                                       this, tr("Rule cloning"), tr("Please type the name for the clone of the download rule."), QLineEdit::Normal, item->text())
                                       .trimmed();
         if (cloneName.isEmpty())
+        {
             return;
+        }
 
         if (!autoDownloader->hasRule(cloneName))
         {
@@ -551,7 +607,9 @@ void AutomatedRssDownloader::renameSelectedRule()
 {
     const QList<QListWidgetItem*> selection = m_ui->ruleList->selectedItems();
     if (selection.isEmpty())
+    {
         return;
+    }
 
     QListWidgetItem* item = selection.first();
     forever
@@ -560,7 +618,9 @@ void AutomatedRssDownloader::renameSelectedRule()
             this, tr("Rule renaming"), tr("Please type the new rule name"), QLineEdit::Normal, item->text());
         newName = newName.trimmed();
         if (newName.isEmpty())
+        {
             return;
+        }
 
         if (RSS::AutoDownloader::instance()->hasRule(newName))
         {
@@ -605,15 +665,23 @@ void AutomatedRssDownloader::handleFeedCheckStateChange(QListWidgetItem* feedIte
                                           : RSS::AutoDownloader::instance()->ruleByName(ruleItem->text()));
         QStringList affectedFeeds = rule.feedURLs();
         if ((feedItem->checkState() == Qt::Checked) && !affectedFeeds.contains(feedURL))
+        {
             affectedFeeds << feedURL;
+        }
         else if ((feedItem->checkState() == Qt::Unchecked) && affectedFeeds.contains(feedURL))
+        {
             affectedFeeds.removeOne(feedURL);
+        }
 
         rule.setFeedURLs(affectedFeeds);
         if (ruleItem != m_currentRuleItem)
+        {
             RSS::AutoDownloader::instance()->setRule(rule);
+        }
         else
+        {
             m_currentRule = rule;
+        }
     }
 
     handleRuleDefinitionChanged();
@@ -625,21 +693,29 @@ void AutomatedRssDownloader::updateMatchingArticles()
 
     for (const QListWidgetItem* ruleItem : asConst(m_ui->ruleList->selectedItems()))
     {
-        RSS::AutoDownloadRule rule = (ruleItem == m_currentRuleItem
-                                          ? m_currentRule
-                                          : RSS::AutoDownloader::instance()->ruleByName(ruleItem->text()));
+        RSS::AutoDownloadRule const rule = (ruleItem == m_currentRuleItem
+                                                ? m_currentRule
+                                                : RSS::AutoDownloader::instance()->ruleByName(ruleItem->text()));
         for (const QString& feedURL : asConst(rule.feedURLs()))
         {
             auto* feed = RSS::Session::instance()->feedByURL(feedURL);
             if (!feed)
+            {
                 continue; // feed doesn't exist
+            }
 
             QStringList matchingArticles;
             for (const auto* article : asConst(feed->articles()))
+            {
                 if (rule.matches(article->data()))
+                {
                     matchingArticles << article->title();
+                }
+            }
             if (!matchingArticles.isEmpty())
+            {
                 addFeedArticlesToTree(feed, matchingArticles);
+            }
         }
     }
 
@@ -722,7 +798,7 @@ void AutomatedRssDownloader::updateFieldsToolTips(bool regex)
 void AutomatedRssDownloader::updateMustLineValidity()
 {
     const QString text = m_ui->lineContains->text();
-    bool isRegex = m_ui->checkRegex->isChecked();
+    bool const isRegex = m_ui->checkRegex->isChecked();
     bool valid = true;
     QString error;
 
@@ -736,16 +812,20 @@ void AutomatedRssDownloader::updateMustLineValidity()
         else
         {
             for (const QString& token : asConst(text.split(u'|')))
+            {
                 tokens << Utils::String::wildcardToRegexPattern(token);
+            }
         }
 
         for (const QString& token : asConst(tokens))
         {
-            QRegularExpression reg(token, QRegularExpression::CaseInsensitiveOption);
+            QRegularExpression const reg(token, QRegularExpression::CaseInsensitiveOption);
             if (!reg.isValid())
             {
                 if (isRegex)
+                {
                     error = tr("Position %1: %2").arg(reg.patternErrorOffset()).arg(reg.errorString());
+                }
                 valid = false;
                 break;
             }
@@ -769,7 +849,7 @@ void AutomatedRssDownloader::updateMustLineValidity()
 void AutomatedRssDownloader::updateMustNotLineValidity()
 {
     const QString text = m_ui->lineNotContains->text();
-    bool isRegex = m_ui->checkRegex->isChecked();
+    bool const isRegex = m_ui->checkRegex->isChecked();
     bool valid = true;
     QString error;
 
@@ -783,16 +863,20 @@ void AutomatedRssDownloader::updateMustNotLineValidity()
         else
         {
             for (const QString& token : asConst(text.split(u'|')))
+            {
                 tokens << Utils::String::wildcardToRegexPattern(token);
+            }
         }
 
         for (const QString& token : asConst(tokens))
         {
-            QRegularExpression reg(token, QRegularExpression::CaseInsensitiveOption);
+            QRegularExpression const reg(token, QRegularExpression::CaseInsensitiveOption);
             if (!reg.isValid())
             {
                 if (isRegex)
+                {
                     error = tr("Position %1: %2").arg(reg.patternErrorOffset()).arg(reg.errorString());
+                }
                 valid = false;
                 break;
             }
@@ -816,7 +900,7 @@ void AutomatedRssDownloader::updateMustNotLineValidity()
 void AutomatedRssDownloader::updateEpisodeFilterValidity()
 {
     const QString text = m_ui->lineEFilter->text();
-    bool valid = text.isEmpty() || m_episodeRegex->match(text).hasMatch();
+    bool const valid = text.isEmpty() || m_episodeRegex->match(text).hasMatch();
 
     if (valid)
     {
@@ -846,7 +930,9 @@ void AutomatedRssDownloader::handleRuleRenamed(const QString& ruleName, const QS
     auto* item = m_itemsByRuleName.take(oldRuleName);
     m_itemsByRuleName.insert(ruleName, item);
     if (m_currentRule.name() == oldRuleName)
+    {
         m_currentRule.setName(ruleName);
+    }
     item->setText(ruleName);
 }
 
@@ -854,7 +940,9 @@ void AutomatedRssDownloader::handleRuleChanged(const QString& ruleName)
 {
     auto* item = m_itemsByRuleName.value(ruleName);
     if (item && (item != m_currentRuleItem))
+    {
         item->setCheckState(RSS::AutoDownloader::instance()->ruleByName(ruleName).isEnabled() ? Qt::Checked : Qt::Unchecked);
+    }
 }
 
 void AutomatedRssDownloader::handleRuleAboutToBeRemoved(const QString& ruleName)

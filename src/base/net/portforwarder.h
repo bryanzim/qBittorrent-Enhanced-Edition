@@ -45,7 +45,7 @@ namespace Net
 
         static PortForwarder* instance();
 
-        virtual bool isEnabled() const = 0;
+        [[nodiscard]] virtual bool isEnabled() const = 0;
         virtual void setEnabled(bool enabled) = 0;
 
         virtual void setPorts(const QString& profile, QSet<quint16> ports) = 0;

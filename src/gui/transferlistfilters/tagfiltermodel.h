@@ -50,14 +50,14 @@ public:
 
     static bool isSpecialItem(const QModelIndex& index);
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
-    int rowCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex& index) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    [[nodiscard]] QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
 
-    QModelIndex index(const Tag& tag) const;
-    Tag tag(const QModelIndex& index) const;
+    [[nodiscard]] QModelIndex index(const Tag& tag) const;
+    [[nodiscard]] Tag tag(const QModelIndex& index) const;
 
 private slots:
     void tagAdded(const Tag& tag);
@@ -71,8 +71,8 @@ private:
     void populate();
     void addToModel(const Tag& tag, int count);
     void removeFromModel(int row);
-    bool isValidRow(int row) const;
-    int findRow(const Tag& tag) const;
+    [[nodiscard]] bool isValidRow(int row) const;
+    [[nodiscard]] int findRow(const Tag& tag) const;
     TagModelItem* findItem(const Tag& tag);
     QList<TagModelItem*> findItems(const TagSet& tags);
     TagModelItem* allTagsItem();

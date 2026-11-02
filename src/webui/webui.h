@@ -54,12 +54,12 @@ class WebUI final : public ApplicationComponent<QObject>
 public:
     explicit WebUI(IApplication* app, const QByteArray& tempPasswordHash = {});
 
-    bool isEnabled() const;
-    bool isErrored() const;
-    QString errorMessage() const;
-    bool isHttps() const;
-    QHostAddress hostAddress() const;
-    quint16 port() const;
+    [[nodiscard]] bool isEnabled() const;
+    [[nodiscard]] bool isErrored() const;
+    [[nodiscard]] QString errorMessage() const;
+    [[nodiscard]] bool isHttps() const;
+    [[nodiscard]] QHostAddress hostAddress() const;
+    [[nodiscard]] quint16 port() const;
 
 signals:
     void error(const QString& message);

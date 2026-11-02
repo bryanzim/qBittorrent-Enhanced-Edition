@@ -69,8 +69,8 @@ namespace Http
         // Support Range requests.
         void streamFile(const Path& filePath, const HeaderMap& headers) override;
 
-        bool isFinished() const override;
-        State state() const;
+        [[nodiscard]] bool isFinished() const override;
+        [[nodiscard]] State state() const;
 
     private:
         void fail();

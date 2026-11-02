@@ -53,16 +53,16 @@ namespace BitTorrent
     public:
         TorrentDescriptor() = default;
 
-        InfoHash infoHash() const;
-        QString name() const;
-        QDateTime creationDate() const;
-        QString creator() const;
-        QString comment() const;
-        QList<TrackerEntry> trackers() const;
-        QList<QUrl> urlSeeds() const;
-        const std::optional<TorrentInfo>& info() const;
+        [[nodiscard]] InfoHash infoHash() const;
+        [[nodiscard]] QString name() const;
+        [[nodiscard]] QDateTime creationDate() const;
+        [[nodiscard]] QString creator() const;
+        [[nodiscard]] QString comment() const;
+        [[nodiscard]] QList<TrackerEntry> trackers() const;
+        [[nodiscard]] QList<QUrl> urlSeeds() const;
+        [[nodiscard]] const std::optional<TorrentInfo>& info() const;
 
-        QString source() const;
+        [[nodiscard]] QString source() const;
 
         void setTorrentInfo(TorrentInfo torrentInfo);
 
@@ -70,9 +70,9 @@ namespace BitTorrent
         static nonstd::expected<TorrentDescriptor, QString> loadFromFile(const Path& path) noexcept;
         static nonstd::expected<TorrentDescriptor, QString> parse(const QString& str) noexcept;
         nonstd::expected<void, QString> saveToFile(const Path& path) const;
-        nonstd::expected<QByteArray, QString> saveToBuffer() const;
+        [[nodiscard]] nonstd::expected<QByteArray, QString> saveToBuffer() const;
 
-        const lt::add_torrent_params& ltAddTorrentParams() const;
+        [[nodiscard]] const lt::add_torrent_params& ltAddTorrentParams() const;
 
     private:
         explicit TorrentDescriptor(lt::add_torrent_params ltAddTorrentParams);

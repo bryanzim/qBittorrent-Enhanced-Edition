@@ -79,11 +79,15 @@ int BaseLogModel::columnCount(const QModelIndex&) const
 QVariant BaseLogModel::data(const QModelIndex& index, const int role) const
 {
     if (!index.isValid())
+    {
         return {};
+    }
 
     const int messageIndex = index.row();
     if ((messageIndex < 0) || (messageIndex >= static_cast<int>(m_messages.size())))
+    {
         return {};
+    }
 
     const Message& message = m_messages[messageIndex];
     switch (role)
@@ -124,7 +128,9 @@ void BaseLogModel::onUIThemeChanged()
 {
     loadColors();
     if (const int rCount = rowCount(); rCount > 0)
+    {
         emit dataChanged(index(0, 0), index((rCount - 1), (columnCount() - 1)), { TimeForegroundRole, MessageForegroundRole });
+    }
 }
 
 void BaseLogModel::loadColors()
@@ -145,7 +151,9 @@ LogMessageModel::LogMessageModel(QObject* parent)
     loadColors();
 
     for (const Log::Msg& msg : asConst(Logger::instance()->getMessages()))
+    {
         handleNewMessage(msg);
+    }
     connect(Logger::instance(), &Logger::newLogMessage, this, &LogMessageModel::handleNewMessage);
 }
 
@@ -184,7 +192,9 @@ LogPeerModel::LogPeerModel(QObject* parent)
     loadColors();
 
     for (const Log::Peer& peer : asConst(Logger::instance()->getPeers()))
+    {
         handleNewMessage(peer);
+    }
     connect(Logger::instance(), &Logger::newLogPeer, this, &LogPeerModel::handleNewMessage);
 }
 

@@ -27,7 +27,7 @@ bool is_bad_peer(const lt::peer_info& info)
     // TODO: trafficConsume by thank243(senis) but it's hard to determine GT0003 is legitimate client or not...
     // Anyway, block dt/torrent and Taipei-torrent with specific case first.
     const lt::tcp::endpoint endpoint = peerInfoEndpoint(info);
-    QString country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
+    QString const country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
     if (country == QLatin1String("CN") && std::regex_match(info.client, consume_filter))
     {
         return true;
@@ -40,7 +40,7 @@ bool is_bad_peer(const lt::peer_info& info)
 bool is_unknown_peer(const lt::peer_info& info)
 {
     const lt::tcp::endpoint endpoint = peerInfoEndpoint(info);
-    QString country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
+    QString const country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
     return info.client.find("Unknown") != std::string::npos && country == QLatin1String("CN");
 }
 
@@ -49,13 +49,13 @@ bool is_offline_downloader(const lt::peer_info& info)
 {
     static const std::regex id_filter("-LT(1220|2070)-");
     const lt::tcp::endpoint endpoint = peerInfoEndpoint(info);
-    unsigned short port = endpoint.port();
-    QString country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
+    unsigned short const port = endpoint.port();
+    QString const country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
     // 115: Old data, may out of date.
-    bool fake_transmission = port >= 65000 && country == QLatin1String("CN") && info.client.find("Transmission") != std::string::npos;
+    bool const fake_transmission = port >= 65000 && country == QLatin1String("CN") && info.client.find("Transmission") != std::string::npos;
     // PikPak: PikPak is renting Worldstream server and announce as LT1220/LT2070, the best way is block the ip range via ip filter(?)
     // Xunlei: it seems Xunlei is using LT2070 too
-    bool fake_libtorrent = (country == QLatin1String("NL") || country == QLatin1String("CN")) && std::regex_match(info.pid.data(), info.pid.data() + 8, id_filter);
+    bool const fake_libtorrent = (country == QLatin1String("NL") || country == QLatin1String("CN")) && std::regex_match(info.pid.data(), info.pid.data() + 8, id_filter);
     return fake_transmission || fake_libtorrent;
 }
 
@@ -82,7 +82,7 @@ template <typename F>
 auto wrap_filter(F filter)
 {
     return [=](const lt::peer_info& info, bool handshake, bool* stop_filtering) {
-        bool matched = filter(info);
+        bool const matched = filter(info);
         *stop_filtering = !handshake && !matched;
         return matched;
     };
@@ -96,7 +96,9 @@ std::shared_ptr<lt::torrent_plugin> create_peer_action_plugin(
 {
     // ignore private torrents
     if (th.torrent_file() && th.torrent_file()->priv())
+    {
         return nullptr;
+    }
 
     return std::make_shared<peer_action_plugin>(std::move(filter), std::move(action));
 }

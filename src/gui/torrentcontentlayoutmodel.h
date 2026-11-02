@@ -59,27 +59,27 @@ public:
 
     explicit TorrentContentLayoutModel(BitTorrent::TorrentContentHandler* contentHandler, QObject* parent = nullptr);
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
-    QModelIndex parent(const QModelIndex& index) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QModelIndex parent(const QModelIndex& index) const override;
 
-    int rowCount(const QModelIndex& parent = {}) const override;
-    int columnCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override;
 
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex& index) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
-    bool haveChangedFilePaths() const;
+    [[nodiscard]] bool haveChangedFilePaths() const;
     void applyChangedFilePaths();
 
 signals:
     void renameFailed(const QString& firstErrorMessage, qsizetype errorsCount);
 
 private:
-    int getFilesCount() const;
-    Path getFilePath(int index) const;
+    [[nodiscard]] int getFilesCount() const;
+    [[nodiscard]] Path getFilePath(int index) const;
 
     void onFileRenamed(int fileIndex);
     void onFolderRenamed(const Path& newFolderPath, const Path& oldFolderPath, const QHash<int, Path>& renamedFiles);

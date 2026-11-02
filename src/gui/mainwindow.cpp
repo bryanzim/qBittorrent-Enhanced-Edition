@@ -334,7 +334,9 @@ MainWindow::MainWindow(IGUIApplication* app, const WindowState initialState, con
 
     // trigger an early check on startup
     if (pref->isUpdateCheckEnabled())
+    {
         checkProgramUpdate(false);
+    }
 #else
     m_ui->actionCheckForUpdates->setVisible(false);
 #endif
@@ -400,7 +402,9 @@ MainWindow::MainWindow(IGUIApplication* app, const WindowState initialState, con
     on_actionWarningMessages_triggered(m_ui->actionWarningMessages->isChecked());
     on_actionCriticalMessages_triggered(m_ui->actionCriticalMessages->isChecked());
     if (m_ui->actionSearchWidget->isChecked())
+    {
         QMetaObject::invokeMethod(this, &MainWindow::on_actionSearchWidget_triggered, Qt::QueuedConnection);
+    }
     // Auto shutdown actions
     auto* autoShutdownGroup = new QActionGroup(this);
     autoShutdownGroup->setExclusive(true);
@@ -427,7 +431,9 @@ MainWindow::MainWindow(IGUIApplication* app, const WindowState initialState, con
     m_ui->actionAutoExit->setChecked(pref->shutdownqBTWhenDownloadsComplete());
 
     if (!autoShutdownGroup->checkedAction())
+    {
         m_ui->actionAutoShutdownDisabled->setChecked(true);
+    }
 
     // Load Window state and sizes
     loadSettings();
@@ -569,7 +575,9 @@ bool MainWindow::isDownloadTrackerFavicon() const
 void MainWindow::setDownloadTrackerFavicon(const bool value)
 {
     if (m_transferListFiltersWidget)
+    {
         m_transferListFiltersWidget->setDownloadTrackerFavicon(value);
+    }
     m_storeDownloadTrackerFavicon = value;
 }
 
@@ -610,7 +618,9 @@ void MainWindow::addToolbarContextMenu()
 
     const auto buttonStyle = static_cast<Qt::ToolButtonStyle>(pref->getToolbarTextPosition());
     if ((buttonStyle >= Qt::ToolButtonIconOnly) && (buttonStyle <= Qt::ToolButtonFollowStyle))
+    {
         m_ui->toolBar->setToolButtonStyle(buttonStyle);
+    }
     switch (buttonStyle)
     {
     case Qt::ToolButtonIconOnly:
@@ -677,7 +687,9 @@ bool MainWindow::defineUILockPassword()
     bool ok = false;
     const QString newPassword = AutoExpandableDialog::getText(this, tr("UI lock password"), tr("Please type the UI lock password:"), QLineEdit::Password, {}, &ok);
     if (!ok)
+    {
         return false;
+    }
 
     if (newPassword.size() < 3)
     {
@@ -693,7 +705,9 @@ void MainWindow::clearUILockPassword()
 {
     const QMessageBox::StandardButton answer = QMessageBox::question(this, tr("Clear the password"), tr("Are you sure you want to clear the password?"), (QMessageBox::Yes | QMessageBox::No), QMessageBox::No);
     if (answer == QMessageBox::Yes)
+    {
         Preferences::instance()->setUILockPassword({});
+    }
 }
 
 void MainWindow::on_actionLock_triggered()
@@ -704,7 +718,9 @@ void MainWindow::on_actionLock_triggered()
     if (pref->getUILockPassword().isEmpty())
     {
         if (!defineUILockPassword())
+        {
             return;
+        }
     }
 
     // Lock the interface
@@ -776,9 +792,13 @@ void MainWindow::displaySearchTab(bool enable)
                 if (app()->desktopIntegration()->isNotificationsEnabled() && (currentTabWidget() != m_searchWidget))
                 {
                     if (failed)
+                    {
                         app()->desktopIntegration()->showNotification(tr("Search Engine"), tr("Search has failed"));
+                    }
                     else
+                    {
                         app()->desktopIntegration()->showNotification(tr("Search Engine"), tr("Search has finished"));
+                    }
                 }
             });
             m_tabs->insertTab(1, m_searchWidget,
@@ -848,7 +868,9 @@ void MainWindow::saveSettings() const
 void MainWindow::saveSplitterSettings() const
 {
     if (!m_transferListFiltersWidget)
+    {
         return;
+    }
 
     auto* pref = Preferences::instance();
     pref->setFiltersSidebarWidth(m_splitter->sizes()[0]);
@@ -873,12 +895,16 @@ void MainWindow::cleanup()
 
 #if (defined(Q_OS_WIN) || defined(Q_OS_MACOS))
     if (m_programUpdateTimer)
+    {
         m_programUpdateTimer->stop();
+    }
 #endif
 
     // remove all child widgets
     while (auto* w = findChild<QWidget*>())
+    {
         delete w;
+    }
 }
 
 void MainWindow::loadSettings()
@@ -900,11 +926,15 @@ void MainWindow::desktopNotificationClicked()
         {
             // Ask for UI lock password
             if (!unlockUI())
+            {
                 return;
+            }
         }
         show();
         if (isMinimized())
+        {
             showNormal();
+        }
     }
 
     raise();
@@ -1009,9 +1039,13 @@ void MainWindow::on_actionExit_triggered()
 {
     // UI locking enforcement.
     if (isHidden() && m_uiLocked)
+    {
         // Ask for UI lock password
         if (!unlockUI())
+        {
             return;
+        }
+    }
 
     m_forceExit = true;
     close();
@@ -1030,9 +1064,13 @@ void MainWindow::on_actionCloseWindow_triggered()
 QWidget* MainWindow::currentTabWidget() const
 {
     if (isMinimized() || !isVisible())
+    {
         return nullptr;
+    }
     if (m_tabs->currentIndex() == 0)
+    {
         return m_transferListWidget;
+    }
     return m_tabs->currentWidget();
 }
 
@@ -1044,12 +1082,16 @@ TransferListWidget* MainWindow::transferListWidget() const
 bool MainWindow::unlockUI()
 {
     if (m_unlockDlgShowing)
+    {
         return false;
+    }
 
     bool ok = false;
     const QString password = AutoExpandableDialog::getText(this, tr("UI lock password"), tr("Please type the UI lock password:"), QLineEdit::Password, {}, &ok);
     if (!ok)
+    {
         return false;
+    }
 
     Preferences* const pref = Preferences::instance();
 
@@ -1082,8 +1124,10 @@ void MainWindow::toggleVisibility()
 {
     if (isHidden())
     {
-        if (m_uiLocked && !unlockUI()) // Ask for UI lock password
+        if (m_uiLocked && !unlockUI())
+        { // Ask for UI lock password
             return;
+        }
 
         // Make sure the window is not minimized
         setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
@@ -1146,7 +1190,9 @@ void MainWindow::showEvent(QShowEvent* e)
         }
 
         if (currentTabWidget() == m_transferListWidget)
+        {
             m_propertiesWidget->loadDynamicData();
+        }
 
         // Make sure the window is initially centered
         if (!m_posInitialized)
@@ -1174,7 +1220,9 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
             {
                 line = line.trimmed();
                 if (!Utils::Misc::isTorrentLink(line))
+                {
                     continue;
+                }
 
                 app()->addTorrentManager()->addTorrent(line);
             }
@@ -1221,7 +1269,9 @@ void MainWindow::closeEvent(QCloseEvent* e)
         if (e->spontaneous() || m_forceExit)
         {
             if (!isVisible())
+            {
                 show();
+            }
             QMessageBox confirmBox(QMessageBox::Question, tr("Exiting qBittorrent"),
                                    // Split it because the last sentence is used in the WebUI
                                    tr("Some files are currently transferring.") + u'\n' + tr("Are you sure you want to quit qBittorrent?"),
@@ -1239,8 +1289,10 @@ void MainWindow::closeEvent(QCloseEvent* e)
                 return;
             }
             if (confirmBox.clickedButton() == alwaysBtn)
+            {
                 // Remember choice
                 Preferences::instance()->setConfirmOnExit(false);
+            }
         }
     }
 
@@ -1331,10 +1383,14 @@ void MainWindow::on_actionOpen_triggered()
     const QStringList pathsList = QFileDialog::getOpenFileNames(this, tr("Open Torrent Files"), pref->getMainLastDir().data(), tr("Torrent Files") + u" (*" + TORRENT_FILE_EXTENSION + u')');
 
     if (pathsList.isEmpty())
+    {
         return;
+    }
 
     for (const QString& file : pathsList)
+    {
         app()->addTorrentManager()->addTorrent(file);
+    }
 
     // Save last dir to remember it
     const Path topDir{ pathsList.at(0) };
@@ -1505,14 +1561,18 @@ void MainWindow::reloadTorrentStats(const QList<BitTorrent::Torrent*>& torrents)
     if (currentTabWidget() == m_transferListWidget)
     {
         if (torrents.contains(m_propertiesWidget->getCurrentTorrent()))
+        {
             m_propertiesWidget->loadDynamicData();
+        }
     }
 }
 
 void MainWindow::downloadFromURLList(const QStringList& urlList)
 {
     for (const QString& url : urlList)
+    {
         app()->addTorrentManager()->addTorrent(url);
+    }
 }
 
 void MainWindow::populateDesktopIntegrationMenu()
@@ -1547,7 +1607,9 @@ void MainWindow::populateDesktopIntegrationMenu()
 #endif
 
     if (m_uiLocked)
+    {
         menu->setEnabled(false);
+    }
 }
 
 void MainWindow::updateAltSpeedsBtn(const bool alternative)
@@ -1624,7 +1686,9 @@ void MainWindow::on_actionSearchWidget_triggered()
 #ifdef Q_OS_WIN
             const QMessageBox::StandardButton buttonPressed = QMessageBox::question(this, tr("Missing Python Runtime"), tr("Python is required to use the search engine but it does not seem to be installed.\nDo you want to install it now?"), (QMessageBox::Yes | QMessageBox::No), QMessageBox::Yes);
             if (buttonPressed == QMessageBox::Yes)
+            {
                 installPython();
+            }
 #else
             QMessageBox::information(this, tr("Missing Python Runtime"), tr("Python is required to use the search engine but it does not seem to be installed."));
 #endif
@@ -1640,7 +1704,9 @@ void MainWindow::on_actionSearchWidget_triggered()
 #ifdef Q_OS_WIN
             const QMessageBox::StandardButton buttonPressed = QMessageBox::question(this, tr("Old Python Runtime"), tr("Your Python version (%1) is outdated. Minimum requirement: %2.\nDo you want to install a newer version now?").arg(pyInfo.version.toString(), Utils::ForeignApps::PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()), (QMessageBox::Yes | QMessageBox::No), QMessageBox::Yes);
             if (buttonPressed == QMessageBox::Yes)
+            {
                 installPython();
+            }
 #else
             QMessageBox::information(this, tr("Old Python Runtime"), tr("Your Python version (%1) is outdated. Please upgrade to latest version for search engines to work.\nMinimum requirement: %2.").arg(pyInfo.version.toString(), Utils::ForeignApps::PythonInfo::MINIMUM_SUPPORTED_VERSION.toString()));
 #endif
@@ -1676,7 +1742,9 @@ void MainWindow::handleUpdateCheckFinished(ProgramUpdater* updater, const bool i
 
     const auto cleanup = [this, updater]() {
         if (m_programUpdateTimer)
+        {
             m_programUpdateTimer->start();
+        }
         updater->deleteLater();
     };
 
@@ -1768,7 +1836,9 @@ void MainWindow::on_actionExecutionLogs_triggered(bool checked)
 void MainWindow::on_actionNormalMessages_triggered(const bool checked)
 {
     if (!m_executionLog)
+    {
         return;
+    }
 
     const Log::MsgTypes flags = executionLogMsgTypes().setFlag(Log::NORMAL, checked);
     setExecutionLogMsgTypes(flags);
@@ -1777,7 +1847,9 @@ void MainWindow::on_actionNormalMessages_triggered(const bool checked)
 void MainWindow::on_actionInformationMessages_triggered(const bool checked)
 {
     if (!m_executionLog)
+    {
         return;
+    }
 
     const Log::MsgTypes flags = executionLogMsgTypes().setFlag(Log::INFO, checked);
     setExecutionLogMsgTypes(flags);
@@ -1786,7 +1858,9 @@ void MainWindow::on_actionInformationMessages_triggered(const bool checked)
 void MainWindow::on_actionWarningMessages_triggered(const bool checked)
 {
     if (!m_executionLog)
+    {
         return;
+    }
 
     const Log::MsgTypes flags = executionLogMsgTypes().setFlag(Log::WARNING, checked);
     setExecutionLogMsgTypes(flags);
@@ -1795,7 +1869,9 @@ void MainWindow::on_actionWarningMessages_triggered(const bool checked)
 void MainWindow::on_actionCriticalMessages_triggered(const bool checked)
 {
     if (!m_executionLog)
+    {
         return;
+    }
 
     const Log::MsgTypes flags = executionLogMsgTypes().setFlag(Log::CRITICAL, checked);
     setExecutionLogMsgTypes(flags);
@@ -1835,10 +1911,14 @@ void MainWindow::updatePowerManagementState() const
     const QList<BitTorrent::Torrent*> allTorrents = BitTorrent::Session::instance()->torrents();
     const bool inhibitSuspend = std::ranges::any_of(allTorrents, [&](const BitTorrent::Torrent* torrent) {
         if (preventFromSuspendWhenDownloading && (!torrent->isFinished() && !torrent->isStopped() && !torrent->isErrored() && torrent->hasMetadata()))
+        {
             return true;
+        }
 
         if (preventFromSuspendWhenSeeding && (torrent->isFinished() && !torrent->isStopped()))
+        {
             return true;
+        }
 
         return torrent->isMoving();
     });
@@ -1894,7 +1974,9 @@ void MainWindow::refreshTrayIconTooltip()
 void MainWindow::checkProgramUpdate(const bool invokedByUser)
 {
     if (m_programUpdateTimer)
+    {
         m_programUpdateTimer->stop();
+    }
 
     m_ui->actionCheckForUpdates->setEnabled(false);
     m_ui->actionCheckForUpdates->setText(tr("Checking for Updates..."));
@@ -1968,7 +2050,9 @@ void MainWindow::pythonDownloadFinished(const Net::DownloadResult& result)
     }
 
     if (!verifyPythonInstaller(exePath))
+    {
         return;
+    }
 
     // launch installer
     auto* installer = new QProcess(this);
@@ -2010,12 +2094,16 @@ void MainWindow::populatePluginsMenu()
     for (const PluginInfo& pluginInfo : asConst(pluginsEngine->allPlugins()))
     {
         if (pluginInfo.invocable && pluginInfo.enabled)
+        {
             addPluginsMenuItem(pluginInfo);
+        }
     }
 
     connect(pluginsEngine, &PluginsEngine::pluginInstalled, this, [this](const Path&, const PluginInfo& pluginInfo) {
         if (pluginInfo.invocable && pluginInfo.enabled)
+        {
             addPluginsMenuItem(pluginInfo);
+        }
     });
 
     connect(pluginsEngine, &PluginsEngine::pluginUninstalled, this, [this](const QString& pluginID) {
@@ -2026,9 +2114,13 @@ void MainWindow::populatePluginsMenu()
         if (newPluginInfo.enabled && newPluginInfo.invocable)
         {
             if (QAction* action = m_pluginActions.value(oldPluginInfo.id))
+            {
                 action->setText(newPluginInfo.name);
+            }
             else
+            {
                 addPluginsMenuItem(newPluginInfo);
+            }
         }
         else
         {

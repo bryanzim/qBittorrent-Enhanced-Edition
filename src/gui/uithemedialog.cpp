@@ -77,7 +77,7 @@ public:
         applyColor(currentColor);
     }
 
-    QColor currentColor() const
+    [[nodiscard]] QColor currentColor() const
     {
         return m_currentColor;
     }
@@ -102,7 +102,9 @@ private:
     void setCurrentColor(const QColor& color)
     {
         if (m_currentColor == color)
+        {
             return;
+        }
 
         m_currentColor = color;
         applyColor(m_currentColor);
@@ -157,7 +159,7 @@ public:
         setCurrentPath(currentPath);
     }
 
-    Path currentPath() const
+    [[nodiscard]] Path currentPath() const
     {
         return m_currentPath;
     }
@@ -182,7 +184,9 @@ private:
     void setCurrentPath(const Path& path)
     {
         if (m_currentPath == path)
+        {
             return;
+        }
 
         m_currentPath = path;
         showIcon(m_currentPath);
@@ -232,7 +236,9 @@ UIThemeDialog::UIThemeDialog(QWidget* parent)
     loadIcons();
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 UIThemeDialog::~UIThemeDialog()
@@ -247,9 +253,13 @@ void UIThemeDialog::accept()
 
     bool hasError = false;
     if (!storeColors())
+    {
         hasError = true;
+    }
     if (!storeIcons())
+    {
         hasError = true;
+    }
 
     if (hasError)
     {
@@ -290,7 +300,9 @@ void UIThemeDialog::loadIcons()
         m_ui->iconsLayout->addWidget(new QLabel(id), row, 0);
 
         if (id == u"qbittorrent-tray-mono")
+        {
             qDebug() << id;
+        }
 
         auto* lightIconWidget = new IconWidget(m_defaultThemeSource.getIconPath(id, ColorMode::Light), m_defaultThemeSource.getDefaultIconPath(id, ColorMode::Light), this);
         m_lightIconWidgets.insert(id, lightIconWidget);
@@ -324,11 +336,15 @@ bool UIThemeDialog::storeColors()
                                              : defaultColors.value(colorID).dark;
             const QColor& color = it.value()->currentColor();
             if (color != defaultColor)
+            {
                 colors.insert(it.key(), color.name());
+            }
         }
 
         if (!colors.isEmpty())
+        {
             userConfig.insert(((colorMode == ColorMode::Light) ? KEY_COLORS_LIGHT : KEY_COLORS_DARK), colors);
+        }
     };
 
     addColorOverrides(ColorMode::Light);
@@ -363,7 +379,9 @@ bool UIThemeDialog::storeIcons()
             const QString& id = it.key();
             const Path& path = it.value()->currentPath();
             if (path == m_defaultThemeSource.getIconPath(id, colorMode))
+            {
                 continue;
+            }
 
             const Path& userIconPathBase = userConfigPath() / subdirPath / Path(id);
 

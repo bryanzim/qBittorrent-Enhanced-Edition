@@ -91,18 +91,18 @@ public:
     explicit MainWindow(IGUIApplication* app, WindowState initialState = WindowState::Normal, const QString& titleSuffix = {});
     ~MainWindow() override;
 
-    QWidget* currentTabWidget() const;
-    TransferListWidget* transferListWidget() const;
-    PropertiesWidget* propertiesWidget() const;
+    [[nodiscard]] QWidget* currentTabWidget() const;
+    [[nodiscard]] TransferListWidget* transferListWidget() const;
+    [[nodiscard]] PropertiesWidget* propertiesWidget() const;
 
     // ExecutionLog properties
-    bool isExecutionLogEnabled() const;
+    [[nodiscard]] bool isExecutionLogEnabled() const;
     void setExecutionLogEnabled(bool value);
-    Log::MsgTypes executionLogMsgTypes() const;
+    [[nodiscard]] Log::MsgTypes executionLogMsgTypes() const;
     void setExecutionLogMsgTypes(Log::MsgTypes value);
 
     // Misc properties
-    bool isDownloadTrackerFavicon() const;
+    [[nodiscard]] bool isDownloadTrackerFavicon() const;
     void setDownloadTrackerFavicon(bool value);
 
     void setTitleSuffix(const QString& suffix);
@@ -210,7 +210,7 @@ private:
 
 #ifdef Q_OS_WIN
     void installPython();
-    bool verifyPythonInstaller(const Path& installerPath) const;
+    [[nodiscard]] bool verifyPythonInstaller(const Path& installerPath) const;
 #endif
 
 #ifdef ENABLE_PLUGINS

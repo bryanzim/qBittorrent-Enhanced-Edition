@@ -87,14 +87,14 @@ public:
     ~TrackerListModel() override;
 
     void setTorrent(BitTorrent::Torrent* torrent);
-    BitTorrent::Torrent* torrent() const;
+    [[nodiscard]] BitTorrent::Torrent* torrent() const;
 
-    int columnCount(const QModelIndex& parent = {}) const override;
-    int rowCount(const QModelIndex& parent = {}) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
-    QModelIndex parent(const QModelIndex& index) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] QModelIndex index(int row, int column, const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QModelIndex parent(const QModelIndex& index) const override;
 
 private:
     struct Item;

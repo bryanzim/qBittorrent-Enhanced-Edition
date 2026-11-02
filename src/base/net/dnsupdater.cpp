@@ -164,9 +164,13 @@ QString DNSUpdater::getUpdateUrl() const
 void DNSUpdater::ipUpdateFinished(const DownloadResult& result)
 {
     if (result.status == DownloadStatus::Success)
+    {
         processIPUpdateReply(QString::fromUtf8(result.data));
+    }
     else
+    {
         qWarning() << "IP update failed:" << result.errorString;
+    }
 }
 
 void DNSUpdater::processIPUpdateReply(const QString& reply)
@@ -232,7 +236,9 @@ void DNSUpdater::processIPUpdateReply(const QString& reply)
 void DNSUpdater::updateCredentials()
 {
     if (m_state == FATAL)
+    {
         return;
+    }
     Preferences* const pref = Preferences::instance();
     bool change = false;
     // Get DNS service information

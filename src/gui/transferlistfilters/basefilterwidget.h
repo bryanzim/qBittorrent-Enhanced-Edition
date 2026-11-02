@@ -44,10 +44,10 @@ class BaseFilterWidget : public QListWidget
 public:
     BaseFilterWidget(QWidget* parent, TransferListWidget* transferList);
 
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
+    [[nodiscard]] QSize sizeHint() const override;
+    [[nodiscard]] QSize minimumSizeHint() const override;
 
-    TransferListWidget* transferList() const;
+    [[nodiscard]] TransferListWidget* transferList() const;
 
 public slots:
     void toggleFilter(bool checked);

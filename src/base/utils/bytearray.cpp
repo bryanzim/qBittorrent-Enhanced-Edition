@@ -50,16 +50,22 @@ QList<QByteArrayView> Utils::ByteArray::splitToViews(const QByteArrayView in, co
         }
 
         for (auto iter = in.cbegin(); iter < in.cend(); ++iter)
+        {
             ret.emplace_back(iter, 1);
+        }
 
         if (behavior == Qt::KeepEmptyParts)
+        {
             ret.emplace_back();
+        }
 
         return ret;
     }
 
-    if (in.isEmpty()) [[unlikely]]
-        return (behavior == Qt::SkipEmptyParts) ? QList<QByteArrayView>{} : QList<QByteArrayView>{ {} };
+    if (in.isEmpty())
+    {
+        [[unlikely]] return (behavior == Qt::SkipEmptyParts) ? QList<QByteArrayView>{} : QList<QByteArrayView>{ {} };
+    }
 
     const QByteArrayMatcher matcher{ sep };
     QList<QByteArrayView> ret;
@@ -71,17 +77,23 @@ QList<QByteArrayView> Utils::ByteArray::splitToViews(const QByteArrayView in, co
     {
         qsizetype end = matcher.indexIn(in, head);
         if (end < 0)
+        {
             end = in.size();
+        }
 
         const QByteArrayView part = in.sliced(head, (end - head));
         if (!part.isEmpty() || (behavior == Qt::KeepEmptyParts))
+        {
             ret += part;
+        }
 
         head = end + sep.size();
     }
 
     if ((behavior == Qt::KeepEmptyParts) && (head == in.size()))
+    {
         ret.emplaceBack();
+    }
 
     return ret;
 }
@@ -107,12 +119,14 @@ QByteArray Utils::ByteArray::toBase32(const QByteArray& in)
     {
         // encode 5 bytes at a time
         qsizetype inPadLen = 5;
-        int64_t chunk = 0;
+        std::int64_t chunk = 0;
         while (inPadLen > 0)
         {
-            chunk |= static_cast<int64_t>(static_cast<uchar>(in.data()[inIndex++])) << (--inPadLen * 8);
+            chunk |= static_cast<std::int64_t>(static_cast<uchar>(in.data()[inIndex++])) << (--inPadLen * 8);
             if (inIndex == inSize)
+            {
                 break;
+            }
         }
 
         const int outCharCounts[] = { 8, 7, 5, 4, 2 };
@@ -121,7 +135,7 @@ QByteArray Utils::ByteArray::toBase32(const QByteArray& in)
             if (i >= (8 - outCharCounts[inPadLen]))
             {
                 const int shift = (i * 5);
-                const int64_t mask = static_cast<int64_t>(0x1f) << shift;
+                const std::int64_t mask = static_cast<std::int64_t>(0x1f) << shift;
                 const int charIndex = (chunk & mask) >> shift;
                 *out++ = alphabet[charIndex];
             }

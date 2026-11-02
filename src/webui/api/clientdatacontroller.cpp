@@ -55,15 +55,21 @@ void ClientDataController::loadAction()
     QJsonParseError jsonError;
     const auto keysJsonDocument = QJsonDocument::fromJson(keysParam.toUtf8(), &jsonError);
     if (jsonError.error != QJsonParseError::NoError)
+    {
         throw APIError(APIErrorType::BadParams, jsonError.errorString());
+    }
     if (!keysJsonDocument.isArray())
+    {
         throw APIError(APIErrorType::BadParams, tr("`keys` must be an array"));
+    }
 
     QStringList keys;
     for (const QJsonValue& keysJsonVal : asConst(keysJsonDocument.array()))
     {
         if (!keysJsonVal.isString())
+        {
             throw APIError(APIErrorType::BadParams, tr("Items of `keys` must be strings"));
+        }
 
         keys << keysJsonVal.toString();
     }
@@ -77,11 +83,17 @@ void ClientDataController::storeAction()
     QJsonParseError jsonError;
     const auto dataJsonDocument = QJsonDocument::fromJson(params()[u"data"_s].toUtf8(), &jsonError);
     if (jsonError.error != QJsonParseError::NoError)
+    {
         throw APIError(APIErrorType::BadParams, jsonError.errorString());
+    }
     if (!dataJsonDocument.isObject())
+    {
         throw APIError(APIErrorType::BadParams, tr("`data` must be an object"));
+    }
 
     const nonstd::expected<void, QString> result = m_clientDataStorage->storeData(dataJsonDocument.object());
     if (!result)
+    {
         throw APIError(APIErrorType::Conflict, result.error());
+    }
 }

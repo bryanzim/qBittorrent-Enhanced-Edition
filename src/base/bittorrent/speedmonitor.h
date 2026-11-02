@@ -72,7 +72,7 @@ public:
     SpeedMonitor();
 
     void addSample(const SpeedSample& sample);
-    SpeedSampleAvg average() const;
+    [[nodiscard]] SpeedSampleAvg average() const;
     void reset();
 
 private:

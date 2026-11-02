@@ -45,9 +45,13 @@ int Utils::Compare::naturalCompare(const QString& left, const QString& right, co
         {
             // when a shorter string is another string's prefix, place shorter string before longer string
             if (lSize < rSize)
+            {
                 return -1;
+            }
             if (lSize == rSize)
+            {
                 return 0;
+            }
             return 1;
         }
 
@@ -69,7 +73,9 @@ int Utils::Compare::naturalCompare(const QString& left, const QString& right, co
             const auto numberView = [](const QStringView str, int& pos) -> QStringView {
                 const int start = pos;
                 while ((pos < str.size()) && str[pos].isDigit())
+                {
                     ++pos;
+                }
                 return str.sliced(start, (pos - start));
             };
 
@@ -77,7 +83,9 @@ int Utils::Compare::naturalCompare(const QString& left, const QString& right, co
             const QStringView numViewR = numberView(right, posR);
 
             if (numViewL.length() != numViewR.length())
+            {
                 return (numViewL.length() - numViewR.length());
+            }
 
             // both numbers have the same length
             for (qsizetype i = 0; i < numViewL.length(); ++i)
@@ -86,7 +94,9 @@ int Utils::Compare::naturalCompare(const QString& left, const QString& right, co
                 const QChar numR = numViewR[i];
 
                 if (numL != numR)
+                {
                     return (numL.unicode() - numR.unicode());
+                }
             }
 
             // String + digits do match and we haven't hit the end of both strings

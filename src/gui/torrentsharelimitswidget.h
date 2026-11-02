@@ -62,11 +62,11 @@ public:
 
     void setDefaults(UsedDefaults usedDefaults, const BitTorrent::ShareLimits& shareLimits);
 
-    std::optional<qreal> ratioLimit() const;
-    std::optional<int> seedingTimeLimit() const;
-    std::optional<int> inactiveSeedingTimeLimit() const;
-    std::optional<BitTorrent::ShareLimitsMode> shareLimitsMode() const;
-    std::optional<BitTorrent::ShareLimitAction> shareLimitAction() const;
+    [[nodiscard]] std::optional<qreal> ratioLimit() const;
+    [[nodiscard]] std::optional<int> seedingTimeLimit() const;
+    [[nodiscard]] std::optional<int> inactiveSeedingTimeLimit() const;
+    [[nodiscard]] std::optional<BitTorrent::ShareLimitsMode> shareLimitsMode() const;
+    [[nodiscard]] std::optional<BitTorrent::ShareLimitAction> shareLimitAction() const;
 
 private:
     void onRatioLimitModeChanged(int currentIndex, int previousIndex);

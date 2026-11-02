@@ -71,7 +71,9 @@ void TrackerEntriesDialog::setTrackers(const QList<BitTorrent::TrackerEntry>& tr
     QString text = tiers.value(0);
 
     for (int i = 1; i <= maxTier; ++i)
+    {
         text += (u'\n' + tiers.value(i));
+    }
 
     m_ui->plainTextEdit->setPlainText(text);
 }
@@ -89,5 +91,7 @@ void TrackerEntriesDialog::saveSettings()
 void TrackerEntriesDialog::loadSettings()
 {
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }

@@ -59,7 +59,9 @@ BitTorrent::TorrentCreationManager::TorrentCreationManager(IApplication* app, QO
     m_threadPool.setObjectName("TorrentCreationManager m_threadPool");
 
     if (m_numThreads > 0)
+    {
         m_threadPool.setMaxThreadCount(m_numThreads);
+    }
 }
 
 BitTorrent::TorrentCreationManager::~TorrentCreationManager() = default;
@@ -77,7 +79,9 @@ std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationMana
         }
     }
     if (std::cmp_greater_equal(m_tasks->size(), m_maxTasks.get()))
+    {
         return {};
+    }
 
     const QString taskID = generateTaskID();
 
@@ -96,7 +100,9 @@ QString BitTorrent::TorrentCreationManager::generateTaskID() const
     const auto& tasksByID = m_tasks->get<ByID>();
     QString taskID = QUuid::createUuid().toString(QUuid::WithoutBraces);
     while (tasksByID.find(taskID) != tasksByID.end())
+    {
         taskID = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    }
 
     return taskID;
 }
@@ -106,7 +112,9 @@ std::shared_ptr<BitTorrent::TorrentCreationTask> BitTorrent::TorrentCreationMana
     const auto& tasksByID = m_tasks->get<ByID>();
     const auto iter = tasksByID.find(id);
     if (iter == tasksByID.end())
+    {
         return nullptr;
+    }
 
     return *iter;
 }
@@ -122,7 +130,9 @@ bool BitTorrent::TorrentCreationManager::deleteTask(const QString& id)
     auto& tasksByID = m_tasks->get<ByID>();
     const auto iter = tasksByID.find(id);
     if (iter == tasksByID.end())
+    {
         return false;
+    }
 
     tasksByID.erase(iter);
     return true;

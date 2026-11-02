@@ -96,7 +96,9 @@ int TorrentContentModelItem::columnCount() const
 QString TorrentContentModelItem::displayData(const int column) const
 {
     if (isRootItem())
+    {
         return m_itemData.value(column);
+    }
 
     switch (column)
     {
@@ -127,7 +129,9 @@ QString TorrentContentModelItem::displayData(const int column) const
     case COL_AVAILABILITY: {
         const qreal avail = availability();
         if (avail < 0)
+        {
             return tr("N/A");
+        }
 
         const QString value = (avail >= 1)
                                   ? u"100"_s
@@ -145,7 +149,9 @@ QString TorrentContentModelItem::displayData(const int column) const
 QVariant TorrentContentModelItem::underlyingData(const int column) const
 {
     if (isRootItem())
+    {
         return m_itemData.value(column);
+    }
 
     switch (column)
     {
@@ -172,7 +178,9 @@ QVariant TorrentContentModelItem::underlyingData(const int column) const
 int TorrentContentModelItem::row() const
 {
     if (m_parentItem)
+    {
         return m_parentItem->children().indexOf(const_cast<TorrentContentModelItem*>(this));
+    }
     return 0;
 }
 

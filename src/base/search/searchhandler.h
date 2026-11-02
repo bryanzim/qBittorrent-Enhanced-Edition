@@ -64,10 +64,10 @@ class SearchHandler : public QObject
     SearchHandler(const QString& pattern, const QString& category, const QStringList& usedPlugins, SearchPluginManager* manager);
 
 public:
-    bool isActive() const;
-    QString pattern() const;
-    SearchPluginManager* manager() const;
-    QList<SearchResult> results() const;
+    [[nodiscard]] bool isActive() const;
+    [[nodiscard]] QString pattern() const;
+    [[nodiscard]] SearchPluginManager* manager() const;
+    [[nodiscard]] QList<SearchResult> results() const;
 
     void cancelSearch();
 

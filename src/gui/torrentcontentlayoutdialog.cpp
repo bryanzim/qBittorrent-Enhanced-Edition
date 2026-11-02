@@ -126,7 +126,9 @@ TorrentContentLayoutDialog::TorrentContentLayoutDialog(BitTorrent::TorrentConten
     connect(m_ui->commonPathEdit, &QLineEdit::textEdited, this, &TorrentContentLayoutDialog::onCommonPathEdited);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 
     m_ui->pathListView->header()->restoreState(m_storeViewState);
 }
@@ -148,7 +150,9 @@ void TorrentContentLayoutDialog::showColumnHeaderMenu()
         for (int i = 0, count = m_ui->pathListView->header()->count(); i < count; ++i)
         {
             if (!m_ui->pathListView->isColumnHidden(i))
+            {
                 m_ui->pathListView->resizeColumnToContents(i);
+            }
         }
 
         m_storeViewState = m_ui->pathListView->header()->saveState();
@@ -162,12 +166,16 @@ PathList TorrentContentLayoutDialog::selectedPaths() const
 {
     const QModelIndexList selectedRows = m_ui->pathListView->selectionModel()->selectedRows(TorrentContentLayoutModel::COL_PATH);
     if (selectedRows.isEmpty())
+    {
         return {};
+    }
 
     PathList selectedPaths;
     selectedPaths.reserve(selectedRows.size());
     for (const QModelIndex& rowIndex : selectedRows)
+    {
         selectedPaths.append(Path(rowIndex.data().toString()));
+    }
 
     return selectedPaths;
 }
@@ -197,7 +205,9 @@ void TorrentContentLayoutDialog::onCommonPathEdited(const QString& pathStr)
 
     const QModelIndexList selectedRows = m_ui->pathListView->selectionModel()->selectedRows(TorrentContentLayoutModel::COL_PATH);
     if (selectedRows.isEmpty())
+    {
         return;
+    }
 
     for (const QModelIndex& rowIndex : selectedRows)
     {

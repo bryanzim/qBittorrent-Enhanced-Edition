@@ -64,8 +64,8 @@ private slots:
 private:
     void checkForUpdatesFinished(const QHash<QString, SearchPluginVersion>& updateInfo);
     void checkForUpdatesFailed(const QString& reason);
-    QJsonObject getResults(const QList<SearchResult>& searchResults, bool isSearchActive, int totalResults) const;
-    QJsonArray getPluginsInfo(const QStringList& plugins) const;
+    [[nodiscard]] QJsonObject getResults(const QList<SearchResult>& searchResults, bool isSearchActive, int totalResults) const;
+    [[nodiscard]] QJsonArray getPluginsInfo(const QStringList& plugins) const;
 
     SearchJobManager* m_searchJobManager = nullptr;
 };

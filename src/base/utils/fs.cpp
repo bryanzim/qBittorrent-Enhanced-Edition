@@ -95,11 +95,15 @@ namespace
     {
         const ushort unicode = c.unicode();
         if ((unicode < 32) || (unicode == 127) || (c == u'/'))
+        {
             return true;
+        }
 
 #if defined(Q_OS_WIN)
         if ((c == u'\\') || (c == u'<') || (c == u'>') || (c == u':') || (c == u'"') || (c == u'|') || (c == u'?') || (c == u'*'))
+        {
             return true;
+        }
 #elif defined(Q_OS_MACOS)
         return (c == u':');
 #endif
@@ -120,7 +124,9 @@ namespace
 bool Utils::Fs::smartRemoveEmptyFolderTree(const Path& path)
 {
     if (!path.exists())
+    {
         return true;
+    }
 
     const QStringList deleteFilesList = {
         // Windows
@@ -136,7 +142,9 @@ bool Utils::Fs::smartRemoveEmptyFolderTree(const Path& path)
     QStringList dirList(path.data() + u'/'); // get all subdirectory paths
     QDirIterator iter{ path.data(), (QDir::AllDirs | QDir::NoDotAndDotDot), QDirIterator::Subdirectories };
     while (iter.hasNext())
+    {
         dirList << iter.next() + u'/';
+    }
     // sort descending by directory depth
     std::ranges::sort(dirList, [](const QString& l, const QString& r) { return l.count(u'/') > r.count(u'/'); });
 
@@ -146,7 +154,9 @@ bool Utils::Fs::smartRemoveEmptyFolderTree(const Path& path)
         // A deeper folder may have not been removed in the previous iteration
         // so don't remove anything from this folder either.
         if (!dir.isEmpty(QDir::Dirs | QDir::NoDotAndDotDot))
+        {
             continue;
+        }
 
         const QStringList tmpFileList = dir.entryList(QDir::Files | QDir::Hidden);
 
@@ -156,10 +166,14 @@ bool Utils::Fs::smartRemoveEmptyFolderTree(const Path& path)
             return (!f.endsWith(u'~') && !deleteFilesList.contains(f, Qt::CaseInsensitive));
         });
         if (hasOtherFiles)
+        {
             continue;
+        }
 
         for (const QString& f : tmpFileList)
+        {
             std::ignore = removeFile(Path(p + f));
+        }
 
         // remove directory if empty
         dir.rmdir(p);
@@ -174,7 +188,9 @@ bool Utils::Fs::smartRemoveEmptyFolderTree(const Path& path)
 void Utils::Fs::removeDirRecursively(const Path& path)
 {
     if (!path.isEmpty())
+    {
         QDir(path.data()).removeRecursively();
+    }
 }
 
 /**
@@ -188,9 +204,13 @@ qint64 Utils::Fs::computePathSize(const Path& path)
     // Check if it is a file
     const QFileInfo fi{ path.data() };
     if (!fi.exists())
+    {
         return -1;
+    }
     if (fi.isFile())
+    {
         return fi.size();
+    }
 
     // Compute folder size based on its content
     qint64 size = 0;
@@ -215,19 +235,29 @@ bool Utils::Fs::isSameFile(const Path& path1, const Path& path2)
     QFile f2{ path2.data() };
 
     if (!f1.exists() || !f2.exists())
+    {
         return false;
+    }
     if (path1 == path2)
+    {
         return true;
+    }
     if (f1.size() != f2.size())
+    {
         return false;
+    }
     if (!f1.open(QIODevice::ReadOnly) || !f2.open(QIODevice::ReadOnly))
+    {
         return false;
+    }
 
     const int readSize = 1024 * 1024; // 1 MiB
     while (!f1.atEnd() && !f2.atEnd())
     {
         if (f1.read(readSize) != f2.read(readSize))
+        {
             return false;
+        }
     }
     return true;
 }
@@ -237,20 +267,28 @@ bool Utils::Fs::isValidFileName(const QStringView name)
 {
     // The empty string, "." and ".." are not valid filenames
     if (name.isEmpty() || (name == u".") || (name == u".."))
+    {
         return false;
+    }
 
 #ifdef Q_OS_WIN
     // Windows restricts file names to 255 characters
     if (name.length() > 255)
+    {
         return false;
+    }
 
     // Windows prohibits trailing dots or spaces for filenames
     if (name.endsWith(u'.') || name.endsWith(u' '))
+    {
         return false;
+    }
 
     // Reserved device names (CON, PRN, AUX, etc.) cannot be used as file or directory names in Windows
     if (isReservedDeviceName(name))
+    {
         return false;
+    }
 #else
     // Non-Windows systems limit file name lengths to 255 bytes in UTF-8 encoding
     if (name.toUtf8().length() > 255)
@@ -259,7 +297,9 @@ bool Utils::Fs::isValidFileName(const QStringView name)
 
     // Check for OS specific reserved characters
     if (std::ranges::any_of(name, isReservedCharacter))
+    {
         return false;
+    }
 
     return true;
 }
@@ -271,7 +311,9 @@ QString Utils::Fs::toValidFileName(QStringView name, const QString& pad)
 
     // The empty string, "." and ".." are not valid filenames
     if (name.isEmpty() || (name == u".") || (name == u".."))
+    {
         return pad;
+    }
 
     QString validName;
     validName.reserve(name.size());
@@ -282,7 +324,9 @@ QString Utils::Fs::toValidFileName(QStringView name, const QString& pad)
         if (isReservedCharacter(c))
         {
             if (!validName.endsWith(pad))
+            {
                 validName += pad;
+            }
         }
         else
         {
@@ -293,7 +337,9 @@ QString Utils::Fs::toValidFileName(QStringView name, const QString& pad)
 #ifdef Q_OS_WIN
     // Remove trailing dots and spaces (Windows forbids filenames ending with '.' or " ")
     while (validName.endsWith(u'.') || validName.endsWith(u' '))
+    {
         validName.chop(1);
+    }
 
     // Append pad+"1" to Windows reserved device names (e.g. "con.txt" → "con_1.txt")
     if (isReservedDeviceName(validName))
@@ -345,7 +391,9 @@ bool Utils::Fs::isNetworkFileSystem(const Path& path)
     const std::wstring pathW = path.toString().toStdWString();
     auto volumePath = std::make_unique<wchar_t[]>(pathW.length() + 1);
     if (!::GetVolumePathNameW(pathW.c_str(), volumePath.get(), static_cast<DWORD>(pathW.length() + 1)))
+    {
         return false;
+    }
     return (::GetDriveTypeW(volumePath.get()) == DRIVE_REMOTE);
 #else
     const QString file = (path.toString() + u"/.");
@@ -401,10 +449,14 @@ bool Utils::Fs::isNetworkFileSystem(const Path& path)
 bool Utils::Fs::copyFile(const Path& from, const Path& to)
 {
     if (!from.exists())
+    {
         return false;
+    }
 
     if (!mkpath(to.parentPath()))
+    {
         return false;
+    }
 
     return QFile::copy(from.data(), to.data());
 }
@@ -412,10 +464,14 @@ bool Utils::Fs::copyFile(const Path& from, const Path& to)
 bool Utils::Fs::renameFile(const Path& from, const Path& to)
 {
     if (!from.exists())
+    {
         return false;
+    }
 
     if (!mkpath(to.parentPath()))
+    {
         return false;
+    }
 
     return QFile::rename(from.data(), to.data());
 }
@@ -429,15 +485,21 @@ nonstd::expected<void, QString> Utils::Fs::removeFile(const Path& path)
 {
     QFile file{ path.data() };
     if (file.remove())
+    {
         return {};
+    }
 
     if (!file.exists())
+    {
         return {};
+    }
 
     // Make sure we have read/write permissions
     file.setPermissions(file.permissions() | QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);
     if (file.remove())
+    {
         return {};
+    }
 
     return nonstd::make_unexpected(file.errorString());
 }
@@ -446,15 +508,21 @@ nonstd::expected<void, QString> Utils::Fs::moveFileToTrash(const Path& path)
 {
     QFile file{ path.data() };
     if (file.moveToTrash())
+    {
         return {};
+    }
 
     if (!file.exists())
+    {
         return {};
+    }
 
     // Make sure we have read/write permissions
     file.setPermissions(file.permissions() | QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);
     if (file.moveToTrash())
+    {
         return {};
+    }
 
     const QString errorMessage = file.errorString();
     return nonstd::make_unexpected(!errorMessage.isEmpty() ? errorMessage : QCoreApplication::translate("fs", "Unknown error"));

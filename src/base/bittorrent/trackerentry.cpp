@@ -47,8 +47,10 @@ QList<BitTorrent::TrackerEntry> BitTorrent::parseTrackerEntries(const QStringVie
 
         if (tracker.isEmpty())
         {
-            if (trackerTier < std::numeric_limits<decltype(trackerTier)>::max()) // prevent overflow
+            if (trackerTier < std::numeric_limits<decltype(trackerTier)>::max())
+            { // prevent overflow
                 ++trackerTier;
+            }
             continue;
         }
 

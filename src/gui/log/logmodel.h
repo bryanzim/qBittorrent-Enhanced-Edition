@@ -53,9 +53,9 @@ public:
 
     explicit BaseLogModel(QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex& parent = {}) const override;
-    int columnCount(const QModelIndex& parent = {}) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     void reset();
 
 protected:
@@ -64,9 +64,9 @@ protected:
     public:
         Message(const QString& time, const QString& message, Log::MsgType type);
 
-        QString time() const;
-        QString message() const;
-        Log::MsgType type() const;
+        [[nodiscard]] QString time() const;
+        [[nodiscard]] QString message() const;
+        [[nodiscard]] Log::MsgType type() const;
 
     private:
         QString m_time;
@@ -75,7 +75,7 @@ protected:
     };
 
     void addNewMessage(const Message& message);
-    virtual QColor messageForeground(const Message& message) const = 0;
+    [[nodiscard]] virtual QColor messageForeground(const Message& message) const = 0;
     virtual void onUIThemeChanged();
 
 private:
@@ -97,7 +97,7 @@ private slots:
     void handleNewMessage(const Log::Msg& message);
 
 private:
-    QColor messageForeground(const Message& message) const override;
+    [[nodiscard]] QColor messageForeground(const Message& message) const override;
     void onUIThemeChanged() override;
     void loadColors();
 
@@ -116,7 +116,7 @@ private slots:
     void handleNewMessage(const Log::Peer& peer);
 
 private:
-    QColor messageForeground(const Message& message) const override;
+    [[nodiscard]] QColor messageForeground(const Message& message) const override;
     void onUIThemeChanged() override;
     void loadColors();
 

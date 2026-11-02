@@ -42,11 +42,11 @@ namespace BitTorrent
         ushort port = 0;
 
         static PeerAddress parse(QStringView address);
-        QString toString() const;
+        [[nodiscard]] QString toString() const;
 
         friend bool operator<(const PeerAddress& left, const PeerAddress& right);
         friend bool operator==(const PeerAddress& left, const PeerAddress& right) = default;
     };
 
-    std::size_t qHash(const PeerAddress& addr, std::size_t seed = 0);
+    std::size_t qHash(const PeerAddress& addr, std::size_t seed = 0U);
 }

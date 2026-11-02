@@ -68,8 +68,8 @@ public:
     APIResult run(const QString& action, const StringMap& params, const DataMap& data = {});
 
 protected:
-    const StringMap& params() const;
-    const DataMap& data() const;
+    [[nodiscard]] const StringMap& params() const;
+    [[nodiscard]] const DataMap& data() const;
     void requireParams(const QList<QString>& requiredParams) const;
 
     void setResult(const QString& result);

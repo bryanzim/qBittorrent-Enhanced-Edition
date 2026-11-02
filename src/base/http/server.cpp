@@ -114,7 +114,9 @@ void Server::incomingConnection(const qintptr socketDescriptor)
 {
     std::unique_ptr<QTcpSocket> serverSocket = isHttps() ? std::make_unique<QSslSocket>(this) : std::make_unique<QTcpSocket>(this);
     if (!serverSocket->setSocketDescriptor(socketDescriptor))
+    {
         return;
+    }
 
     if (m_connections.size() >= CONNECTIONS_LIMIT)
     {
@@ -153,7 +155,9 @@ void Server::dropTimedOutConnection()
 {
     m_connections.removeIf([](Connection* connection) {
         if (!connection->hasExpired(KEEP_ALIVE_DURATION))
+        {
             return false;
+        }
 
         connection->deleteLater();
         return true;

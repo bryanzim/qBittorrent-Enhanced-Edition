@@ -78,20 +78,20 @@ public:
     explicit TorrentContentWidget(QWidget* parent = nullptr);
 
     void setContentHandler(BitTorrent::TorrentContentHandler* contentHandler);
-    BitTorrent::TorrentContentHandler* contentHandler() const;
+    [[nodiscard]] BitTorrent::TorrentContentHandler* contentHandler() const;
     void refresh();
 
-    bool openByEnterKey() const;
+    [[nodiscard]] bool openByEnterKey() const;
     void setOpenByEnterKey(bool value);
 
-    DoubleClickAction doubleClickAction() const;
+    [[nodiscard]] DoubleClickAction doubleClickAction() const;
     void setDoubleClickAction(DoubleClickAction action);
 
-    ColumnsVisibilityMode columnsVisibilityMode() const;
+    [[nodiscard]] ColumnsVisibilityMode columnsVisibilityMode() const;
     void setColumnsVisibilityMode(ColumnsVisibilityMode mode);
 
-    int getFileIndex(const QModelIndex& index) const;
-    Path getItemPath(const QModelIndex& index) const;
+    [[nodiscard]] int getFileIndex(const QModelIndex& index) const;
+    [[nodiscard]] Path getItemPath(const QModelIndex& index) const;
 
     void setFilterPattern(const QString& patternText, FilterPatternFormat format = FilterPatternFormat::Wildcards);
 
@@ -111,7 +111,7 @@ private:
     void wheelEvent(QWheelEvent* event) override;
     void rowsInserted(const QModelIndex& parent, int start, int end) override;
 
-    QModelIndex currentNameCell() const;
+    [[nodiscard]] QModelIndex currentNameCell() const;
     void displayColumnHeaderMenu();
     void displayContextMenu();
     void openItem(const QModelIndex& index) const;
@@ -122,7 +122,7 @@ private:
     void batchRenameFiles();
     void applyPriorities(BitTorrent::DownloadPriority priority);
     void applyPrioritiesByOrder();
-    Path getFullPath(const QModelIndex& index) const;
+    [[nodiscard]] Path getFullPath(const QModelIndex& index) const;
     void onItemDoubleClicked(const QModelIndex& index);
     // Expand single-item folders recursively.
     // This will trigger sorting and filtering so do it after all relevant data is loaded.

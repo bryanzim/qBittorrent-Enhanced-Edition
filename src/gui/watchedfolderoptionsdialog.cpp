@@ -65,7 +65,9 @@ TorrentFilesWatcher::WatchedFolderOptions WatchedFolderOptionsDialog::watchedFol
 void WatchedFolderOptionsDialog::loadState()
 {
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 void WatchedFolderOptionsDialog::saveState()

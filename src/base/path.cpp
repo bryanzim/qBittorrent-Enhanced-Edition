@@ -84,24 +84,32 @@ bool Path::isValid() const
 {
     // Reject empty paths
     if (m_pathStr.isEmpty())
+    {
         return false;
+    }
 
     QStringView pathStrView = m_pathStr;
 
 #ifdef Q_OS_WIN
     // Remove Windows drive letter prefix (e.g., "C:/") if present
     if (hasDriveLetter(pathStrView))
+    {
         pathStrView = pathStrView.sliced(3);
+    }
 #endif
 
     // Split path into components and validate each one
     for (const QStringView component : pathStrView.split(u'/', Qt::SkipEmptyParts))
     {
         if ((component == u".") || (component == u".."))
+        {
             continue;
+        }
 
         if (!Utils::Fs::isValidFileName(component))
+        {
             return false;
+        }
     }
 
     return true;
@@ -116,7 +124,9 @@ bool Path::isAbsolute() const
 {
     // `QDir::isAbsolutePath` treats `:` as a path to QResource, so handle it manually
     if (m_pathStr.startsWith(u':'))
+    {
         return false;
+    }
     return QDir::isAbsolutePath(m_pathStr);
 }
 
@@ -124,7 +134,9 @@ bool Path::isRelative() const
 {
     // `QDir::isRelativePath` treats `:` as a path to QResource, so handle it manually
     if (m_pathStr.startsWith(u':'))
+    {
         return true;
+    }
     return QDir::isRelativePath(m_pathStr);
 }
 
@@ -139,15 +151,21 @@ Path Path::rootItem() const
 
     const qsizetype slashIndex = m_pathStr.indexOf(u'/');
     if (slashIndex < 0)
+    {
         return *this;
+    }
 
-    if (slashIndex == 0) // *nix absolute path
+    if (slashIndex == 0)
+    { // *nix absolute path
         return createUnchecked(u"/"_s);
+    }
 
 #ifdef Q_OS_WIN
     // should be `c:/` instead of `c:`
     if ((slashIndex == 2) && hasDriveLetter(m_pathStr))
+    {
         return createUnchecked(m_pathStr.first(slashIndex + 1));
+    }
 #endif
     return createUnchecked(m_pathStr.first(slashIndex));
 }
@@ -158,16 +176,22 @@ Path Path::parentPath() const
 
     const qsizetype slashIndex = m_pathStr.lastIndexOf(u'/');
     if (slashIndex == -1)
+    {
         return {};
+    }
 
-    if (slashIndex == 0) // *nix absolute path
+    if (slashIndex == 0)
+    { // *nix absolute path
         return (m_pathStr.size() == 1) ? Path() : createUnchecked(u"/"_s);
+    }
 
 #ifdef Q_OS_WIN
     // should be `c:/` instead of `c:`
     // Windows "drive letter" is limited to one alphabet
     if ((slashIndex == 2) && hasDriveLetter(m_pathStr))
+    {
         return (m_pathStr.size() == 3) ? Path() : createUnchecked(m_pathStr.first(slashIndex + 1));
+    }
 #endif
     return createUnchecked(m_pathStr.first(slashIndex));
 }
@@ -176,7 +200,9 @@ QString Path::filename() const
 {
     const qsizetype slashIndex = m_pathStr.lastIndexOf(u'/');
     if (slashIndex == -1)
+    {
         return m_pathStr;
+    }
 
     return m_pathStr.sliced(slashIndex + 1);
 }
@@ -185,7 +211,9 @@ QString Path::extension() const
 {
     const QString suffix = QMimeDatabase().suffixForFileName(m_pathStr);
     if (!suffix.isEmpty())
+    {
         return (u"." + suffix);
+    }
 
     const qsizetype slashIndex = m_pathStr.lastIndexOf(u'/');
     const auto filename = QStringView(m_pathStr).sliced(slashIndex + 1);
@@ -203,7 +231,9 @@ bool Path::hasExtension(const QStringView ext) const
 bool Path::hasAncestor(const Path& other, const Qt::CaseSensitivity caseSensitivity) const
 {
     if (other.isEmpty() || (m_pathStr.size() <= other.m_pathStr.size()))
+    {
         return false;
+    }
 
     return (m_pathStr[other.m_pathStr.size()] == u'/') && m_pathStr.startsWith(other.m_pathStr, caseSensitivity);
 }
@@ -212,7 +242,9 @@ Path Path::relativePathOf(const Path& childPath) const
 {
     // If both paths are relative, we assume that they have the same base path
     if (isRelative() && childPath.isRelative())
+    {
         return Path(QDir(QDir::home().absoluteFilePath(m_pathStr)).relativeFilePath(QDir::home().absoluteFilePath(childPath.data())));
+    }
 
     return Path(QDir(m_pathStr).relativeFilePath(childPath.data()));
 }
@@ -230,7 +262,9 @@ Path Path::removedExtension() const
 void Path::removeExtension(const QStringView ext)
 {
     if (hasExtension(ext))
+    {
         m_pathStr.chop(ext.size());
+    }
 }
 
 Path Path::removedExtension(const QStringView ext) const
@@ -282,7 +316,9 @@ Path::Iterator Path::end() const
 Path Path::commonPath(const Path& left, const Path& right)
 {
     if (left.isEmpty() || right.isEmpty())
+    {
         return {};
+    }
 
     const QList<QStringView> leftPathItems = QStringView(left.m_pathStr).split(u'/');
     const QList<QStringView> rightPathItems = QStringView(right.m_pathStr).split(u'/');
@@ -293,14 +329,18 @@ Path Path::commonPath(const Path& left, const Path& right)
         const QStringView leftPathItem = leftPathItems[commonItemsCount];
         const QStringView rightPathItem = rightPathItems[commonItemsCount];
         if (leftPathItem.compare(rightPathItem, CASE_SENSITIVITY) != 0)
+        {
             break;
+        }
 
         ++commonItemsCount;
         commonPathSize += leftPathItem.size();
     }
 
     if (commonItemsCount > 0)
+    {
         commonPathSize += (commonItemsCount - 1); // size of intermediate separators
+    }
 
     return Path::createUnchecked(left.m_pathStr.first(commonPathSize));
 }
@@ -308,14 +348,18 @@ Path Path::commonPath(const Path& left, const Path& right)
 Path Path::commonPath(const PathList& filePaths)
 {
     if (filePaths.isEmpty())
+    {
         return {};
+    }
 
     Path commonPath = filePaths.at(0);
     for (const Path& filePath : std::views::drop(filePaths, 1))
     {
         commonPath = Path::commonPath(commonPath, filePath);
         if (commonPath.isEmpty())
+        {
             return commonPath;
+        }
     }
 
     return commonPath;
@@ -333,12 +377,18 @@ Path Path::findRootFolder(const PathList& filePaths)
         const auto filePathElements = QStringView(filePath.m_pathStr).split(u'/', Qt::SkipEmptyParts);
         // if at least one file has no root folder, no common root folder exists
         if (filePathElements.count() <= 1)
+        {
             return {};
+        }
 
         if (rootFolder.isEmpty())
+        {
             rootFolder.m_pathStr = filePathElements.at(0).toString();
+        }
         else if (rootFolder.m_pathStr != filePathElements.at(0))
+        {
             return {};
+        }
     }
 
     return rootFolder;
@@ -348,7 +398,9 @@ void Path::stripRootFolder(PathList& filePaths)
 {
     const Path commonRootFolder = findRootFolder(filePaths);
     if (commonRootFolder.isEmpty())
+    {
         return;
+    }
 
     for (Path& filePath : filePaths)
     {
@@ -365,7 +417,9 @@ void Path::addRootFolder(PathList& filePaths, const Path& rootFolder)
     Q_ASSERT(!rootFolder.isEmpty());
 
     for (Path& filePath : filePaths)
+    {
         filePath = rootFolder / filePath;
+    }
 }
 
 Path Path::createUnchecked(const QString& pathStr)
@@ -384,10 +438,14 @@ bool operator==(const Path& lhs, const Path& rhs)
 Path operator/(const Path& lhs, const Path& rhs)
 {
     if (rhs.isEmpty())
+    {
         return lhs;
+    }
 
     if (lhs.isEmpty())
+    {
         return rhs;
+    }
 
     return Path(lhs.m_pathStr + u'/' + rhs.m_pathStr);
 }
@@ -423,16 +481,24 @@ Path::Iterator::Iterator(const Path& path)
     {
         m_itemsCount = m_path.m_pathStr.count(u'/');
         if (!m_path.m_pathStr.startsWith(u'/'))
+        {
             ++m_itemsCount;
+        }
 
         qsizetype sepPos = 0;
         for (qsizetype i = 0; i <= m_depth; ++i)
+        {
             sepPos = m_path.m_pathStr.indexOf(u'/', (sepPos + 1));
+        }
 #ifdef Q_OS_WIN
         if (hasDriveLetter(m_path.m_pathStr))
+        {
             m_currentPath = Path::createUnchecked(m_path.m_pathStr.first(3));
+        }
         else
+        {
             m_currentPath = Path::createUnchecked((sepPos > 0) ? m_path.m_pathStr.first(sepPos) : m_path.m_pathStr);
+        }
 #else
         m_currentPath = Path::createUnchecked((sepPos > 0) ? m_path.m_pathStr.first(sepPos) : m_path.m_pathStr);
 #endif
@@ -446,7 +512,9 @@ Path::Iterator::Iterator(const Path& path, EndIteratorTag)
     {
         m_itemsCount = m_path.m_pathStr.count(u'/');
         if (!m_path.m_pathStr.startsWith(u'/'))
+        {
             ++m_itemsCount;
+        }
         m_depth = m_itemsCount;
     }
 }

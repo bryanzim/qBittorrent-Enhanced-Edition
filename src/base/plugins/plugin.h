@@ -51,9 +51,9 @@ public:
 
     ~Plugin() override;
 
-    QString name() const;
-    PluginVersion version() const;
-    bool isInvocable() const;
+    [[nodiscard]] QString name() const;
+    [[nodiscard]] PluginVersion version() const;
+    [[nodiscard]] bool isInvocable() const;
 
     void invoke() const;
 

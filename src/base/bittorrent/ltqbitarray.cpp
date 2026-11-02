@@ -61,7 +61,9 @@ namespace BitTorrent::LT
 
         QVarLengthArray<char, STACK_ALLOC_SIZE> tmp(dataLength);
         for (int i = 0; i < dataLength; ++i)
+        {
             tmp[i] = reverseByte(bitsData[i]);
+        }
 
         return QBitArray::fromBits(tmp.data(), bits.size());
     }

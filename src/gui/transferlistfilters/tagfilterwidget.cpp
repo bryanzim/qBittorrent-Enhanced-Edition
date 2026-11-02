@@ -45,10 +45,14 @@ namespace
     std::optional<Tag> getTagFilter(const TagFilterProxyModel* const model, const QModelIndex& index)
     {
         if (!index.isValid() || (index.row() == 0))
+        {
             return std::nullopt; // All tags
+        }
 
         if (index.row() == 1)
+        {
             return Tag(); // Untagged
+        }
 
         return model->tag(index);
     }
@@ -88,7 +92,9 @@ std::optional<Tag> TagFilterWidget::currentTag() const
     QModelIndex current;
     const auto selectedRows = selectionModel()->selectedRows();
     if (!selectedRows.isEmpty())
+    {
         current = selectedRows.first();
+    }
 
     return getTagFilter(static_cast<TagFilterProxyModel*>(model()), current);
 }
@@ -176,12 +182,18 @@ void TagFilterWidget::addTag()
 {
     const Tag tag = askTagName();
     if (tag.isEmpty())
+    {
         return;
+    }
 
     if (BitTorrent::Session::instance()->tags().contains(tag))
+    {
         QMessageBox::warning(this, tr("Tag exists"), tr("Tag name already exists."));
+    }
     else
+    {
         BitTorrent::Session::instance()->addTag(tag);
+    }
 }
 
 void TagFilterWidget::removeTag()
@@ -199,7 +211,11 @@ void TagFilterWidget::removeUnusedTags()
 {
     auto* session = BitTorrent::Session::instance();
     for (const Tag& tag : asConst(session->tags()))
+    {
         if (model()->data(static_cast<TagFilterProxyModel*>(model())->index(tag), Qt::UserRole) == 0)
+        {
             session->removeTag(tag);
+        }
+    }
     updateGeometry();
 }

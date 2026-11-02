@@ -49,16 +49,16 @@ namespace RSS
         friend class Session;
 
     public:
-        virtual QList<Article*> articles() const = 0;
-        virtual int unreadCount() const = 0;
+        [[nodiscard]] virtual QList<Article*> articles() const = 0;
+        [[nodiscard]] virtual int unreadCount() const = 0;
         virtual void markAsRead() = 0;
         virtual void refresh() = 0;
         virtual void updateFetchDelay() = 0;
 
-        QString path() const;
-        QString name() const;
+        [[nodiscard]] QString path() const;
+        [[nodiscard]] QString name() const;
 
-        virtual QJsonValue toJsonValue(bool withData = false) const = 0;
+        [[nodiscard]] virtual QJsonValue toJsonValue(bool withData = false) const = 0;
 
         static const QChar PathSeparator;
 

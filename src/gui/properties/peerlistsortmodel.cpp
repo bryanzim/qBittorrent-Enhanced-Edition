@@ -49,7 +49,9 @@ bool PeerListSortModel::lessThan(const QModelIndex& left, const QModelIndex& rig
         const QVariant rightData = right.data(UnderlyingDataRole);
 
         if ((leftData.metaType() == peerAddressType) && (rightData.metaType() == peerAddressType))
+        {
             return leftData.value<BitTorrent::PeerAddress>() < rightData.value<BitTorrent::PeerAddress>();
+        }
         return m_naturalLessThan(leftData.toString(), rightData.toString());
     }
 

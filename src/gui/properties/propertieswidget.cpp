@@ -156,7 +156,9 @@ void PropertiesWidget::showPiecesAvailability(bool show)
     m_piecesAvailability->setVisible(show);
     m_ui->labelAverageAvailabilityVal->setVisible(show);
     if (show || !m_downloadedPieces->isVisible())
+    {
         m_ui->lineBelowBars->setVisible(show);
+    }
 }
 
 void PropertiesWidget::showPiecesDownloaded(bool show)
@@ -165,7 +167,9 @@ void PropertiesWidget::showPiecesDownloaded(bool show)
     m_downloadedPieces->setVisible(show);
     m_ui->labelProgressVal->setVisible(show);
     if (show || !m_piecesAvailability->isVisible())
+    {
         m_ui->lineBelowBars->setVisible(show);
+    }
 }
 
 void PropertiesWidget::setVisibility(const bool visible)
@@ -192,7 +196,9 @@ void PropertiesWidget::setVisibility(const bool visible)
         m_ui->stackedProperties->setVisible(true);
         auto* hSplitter = static_cast<QSplitter*>(parentWidget());
         if (m_handleWidth != -1)
+        {
             hSplitter->setHandleWidth(m_handleWidth);
+        }
         hSplitter->handle(1)->setDisabled(false);
         hSplitter->handle(1)->setVisible(true);
         hSplitter->setSizes(m_slideSizes);
@@ -275,7 +281,9 @@ LineEdit* PropertiesWidget::contentFilterLine() const
 void PropertiesWidget::updateSavePath(BitTorrent::Torrent* const torrent)
 {
     if (torrent == m_torrent)
+    {
         m_ui->labelSavePathVal->setText(m_torrent->savePath().toString());
+    }
 }
 
 void PropertiesWidget::showContentFilterContextMenu()
@@ -308,7 +316,9 @@ void PropertiesWidget::loadTorrentInfos(BitTorrent::Torrent* const torrent)
     m_trackerList->setTorrent(m_torrent);
     m_ui->filesList->setContentHandler(m_torrent);
     if (!m_torrent)
+    {
         return;
+    }
 
     // Save path
     updateSavePath(m_torrent);
@@ -357,7 +367,9 @@ void PropertiesWidget::readSettings()
     m_ui->filesList->header()->restoreState(pref->getPropFileListState());
     m_tabBar->setCurrentIndex(currentTab);
     if (!visible)
+    {
         setVisibility(false);
+    }
 }
 
 void PropertiesWidget::saveSettings()
@@ -368,12 +380,18 @@ void PropertiesWidget::saveSettings()
     auto* hSplitter = static_cast<QSplitter*>(parentWidget());
     QList<int> sizes;
     if (m_state == VISIBLE)
+    {
         sizes = hSplitter->sizes();
+    }
     else
+    {
         sizes = m_slideSizes;
+    }
 
     if (sizes.size() == 2)
+    {
         pref->setPropSplitterSizes(QString::number(sizes.first()) + u',' + QString::number(sizes.last()));
+    }
     pref->setPropFileListState(m_ui->filesList->header()->saveState());
     // Remember current tab
     pref->setPropCurTab(m_tabBar->currentIndex());
@@ -390,7 +408,9 @@ void PropertiesWidget::loadDynamicData()
 {
     // Refresh only if the torrent handle is valid and visible
     if (!m_torrent || (m_state != VISIBLE))
+    {
         return;
+    }
 
     // Transfer infos
     switch (m_ui->stackedProperties->currentIndex())
@@ -467,7 +487,9 @@ void PropertiesWidget::loadDynamicData()
 
                 m_torrent->fetchPieceAvailability().then(this, [this, torrent = QPointer(m_torrent)](const QList<int>& pieceAvailability) {
                     if (m_torrent && (m_torrent == torrent))
+                    {
                         m_piecesAvailability->setAvailability(pieceAvailability);
+                    }
                 });
 
                 m_ui->labelAverageAvailabilityVal->setText(Utils::String::fromDouble(m_torrent->distributedCopies(), 3));
@@ -478,12 +500,14 @@ void PropertiesWidget::loadDynamicData()
             }
 
             // Progress
-            qreal progress = m_torrent->progress() * 100.;
+            qreal const progress = m_torrent->progress() * 100.;
             m_ui->labelProgressVal->setText(Utils::String::fromDouble(progress, 1) + u'%');
 
             m_torrent->fetchDownloadingPieces().then(this, [this, torrent = QPointer(m_torrent)](const QBitArray& downloadingPieces) {
                 if (m_torrent && (m_torrent == torrent))
+                {
                     m_downloadedPieces->setProgress(m_torrent->pieces(), downloadingPieces);
+                }
             });
         }
         else
@@ -506,11 +530,15 @@ void PropertiesWidget::loadDynamicData()
 void PropertiesWidget::loadUrlSeeds()
 {
     if (!m_torrent)
+    {
         return;
+    }
 
     m_torrent->fetchURLSeeds().then(this, [this, torrent = QPointer(m_torrent)](const QList<QUrl>& urlSeeds) {
         if (!m_torrent || (m_torrent != torrent))
+        {
             return;
+        }
 
         m_ui->listWebSeeds->clear();
         qDebug("Loading web seeds");
@@ -526,7 +554,9 @@ void PropertiesWidget::loadUrlSeeds()
 void PropertiesWidget::displayWebSeedListMenu()
 {
     if (!m_torrent)
+    {
         return;
+    }
 
     const QModelIndexList rows = m_ui->listWebSeeds->selectionModel()->selectedRows();
 
@@ -597,7 +627,9 @@ void PropertiesWidget::askWebSeed()
                                                           tr("Add web seed:"), QLineEdit::Normal,
                                                           u"http://www."_s, &ok);
     if (!ok)
+    {
         return;
+    }
     qDebug("Adding %s web seed", qUtf8Printable(urlSeed));
     if (!m_ui->listWebSeeds->findItems(urlSeed, Qt::MatchFixedString).empty())
     {
@@ -605,7 +637,9 @@ void PropertiesWidget::askWebSeed()
         return;
     }
     if (m_torrent)
+    {
         m_torrent->addUrlSeeds({ urlSeed });
+    }
     // Refresh the seeds list
     loadUrlSeeds();
 }
@@ -614,13 +648,17 @@ void PropertiesWidget::deleteSelectedUrlSeeds()
 {
     const QList<QListWidgetItem*> selectedItems = m_ui->listWebSeeds->selectedItems();
     if (selectedItems.isEmpty())
+    {
         return;
+    }
 
     QList<QUrl> urlSeeds;
     urlSeeds.reserve(selectedItems.size());
 
     for (const QListWidgetItem* item : selectedItems)
+    {
         urlSeeds << item->text();
+    }
 
     m_torrent->removeUrlSeeds(urlSeeds);
     // Refresh list
@@ -631,11 +669,15 @@ void PropertiesWidget::copySelectedWebSeedsToClipboard() const
 {
     const QList<QListWidgetItem*> selectedItems = m_ui->listWebSeeds->selectedItems();
     if (selectedItems.isEmpty())
+    {
         return;
+    }
 
     QStringList urlsToCopy;
     for (const QListWidgetItem* item : selectedItems)
+    {
         urlsToCopy << item->text();
+    }
 
     QApplication::clipboard()->setText(urlsToCopy.join(u'\n'));
 }
@@ -644,7 +686,9 @@ void PropertiesWidget::editWebSeed()
 {
     const QList<QListWidgetItem*> selectedItems = m_ui->listWebSeeds->selectedItems();
     if (selectedItems.size() != 1)
+    {
         return;
+    }
 
     const QListWidgetItem* selectedItem = selectedItems.last();
     const QString oldSeed = selectedItem->text();
@@ -653,7 +697,9 @@ void PropertiesWidget::editWebSeed()
                                                           tr("Web seed URL:"), QLineEdit::Normal,
                                                           oldSeed, &result);
     if (!result)
+    {
         return;
+    }
 
     if (!m_ui->listWebSeeds->findItems(newSeed, Qt::MatchFixedString).empty())
     {

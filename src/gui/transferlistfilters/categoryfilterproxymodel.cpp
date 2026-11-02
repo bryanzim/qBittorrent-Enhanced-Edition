@@ -49,6 +49,8 @@ bool CategoryFilterProxyModel::lessThan(const QModelIndex& left, const QModelInd
 {
     // "All" and "Uncategorized" must be left in place
     if (CategoryFilterModel::isSpecialItem(left) || CategoryFilterModel::isSpecialItem(right))
+    {
         return (left < right);
+    }
     return m_naturalLessThan(left.data().toString(), right.data().toString());
 }

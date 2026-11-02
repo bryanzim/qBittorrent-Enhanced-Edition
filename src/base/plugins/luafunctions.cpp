@@ -74,14 +74,18 @@ namespace LuaFunctions
         // will strip off empty parameters.
         // E.g. `python.exe "1" "" "3"` will become `python.exe "1" "3"`
         int argCount = 0;
-        std::unique_ptr<LPWSTR[], decltype(&::LocalFree)> args{ ::CommandLineToArgvW(programWStr.c_str(), &argCount), ::LocalFree };
+        std::unique_ptr<LPWSTR[], decltype(&::LocalFree)> const args{ ::CommandLineToArgvW(programWStr.c_str(), &argCount), ::LocalFree };
 
         if (argCount <= 0)
+        {
             return false;
+        }
 
         QStringList argList;
         for (int i = 1; i < argCount; ++i)
+        {
             argList += QString::fromWCharArray(args[i]);
+        }
 
         QProcess proc;
         proc.setProgram(QString::fromWCharArray(args[0]));
@@ -101,7 +105,9 @@ namespace LuaFunctions
         });
 
         if (proc.startDetached())
+        {
             return true;
+        }
 #else // Q_OS_WIN
         QStringList args = Utils::String::splitCommand(command);
 

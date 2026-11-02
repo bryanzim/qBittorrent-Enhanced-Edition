@@ -61,14 +61,18 @@ namespace
               m_torrentInfo{ torrentInfo }
         {
             if ((m_bytesPerPixel > 0) && (m_bytesPerPixel < 10))
+            {
                 qDebug() << "PieceIndexToImagePos: torrent size is too small for correct computations."
                          << "Torrent size =" << torrentInfo.totalSize() << "Image width = " << image.width();
+            }
         }
 
-        ImageRange imagePos(const BitTorrent::TorrentInfo::PieceRange& pieces) const
+        [[nodiscard]] ImageRange imagePos(const BitTorrent::TorrentInfo::PieceRange& pieces) const
         {
             if (m_bytesPerPixel < 0)
+            {
                 return { 0, 0 };
+            }
 
             // the type conversion is used to prevent integer overflow with torrents of 2+ GiB size
             const qlonglong pieceLength = m_torrentInfo.pieceLength();
@@ -77,7 +81,7 @@ namespace
                 (pieces.last() * pieceLength + m_torrentInfo.pieceLength(pieces.last()) - 1) / m_bytesPerPixel);
         }
 
-        int pieceIndex(int imagePos) const
+        [[nodiscard]] int pieceIndex(int imagePos) const
         {
             return m_bytesPerPixel < 0 ? 0 : (imagePos * m_bytesPerPixel + m_bytesPerPixel / 2) / m_torrentInfo.pieceLength();
         }
@@ -122,7 +126,9 @@ void PiecesBar::setTorrent(const BitTorrent::Torrent* torrent)
 {
     m_torrent = torrent;
     if (!m_torrent)
+    {
         clear();
+    }
 }
 
 void PiecesBar::clear()
@@ -174,7 +180,7 @@ void PiecesBar::mouseMoveEvent(QMouseEvent* e)
 void PiecesBar::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    QRect imageRect(borderWidth, borderWidth, width() - 2 * borderWidth, height() - 2 * borderWidth);
+    QRect const imageRect(borderWidth, borderWidth, width() - 2 * borderWidth, height() - 2 * borderWidth);
     if (m_image.isNull())
     {
         painter.setBrush(backgroundColor());
@@ -185,14 +191,16 @@ void PiecesBar::paintEvent(QPaintEvent*)
         if (m_image.width() != imageRect.width())
         {
             if (const QImage image = renderImage(); !image.isNull())
+            {
                 m_image = image;
+            }
         }
         painter.drawImage(imageRect, m_image);
     }
 
     if (!m_highlightedRegion.isNull())
     {
-        QRect targetHighlightRect{ m_highlightedRegion.adjusted(borderWidth, borderWidth, borderWidth, height() - 2 * borderWidth) };
+        QRect const targetHighlightRect{ m_highlightedRegion.adjusted(borderWidth, borderWidth, borderWidth, height() - 2 * borderWidth) };
         painter.fillRect(targetHighlightRect, highlightedPieceColor());
     }
 
@@ -248,18 +256,18 @@ const QList<QRgb>& PiecesBar::pieceColors() const
 
 QRgb PiecesBar::mixTwoColors(QRgb rgb1, QRgb rgb2, float ratio)
 {
-    int r1 = qRed(rgb1);
-    int g1 = qGreen(rgb1);
-    int b1 = qBlue(rgb1);
+    int const r1 = qRed(rgb1);
+    int const g1 = qGreen(rgb1);
+    int const b1 = qBlue(rgb1);
 
-    int r2 = qRed(rgb2);
-    int g2 = qGreen(rgb2);
-    int b2 = qBlue(rgb2);
+    int const r2 = qRed(rgb2);
+    int const g2 = qGreen(rgb2);
+    int const b2 = qBlue(rgb2);
 
-    float ratioN = 1.0f - ratio;
-    int r = (r1 * ratioN) + (r2 * ratio);
-    int g = (g1 * ratioN) + (g2 * ratio);
-    int b = (b1 * ratioN) + (b2 * ratio);
+    float const ratioN = 1.0f - ratio;
+    int const r = (r1 * ratioN) + (r2 * ratio);
+    int const g = (g1 * ratioN) + (g2 * ratio);
+    int const b = (b1 * ratioN) + (b2 * ratio);
 
     return qRgb(r, g, b);
 }
@@ -267,7 +275,9 @@ QRgb PiecesBar::mixTwoColors(QRgb rgb1, QRgb rgb2, float ratio)
 void PiecesBar::showToolTip(const QHelpEvent* e)
 {
     if (!m_torrent)
+    {
         return;
+    }
 
     QString toolTipText;
 
@@ -284,11 +294,17 @@ void PiecesBar::showToolTip(const QHelpEvent* e)
 
             QString tooltipTitle;
             if (fileIndexes.count() > 1)
+            {
                 tooltipTitle = tr("Files in this piece:");
+            }
             else if (torrentInfo.fileSize(fileIndexes.front()) == torrentInfo.pieceLength(pieceIndex))
+            {
                 tooltipTitle = tr("File in this piece:");
+            }
             else
+            {
                 tooltipTitle = tr("File in these pieces:");
+            }
 
             toolTipText.reserve(fileIndexes.size() * 128);
             toolTipText += u"<html><body>";
@@ -306,10 +322,14 @@ void PiecesBar::showToolTip(const QHelpEvent* e)
     else
     {
         toolTipText += simpleToolTipText();
-        if (showDetailedInformation) // metadata are not available at this point
+        if (showDetailedInformation)
+        { // metadata are not available at this point
             toolTipText += u'\n' + tr("Wait until metadata become available to see detailed information");
+        }
         else
+        {
             toolTipText += u'\n' + tr("Hold Shift key for detailed information");
+        }
     }
 
     QToolTip::showText(e->globalPos(), toolTipText, this);
@@ -318,19 +338,21 @@ void PiecesBar::showToolTip(const QHelpEvent* e)
 void PiecesBar::highlightFile(int imagePos)
 {
     if (!m_torrent || !m_torrent->hasMetadata() || (imagePos < 0) || (imagePos >= m_image.width()))
+    {
         return;
+    }
 
     const BitTorrent::TorrentInfo torrentInfo = m_torrent->info();
-    PieceIndexToImagePos transform{ torrentInfo, m_image };
+    PieceIndexToImagePos const transform{ torrentInfo, m_image };
 
-    int pieceIndex = transform.pieceIndex(imagePos);
+    int const pieceIndex = transform.pieceIndex(imagePos);
     QList<int> fileIndices{ torrentInfo.fileIndicesForPiece(pieceIndex) };
     if (fileIndices.count() == 1)
     {
-        BitTorrent::TorrentInfo::PieceRange filePieces = torrentInfo.filePieces(fileIndices.first());
+        BitTorrent::TorrentInfo::PieceRange const filePieces = torrentInfo.filePieces(fileIndices.first());
 
-        ImageRange imageRange = transform.imagePos(filePieces);
-        QRect newHighlightedRegion{ imageRange.first(), 0, imageRange.size(), m_image.height() };
+        ImageRange const imageRange = transform.imagePos(filePieces);
+        QRect const newHighlightedRegion{ imageRange.first(), 0, imageRange.size(), m_image.height() };
         if (newHighlightedRegion != m_highlightedRegion)
         {
             m_highlightedRegion = newHighlightedRegion;

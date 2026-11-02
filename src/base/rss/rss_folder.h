@@ -51,15 +51,15 @@ namespace RSS
         ~Folder() override;
 
     public:
-        QList<Article*> articles() const override;
-        int unreadCount() const override;
+        [[nodiscard]] QList<Article*> articles() const override;
+        [[nodiscard]] int unreadCount() const override;
         void markAsRead() override;
         void refresh() override;
         void updateFetchDelay() override;
 
-        QList<Item*> items() const;
+        [[nodiscard]] QList<Item*> items() const;
 
-        QJsonValue toJsonValue(bool withData = false) const override;
+        [[nodiscard]] QJsonValue toJsonValue(bool withData = false) const override;
 
     private slots:
         void handleItemUnreadCountChanged();

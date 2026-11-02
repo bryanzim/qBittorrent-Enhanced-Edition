@@ -44,7 +44,9 @@ ProxyConfigurationManager::ProxyConfigurationManager(QObject* parent)
 {
     m_config.type = m_storeProxyType.get(ProxyType::None);
     if ((m_config.type < ProxyType::None) || (m_config.type > ProxyType::SOCKS4))
+    {
         m_config.type = ProxyType::None;
+    }
     m_config.ip = m_storeProxyIP.get((m_config.type == ProxyType::None) ? u""_s : u"0.0.0.0"_s);
     m_config.port = m_storeProxyPort.get(8080);
     m_config.authEnabled = m_storeProxyAuthEnabled;
@@ -56,7 +58,9 @@ ProxyConfigurationManager::ProxyConfigurationManager(QObject* parent)
 void ProxyConfigurationManager::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new ProxyConfigurationManager;
+    }
 }
 
 void ProxyConfigurationManager::freeInstance()

@@ -44,7 +44,9 @@ namespace
     {
         const QColor color = UIThemeManager::instance()->getColor(u"PiecesBar.PartialPiece"_s);
         if (color.isValid())
+        {
             return color;
+        }
 
         const QColor green{ Qt::green };
         return QColor::fromHsl(green.hslHue(), pieceColor.hslSaturation(), pieceColor.lightness());
@@ -61,7 +63,9 @@ QList<float> DownloadedPiecesBar::bitfieldToFloatVector(const QBitArray& vecin, 
 {
     QList<float> result(reqSize, 0.0);
     if (vecin.isEmpty())
+    {
         return result;
+    }
 
     const float ratio = vecin.size() / static_cast<float>(reqSize);
 
@@ -77,10 +81,12 @@ QList<float> DownloadedPiecesBar::bitfieldToFloatVector(const QBitArray& vecin, 
         const float toR = (x + 1) * ratio;
 
         // C - integer
-        int fromC = fromR; // std::floor not needed
+        int const fromC = fromR; // std::floor not needed
         int toC = std::ceil(toR);
         if (toC > vecin.size())
+        {
             --toC;
+        }
 
         // position in pieces table
         int x2 = fromC;
@@ -95,7 +101,9 @@ QList<float> DownloadedPiecesBar::bitfieldToFloatVector(const QBitArray& vecin, 
         if (x2 == toCMinusOne)
         {
             if (vecin[x2])
+            {
                 value += ratio;
+            }
             ++x2;
         }
         // case when (15.2 >= x < 17.8)
@@ -105,20 +113,28 @@ QList<float> DownloadedPiecesBar::bitfieldToFloatVector(const QBitArray& vecin, 
             if (x2 != fromR)
             {
                 if (vecin[x2])
+                {
                     value += 1.0 - (fromR - fromC);
+                }
                 ++x2;
             }
 
             // subcase (16 >= x < 17)
             for (; x2 < toCMinusOne; ++x2)
+            {
                 if (vecin[x2])
+                {
                     value += 1.0;
+                }
+            }
 
             // subcase (17 >= x < 17.8)
             if (x2 == toCMinusOne)
             {
                 if (vecin[x2])
+                {
                     value += 1.0 - (toC - toR);
+                }
                 ++x2;
             }
         }
@@ -151,18 +167,18 @@ QImage DownloadedPiecesBar::renderImage()
         return image;
     }
 
-    QList<float> scaledPieces = bitfieldToFloatVector(m_pieces, image.width());
-    QList<float> scaledPiecesDl = bitfieldToFloatVector(m_downloadedPieces, image.width());
+    QList<float> const scaledPieces = bitfieldToFloatVector(m_pieces, image.width());
+    QList<float> const scaledPiecesDl = bitfieldToFloatVector(m_downloadedPieces, image.width());
 
     // filling image
     for (qsizetype x = 0; x < scaledPieces.size(); ++x)
     {
-        float piecesToValue = scaledPieces.at(x);
-        float piecesToValueDl = scaledPiecesDl.at(x);
+        float const piecesToValue = scaledPieces.at(x);
+        float const piecesToValueDl = scaledPiecesDl.at(x);
         if (piecesToValueDl != 0)
         {
-            float fillRatio = piecesToValue + piecesToValueDl;
-            float ratio = piecesToValueDl / fillRatio;
+            float const fillRatio = piecesToValue + piecesToValueDl;
+            float const ratio = piecesToValueDl / fillRatio;
 
             QRgb mixedColor = mixTwoColors(pieceColor().rgb(), m_dlPieceColor.rgb(), ratio);
             mixedColor = mixTwoColors(backgroundColor().rgb(), mixedColor, fillRatio);

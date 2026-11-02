@@ -47,9 +47,9 @@ public:
     using QObject::QObject;
 
     void checkForUpdates() const;
-    QString getNewVersion() const;
-    QString getNewContent() const;
-    QString getNextUpdate() const;
+    [[nodiscard]] QString getNewVersion() const;
+    [[nodiscard]] QString getNewContent() const;
+    [[nodiscard]] QString getNextUpdate() const;
     bool updateProgram() const;
 
 signals:

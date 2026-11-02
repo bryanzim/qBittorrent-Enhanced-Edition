@@ -60,7 +60,7 @@ class TransferListWidget final : public GUIApplicationComponent<QTreeView>
 public:
     TransferListWidget(IGUIApplication* app, QWidget* parent);
     ~TransferListWidget() override;
-    TransferListModel* getSourceModel() const;
+    [[nodiscard]] TransferListModel* getSourceModel() const;
 
 public slots:
     void setSelectionCategory(const QString& category);
@@ -127,11 +127,11 @@ private:
     void dropEvent(QDropEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void openPreviewSelectDialog(const BitTorrent::Torrent* torrent);
-    QModelIndex mapToSource(const QModelIndex& index) const;
-    QModelIndexList mapToSource(const QModelIndexList& indexes) const;
-    QModelIndex mapFromSource(const QModelIndex& index) const;
+    [[nodiscard]] QModelIndex mapToSource(const QModelIndex& index) const;
+    [[nodiscard]] QModelIndexList mapToSource(const QModelIndexList& indexes) const;
+    [[nodiscard]] QModelIndex mapFromSource(const QModelIndex& index) const;
     bool loadSettings();
-    QList<BitTorrent::Torrent*> getSelectedTorrents() const;
+    [[nodiscard]] QList<BitTorrent::Torrent*> getSelectedTorrents() const;
     void askAddTagsForSelection();
     void editTorrentTrackers();
     void manageTorrentContent();
@@ -139,8 +139,8 @@ private:
     void confirmRemoveAllTagsForSelection();
     TagSet askTagsForSelection(const QString& dialogTitle);
     void applyToSelectedTorrents(const std::function<void(BitTorrent::Torrent* const)>& fn);
-    QList<BitTorrent::Torrent*> getVisibleTorrents() const;
-    int visibleColumnsCount() const;
+    [[nodiscard]] QList<BitTorrent::Torrent*> getVisibleTorrents() const;
+    [[nodiscard]] int visibleColumnsCount() const;
 
     TransferListModel* m_listModel = nullptr;
     TransferListSortModel* m_sortFilterModel = nullptr;

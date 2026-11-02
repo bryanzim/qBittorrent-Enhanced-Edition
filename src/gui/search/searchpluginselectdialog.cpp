@@ -86,7 +86,9 @@ SearchPluginSelectDialog::SearchPluginSelectDialog(SearchPluginManager* pluginMa
     connect(m_pluginManager, &SearchPluginManager::checkForUpdatesFailed, this, &SearchPluginSelectDialog::checkForUpdatesFailed);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 SearchPluginSelectDialog::~SearchPluginSelectDialog()
@@ -107,9 +109,13 @@ void SearchPluginSelectDialog::dropEvent(QDropEvent* event)
             if (!url.isEmpty())
             {
                 if (url.scheme().compare(u"file", Qt::CaseInsensitive) == 0)
+                {
                     files << url.toLocalFile();
+                }
                 else
+                {
                     files << url.toString();
+                }
             }
         }
     }
@@ -119,7 +125,9 @@ void SearchPluginSelectDialog::dropEvent(QDropEvent* event)
     }
 
     if (files.isEmpty())
+    {
         return;
+    }
 
     for (const QString& file : asConst(files))
     {
@@ -169,7 +177,9 @@ void SearchPluginSelectDialog::displayContextMenu()
 {
     const QList<QTreeWidgetItem*> items = m_ui->pluginsTree->selectedItems();
     if (items.isEmpty())
+    {
         return;
+    }
 
     QMenu* myContextMenu = new QMenu(this);
     myContextMenu->setAttribute(Qt::WA_DeleteOnClose);
@@ -193,9 +203,9 @@ void SearchPluginSelectDialog::on_actionUninstall_triggered()
     bool error = false;
     for (QTreeWidgetItem* item : asConst(m_ui->pluginsTree->selectedItems()))
     {
-        int index = m_ui->pluginsTree->indexOfTopLevelItem(item);
+        int const index = m_ui->pluginsTree->indexOfTopLevelItem(item);
         Q_ASSERT(index != -1);
-        QString id = item->text(PLUGIN_ID);
+        QString const id = item->text(PLUGIN_ID);
         if (m_pluginManager->uninstallPlugin(id))
         {
             delete item;
@@ -211,18 +221,22 @@ void SearchPluginSelectDialog::on_actionUninstall_triggered()
     }
 
     if (error)
+    {
         QMessageBox::warning(this, tr("Uninstall warning"), tr("Some plugins could not be uninstalled because they are included in qBittorrent. Only the ones you added yourself can be uninstalled.\nThose plugins were disabled."));
+    }
     else
+    {
         QMessageBox::information(this, tr("Uninstall success"), tr("All selected plugins were uninstalled successfully"));
+    }
 }
 
 void SearchPluginSelectDialog::enableSelection(bool enable)
 {
     for (QTreeWidgetItem* item : asConst(m_ui->pluginsTree->selectedItems()))
     {
-        int index = m_ui->pluginsTree->indexOfTopLevelItem(item);
+        int const index = m_ui->pluginsTree->indexOfTopLevelItem(item);
         Q_ASSERT(index != -1);
-        QString id = item->text(PLUGIN_ID);
+        QString const id = item->text(PLUGIN_ID);
         m_pluginManager->enablePlugin(id, enable);
         if (enable)
         {
@@ -256,7 +270,9 @@ QList<QTreeWidgetItem*> SearchPluginSelectDialog::findItemsWithUrl(const QString
     {
         QTreeWidgetItem* item = m_ui->pluginsTree->topLevelItem(i);
         if (url.startsWith(item->text(PLUGIN_URL), Qt::CaseInsensitive))
+        {
             res << item;
+        }
     }
 
     return res;
@@ -268,7 +284,9 @@ QTreeWidgetItem* SearchPluginSelectDialog::findItemWithID(const QString& id)
     {
         QTreeWidgetItem* item = m_ui->pluginsTree->topLevelItem(i);
         if (id == item->text(PLUGIN_ID))
+        {
             return item;
+        }
     }
 
     return nullptr;
@@ -279,7 +297,9 @@ void SearchPluginSelectDialog::loadSupportedSearchPlugins()
     // Some clean up first
     m_ui->pluginsTree->clear();
     for (const QString& name : asConst(m_pluginManager->allPlugins()))
+    {
         addNewPlugin(name);
+    }
 }
 
 void SearchPluginSelectDialog::addNewPlugin(const QString& pluginName)
@@ -319,14 +339,18 @@ void SearchPluginSelectDialog::startAsyncOp()
 {
     ++m_asyncOps;
     if (m_asyncOps == 1)
+    {
         setCursor(QCursor(Qt::WaitCursor));
+    }
 }
 
 void SearchPluginSelectDialog::finishAsyncOp()
 {
     --m_asyncOps;
     if (m_asyncOps == 0)
+    {
         setCursor(QCursor(Qt::ArrowCursor));
+    }
 }
 
 void SearchPluginSelectDialog::finishPluginUpdate()
@@ -352,10 +376,12 @@ void SearchPluginSelectDialog::on_installButton_clicked()
 void SearchPluginSelectDialog::askForPluginUrl()
 {
     bool ok = false;
-    QString clipTxt = qApp->clipboard()->text();
+    QString const clipTxt = qApp->clipboard()->text();
     auto defaultUrl = u"http://"_s;
     if (Net::DownloadManager::hasSupportedScheme(clipTxt) && clipTxt.endsWith(u".py"))
+    {
         defaultUrl = clipTxt;
+    }
     QString url = AutoExpandableDialog::getText(
         this, tr("New search engine plugin URL"),
         tr("URL:"), QLineEdit::Normal, defaultUrl, &ok);
@@ -398,10 +424,10 @@ void SearchPluginSelectDialog::iconDownloadFinished(const Net::DownloadResult& r
     const Path filePath = result.filePath;
 
     // Icon downloaded
-    QIcon icon{ filePath.data() };
+    QIcon const icon{ filePath.data() };
     // Detect a non-decodable icon
     QList<QSize> sizes = icon.availableSizes();
-    bool invalid = (sizes.isEmpty() || icon.pixmap(sizes.first()).isNull());
+    bool const invalid = (sizes.isEmpty() || icon.pixmap(sizes.first()).isNull());
     if (!invalid)
     {
         for (QTreeWidgetItem* item : asConst(findItemsWithUrl(result.url)))
@@ -409,7 +435,9 @@ void SearchPluginSelectDialog::iconDownloadFinished(const Net::DownloadResult& r
             QString id = item->text(PLUGIN_ID);
             SearchPluginInfo* plugin = m_pluginManager->pluginInfo(id);
             if (!plugin)
+            {
                 continue;
+            }
 
             const QString ext = result.url.endsWith(u".ico", Qt::CaseInsensitive) ? u".ico"_s : u".png"_s;
             const Path iconPath = SearchPluginManager::pluginsLocation() / Path(id + ext);
@@ -418,9 +446,9 @@ void SearchPluginSelectDialog::iconDownloadFinished(const Net::DownloadResult& r
                 // This 2nd check is necessary. Some favicons (eg from piratebay)
                 // decode fine without an ext, but fail to do so when appending the ext
                 // from the url. Probably a Qt bug.
-                QIcon iconWithExt{ iconPath.data() };
+                QIcon const iconWithExt{ iconPath.data() };
                 QList<QSize> sizesExt = iconWithExt.availableSizes();
-                bool invalidExt = (sizesExt.isEmpty() || iconWithExt.pixmap(sizesExt.first()).isNull());
+                bool const invalidExt = (sizesExt.isEmpty() || iconWithExt.pixmap(sizesExt.first()).isNull());
                 if (invalidExt)
                 {
                     std::ignore = Utils::Fs::removeFile(iconPath);
@@ -477,7 +505,7 @@ void SearchPluginSelectDialog::pluginInstallationFailed(const QString& name, con
 void SearchPluginSelectDialog::pluginUpdated(const QString& name)
 {
     finishAsyncOp();
-    SearchPluginVersion version = m_pluginManager->pluginInfo(name)->version;
+    SearchPluginVersion const version = m_pluginManager->pluginInfo(name)->version;
     QTreeWidgetItem* item = findItemWithID(name);
     item->setText(PLUGIN_VERSION, version.toString());
     m_updatedPlugins.append(name);

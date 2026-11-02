@@ -55,56 +55,56 @@ namespace RSS
 
         AutoDownloadRule& operator=(const AutoDownloadRule& other);
 
-        QString name() const;
+        [[nodiscard]] QString name() const;
         void setName(const QString& name);
 
-        bool isEnabled() const;
+        [[nodiscard]] bool isEnabled() const;
         void setEnabled(bool enable);
 
-        int priority() const;
+        [[nodiscard]] int priority() const;
         void setPriority(int value);
 
-        QString mustContain() const;
+        [[nodiscard]] QString mustContain() const;
         void setMustContain(const QString& tokens);
-        QString mustNotContain() const;
+        [[nodiscard]] QString mustNotContain() const;
         void setMustNotContain(const QString& tokens);
-        QStringList feedURLs() const;
+        [[nodiscard]] QStringList feedURLs() const;
         void setFeedURLs(const QStringList& urls);
-        int ignoreDays() const;
+        [[nodiscard]] int ignoreDays() const;
         void setIgnoreDays(int d);
-        QDateTime lastMatch() const;
+        [[nodiscard]] QDateTime lastMatch() const;
         void setLastMatch(const QDateTime& lastMatch);
-        bool useRegex() const;
+        [[nodiscard]] bool useRegex() const;
         void setUseRegex(bool enabled);
-        bool useSmartFilter() const;
+        [[nodiscard]] bool useSmartFilter() const;
         void setUseSmartFilter(bool enabled);
-        QString episodeFilter() const;
+        [[nodiscard]] QString episodeFilter() const;
         void setEpisodeFilter(const QString& e);
 
-        QStringList previouslyMatchedEpisodes() const;
+        [[nodiscard]] QStringList previouslyMatchedEpisodes() const;
         void setPreviouslyMatchedEpisodes(const QStringList& previouslyMatchedEpisodes);
 
-        BitTorrent::AddTorrentParams addTorrentParams() const;
+        [[nodiscard]] BitTorrent::AddTorrentParams addTorrentParams() const;
         void setAddTorrentParams(BitTorrent::AddTorrentParams addTorrentParams);
 
-        bool matches(const QVariantHash& articleData) const;
+        [[nodiscard]] bool matches(const QVariantHash& articleData) const;
         bool accepts(const QVariantHash& articleData);
 
         friend bool operator==(const AutoDownloadRule& left, const AutoDownloadRule& right);
 
-        QJsonObject toJsonObject() const;
+        [[nodiscard]] QJsonObject toJsonObject() const;
         static AutoDownloadRule fromJsonObject(const QJsonObject& jsonObj, const QString& name = {});
 
-        QVariantHash toLegacyDict() const;
+        [[nodiscard]] QVariantHash toLegacyDict() const;
         static AutoDownloadRule fromLegacyDict(const QVariantHash& dict);
 
     private:
-        bool matchesMustContainExpression(const QString& articleTitle) const;
-        bool matchesMustNotContainExpression(const QString& articleTitle) const;
-        bool matchesEpisodeFilterExpression(const QString& articleTitle) const;
-        bool matchesSmartEpisodeFilter(const QString& articleTitle) const;
-        bool matchesExpression(const QString& articleTitle, const QString& expression) const;
-        QRegularExpression cachedRegex(const QString& expression, bool isRegex = true) const;
+        [[nodiscard]] bool matchesMustContainExpression(const QString& articleTitle) const;
+        [[nodiscard]] bool matchesMustNotContainExpression(const QString& articleTitle) const;
+        [[nodiscard]] bool matchesEpisodeFilterExpression(const QString& articleTitle) const;
+        [[nodiscard]] bool matchesSmartEpisodeFilter(const QString& articleTitle) const;
+        [[nodiscard]] bool matchesExpression(const QString& articleTitle, const QString& expression) const;
+        [[nodiscard]] QRegularExpression cachedRegex(const QString& expression, bool isRegex = true) const;
 
         QSharedDataPointer<AutoDownloadRuleData> m_dataPtr;
     };

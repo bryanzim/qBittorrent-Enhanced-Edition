@@ -55,7 +55,9 @@ TorrentTagsDialog::TorrentTagsDialog(const TagSet& initialTags, QWidget* parent)
     {
         auto* tagWidget = new QCheckBox(Utils::Gui::tagToWidgetText(tag));
         if (initialTags.contains(tag))
+        {
             tagWidget->setChecked(true);
+        }
         tagsLayout->addWidget(tagWidget);
     }
 
@@ -64,7 +66,9 @@ TorrentTagsDialog::TorrentTagsDialog(const TagSet& initialTags, QWidget* parent)
     tagsLayout->addWidget(addTagButton);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 TorrentTagsDialog::~TorrentTagsDialog()
@@ -81,7 +85,9 @@ TagSet TorrentTagsDialog::tags() const
     {
         const auto* tagWidget = static_cast<QCheckBox*>(layout->itemAt(i)->widget());
         if (tagWidget->isChecked())
+        {
             tags.insert(Utils::Gui::widgetTextToTag(tagWidget->text()));
+        }
     }
 
     return tags;
@@ -96,7 +102,9 @@ void TorrentTagsDialog::addNewTag()
         bool ok = false;
         tag = Tag(AutoExpandableDialog::getText(this, tr("Add tag"), tr("Tag:"), QLineEdit::Normal, tag.toString(), &ok));
         if (!ok || tag.isEmpty())
+        {
             break;
+        }
 
         if (!tag.isValid())
         {

@@ -68,7 +68,7 @@ namespace Net
             FATAL
         };
 
-        QString getUpdateUrl() const;
+        [[nodiscard]] QString getUpdateUrl() const;
         void processIPUpdateReply(const QString& reply);
 
         QHostAddress m_lastIP;

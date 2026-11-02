@@ -50,7 +50,9 @@ FlowLayout::~FlowLayout()
 {
     QLayoutItem* item;
     while ((item = takeAt(0)))
+    {
         delete item;
+    }
 }
 
 void FlowLayout::addItem(QLayoutItem* item)
@@ -61,7 +63,9 @@ void FlowLayout::addItem(QLayoutItem* item)
 int FlowLayout::horizontalSpacing() const
 {
     if (m_hSpace >= 0)
+    {
         return m_hSpace;
+    }
 
     return smartSpacing(QStyle::PM_LayoutHorizontalSpacing);
 }
@@ -69,7 +73,9 @@ int FlowLayout::horizontalSpacing() const
 int FlowLayout::verticalSpacing() const
 {
     if (m_vSpace >= 0)
+    {
         return m_vSpace;
+    }
 
     return smartSpacing(QStyle::PM_LayoutVerticalSpacing);
 }
@@ -87,7 +93,9 @@ QLayoutItem* FlowLayout::itemAt(const int index) const
 QLayoutItem* FlowLayout::takeAt(const int index)
 {
     if ((index >= 0) && (index < m_itemList.size()))
+    {
         return m_itemList.takeAt(index);
+    }
 
     return nullptr;
 }
@@ -123,7 +131,9 @@ QSize FlowLayout::minimumSize() const
 {
     QSize size;
     for (const QLayoutItem* item : asConst(m_itemList))
+    {
         size = size.expandedTo(item->minimumSize());
+    }
 
     const QMargins margins = contentsMargins();
     size += QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
@@ -175,14 +185,18 @@ int FlowLayout::doLayout(const QRect& rect, const bool testOnly) const
         }
 
         if (!testOnly)
+        {
             lineItems[item] = QPoint(x, y);
+        }
 
         x = nextX;
         lineHeight = std::max(lineHeight, item->sizeHint().height());
     }
 
     if (!testOnly)
+    {
         applyItemsGeometry(lineItems, lineHeight);
+    }
 
     return y + lineHeight - rect.y() + bottom;
 }
@@ -191,7 +205,9 @@ int FlowLayout::smartSpacing(const QStyle::PixelMetric pm) const
 {
     QObject* parent = this->parent();
     if (!parent)
+    {
         return -1;
+    }
 
     if (parent->isWidgetType())
     {
@@ -212,9 +228,13 @@ void FlowLayout::applyItemsGeometry(const QHash<QLayoutItem*, QPoint>& items, co
         const auto alignment = item->alignment();
         const int vSpace = lineHeight - item->sizeHint().height();
         if (alignment & Qt::AlignVCenter)
+        {
             point.ry() += vSpace / 2;
+        }
         else if (alignment & Qt::AlignBottom)
+        {
             point.ry() += vSpace;
+        }
         item->setGeometry(QRect(point, item->sizeHint()));
     }
 }

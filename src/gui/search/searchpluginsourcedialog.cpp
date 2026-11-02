@@ -39,7 +39,9 @@ SearchPluginSourceDialog::SearchPluginSourceDialog(QWidget* parent)
     m_ui->setupUi(this);
 
     if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
+    {
         resize(dialogSize);
+    }
 }
 
 SearchPluginSourceDialog::~SearchPluginSourceDialog()

@@ -145,14 +145,18 @@ SearchJobWidget::SearchJobWidget(const QString& id, IGUIApplication* app, QWidge
         }
     }
     if (!atLeastOne)
+    {
         m_ui->resultsBrowser->setColumnHidden(SearchSortModel::NAME, false);
+    }
     // To also mitigate the above issue, we have to resize each column when
     // its size is 0, because explicitly 'showing' the column isn't enough
     // in the above scenario.
     for (int i = 0; i < SearchSortModel::DL_LINK; ++i)
     {
         if ((m_ui->resultsBrowser->columnWidth(i) <= 0) && !m_ui->resultsBrowser->isColumnHidden(i))
+        {
             m_ui->resultsBrowser->resizeColumnToContents(i);
+        }
     }
 
     header()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -235,7 +239,9 @@ QHeaderView* SearchJobWidget::header() const
 void SearchJobWidget::setRowColor(int row, const QColor& color)
 {
     for (int i = 0; i < m_proxyModel->columnCount(); ++i)
+    {
         m_proxyModel->setData(m_proxyModel->index(row, i), color, Qt::ForegroundRole);
+    }
 }
 
 void SearchJobWidget::setRowVisited(const int row)
@@ -257,7 +263,9 @@ void SearchJobWidget::onUIThemeChanged()
         const QVariant userData = m_proxyModel->data(m_proxyModel->index(row, 0), LinkVisitedRole);
         const bool isVisited = userData.toBool();
         if (isVisited)
+        {
             setRowColor(row, visitedRowColor());
+        }
     }
 
     m_proxyModel->setDynamicSortFilter(true);
@@ -281,8 +289,10 @@ LineEdit* SearchJobWidget::lineEditSearchResultsFilter() const
 void SearchJobWidget::assignSearchHandler(SearchHandler* searchHandler)
 {
     Q_ASSERT(searchHandler);
-    if (!searchHandler) [[unlikely]]
-        return;
+    if (!searchHandler)
+    {
+        [[unlikely]] return;
+    }
 
     m_searchResults.clear();
     m_searchListModel->removeRows(0, m_searchListModel->rowCount());
@@ -305,7 +315,9 @@ void SearchJobWidget::assignSearchHandler(SearchHandler* searchHandler)
 void SearchJobWidget::cancelSearch()
 {
     if (!m_searchHandler)
+    {
         return;
+    }
 
     m_searchHandler->cancelSearch();
     setStatus(Status::Aborted);
@@ -315,7 +327,9 @@ void SearchJobWidget::downloadTorrents(const AddTorrentOption option)
 {
     const QModelIndexList rows = m_ui->resultsBrowser->selectionModel()->selectedRows();
     for (const QModelIndex& rowIndex : rows)
+    {
         downloadTorrent(rowIndex, option);
+    }
 }
 
 void SearchJobWidget::openTorrentPages()
@@ -333,13 +347,17 @@ void SearchJobWidget::openTorrentPages()
         if (descrLinkURL.isEmpty()) [[unlikely]]
         {
             if (warningEntryName.isEmpty())
+            {
                 warningEntryName = entryName;
+            }
             ++emptyLinkCount;
         }
         else if (descrLinkURL.isLocalFile()) [[unlikely]]
         {
             if (badLinkCount == 0)
+            {
                 warningEntryName = entryName;
+            }
             ++badLinkCount;
 
             LogMsg(tr("Blocked opening search result description page URL. URL pointing to local file might be malicious behaviour. Name: \"%1\". URL: \"%2\".")
@@ -356,14 +374,18 @@ void SearchJobWidget::openTorrentPages()
     {
         QString message = tr("Blocked opening search result description page URL. The following result URL is pointing to local file and it may be malicious behaviour:\n%1").arg(warningEntryName);
         if (badLinkCount > 1)
+        {
             message.append(u"\n" + tr("There are %1 more results with the same issue.").arg(badLinkCount - 1));
+        }
         QMessageBox::warning(this, u"qBittorrent"_s, message, QMessageBox::Ok);
     }
     else if (emptyLinkCount > 0)
     {
         QString message = tr("Entry \"%1\" has no description page URL provided.").arg(warningEntryName);
         if (emptyLinkCount > 1)
+        {
             message.append(u"\n" + tr("There are %1 more entries with the same issue.").arg(emptyLinkCount - 1));
+        }
         QMessageBox::warning(this, u"qBittorrent"_s, message, QMessageBox::Ok);
     }
 }
@@ -394,17 +416,23 @@ void SearchJobWidget::copyField(const int column) const
                                               m_proxyModel->index(rowIndex.row(), column))
                                   .toString();
         if (!field.isEmpty())
+        {
             list << field;
+        }
     }
 
     if (!list.empty())
+    {
         QApplication::clipboard()->setText(list.join(u'\n'));
+    }
 }
 
 void SearchJobWidget::setStatus(const Status value)
 {
     if (m_status == value)
+    {
         return;
+    }
 
     m_status = value;
     setStatusTip(statusText(value));
@@ -573,7 +601,9 @@ int SearchJobWidget::visibleColumnsCount() const
     for (int i = 0, iMax = m_ui->resultsBrowser->header()->count(); i < iMax; ++i)
     {
         if (!m_ui->resultsBrowser->isColumnHidden(i))
+        {
             ++count;
+        }
     }
 
     return count;
@@ -591,12 +621,16 @@ void SearchJobWidget::displayColumnHeaderMenu()
         const auto columnName = m_searchListModel->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
         QAction* action = menu->addAction(columnName, this, [this, i](const bool checked) {
             if (!checked && (visibleColumnsCount() <= 1))
+            {
                 return;
+            }
 
             m_ui->resultsBrowser->setColumnHidden(i, !checked);
 
             if (checked && (m_ui->resultsBrowser->columnWidth(i) <= 5))
+            {
                 m_ui->resultsBrowser->resizeColumnToContents(i);
+            }
 
             saveSettings();
         });
@@ -609,7 +643,9 @@ void SearchJobWidget::displayColumnHeaderMenu()
         for (int i = 0, count = m_ui->resultsBrowser->header()->count(); i < count; ++i)
         {
             if (!m_ui->resultsBrowser->isColumnHidden(i))
+            {
                 m_ui->resultsBrowser->resizeColumnToContents(i);
+            }
         }
         saveSettings();
     });
@@ -621,11 +657,17 @@ void SearchJobWidget::displayColumnHeaderMenu()
 void SearchJobWidget::searchFinished(bool cancelled)
 {
     if (cancelled)
+    {
         setStatus(Status::Aborted);
+    }
     else if (m_noSearchResults)
+    {
         setStatus(Status::NoResults);
+    }
     else
+    {
         setStatus(Status::Finished);
+    }
 }
 
 void SearchJobWidget::searchFailed([[maybe_unused]] const QString& errorMessage)
@@ -638,7 +680,7 @@ void SearchJobWidget::appendSearchResults(const QList<SearchResult>& results)
     for (const SearchResult& result : results)
     {
         // Add item to search result list
-        int row = m_searchListModel->rowCount();
+        int const row = m_searchListModel->rowCount();
         m_searchListModel->insertRow(row);
 
         const auto setModelData = [this, row](const int column, const QString& displayData, const QVariant& underlyingData, const Qt::Alignment textAlignmentData = {}) {

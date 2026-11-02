@@ -75,9 +75,9 @@ private:
     void loadSettings();
     void setInteractionEnabled(bool enabled) const;
 
-    int getPieceSize() const;
+    [[nodiscard]] int getPieceSize() const;
 #ifdef QBT_USES_LIBTORRENT2
-    BitTorrent::TorrentFormat getTorrentFormat() const;
+    [[nodiscard]] BitTorrent::TorrentFormat getTorrentFormat() const;
 #else
     int getPaddedFileSizeLimit() const;
 #endif

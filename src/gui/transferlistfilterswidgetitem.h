@@ -41,7 +41,7 @@ class TransferListFiltersWidgetItem final : public QWidget
 public:
     TransferListFiltersWidgetItem(const QString& caption, QWidget* filterWidget, QWidget* parent = nullptr);
 
-    bool isChecked() const;
+    [[nodiscard]] bool isChecked() const;
     void setChecked(bool value);
 
 signals:

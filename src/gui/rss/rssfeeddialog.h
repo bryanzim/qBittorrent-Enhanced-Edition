@@ -46,9 +46,9 @@ public:
     explicit RSSFeedDialog(QWidget* parent = nullptr);
     ~RSSFeedDialog() override;
 
-    QString feedURL() const;
+    [[nodiscard]] QString feedURL() const;
     void setFeedURL(const QString& feedURL);
-    std::chrono::seconds refreshInterval() const;
+    [[nodiscard]] std::chrono::seconds refreshInterval() const;
     void setRefreshInterval(std::chrono::seconds refreshInterval);
 
 private:

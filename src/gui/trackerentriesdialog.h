@@ -53,7 +53,7 @@ public:
     ~TrackerEntriesDialog() override;
 
     void setTrackers(const QList<BitTorrent::TrackerEntry>& trackers);
-    QList<BitTorrent::TrackerEntry> trackers() const;
+    [[nodiscard]] QList<BitTorrent::TrackerEntry> trackers() const;
 
 private:
     void saveSettings();

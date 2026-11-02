@@ -55,12 +55,16 @@ bool AddTorrentManager::addTorrent(const QString& source, const BitTorrent::AddT
     // `source`: .torrent file path,  magnet URI or URL
 
     if (source.isEmpty())
+    {
         return false;
+    }
 
     if (Net::DownloadManager::hasSupportedScheme(source))
     {
         if (m_downloadedTorrents.contains(source))
+        {
             return true;
+        }
 
         LogMsg(tr("Downloading torrent... Source: \"%1\"").arg(source));
         const auto* pref = Preferences::instance();
@@ -102,7 +106,9 @@ bool AddTorrentManager::addTorrentToSession(const QString& source, const BitTorr
 {
     const bool result = btSession()->addTorrent(torrentDescr, addTorrentParams);
     if (result)
+    {
         m_sourcesByInfoHash[torrentDescr.infoHash()] = source;
+    }
 
     return result;
 }
@@ -116,15 +122,23 @@ void AddTorrentManager::onDownloadFinished(const Net::DownloadResult& result)
     {
     case Net::DownloadStatus::Success:
         if (const auto loadResult = BitTorrent::TorrentDescriptor::load(result.data))
+        {
             processTorrent(source, loadResult.value(), addTorrentParams);
+        }
         else
+        {
             handleAddTorrentFailed(source, loadResult.error());
+        }
         break;
     case Net::DownloadStatus::RedirectedToMagnet:
         if (const auto parseResult = BitTorrent::TorrentDescriptor::parse(result.magnetURI))
+        {
             processTorrent(source, parseResult.value(), addTorrentParams);
+        }
         else
+        {
             handleAddTorrentFailed(source, parseResult.error());
+        }
         break;
     default:
         handleAddTorrentFailed(source, result.errorString);
@@ -137,7 +151,9 @@ void AddTorrentManager::onSessionTorrentAdded(BitTorrent::Torrent* torrent)
     {
         auto torrentFileGuard = m_guardedTorrentFiles.take(source);
         if (torrentFileGuard)
+        {
             torrentFileGuard->markAsAddedToSession();
+        }
         emit torrentAdded(source, torrent);
     }
 }
@@ -146,11 +162,15 @@ void AddTorrentManager::onSessionDuplicateTorrentDetected(const BitTorrent::Info
 {
     const QString source = m_sourcesByInfoHash.take(infoHash);
     if (source.isEmpty())
+    {
         return;
+    }
 
-    std::shared_ptr<TorrentFileGuard> torrentFileGuard = m_guardedTorrentFiles.take(source);
+    std::shared_ptr<TorrentFileGuard> const torrentFileGuard = m_guardedTorrentFiles.take(source);
     if (torrentFileGuard)
+    {
         torrentFileGuard->setAutoRemove(false);
+    }
     emit duplicateTorrentDetected(source, torrent, message);
 }
 
@@ -160,7 +180,9 @@ void AddTorrentManager::onSessionAddTorrentFailed(const BitTorrent::InfoHash& in
     {
         auto torrentFileGuard = m_guardedTorrentFiles.take(source);
         if (torrentFileGuard)
+        {
             torrentFileGuard->setAutoRemove(false);
+        }
         emit addTorrentFailed(source, reason);
     }
 }

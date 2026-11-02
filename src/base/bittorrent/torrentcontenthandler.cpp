@@ -38,11 +38,17 @@
 void BitTorrent::TorrentContentHandler::renameFile(const Path& oldPath, const Path& newPath)
 {
     if (!oldPath.isValid())
+    {
         throw RuntimeError(tr("The old path is invalid: '%1'.").arg(oldPath.toString()));
+    }
     if (!newPath.isValid())
+    {
         throw RuntimeError(tr("The new path is invalid: '%1'.").arg(newPath.toString()));
+    }
     if (newPath.isAbsolute())
+    {
         throw RuntimeError(tr("Absolute path isn't allowed: '%1'.").arg(newPath.toString()));
+    }
 
     int renamingFileIndex = -1;
     for (int i = 0; i < filesCount(); ++i)
@@ -50,13 +56,19 @@ void BitTorrent::TorrentContentHandler::renameFile(const Path& oldPath, const Pa
         const Path path = filePath(i);
 
         if ((renamingFileIndex < 0) && (path == oldPath))
+        {
             renamingFileIndex = i;
+        }
         else if (path == newPath)
+        {
             throw RuntimeError(tr("The file already exists: '%1'.").arg(newPath.toString()));
+        }
     }
 
     if (renamingFileIndex < 0)
+    {
         throw RuntimeError(tr("No such file: '%1'.").arg(oldPath.toString()));
+    }
 
     renameFile(renamingFileIndex, newPath);
 }
@@ -64,11 +76,17 @@ void BitTorrent::TorrentContentHandler::renameFile(const Path& oldPath, const Pa
 void BitTorrent::TorrentContentHandler::renameFolder(const Path& oldFolderPath, const Path& newFolderPath)
 {
     if (!oldFolderPath.isValid())
+    {
         throw RuntimeError(tr("The old path is invalid: '%1'.").arg(oldFolderPath.toString()));
+    }
     if (!newFolderPath.isValid())
+    {
         throw RuntimeError(tr("The new path is invalid: '%1'.").arg(newFolderPath.toString()));
+    }
     if (newFolderPath.isAbsolute())
+    {
         throw RuntimeError(tr("Absolute path isn't allowed: '%1'.").arg(newFolderPath.toString()));
+    }
 
     bool oldFolderExists = false;
     for (int i = 0; i < filesCount(); ++i)
@@ -77,14 +95,20 @@ void BitTorrent::TorrentContentHandler::renameFolder(const Path& oldFolderPath, 
         // We should compare path in a case sensitive manner even on case insensitive
         // platforms since it can be renamed by only changing case of some character(s)
         if (path.hasAncestor(newFolderPath, Qt::CaseSensitive))
+        {
             throw RuntimeError(tr("The folder already exists: '%1'.").arg(newFolderPath.toString()));
+        }
 
         if (!oldFolderExists && path.hasAncestor(oldFolderPath))
+        {
             oldFolderExists = true;
+        }
     }
 
     if (!oldFolderExists)
+    {
         throw RuntimeError(tr("No such folder: '%1'.").arg(oldFolderPath.toString()));
+    }
 
     doRenameFolder(oldFolderPath, newFolderPath);
 }

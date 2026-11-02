@@ -49,7 +49,9 @@ namespace luabridge
         {
 #if LUABRIDGE_SAFE_STACK_CHECKS
             if (!lua_checkstack(luaState, 1))
+            {
                 return makeErrorCode(ErrorCode::LuaStackOverflow);
+            }
 #endif
 
             const QByteArray utf8data = str.toUtf8();
@@ -59,7 +61,7 @@ namespace luabridge
 
         [[nodiscard]] static TypeResult<QString> get(lua_State* luaState, const int index)
         {
-            size_t len = 0;
+            std::size_t len = 0U;
             const char* str = nullptr;
 
             if (lua_type(luaState, index) == LUA_TSTRING)
@@ -71,7 +73,9 @@ namespace luabridge
             {
 #if LUABRIDGE_SAFE_STACK_CHECKS
                 if (!lua_checkstack(luaState, 1))
+                {
                     return makeErrorCode(ErrorCode::LuaStackOverflow);
+                }
 #endif
 
                 // Lua reference manual:
@@ -87,7 +91,9 @@ namespace luabridge
 #endif
 
             if (str == nullptr)
+            {
                 return makeErrorCode(ErrorCode::InvalidTypeCast);
+            }
 
             return QString::fromUtf8(str, len);
         }
@@ -148,7 +154,9 @@ namespace luabridge
         {
 #if LUABRIDGE_SAFE_STACK_CHECKS
             if (!lua_checkstack(luaState, 3))
+            {
                 return makeErrorCode(ErrorCode::LuaStackOverflow);
+            }
 #endif
 
             StackRestore stackRestore{ luaState };
@@ -162,7 +170,9 @@ namespace luabridge
 
                 auto result = Stack<T>::push(luaState, list[i]);
                 if (!result)
+                {
                     return result;
+                }
 
                 lua_settable(luaState, -3);
             }
@@ -174,7 +184,9 @@ namespace luabridge
         [[nodiscard]] static TypeResult<Type> get(lua_State* luaState, const int index)
         {
             if (!lua_istable(luaState, index))
+            {
                 return makeErrorCode(ErrorCode::InvalidTypeCast);
+            }
 
             const StackRestore stackRestore{ luaState };
 
@@ -188,7 +200,9 @@ namespace luabridge
             {
                 auto item = Stack<T>::get(luaState, -1);
                 if (!item)
+                {
                     return makeErrorCode(ErrorCode::InvalidTypeCast);
+                }
 
                 list.emplace_back(*item);
                 lua_pop(luaState, 1);
@@ -213,7 +227,9 @@ namespace luabridge
         {
 #if LUABRIDGE_SAFE_STACK_CHECKS
             if (!lua_checkstack(luaState, 3))
+            {
                 return makeErrorCode(ErrorCode::LuaStackOverflow);
+            }
 #endif
 
             StackRestore stackRestore{ luaState };
@@ -223,11 +239,15 @@ namespace luabridge
             {
                 auto result = Stack<K>::push(luaState, it.key());
                 if (!result)
+                {
                     return result;
+                }
 
                 result = Stack<V>::push(luaState, it.value());
                 if (!result)
+                {
                     return result;
+                }
 
                 lua_settable(luaState, -3);
             }
@@ -239,24 +259,30 @@ namespace luabridge
         [[nodiscard]] static TypeResult<Type> get(lua_State* luaState, const int index)
         {
             if (!lua_istable(luaState, index))
+            {
                 return makeErrorCode(ErrorCode::InvalidTypeCast);
+            }
 
             const StackRestore stackRestore{ luaState };
 
             Type hashTable;
 
-            int absIndex = lua_absindex(luaState, index);
+            int const absIndex = lua_absindex(luaState, index);
             lua_pushnil(luaState);
 
             while (lua_next(luaState, absIndex) != 0)
             {
                 const auto value = Stack<V>::get(luaState, -1);
                 if (!value)
+                {
                     return makeErrorCode(ErrorCode::InvalidTypeCast);
+                }
 
                 const auto key = Stack<K>::get(luaState, -2);
                 if (!key)
+                {
                     return makeErrorCode(ErrorCode::InvalidTypeCast);
+                }
 
                 hashTable.emplace(*key, *value);
                 lua_pop(luaState, 1);

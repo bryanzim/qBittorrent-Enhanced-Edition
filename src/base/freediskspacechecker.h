@@ -41,7 +41,7 @@ class FreeDiskSpaceChecker final : public QObject
 public:
     FreeDiskSpaceChecker(const Path& pathToCheck);
 
-    Path pathToCheck() const;
+    [[nodiscard]] Path pathToCheck() const;
     void setPathToCheck(const Path& newPathToCheck);
 
 public slots:

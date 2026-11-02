@@ -42,14 +42,14 @@ class IGUIApplication : public IApplication
 public:
     ~IGUIApplication() override = default;
 
-    GUIAddTorrentManager* addTorrentManager() const override = 0;
+    [[nodiscard]] GUIAddTorrentManager* addTorrentManager() const override = 0;
 
     virtual DesktopIntegration* desktopIntegration() = 0;
     virtual MainWindow* mainWindow() = 0;
 
-    virtual WindowState startUpWindowState() const = 0;
+    [[nodiscard]] virtual WindowState startUpWindowState() const = 0;
     virtual void setStartUpWindowState(WindowState windowState) = 0;
 
-    virtual bool isTorrentAddedNotificationsEnabled() const = 0;
+    [[nodiscard]] virtual bool isTorrentAddedNotificationsEnabled() const = 0;
     virtual void setTorrentAddedNotificationsEnabled(bool value) = 0;
 };

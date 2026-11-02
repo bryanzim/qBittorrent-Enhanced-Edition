@@ -48,7 +48,9 @@ ArticleListWidget::ArticleListWidget(QWidget* parent)
 
     connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, [this] {
         for (int row = 0; row < count(); ++row)
+        {
             applyUITheme(item(row));
+        }
     });
 }
 
@@ -69,7 +71,9 @@ void ArticleListWidget::setRSSItem(RSS::Item* rssItem, bool unreadOnly, const QS
     clear();
     m_rssArticleToListItemMapping.clear();
     if (m_rssItem)
+    {
         m_rssItem->disconnect(this);
+    }
 
     m_unreadOnly = unreadOnly;
     m_rssItem = rssItem;
@@ -109,7 +113,9 @@ void ArticleListWidget::handleArticleRead(RSS::Article* rssArticle)
 {
     auto* item = mapRSSArticle(rssArticle);
     if (!item)
+    {
         return;
+    }
 
     applyUITheme(item);
 

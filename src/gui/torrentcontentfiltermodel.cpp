@@ -66,11 +66,15 @@ QSet<int> TorrentContentFilterModel::getFileIndexes(const QModelIndex& itemIndex
 QModelIndex TorrentContentFilterModel::parent(const QModelIndex& child) const
 {
     if (!child.isValid())
+    {
         return {};
+    }
 
-    QModelIndex sourceParent = m_model->parent(mapToSource(child));
+    QModelIndex const sourceParent = m_model->parent(mapToSource(child));
     if (!sourceParent.isValid())
+    {
         return {};
+    }
 
     return mapFromSource(sourceParent);
 }
@@ -120,22 +124,28 @@ bool TorrentContentFilterModel::hasFiltered(const QModelIndex& folder) const
     // check if the folder name itself matches the filter string
     QString name = folder.data().toString();
     if (name.contains(filterRegularExpression()))
+    {
         return true;
+    }
 
     for (int child = 0; child < m_model->rowCount(folder); ++child)
     {
-        QModelIndex childIndex = m_model->index(child, 0, folder);
+        QModelIndex const childIndex = m_model->index(child, 0, folder);
         if (m_model->hasChildren(childIndex))
         {
             if (hasFiltered(childIndex))
+            {
                 return true;
+            }
 
             continue;
         }
 
         name = childIndex.data().toString();
         if (name.contains(filterRegularExpression()))
+        {
             return true;
+        }
     }
 
     return false;

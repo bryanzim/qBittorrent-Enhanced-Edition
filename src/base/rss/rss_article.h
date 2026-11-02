@@ -58,16 +58,16 @@ namespace RSS
         static const QString KeyLink;
         static const QString KeyIsRead;
 
-        Feed* feed() const;
-        QString guid() const;
-        QDateTime date() const;
-        QString title() const;
-        QString author() const;
-        QString description() const;
-        QString torrentUrl() const;
-        QString link() const;
-        bool isRead() const;
-        QVariantHash data() const;
+        [[nodiscard]] Feed* feed() const;
+        [[nodiscard]] QString guid() const;
+        [[nodiscard]] QDateTime date() const;
+        [[nodiscard]] QString title() const;
+        [[nodiscard]] QString author() const;
+        [[nodiscard]] QString description() const;
+        [[nodiscard]] QString torrentUrl() const;
+        [[nodiscard]] QString link() const;
+        [[nodiscard]] bool isRead() const;
+        [[nodiscard]] QVariantHash data() const;
 
         void markAsRead();
 

@@ -94,13 +94,17 @@ namespace
             try
             {
                 if (!query.prepare(insertStatement))
+                {
                     throw RuntimeError(query.lastError().text());
+                }
 
                 query.bindValue((u":" + DB_COLUMN_KEY), m_key);
                 query.bindValue((u":" + DB_COLUMN_VALUE), m_value);
 
                 if (!query.exec())
+                {
                     throw RuntimeError(query.lastError().text());
+                }
             }
             catch (const RuntimeError& err)
             {
@@ -132,16 +136,24 @@ namespace
             try
             {
                 if (!query.prepare(selectStatement))
+                {
                     throw RuntimeError(query.lastError().text());
+                }
 
                 query.bindValue((u":" + DB_COLUMN_KEY), m_key);
                 if (!query.exec())
+                {
                     throw RuntimeError(query.lastError().text());
+                }
 
                 if (query.next())
+                {
                     m_promise.addResult(query.value(DB_COLUMN_VALUE));
+                }
                 else
+                {
                     m_promise.addResult({});
+                }
 
                 m_promise.finish();
             }
@@ -176,12 +188,16 @@ namespace
             try
             {
                 if (!query.prepare(deleteStatement))
+                {
                     throw RuntimeError(query.lastError().text());
+                }
 
                 query.bindValue((u":" + DB_COLUMN_KEY), m_key);
 
                 if (!query.exec())
+                {
                     throw RuntimeError(query.lastError().text());
+                }
             }
             catch (const RuntimeError& err)
             {
@@ -258,7 +274,9 @@ QFuture<QVariant> KeyValueDataStorage::fetchValue(const QString& key) const
     }
 
     if (!m_asyncWorker)
+    {
         return QtFuture::makeReadyValueFuture<QVariant>({});
+    }
 
     QPromise<QVariant> promise;
     const auto future = promise.future();
@@ -296,7 +314,9 @@ void KeyValueDataStorage::removeValue(const QString& key)
     }
 
     if (m_asyncWorker)
+    {
         m_asyncWorker->removeValue(key);
+    }
 }
 
 KeyValueDataStorage::Worker::Worker(const Path& dbPath, const QString& storageName, QObject* parent)
@@ -330,7 +350,7 @@ void KeyValueDataStorage::Worker::run()
             }
         }
 
-        int64_t transactedJobsCount = 0;
+        std::int64_t transactedJobsCount = 0;
         while (true)
         {
             QMutexLocker jobsMutexLocker{ &m_jobsMutex };
@@ -346,11 +366,15 @@ void KeyValueDataStorage::Worker::run()
                 }
 
                 if (isInterruptionRequested())
+                {
                     break;
+                }
 
                 m_waitCondition.wait(&m_jobsMutex);
                 if (isInterruptionRequested())
+                {
                     break;
+                }
 
                 m_dbLock.lockForWrite();
                 if (!initDB(db))
@@ -359,7 +383,7 @@ void KeyValueDataStorage::Worker::run()
                     break;
                 }
             }
-            std::unique_ptr<Job> job = std::move(m_jobs.front());
+            std::unique_ptr<Job> const job = std::move(m_jobs.front());
             m_jobs.pop();
             jobsMutexLocker.unlock();
 

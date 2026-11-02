@@ -52,7 +52,7 @@ namespace Http
         // Support Range requests.
         virtual void streamFile(const Path& filePath, const HeaderMap& headers) = 0;
 
-        virtual bool isFinished() const = 0;
+        [[nodiscard]] virtual bool isFinished() const = 0;
 
     signals:
         void failed();

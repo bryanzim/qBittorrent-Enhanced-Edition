@@ -376,7 +376,9 @@ namespace
 
         const QString str = string.trimmed();
         if (str.isEmpty())
+        {
             return fallbackDate;
+        }
 
         int nyear = 6; // indexes within string to values
         int nmonth = 4;
@@ -396,14 +398,18 @@ namespace
             const bool h1 = (parts[3] == u"-");
             const bool h2 = (parts[5] == u"-");
             if (h1 != h2)
+            {
                 return fallbackDate;
+            }
         }
         else
         {
             // Check for the obsolete form "Wdy Mon DD HH:MM:SS YYYY"
             rx = QRegularExpression{ u"^([A-Z][a-z]+)\\s+(\\S+)\\s+(\\d\\d)\\s+(\\d\\d):(\\d\\d):(\\d\\d)\\s+(\\d\\d\\d\\d)$"_s };
             if (str.indexOf(rx, 0, &rxMatch) != 0)
+            {
                 return fallbackDate;
+            }
 
             nyear = 7;
             nmonth = 2;
@@ -421,31 +427,45 @@ namespace
         const int hour = parts[nhour].toInt(&ok[2]);
         const int minute = parts[nmin].toInt(&ok[3]);
         if (!ok[0] || !ok[1] || !ok[2] || !ok[3])
+        {
             return fallbackDate;
+        }
 
         int second = 0;
         if (!parts[nsec].isEmpty())
         {
             second = parts[nsec].toInt(&ok[0]);
             if (!ok[0])
+            {
                 return fallbackDate;
+            }
         }
 
         const bool leapSecond = (second == 60);
         if (leapSecond)
+        {
             second = 59; // apparently a leap second - validate below, once time zone is known
+        }
         int month = 0;
         for (; (month < 12) && (parts[nmonth] != shortMonth[month]); ++month)
+        {
             ;
+        }
         int dayOfWeek = -1;
         if (!parts[nwday].isEmpty())
         {
             // Look up the weekday name
             while ((++dayOfWeek < 7) && (shortDay[dayOfWeek] != parts[nwday]))
+            {
                 ;
+            }
             if (dayOfWeek >= 7)
+            {
                 for (dayOfWeek = 0; (dayOfWeek < 7) && (longDay[dayOfWeek] != parts[nwday]); ++dayOfWeek)
+                {
                     ;
+                }
+            }
         }
 
         //       if (month >= 12 || dayOfWeek >= 7
@@ -471,11 +491,15 @@ namespace
                 offset = parts[2].toInt(&ok[0]) * 3600;
                 const int offsetMin = parts[3].toInt(&ok[1]);
                 if (!ok[0] || !ok[1] || offsetMin > 59)
+                {
                     return {};
+                }
                 offset += offsetMin * 60;
                 negOffset = (parts[1] == u"-");
                 if (negOffset)
+                {
                     offset = -offset;
+                }
             }
             else
             {
@@ -503,9 +527,13 @@ namespace
                         // Check for any other alphabetic time zone
                         bool nonalpha = false;
                         for (qsizetype charIndex = 0, zoneEnd = zone.size(); (charIndex < zoneEnd) && !nonalpha; ++charIndex)
+                        {
                             nonalpha = !isalpha(zone[charIndex]);
+                        }
                         if (nonalpha)
+                        {
                             return {};
+                        }
                         // TODO: Attempt to recognize the time zone abbreviation?
                         negOffset = true; // unknown time zone: RFC 2822 treats as '-0000'
                     }
@@ -515,21 +543,29 @@ namespace
 
         const QDate qDate(year, month + 1, day); // convert date, and check for out-of-range
         if (!qDate.isValid())
+        {
             return fallbackDate;
+        }
 
         const QTime qTime(hour, minute, second);
         QDateTime result(qDate, qTime, QTimeZone::UTC);
         if (offset)
+        {
             result = result.addSecs(-offset);
+        }
         if (!result.isValid())
+        {
             return fallbackDate; // invalid date/time
+        }
 
         if (leapSecond)
         {
             // Validate a leap second time. Leap seconds are inserted after 23:59:59 UTC.
             // Convert the time to UTC and check that it is 00:00:00.
-            if ((hour * 3600 + minute * 60 + 60 - offset + 86400 * 5) % 86400) // (max abs(offset) is 100 hours)
-                return fallbackDate;                                           // the time isn't the last second of the day
+            if ((hour * 3600 + minute * 60 + 60 - offset + 86400 * 5) % 86400)
+            {                        // (max abs(offset) is 100 hours)
+                return fallbackDate; // the time isn't the last second of the day
+            }
         }
 
         return result;
@@ -612,7 +648,9 @@ void RSS::Private::Parser::parseRssArticle(QXmlStreamReader& xml)
         const QString name(xml.name().toString());
 
         if (xml.isEndElement() && (name == u"item"))
+        {
             break;
+        }
 
         if (xml.isStartElement())
         {
@@ -623,17 +661,25 @@ void RSS::Private::Parser::parseRssArticle(QXmlStreamReader& xml)
             else if (name == u"enclosure")
             {
                 if (xml.attributes().value(u"type"_s) == u"application/x-bittorrent")
+                {
                     article[Article::KeyTorrentURL] = xml.attributes().value(u"url"_s).toString();
+                }
                 else if (xml.attributes().value(u"type"_s).isEmpty())
+                {
                     altTorrentUrl = xml.attributes().value(u"url"_s).toString();
+                }
             }
             else if (name == u"link")
             {
                 const QString text{ xml.readElementText().trimmed() };
                 if (text.startsWith(u"magnet:", Qt::CaseInsensitive))
+                {
                     article[Article::KeyTorrentURL] = text; // magnet link instead of a news URL
+                }
                 else
+                {
                     article[Article::KeyLink] = text;
+                }
             }
             else if (name == u"description")
             {
@@ -659,7 +705,9 @@ void RSS::Private::Parser::parseRssArticle(QXmlStreamReader& xml)
     }
 
     if (article[Article::KeyTorrentURL].toString().isEmpty())
+    {
         article[Article::KeyTorrentURL] = altTorrentUrl;
+    }
 
     addArticle(article);
 }
@@ -708,7 +756,9 @@ void RSS::Private::Parser::parseAtomArticle(QXmlStreamReader& xml)
         const QString name(xml.name().toString());
 
         if (xml.isEndElement() && (name == u"entry"))
+        {
             break;
+        }
 
         if (xml.isStartElement())
         {
@@ -762,9 +812,13 @@ void RSS::Private::Parser::parseAtomArticle(QXmlStreamReader& xml)
                 while (xml.readNextStartElement())
                 {
                     if (xml.name() == u"name")
+                    {
                         article[Article::KeyAuthor] = xml.readElementText().trimmed();
+                    }
                     else
+                    {
                         xml.skipCurrentElement();
+                    }
                 }
             }
             else if (name == u"id")
@@ -820,7 +874,9 @@ void RSS::Private::Parser::addArticle(QVariantHash article)
 {
     QVariant& torrentURL = article[Article::KeyTorrentURL];
     if (torrentURL.toString().isEmpty())
+    {
         torrentURL = article.value(Article::KeyLink);
+    }
 
     // If item does not have an ID, fall back to some other identifier.
     QVariant& localId = article[Article::KeyId];

@@ -49,6 +49,8 @@ bool TagFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& r
 {
     // "All" and "Untagged" must be left in place
     if (TagFilterModel::isSpecialItem(left) || TagFilterModel::isSpecialItem(right))
+    {
         return (left < right);
+    }
     return m_naturalLessThan(left.data().toString(), right.data().toString());
 }

@@ -71,7 +71,9 @@ void TorrentContentItemDelegate::setEditorData(QWidget* editor, const QModelInde
 QWidget* TorrentContentItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex& index) const
 {
     if (index.column() != TorrentContentModelItem::COL_PRIO)
+    {
         return nullptr;
+    }
 
     auto* editor = new QComboBox(parent);
     editor->setAutoFillBackground(true);

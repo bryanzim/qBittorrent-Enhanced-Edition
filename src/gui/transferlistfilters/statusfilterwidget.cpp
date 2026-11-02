@@ -95,9 +95,13 @@ StatusFilterWidget::StatusFilterWidget(QWidget* parent, TransferListWidget* tran
 
     const int storedRow = pref->getTransSelFilter();
     if (item(((storedRow >= 0) && (storedRow < count())) ? storedRow : 0)->isHidden())
+    {
         setCurrentRow(TorrentFilter::All, QItemSelectionModel::SelectCurrent);
+    }
     else
+    {
         setCurrentRow(storedRow, QItemSelectionModel::SelectCurrent);
+    }
 }
 
 StatusFilterWidget::~StatusFilterWidget()
@@ -111,7 +115,9 @@ QSize StatusFilterWidget::sizeHint() const
     for (int i = 0; i < count(); ++i)
     {
         if (!item(i)->isHidden())
+        {
             ++numVisibleItems;
+        }
     }
 
     return {
@@ -193,13 +199,17 @@ void StatusFilterWidget::hideZeroItems()
     item(TorrentFilter::Errored)->setHidden(m_nbErrored == 0);
 
     if (currentItem() && currentItem()->isHidden())
+    {
         setCurrentRow(TorrentFilter::All, QItemSelectionModel::SelectCurrent);
+    }
 }
 
 void StatusFilterWidget::update(const QList<BitTorrent::Torrent*>& torrents)
 {
     for (const BitTorrent::Torrent* torrent : torrents)
+    {
         updateTorrentStatus(torrent);
+    }
 
     updateTexts();
 
@@ -238,29 +248,53 @@ void StatusFilterWidget::torrentAboutToBeDeleted(BitTorrent::Torrent* const torr
     const TorrentFilterBitset status = m_torrentsStatus.take(torrent);
 
     if (status[TorrentFilter::Downloading])
+    {
         --m_nbDownloading;
+    }
     if (status[TorrentFilter::Seeding])
+    {
         --m_nbSeeding;
+    }
     if (status[TorrentFilter::Completed])
+    {
         --m_nbCompleted;
+    }
     if (status[TorrentFilter::Running])
+    {
         --m_nbRunning;
+    }
     if (status[TorrentFilter::Stopped])
+    {
         --m_nbStopped;
+    }
     if (status[TorrentFilter::Active])
+    {
         --m_nbActive;
+    }
     if (status[TorrentFilter::Inactive])
+    {
         --m_nbInactive;
+    }
     if (status[TorrentFilter::StalledUploading])
+    {
         --m_nbStalledUploading;
+    }
     if (status[TorrentFilter::StalledDownloading])
+    {
         --m_nbStalledDownloading;
+    }
     if (status[TorrentFilter::Checking])
+    {
         --m_nbChecking;
+    }
     if (status[TorrentFilter::Moving])
+    {
         --m_nbMoving;
+    }
     if (status[TorrentFilter::Errored])
+    {
         --m_nbErrored;
+    }
 
     m_nbStalled = m_nbStalledUploading + m_nbStalledDownloading;
 
@@ -282,7 +316,9 @@ void StatusFilterWidget::configure()
     else
     {
         for (int i = 0; i < count(); ++i)
+        {
             item(i)->setHidden(false);
+        }
     }
 
     updateGeometry();

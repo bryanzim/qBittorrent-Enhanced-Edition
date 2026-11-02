@@ -44,8 +44,8 @@ namespace Utils::ForeignApps
     {
         using Version = Utils::Version<3, 1>;
 
-        bool isValid() const;
-        bool isSupportedVersion() const;
+        [[nodiscard]] bool isValid() const;
+        [[nodiscard]] bool isSupportedVersion() const;
 
         Path executablePath;
         Version version;

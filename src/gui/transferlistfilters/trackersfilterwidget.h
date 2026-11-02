@@ -80,14 +80,14 @@ private:
     void increaseTorrentsCount(const QString& trackerHost, qsizetype torrentsCount);
     void decreaseTorrentsCount(const QString& trackerHost);
     void refreshStatusItems(const BitTorrent::Torrent* torrent);
-    QString trackerFromRow(int row) const;
-    int rowFromTracker(const QString& tracker) const;
+    [[nodiscard]] QString trackerFromRow(int row) const;
+    [[nodiscard]] int rowFromTracker(const QString& tracker) const;
     void downloadFavicon(const QString& trackerHost, const QString& faviconURL);
     void removeTracker(const QString& trackerHost);
 
     void enableTrackerStatusItems(bool value);
 
-    qsizetype numSpecialRows() const;
+    [[nodiscard]] qsizetype numSpecialRows() const;
 
     struct TrackerData
     {

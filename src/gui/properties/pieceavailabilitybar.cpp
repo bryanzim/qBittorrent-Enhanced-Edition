@@ -45,7 +45,9 @@ QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int>& vecin, int
 {
     QList<float> result(reqSize, 0.0);
     if (vecin.isEmpty())
+    {
         return result;
+    }
 
     const float ratio = static_cast<float>(vecin.size()) / reqSize;
 
@@ -56,7 +58,9 @@ QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int>& vecin, int
     // const int maxElement = std::max(*std::ranges::max_element(avail), 1);
 
     if (maxElement == 0)
+    {
         return result;
+    }
 
     // simple linear transformation algorithm
     // for example:
@@ -70,10 +74,12 @@ QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int>& vecin, int
         const float toR = (x + 1) * ratio;
 
         // C - integer
-        int fromC = fromR; // std::floor not needed
+        int const fromC = fromR; // std::floor not needed
         int toC = std::ceil(toR);
         if (toC > vecin.size())
+        {
             --toC;
+        }
 
         // position in pieces table
         int x2 = fromC;
@@ -88,7 +94,9 @@ QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int>& vecin, int
         if (x2 == toCMinusOne)
         {
             if (vecin[x2])
+            {
                 value += ratio * vecin[x2];
+            }
             ++x2;
         }
         // case when (15.2 >= x < 17.8)
@@ -98,20 +106,28 @@ QList<float> PieceAvailabilityBar::intToFloatVector(const QList<int>& vecin, int
             if (x2 != fromR)
             {
                 if (vecin[x2])
+                {
                     value += (1.0 - (fromR - fromC)) * vecin[x2];
+                }
                 ++x2;
             }
 
             // subcase (16 >= x < 17)
             for (; x2 < toCMinusOne; ++x2)
+            {
                 if (vecin[x2])
+                {
                     value += vecin[x2];
+                }
+            }
 
             // subcase (17 >= x < 17.8)
             if (x2 == toCMinusOne)
             {
                 if (vecin[x2])
+                {
                     value += (1.0 - (toC - toR)) * vecin[x2];
+                }
                 ++x2;
             }
         }
@@ -143,12 +159,12 @@ QImage PieceAvailabilityBar::renderImage()
         return image;
     }
 
-    QList<float> scaledPieces = intToFloatVector(m_pieces, image.width());
+    QList<float> const scaledPieces = intToFloatVector(m_pieces, image.width());
 
     // filling image
     for (qsizetype x = 0; x < scaledPieces.size(); ++x)
     {
-        float piecesToValue = scaledPieces.at(x);
+        float const piecesToValue = scaledPieces.at(x);
         image.setPixel(x, 0, pieceColors()[piecesToValue * 255]);
     }
 

@@ -47,7 +47,7 @@ public:
     DeletionConfirmationDialog(QWidget* parent, int torrentsCount, const QString& name, bool defaultDeleteFiles);
     ~DeletionConfirmationDialog() override;
 
-    bool isRemoveContentSelected() const;
+    [[nodiscard]] bool isRemoveContentSelected() const;
 
 private:
     Ui::DeletionConfirmationDialog* m_ui = nullptr;

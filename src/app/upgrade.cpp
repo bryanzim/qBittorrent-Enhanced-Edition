@@ -56,14 +56,18 @@ namespace
         const auto migrate = [](const QString& oldKey, const QString& newKey, const Path& savePath) {
             auto* settingsStorage = SettingsStorage::instance();
             if (!settingsStorage->hasKey(oldKey))
+            {
                 return;
+            }
 
             const auto oldData{ settingsStorage->loadValue<QByteArray>(oldKey) };
             const auto newData{ settingsStorage->loadValue<QString>(newKey) };
             const QString errorMsgFormat{ QCoreApplication::translate("Upgrade", "Migrate preferences failed: WebUI https, file: \"%1\", error: \"%2\"") };
 
             if (!newData.isEmpty() || oldData.isEmpty())
+            {
                 return;
+            }
 
             const nonstd::expected<void, QString> result = Utils::IO::saveToFile(savePath, oldData);
             if (!result)
@@ -88,7 +92,9 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const QString oldKey = u"BitTorrent/Session/CreateTorrentSubfolder"_s;
         if (!settingsStorage->hasKey(oldKey))
+        {
             return;
+        }
 
         const QString newKey = u"BitTorrent/Session/TorrentContentLayout"_s;
 
@@ -96,7 +102,9 @@ namespace
         const auto newData{ settingsStorage->loadValue<QString>(newKey) };
 
         if (!newData.isEmpty() || !oldData.isValid())
+        {
             return;
+        }
 
         const bool createSubfolder = oldData.toBool();
         const BitTorrent::TorrentContentLayout torrentContentLayout =
@@ -115,7 +123,9 @@ namespace
         if (settingsStorage->hasKey(oldKey))
         {
             if (settingsStorage->loadValue<bool>(oldKey))
+            {
                 settingsStorage->storeValue(newKey, 0);
+            }
 
             settingsStorage->removeValue(oldKey);
         }
@@ -126,7 +136,9 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Preferences/Scheduler/days"_s;
         if (!settingsStorage->hasKey(key))
+        {
             return;
+        }
 
         const auto value = settingsStorage->loadValue<QString>(key);
         bool ok = false;
@@ -182,7 +194,9 @@ namespace
         const auto key = u"Preferences/DynDNS/Service"_s;
         const auto value = settingsStorage->loadValue<QString>(key);
         if (!settingsStorage->hasKey(key))
+        {
             return;
+        }
 
         bool ok = false;
         const auto number = value.toInt(&ok);
@@ -215,7 +229,9 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Preferences/Advanced/TrayIconStyle"_s;
         if (!settingsStorage->hasKey(key))
+        {
             return;
+        }
 
         const auto value = settingsStorage->loadValue<QString>(key);
         bool ok = false;
@@ -249,15 +265,21 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const auto oldKey = u"Preferences/Advanced/TrayIconStyle"_s;
         if (!settingsStorage->hasKey(oldKey))
+        {
             return;
+        }
 
         const auto newKey = u"Appearance/TrayIconStyle"_s;
         const auto value = settingsStorage->loadValue<QString>(oldKey);
 
         if ((value == u"MonoDark") || (value == u"MonoLight"))
+        {
             settingsStorage->storeValue(newKey, u"Monochrome"_s);
+        }
         else
+        {
             settingsStorage->storeValue(newKey, u"Normal"_s);
+        }
 
         settingsStorage->removeValue(oldKey);
     }
@@ -377,7 +399,9 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const auto key = u"Network/Proxy/Type"_s;
         if (!settingsStorage->hasKey(key))
+        {
             return;
+        }
 
         const auto value = settingsStorage->loadValue<QString>(key);
         bool ok = false;
@@ -478,7 +502,9 @@ namespace
         {
             const auto locale = settingsStorage->loadValue<QString>(key);
             if (locale.compare(u"zh"_s, Qt::CaseInsensitive) == 0)
+            {
                 settingsStorage->storeValue(key, u"zh_CN"_s);
+            }
         }
     }
 
@@ -487,7 +513,9 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const auto oldKey = u"BitTorrent/Session/MaxRatioAction"_s;
         if (!settingsStorage->hasKey(oldKey))
+        {
             return;
+        }
 
         const auto newKey = u"BitTorrent/Session/ShareLimitAction"_s;
         const auto value = settingsStorage->loadValue<int>(oldKey);
@@ -521,7 +549,9 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const auto oldKey = u"BitTorrent/Session/AddTorrentPaused"_s;
         if (!settingsStorage->hasKey(oldKey))
+        {
             return;
+        }
 
         const auto newKey = u"BitTorrent/Session/AddTorrentStopped"_s;
         settingsStorage->storeValue(newKey, settingsStorage->loadValue<bool>(oldKey));
@@ -552,7 +582,9 @@ namespace
         auto* settingsStorage = SettingsStorage::instance();
         const QString key = u"Preferences/Connection/ResolvePeerCountries"_s;
         if (!settingsStorage->hasKey(key))
+        {
             SettingsStorage::instance()->storeValue(key, true);
+        }
     }
 
     void migrateTorrentExportFolderSettings()
@@ -649,14 +681,20 @@ bool upgrade()
         }
 
         if (version < 2)
+        {
             handleSettingKeys<MigrateOption::AddNewKeys>();
+        }
 
         if (version < 3)
+        {
             migrateProxySettingsEnum();
+        }
 
 #ifdef Q_OS_WIN
         if (version < 4)
+        {
             migrateMemoryPrioritySettings();
+        }
 #endif
 
         if (version < 5)
@@ -666,16 +704,24 @@ bool upgrade()
         }
 
         if (version < 6)
+        {
             migrateProxySettings();
+        }
 
         if (version < 7)
+        {
             migrateShareLimitActionSettings();
+        }
 
         if (version < 8)
+        {
             migrateAddPausedSetting();
+        }
 
         if (version < 9)
+        {
             handleSettingKeys<MigrateOption::RemoveOldKeys>();
+        }
 
         if (version < 10)
         {
@@ -691,7 +737,9 @@ bool upgrade()
         }
 
         if (version < 12)
+        {
             migrateSearchSettingKeys();
+        }
 
         version = MIGRATION_VERSION;
     }

@@ -62,15 +62,21 @@ QString AutoExpandableDialog::getText(QWidget* parent, const QString& title, con
     {
         const QString extension = Path(text).extension();
         if (!extension.isEmpty())
+        {
             d.m_ui->textEdit->setSelection(0, (text.length() - extension.length()));
+        }
     }
 
-    bool res = d.exec();
+    bool const res = d.exec();
     if (ok)
+    {
         *ok = res;
+    }
 
     if (!res)
+    {
         return {};
+    }
 
     return d.m_ui->textEdit->text();
 }
@@ -88,13 +94,13 @@ void AutoExpandableDialog::showEvent(QShowEvent* e)
     {
         // not really the font metrics in window title, so we enlarge it a bit,
         // including the small icon and close button width
-        int w = fontMetrics().horizontalAdvance(windowTitle()) * 1.8;
+        int const w = fontMetrics().horizontalAdvance(windowTitle()) * 1.8;
         wd = std::max(wd, w);
     }
 
     if (!m_ui->textLabel->text().isEmpty())
     {
-        int w = m_ui->textLabel->fontMetrics().horizontalAdvance(m_ui->textLabel->text());
+        int const w = m_ui->textLabel->fontMetrics().horizontalAdvance(m_ui->textLabel->text());
         wd = std::max(wd, w);
     }
 
@@ -103,7 +109,7 @@ void AutoExpandableDialog::showEvent(QShowEvent* e)
     // If the value is less than dialog default size, default size is used
     if (wd > width())
     {
-        QSize size = { width() - m_ui->verticalLayout->sizeHint().width() + wd, height() };
+        QSize const size = { width() - m_ui->verticalLayout->sizeHint().width() + wd, height() };
         resize(size);
     }
 }

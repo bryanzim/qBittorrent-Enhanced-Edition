@@ -69,27 +69,35 @@ const QList<TorrentContentModelItem*>& TorrentContentModelFolder::children() con
 void TorrentContentModelFolder::appendChild(TorrentContentModelItem* item)
 {
     Q_ASSERT(item);
-    if (!item) [[unlikely]]
-        return;
+    if (!item)
+    {
+        [[unlikely]] return;
+    }
 
     m_childItems.append(item);
     item->m_parentItem = this;
     // Update own size
     if (item->itemType() == FileType)
+    {
         increaseSize(item->size());
+    }
 }
 
 void TorrentContentModelFolder::removeChild(TorrentContentModelItem* item)
 {
     Q_ASSERT(item);
-    if (!item) [[unlikely]]
-        return;
+    if (!item)
+    {
+        [[unlikely]] return;
+    }
 
     if (m_childItems.removeOne(item))
     {
         // Update own size
         if (item->itemType() == FileType)
+        {
             decreaseSize(item->size());
+        }
         item->m_parentItem = nullptr;
     }
 }
@@ -108,10 +116,14 @@ int TorrentContentModelFolder::childCount() const
 void TorrentContentModelFolder::updatePriority()
 {
     if (isRootItem())
+    {
         return;
+    }
 
     if (m_childItems.isEmpty())
+    {
         return;
+    }
 
     // If all children have the same priority
     // then the folder should have the same
@@ -133,34 +145,44 @@ void TorrentContentModelFolder::updatePriority()
 void TorrentContentModelFolder::setPriority(BitTorrent::DownloadPriority newPriority, bool updateParent)
 {
     if (m_priority == newPriority)
+    {
         return;
+    }
 
     m_priority = newPriority;
 
     // Update parent priority
     if (updateParent)
+    {
         m_parentItem->updatePriority();
+    }
 
     // Update children
     if (m_priority != BitTorrent::DownloadPriority::Mixed)
     {
         for (TorrentContentModelItem* child : asConst(m_childItems))
+        {
             child->setPriority(m_priority, false);
+        }
     }
 }
 
 void TorrentContentModelFolder::recalculateProgress()
 {
     qreal tProgress = 0;
-    qulonglong tSize = 0;
-    qulonglong tRemaining = 0;
+    qulonglong tSize = 0U;
+    qulonglong tRemaining = 0U;
     for (TorrentContentModelItem* child : asConst(m_childItems))
     {
         if (child->priority() == BitTorrent::DownloadPriority::Ignored)
+        {
             continue;
+        }
 
         if (child->itemType() == FolderType)
+        {
             static_cast<TorrentContentModelFolder*>(child)->recalculateProgress();
+        }
         tProgress += child->progress() * child->size();
         tSize += child->size();
         tRemaining += child->remaining();
@@ -186,15 +208,19 @@ void TorrentContentModelFolder::recalculateProgress()
 void TorrentContentModelFolder::recalculateAvailability()
 {
     qreal tAvailability = 0;
-    qulonglong tSize = 0;
+    qulonglong tSize = 0U;
     bool foundAnyData = false;
     for (TorrentContentModelItem* child : asConst(m_childItems))
     {
         if (child->priority() == BitTorrent::DownloadPriority::Ignored)
+        {
             continue;
+        }
 
         if (child->itemType() == FolderType)
+        {
             static_cast<TorrentContentModelFolder*>(child)->recalculateAvailability();
+        }
         const qreal childAvailability = child->availability();
         if (childAvailability >= 0)
         { // -1 means "no data"
@@ -218,7 +244,9 @@ void TorrentContentModelFolder::recalculateAvailability()
 void TorrentContentModelFolder::increaseSize(const qulonglong delta)
 {
     if (isRootItem())
+    {
         return;
+    }
 
     m_size += delta;
     m_parentItem->increaseSize(delta);
@@ -227,7 +255,9 @@ void TorrentContentModelFolder::increaseSize(const qulonglong delta)
 void TorrentContentModelFolder::decreaseSize(const qulonglong delta)
 {
     if (isRootItem())
+    {
         return;
+    }
 
     m_size -= delta;
     m_parentItem->decreaseSize(delta);

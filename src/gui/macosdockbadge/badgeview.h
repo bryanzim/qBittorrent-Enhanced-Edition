@@ -31,6 +31,6 @@
 
 @interface BadgeView : NSView
 
-- (BOOL)setRatesWithDownload:(int64_t)downloadRate upload:(int64_t)uploadRate;
+- (BOOL)setRatesWithDownload:(std::int64_t)downloadRate upload:(std::int64_t)uploadRate;
 
 @end

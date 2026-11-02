@@ -48,13 +48,17 @@ void TorrentContentModelFile::setPriority(BitTorrent::DownloadPriority newPriori
     Q_ASSERT(newPriority != BitTorrent::DownloadPriority::Mixed);
 
     if (m_priority == newPriority)
+    {
         return;
+    }
 
     m_priority = newPriority;
 
     // Update parent
     if (updateParent)
+    {
         parent()->updatePriority();
+    }
 }
 
 void TorrentContentModelFile::setProgress(qreal progress)

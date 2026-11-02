@@ -193,7 +193,9 @@ Private::Converter::Converter(const Path& basePath)
 Path Private::Converter::toPortablePath(const Path& path) const
 {
     if (path.isEmpty())
+    {
         return path;
+    }
 
 #ifdef Q_OS_WIN
     if (path.isAbsolute())
@@ -202,7 +204,9 @@ Path Private::Converter::toPortablePath(const Path& path) const
         const QChar baseDriveLetter = m_basePath.data()[0].toUpper();
         const bool onSameDrive = (driveLetter.category() == QChar::Letter_Uppercase) && (driveLetter == baseDriveLetter);
         if (!onSameDrive)
+        {
             return path;
+        }
     }
 #endif
     return m_basePath.relativePathOf(path);
@@ -211,7 +215,9 @@ Path Private::Converter::toPortablePath(const Path& path) const
 Path Private::Converter::fromPortablePath(const Path& portablePath) const
 {
     if (portablePath.isEmpty() || portablePath.isAbsolute())
+    {
         return portablePath;
+    }
 
     return m_basePath / portablePath;
 }

@@ -46,7 +46,9 @@ TorrentContentLayoutModel::TorrentContentLayoutModel(BitTorrent::TorrentContentH
 QVariant TorrentContentLayoutModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
 {
     if ((role != Qt::DisplayRole) || (orientation != Qt::Horizontal))
+    {
         return {};
+    }
 
     switch (section)
     {
@@ -79,7 +81,9 @@ QModelIndex TorrentContentLayoutModel::parent([[maybe_unused]] const QModelIndex
 int TorrentContentLayoutModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
+    {
         return 0;
+    }
 
     return getFilesCount();
 }
@@ -92,7 +96,9 @@ int TorrentContentLayoutModel::columnCount([[maybe_unused]] const QModelIndex& p
 QVariant TorrentContentLayoutModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || (index.row() >= getFilesCount()))
+    {
         return {};
+    }
 
     switch (role)
     {
@@ -111,13 +117,17 @@ QVariant TorrentContentLayoutModel::data(const QModelIndex& index, int role) con
 
     case Qt::TextAlignmentRole:
         if (index.column() == COL_INDEX)
+        {
             return Qt::AlignRight;
+        }
 
         break;
 
     case PATH_CHANGED_ROLE:
         if (index.column() == COL_PATH)
+        {
             return m_changedFilePaths.contains(index.row());
+        }
 
         break;
     }
@@ -128,7 +138,9 @@ QVariant TorrentContentLayoutModel::data(const QModelIndex& index, int role) con
 bool TorrentContentLayoutModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (role != Qt::EditRole)
+    {
         return false;
+    }
 
     if (index.column() == COL_PATH)
     {
@@ -137,9 +149,13 @@ bool TorrentContentLayoutModel::setData(const QModelIndex& index, const QVariant
         if (getFilePath(fileIndex) != filePath)
         {
             if (filePath == m_contentHandler->filePath(fileIndex))
+            {
                 m_changedFilePaths.remove(fileIndex);
+            }
             else
+            {
                 m_changedFilePaths.emplace(fileIndex, std::move(filePath));
+            }
 
             emit dataChanged(index, index);
         }
@@ -169,14 +185,18 @@ void TorrentContentLayoutModel::applyChangedFilePaths()
         catch (const RuntimeError& error)
         {
             if (failedCount == 0)
+            {
                 firstErrorMessage = error.message();
+            }
 
             ++failedCount;
         }
     }
 
     if (failedCount > 0)
+    {
         emit renameFailed(firstErrorMessage, failedCount);
+    }
 }
 
 int TorrentContentLayoutModel::getFilesCount() const
@@ -197,7 +217,9 @@ void TorrentContentLayoutModel::onFileRenamed(const int fileIndex)
     if (newFilePath == m_contentHandler->filePath(fileIndex))
     {
         if (m_changedFilePaths.remove(fileIndex))
+        {
             emit dataChanged(modelIndex, modelIndex);
+        }
     }
     else
     {
@@ -209,24 +231,32 @@ void TorrentContentLayoutModel::onFileRenamed(const int fileIndex)
 void TorrentContentLayoutModel::onFolderRenamed([[maybe_unused]] const Path& newFolderPath, [[maybe_unused]] const Path& oldFolderPath, const QHash<int, Path>& renamedFiles)
 {
     for (auto iter = renamedFiles.keyBegin(); iter != renamedFiles.keyEnd(); ++iter)
+    {
         onFileRenamed(*iter);
+    }
 }
 
 void TorrentContentLayoutModel::onFolderRenamingFailed([[maybe_unused]] const Path& newFolderPath, [[maybe_unused]] const Path& oldFolderPath, const QHash<int, Path>& renamedFiles)
 {
     for (auto iter = renamedFiles.keyBegin(); iter != renamedFiles.keyEnd(); ++iter)
+    {
         onFileRenamed(*iter);
+    }
 }
 
 Qt::ItemFlags TorrentContentLayoutModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
+    {
         return Qt::NoItemFlags;
+    }
 
     Qt::ItemFlags customFlags = Qt::ItemNeverHasChildren;
 
     if (index.column() == COL_PATH)
+    {
         customFlags |= Qt::ItemIsEditable;
+    }
 
     return QAbstractItemModel::flags(index) | customFlags;
 }

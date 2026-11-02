@@ -40,7 +40,7 @@ namespace BitTorrent
         QSslKey privateKey;
         QByteArray dhParams;
 
-        bool isValid() const;
+        [[nodiscard]] bool isValid() const;
 
         friend bool operator==(const SSLParameters& left, const SSLParameters& right) = default;
     };

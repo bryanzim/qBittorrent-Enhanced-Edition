@@ -65,7 +65,9 @@ SettingsStorage::~SettingsStorage()
 void SettingsStorage::initInstance()
 {
     if (!m_instance)
+    {
         m_instance = new SettingsStorage;
+    }
 }
 
 void SettingsStorage::freeInstance()
@@ -85,7 +87,9 @@ bool SettingsStorage::save()
 
     const QWriteLocker locker(&m_lock); // guard for `m_dirty` too
     if (!m_dirty)
+    {
         return false;
+    }
 
     if (!writeNativeSettings())
     {
@@ -121,9 +125,11 @@ void SettingsStorage::readNativeSettings()
     // there is no other way to get that name except actually create a QSettings object.
     // If serialization operation was not successful we return empty string.
     const auto deserialize = [](QVariantHash& data, const QString& nativeSettingsName) -> Path {
-        std::unique_ptr<QSettings> nativeSettings = Profile::instance()->applicationSettings(nativeSettingsName);
+        std::unique_ptr<QSettings> const nativeSettings = Profile::instance()->applicationSettings(nativeSettingsName);
         if (nativeSettings->allKeys().isEmpty())
+        {
             return {};
+        }
 
         // Copy everything into memory. This means even keys inserted in the file manually
         // or that we don't touch directly in this code (eg disabled by ifdef). This ensures
@@ -132,7 +138,9 @@ void SettingsStorage::readNativeSettings()
         {
             const QVariant value = nativeSettings->value(key);
             if (value.isValid())
+            {
                 data[key] = value;
+            }
         }
 
         return Path(nativeSettings->fileName());
@@ -156,7 +164,9 @@ void SettingsStorage::readNativeSettings()
 
         const Path finalPath{ finalPathStr };
         if (Utils::Fs::removeFile(finalPath))
+        {
             Utils::Fs::renameFile(newPath, finalPath);
+        }
     }
     else
     {
@@ -183,7 +193,9 @@ bool SettingsStorage::writeNativeSettings() const
     // Write everything to qBittorrent_new.ini/qBittorrent_new.conf and if it succeeds
     // replace qBittorrent.ini/qBittorrent.conf with it.
     for (auto i = m_data.cbegin(); i != m_data.cend(); ++i)
+    {
         nativeSettings->setValue(i.key(), i.value());
+    }
 
     nativeSettings->sync(); // Important to get error status
     const QSettings::Status status = nativeSettings->status();

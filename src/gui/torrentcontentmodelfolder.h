@@ -47,7 +47,7 @@ public:
 
     ~TorrentContentModelFolder() override;
 
-    ItemType itemType() const override;
+    [[nodiscard]] ItemType itemType() const override;
 
     void recalculateProgress();
     void recalculateAvailability();
@@ -56,11 +56,11 @@ public:
     void setPriority(BitTorrent::DownloadPriority newPriority, bool updateParent = true) override;
 
     void deleteAllChildren();
-    const QList<TorrentContentModelItem*>& children() const;
+    [[nodiscard]] const QList<TorrentContentModelItem*>& children() const;
     void appendChild(TorrentContentModelItem* item);
     void removeChild(TorrentContentModelItem* item);
-    TorrentContentModelItem* child(int row) const;
-    int childCount() const;
+    [[nodiscard]] TorrentContentModelItem* child(int row) const;
+    [[nodiscard]] int childCount() const;
 
 private:
     void increaseSize(qulonglong delta);

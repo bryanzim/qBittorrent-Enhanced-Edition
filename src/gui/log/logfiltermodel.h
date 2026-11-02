@@ -42,7 +42,7 @@ public:
     void setMessageTypes(Log::MsgTypes types);
 
 private:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    [[nodiscard]] bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
     Log::MsgTypes m_types;
 };

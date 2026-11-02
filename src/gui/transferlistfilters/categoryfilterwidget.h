@@ -38,7 +38,7 @@ class CategoryFilterWidget final : public QTreeView
 public:
     explicit CategoryFilterWidget(QWidget* parent = nullptr);
 
-    QString currentCategory() const;
+    [[nodiscard]] QString currentCategory() const;
 
 signals:
     void categoryChanged(const QString& categoryName);
@@ -58,9 +58,9 @@ private slots:
     void removeUnusedCategories();
 
 private:
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
+    [[nodiscard]] QSize sizeHint() const override;
+    [[nodiscard]] QSize minimumSizeHint() const override;
     void rowsInserted(const QModelIndex& parent, int start, int end) override;
-    bool hasAnySubcategory() const;
+    [[nodiscard]] bool hasAnySubcategory() const;
     void adjustIndentation();
 };
