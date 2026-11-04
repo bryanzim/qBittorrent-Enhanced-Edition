@@ -110,32 +110,44 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction& ac
 #elif defined(Q_OS_MACOS)
     AEEventID EventToSend{};
     if (action == ShutdownDialogAction::Suspend)
+    {
         EventToSend = kAESleep;
+    }
     else if (action == ShutdownDialogAction::Reboot)
+    {
         EventToSend = kAERestart;
+    }
     else if (action == ShutdownDialogAction::Shutdown)
+    {
         EventToSend = kAEShutDown;
+    }
     AEAddressDesc targetDesc;
     const ProcessSerialNumber kPSNOfSystemProcess = { 0, kSystemProcess };
-    AppleEvent eventReply = { typeNull, NULL };
-    AppleEvent appleEventToSend = { typeNull, NULL };
+    AppleEvent eventReply = { typeNull, nullptr };
+    AppleEvent appleEventToSend = { typeNull, nullptr };
 
     OSStatus error = ::AECreateDesc(typeProcessSerialNumber, &kPSNOfSystemProcess, sizeof(kPSNOfSystemProcess), &targetDesc);
 
     if (error != noErr)
+    {
         return;
+    }
 
     error = ::AECreateAppleEvent(kCoreEventClass, EventToSend, &targetDesc, kAutoGenerateReturnID, kAnyTransactionID, &appleEventToSend);
 
     AEDisposeDesc(&targetDesc);
     if (error != noErr)
+    {
         return;
+    }
 
-    error = ::AESend(&appleEventToSend, &eventReply, kAENoReply, kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
+    error = ::AESend(&appleEventToSend, &eventReply, kAENoReply, kAENormalPriority, kAEDefaultTimeout, nullptr, nullptr);
 
     ::AEDisposeDesc(&appleEventToSend);
     if (error != noErr)
+    {
         return;
+    }
 
     ::AEDisposeDesc(&eventReply);
 
@@ -149,9 +161,13 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction& ac
         if (login1Iface.isValid())
         {
             if (action == ShutdownDialogAction::Suspend)
+            {
                 login1Iface.call(u"Suspend"_s, false);
+            }
             else
+            {
                 login1Iface.call(u"Hibernate"_s, false);
+            }
             return;
         }
         // Else, other recent systems use UPower
@@ -160,9 +176,13 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction& ac
         if (upowerIface.isValid())
         {
             if (action == ShutdownDialogAction::Suspend)
+            {
                 upowerIface.call(u"Suspend"_s);
+            }
             else
+            {
                 upowerIface.call(u"Hibernate"_s);
+            }
             return;
         }
         // HAL (older systems)
@@ -170,9 +190,13 @@ void Utils::OS::shutdownComputer([[maybe_unused]] const ShutdownDialogAction& ac
                                 u"org.freedesktop.Hal.Device.SystemPowerManagement"_s,
                                 QDBusConnection::systemBus());
         if (action == ShutdownDialogAction::Suspend)
+        {
             halIface.call(u"Suspend"_s, 5);
+        }
         else
+        {
             halIface.call(u"Hibernate"_s);
+        }
     }
     else if (action == ShutdownDialogAction::Shutdown)
     {
@@ -260,7 +284,7 @@ bool Utils::OS::applyMarkOfTheWeb(const Path& file, const QString& url)
     [[maybe_unused]] const auto fileURLGuard = qScopeGuard([&fileURL] { ::CFRelease(fileURL); });
 
     if (CFDictionaryRef currentProperties = nullptr;
-        ::CFURLCopyResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey, &currentProperties, NULL) && currentProperties)
+        ::CFURLCopyResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey, &currentProperties, nullptr) && currentProperties)
     {
         [[maybe_unused]] const auto currentPropertiesGuard = qScopeGuard([&currentProperties] { ::CFRelease(currentProperties); });
 
@@ -268,13 +292,17 @@ bool Utils::OS::applyMarkOfTheWeb(const Path& file, const QString& url)
             ::CFDictionaryGetValueIfPresent(currentProperties, kLSQuarantineTypeKey, reinterpret_cast<const void**>(&quarantineType)) && quarantineType)
         {
             if (::CFStringCompare(quarantineType, kLSQuarantineTypeOtherDownload, 0) == kCFCompareEqualTo)
+            {
                 return true;
+            }
         }
     }
 
     CFMutableDictionaryRef properties = ::CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     if (!properties)
+    {
         return false;
+    }
     [[maybe_unused]] const auto propertiesGuard = qScopeGuard([&properties] { ::CFRelease(properties); });
 
     ::CFDictionarySetValue(properties, kLSQuarantineTypeKey, kLSQuarantineTypeOtherDownload);
@@ -285,7 +313,7 @@ bool Utils::OS::applyMarkOfTheWeb(const Path& file, const QString& url)
         ::CFDictionarySetValue(properties, kLSQuarantineDataURLKey, urlCFString);
     }
 
-    const Boolean success = ::CFURLSetResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey, properties, NULL);
+    const Boolean success = ::CFURLSetResourcePropertyForKey(fileURL, kCFURLQuarantinePropertiesKey, properties, nullptr);
     return success;
 #elif defined(Q_OS_WIN)
     const QString zoneIDStream = file.toString() + u":Zone.Identifier";

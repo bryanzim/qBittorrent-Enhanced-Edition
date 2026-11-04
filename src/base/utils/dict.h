@@ -50,7 +50,9 @@ namespace Utils::Dict
     {
         const auto it = dict.find(key);
         if (it != dict.cend())
+        {
             return *it;
+        }
 
         return std::nullopt;
     }

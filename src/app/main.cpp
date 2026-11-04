@@ -157,7 +157,9 @@ namespace
         rlimit limit{};
 
         if (getrlimit(RLIMIT_NOFILE, &limit) != 0)
+        {
             return;
+        }
 
         limit.rlim_cur = limit.rlim_max;
         setrlimit(RLIMIT_NOFILE, &limit);
@@ -168,7 +170,9 @@ namespace
         // specify the default locale just in case if user has not set any other locale
         // only `C` locale is available universally without installing locale packages
         if (qEnvironmentVariableIsEmpty("LANG"))
+        {
             qputenv("LANG", "C.UTF-8");
+        }
     }
 #endif
 }

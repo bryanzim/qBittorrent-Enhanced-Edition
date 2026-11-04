@@ -70,7 +70,7 @@ namespace BitTorrent
 #endif
 
         InfoHash() = default;
-        InfoHash(const WrappedType& nativeHash);
+        explicit InfoHash(const WrappedType& nativeHash);
 #ifdef QBT_USES_LIBTORRENT2
         InfoHash(const SHA1Hash& v1, const SHA256Hash& v2);
 #endif

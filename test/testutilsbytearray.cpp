@@ -60,7 +60,9 @@ private slots:
                                               .toContainer();
             Latin1Views expectedStrings;
             for (const auto& string : expected)
+            {
                 expectedStrings.append(QLatin1StringView(string));
+            }
             QCOMPARE(reference, expectedStrings);
         };
 
@@ -92,7 +94,9 @@ private slots:
                                               .toContainer();
             Latin1Views expectedStrings;
             for (const auto& string : expected)
+            {
                 expectedStrings.append(QLatin1StringView(string));
+            }
             QCOMPARE(reference, expectedStrings);
         };
 

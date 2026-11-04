@@ -145,7 +145,9 @@ void TransferListSortModel::setStatusFilter(const TorrentFilter::Status status)
     endFilterChange(Direction::Rows);
 #else
     if (m_filter.setStatus(status))
+    {
         invalidateRowsFilter();
+    }
 #endif
 }
 
@@ -157,7 +159,9 @@ void TransferListSortModel::setCategoryFilter(const QString& category)
     endFilterChange(Direction::Rows);
 #else
     if (m_filter.setCategory(category))
+    {
         invalidateRowsFilter();
+    }
 #endif
 }
 
@@ -169,7 +173,9 @@ void TransferListSortModel::disableCategoryFilter()
     endFilterChange(Direction::Rows);
 #else
     if (m_filter.setCategory(TorrentFilter::AnyCategory))
+    {
         invalidateRowsFilter();
+    }
 #endif
 }
 
@@ -181,7 +187,9 @@ void TransferListSortModel::setTagFilter(const Tag& tag)
     endFilterChange(Direction::Rows);
 #else
     if (m_filter.setTag(tag))
+    {
         invalidateRowsFilter();
+    }
 #endif
 }
 
@@ -193,7 +201,9 @@ void TransferListSortModel::disableTagFilter()
     endFilterChange(Direction::Rows);
 #else
     if (m_filter.setTag(TorrentFilter::AnyTag))
+    {
         invalidateRowsFilter();
+    }
 #endif
 }
 
@@ -205,7 +215,9 @@ void TransferListSortModel::setTrackerFilter(const std::optional<QString>& track
     endFilterChange(Direction::Rows);
 #else
     if (m_filter.setTrackerHost(trackerHost))
+    {
         invalidateRowsFilter();
+    }
 #endif
 }
 
@@ -217,7 +229,9 @@ void TransferListSortModel::setAnnounceStatusFilter(const std::optional<BitTorre
     endFilterChange(Direction::Rows);
 #else
     if (m_filter.setAnnounceStatus(announceStatus))
+    {
         invalidateRowsFilter();
+    }
 #endif
 }
 

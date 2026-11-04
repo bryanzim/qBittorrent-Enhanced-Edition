@@ -67,6 +67,8 @@ void HidableTabWidget::paintEvent(QPaintEvent* event)
 {
     // Hide the pane for macintosh style
     if (!style()->inherits("QMacStyle"))
+    {
         QTabWidget::paintEvent(event);
+    }
 }
 #endif

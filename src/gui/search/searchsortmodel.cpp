@@ -79,9 +79,13 @@ void SearchSortModel::setNameFilter(const QString& searchTerm)
 #else
     m_searchTerm = searchTerm;
     if ((searchTerm.length() > 2) && searchTerm.startsWith(u'"') && searchTerm.endsWith(u'"'))
+    {
         m_searchTermWords = QStringList(m_searchTerm.sliced(1, (m_searchTerm.length() - 2)));
+    }
     else
+    {
         m_searchTermWords = searchTerm.split(u' ', Qt::SkipEmptyParts);
+    }
 
     invalidateRowsFilter();
 #endif

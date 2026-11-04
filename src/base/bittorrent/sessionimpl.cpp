@@ -365,16 +365,16 @@ namespace
 
 #ifdef QBT_USES_LIBTORRENT2
     template <typename T>
-    concept HasInfoHashMember = requires(T t) { { t.info_hashes } -> std::convertible_to<InfoHash>; };
+    concept HasInfoHashMember = requires(T t) { InfoHash(t.info_hashes); };
 
     template <typename T>
-    concept HasInfoHashMemberFn = requires(T t) { { t.info_hashes() } -> std::convertible_to<InfoHash>; };
+    concept HasInfoHashMemberFn = requires(T t) { InfoHash(t.info_hashes()); };
 
     template <HasInfoHashMember T>
-    InfoHash getInfoHash(const T& t) { return t.info_hashes; }
+    InfoHash getInfoHash(const T& t) { return InfoHash(t.info_hashes); }
 
     template <HasInfoHashMemberFn T>
-    InfoHash getInfoHash(const T& t) { return t.info_hashes(); }
+    InfoHash getInfoHash(const T& t) { return InfoHash(t.info_hashes()); }
 
     InfoHash getInfoHash(const lt::add_torrent_params& addTorrentParams)
     {
@@ -383,16 +383,16 @@ namespace
     }
 #else
     template <typename T>
-    concept HasInfoHashMember = requires(T t) { { t.info_hash } -> std::convertible_to<InfoHash>; };
+    concept HasInfoHashMember = requires(T t) { InfoHash(t.info_hash); };
 
     template <typename T>
-    concept HasInfoHashMemberFn = requires(T t) { { t.info_hash() } -> std::convertible_to<InfoHash>; };
+    concept HasInfoHashMemberFn = requires(T t) { InfoHash(t.info_hash()); };
 
     template <HasInfoHashMember T>
-    InfoHash getInfoHash(const T& t) { return t.info_hash; }
+    InfoHash getInfoHash(const T& t) { return InfoHash(t.info_hash); }
 
     template <HasInfoHashMemberFn T>
-    InfoHash getInfoHash(const T& t) { return t.info_hash(); }
+    InfoHash getInfoHash(const T& t) { return InfoHash(t.info_hash()); }
 
     InfoHash getInfoHash(const lt::add_torrent_params& addTorrentParams)
     {
@@ -2368,7 +2368,9 @@ void SessionImpl::applyNetworkInterfacesSettings(lt::settings_pack& settingsPack
             }
 #else
             for (const QString& portString : asConst(portStrings))
+            {
                 endpoints << (ip + portString);
+            }
             outgoingInterfaces << ip;
 #endif
         }

@@ -64,6 +64,8 @@
 #include <QRegularExpression>
 #include <QStorageInfo>
 
+#include <cstring>
+
 namespace
 {
 #ifdef Q_OS_WIN
@@ -292,7 +294,9 @@ bool Utils::Fs::isValidFileName(const QStringView name)
 #else
     // Non-Windows systems limit file name lengths to 255 bytes in UTF-8 encoding
     if (name.toUtf8().length() > 255)
+    {
         return false;
+    }
 #endif
 
     // Check for OS specific reserved characters
@@ -399,10 +403,12 @@ bool Utils::Fs::isNetworkFileSystem(const Path& path)
     const QString file = (path.toString() + u"/.");
     struct statfs buf{};
     if (statfs(file.toLocal8Bit().constData(), &buf) != 0)
+    {
         return false;
+    }
 
 #if defined(Q_OS_OPENBSD)
-    return ((strncmp(buf.f_fstypename, "cifs", sizeof(buf.f_fstypename)) == 0) || (strncmp(buf.f_fstypename, "nfs", sizeof(buf.f_fstypename)) == 0) || (strncmp(buf.f_fstypename, "smbfs", sizeof(buf.f_fstypename)) == 0));
+    return ((std::strncmp(buf.f_fstypename, "cifs", sizeof(buf.f_fstypename)) == 0) || (std::strncmp(buf.f_fstypename, "nfs", sizeof(buf.f_fstypename)) == 0) || (std::strncmp(buf.f_fstypename, "smbfs", sizeof(buf.f_fstypename)) == 0));
 #else
     // Magic number reference:
     // https://github.com/coreutils/coreutils/blob/master/src/stat.c

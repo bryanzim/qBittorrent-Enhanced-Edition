@@ -326,7 +326,9 @@ TorrentImpl::TorrentImpl(SessionImpl* session, const lt::torrent_handle& nativeH
         m_comment = QString::fromStdString(m_ltAddTorrentParams.comment);
 #else
         if (const std::time_t creationDate = m_ltAddTorrentParams.ti->creation_date(); creationDate > 0)
+        {
             m_creationDate = QDateTime::fromSecsSinceEpoch(creationDate);
+        }
         m_creator = QString::fromStdString(m_ltAddTorrentParams.ti->creator());
         m_comment = QString::fromStdString(m_ltAddTorrentParams.ti->comment());
 #endif

@@ -54,7 +54,7 @@ class TorrentCreatorDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(TorrentCreatorDialog)
 
 public:
-    TorrentCreatorDialog(QWidget* parent = nullptr, const Path& defaultPath = {});
+    explicit TorrentCreatorDialog(QWidget* parent = nullptr, const Path& defaultPath = {});
     ~TorrentCreatorDialog() override;
     void updateInputPath(const Path& path);
 

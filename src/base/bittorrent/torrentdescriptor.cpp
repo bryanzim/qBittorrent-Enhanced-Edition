@@ -248,7 +248,9 @@ BitTorrent::TorrentDescriptor::TorrentDescriptor(lt::add_torrent_params ltAddTor
         m_comment = QString::fromStdString(m_ltAddTorrentParams.comment);
 #else
         if (m_ltAddTorrentParams.ti->creation_date() > 0)
+        {
             m_creationDate = QDateTime::fromSecsSinceEpoch(m_ltAddTorrentParams.ti->creation_date());
+        }
         m_creator = QString::fromStdString(m_ltAddTorrentParams.ti->creator());
         m_comment = QString::fromStdString(m_ltAddTorrentParams.ti->comment());
 #endif
@@ -258,9 +260,9 @@ BitTorrent::TorrentDescriptor::TorrentDescriptor(lt::add_torrent_params ltAddTor
 BitTorrent::InfoHash BitTorrent::TorrentDescriptor::infoHash() const
 {
 #ifdef QBT_USES_LIBTORRENT2
-    return m_ltAddTorrentParams.info_hashes;
+    return InfoHash(m_ltAddTorrentParams.info_hashes);
 #else
-    return m_ltAddTorrentParams.info_hash;
+    return InfoHash(m_ltAddTorrentParams.info_hash);
 #endif
 }
 

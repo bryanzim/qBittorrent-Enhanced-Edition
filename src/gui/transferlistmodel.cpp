@@ -278,7 +278,7 @@ QVariant TransferListModel::headerData(const int section, const Qt::Orientation 
             case TR_LAST_ACTIVITY:
             case TR_AVAILABILITY:
             case TR_REANNOUNCE:
-                return QVariant(Qt::AlignRight | Qt::AlignVCenter);
+                return { Qt::AlignRight | Qt::AlignVCenter };
             default:
                 return QAbstractListModel::headerData(section, orientation, role);
             }
@@ -670,7 +670,7 @@ QVariant TransferListModel::data(const QModelIndex& index, const int role) const
         case TR_LAST_ACTIVITY:
         case TR_AVAILABILITY:
         case TR_REANNOUNCE:
-            return QVariant(Qt::AlignRight | Qt::AlignVCenter);
+            return { Qt::AlignRight | Qt::AlignVCenter };
         }
         break;
     default:

@@ -121,7 +121,7 @@ public:
     {
     };
 
-    Iterator(const Path& path);
+    explicit Iterator(const Path& path);
     Iterator(const Path& path, EndIteratorTag);
 
     reference operator*() const;

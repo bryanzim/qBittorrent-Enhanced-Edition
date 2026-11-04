@@ -118,9 +118,13 @@ namespace
                     const QString pathParam = (Utils::Fs::isDir(path) ? path.parentPath() : path).toString();
 
                     if (NautilusVersion::fromString(nautilusVerStr, { 1, 0, 0 }) > NautilusVersion(3, 28, 0))
+                    {
                         startDetached(u"nautilus"_s, { pathParam });
+                    }
                     else
+                    {
                         startDetached(u"nautilus"_s, { u"--no-desktop"_s, pathParam });
+                    }
                 });
                 deProcess->start(u"nautilus"_s, { u"--version"_s });
             }
@@ -278,7 +282,9 @@ void Utils::Gui::openFolderSelect(const Path& path)
 
             const QDBusPendingReply reply = *watcher;
             if (reply.isError())
+            {
                 invokeFileManager(path);
+            }
         });
         return;
     }

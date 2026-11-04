@@ -98,7 +98,9 @@ namespace
             {
                 QPixmap cached;
                 if (QPixmapCache::find(ext, &cached))
+                {
                     return { cached };
+                }
 
                 const QPixmap pixmap = pixmapForExtension(ext);
                 if (!pixmap.isNull())
@@ -153,11 +155,15 @@ namespace
 
             const auto mimeIcon = QIcon::fromTheme(mimeType.iconName());
             if (!mimeIcon.isNull())
+            {
                 return mimeIcon;
+            }
 
             const auto genericIcon = QIcon::fromTheme(mimeType.genericIconName());
             if (!genericIcon.isNull())
+            {
                 return genericIcon;
+            }
 
             return UnifiedFileIconProvider::icon(info);
         }

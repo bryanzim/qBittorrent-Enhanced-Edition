@@ -92,7 +92,7 @@ class TorrentFilesWatcher::Worker final : public QObject
     Q_DISABLE_COPY_MOVE(Worker)
 
 public:
-    Worker(QFileSystemWatcher* watcher);
+    explicit Worker(QFileSystemWatcher* watcher);
 
 public slots:
     void setWatchedFolder(const Path& path, const TorrentFilesWatcher::WatchedFolderOptions& options);

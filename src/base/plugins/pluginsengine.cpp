@@ -90,13 +90,13 @@ PluginsEngine* PluginsEngine::instance()
 
 LuaVersion PluginsEngine::luaVersion()
 {
-    return LuaVersion(LUA_VERSION_MAJOR_N, LUA_VERSION_MINOR_N, LUA_VERSION_RELEASE_N);
+    return LuaVersion{ LUA_VERSION_MAJOR_N, LUA_VERSION_MINOR_N, LUA_VERSION_RELEASE_N };
 }
 
 LuaBridgeVersion PluginsEngine::luaBridgeVersion()
 {
     // NOTE: Need to update it whenever LuaBridge built-in sources are updated to new version.
-    return LuaBridgeVersion(3, 0);
+    return LuaBridgeVersion{ 3, 0 };
 }
 
 PluginsEngine::PluginsEngine(QObject* parent)

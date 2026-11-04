@@ -39,7 +39,7 @@ class FreeDiskSpaceChecker final : public QObject
     Q_DISABLE_COPY_MOVE(FreeDiskSpaceChecker)
 
 public:
-    FreeDiskSpaceChecker(const Path& pathToCheck);
+    explicit FreeDiskSpaceChecker(const Path& pathToCheck);
 
     [[nodiscard]] Path pathToCheck() const;
     void setPathToCheck(const Path& newPathToCheck);

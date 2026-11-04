@@ -419,7 +419,7 @@ void SearchPluginManager::checkForUpdates()
 {
     // Download version file from update server
     using namespace Net;
-    DownloadManager::instance()->download({ m_updateUrl + u"versions.txt" }, Preferences::instance()->useProxyForGeneralPurposes(), this, &SearchPluginManager::versionInfoDownloadFinished);
+    DownloadManager::instance()->download(DownloadRequest{ m_updateUrl + u"versions.txt" }, Preferences::instance()->useProxyForGeneralPurposes(), this, &SearchPluginManager::versionInfoDownloadFinished);
 }
 
 SearchDownloadHandler* SearchPluginManager::downloadTorrent(const QString& pluginName, const QString& url)

@@ -39,7 +39,7 @@ class PieceAvailabilityBar final : public PiecesBar
     using base = PiecesBar;
 
 public:
-    PieceAvailabilityBar(QWidget* parent);
+    explicit PieceAvailabilityBar(QWidget* parent);
 
     void setAvailability(const QList<int>& avail);
 

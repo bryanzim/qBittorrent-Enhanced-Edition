@@ -79,7 +79,9 @@ void DBusNotifier::onActionInvoked(const uint messageID, [[maybe_unused]] const 
     // Check whether the notification is sent by qBittorrent
     // to avoid reacting to unrelated notifications
     if (m_activeMessages.contains(messageID))
+    {
         emit messageClicked();
+    }
 }
 
 void DBusNotifier::onNotificationClosed(const uint messageID, [[maybe_unused]] const uint reason)

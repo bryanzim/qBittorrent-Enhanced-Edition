@@ -179,7 +179,7 @@ bool LocalPeer::isClient()
     bool res = m_server->listen(m_socketName);
 #if defined(Q_OS_UNIX)
     // ### Workaround
-    if (!res && m_server->serverError() == QAbstractSocket::AddressInUseError)
+    if (!res && (m_server->serverError() == QAbstractSocket::AddressInUseError))
     {
         QFile::remove(m_socketName);
         res = m_server->listen(m_socketName);

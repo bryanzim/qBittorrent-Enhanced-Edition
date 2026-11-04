@@ -94,9 +94,9 @@ InfoHash TorrentInfo::infoHash() const
     }
 
 #ifdef QBT_USES_LIBTORRENT2
-    return m_nativeInfo->info_hashes();
+    return InfoHash(m_nativeInfo->info_hashes());
 #else
-    return m_nativeInfo->info_hash();
+    return InfoHash(m_nativeInfo->info_hash());
 #endif
 }
 

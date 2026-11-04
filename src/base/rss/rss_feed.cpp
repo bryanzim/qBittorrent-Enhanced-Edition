@@ -158,7 +158,7 @@ void Feed::refresh()
 
     // NOTE: Should we allow manually refreshing for disabled session?
 
-    m_downloadHandler = Net::DownloadManager::instance()->download(m_url, Preferences::instance()->useProxyForRSS());
+    m_downloadHandler = Net::DownloadManager::instance()->download(Net::DownloadRequest{ m_url }, Preferences::instance()->useProxyForRSS());
     connect(m_downloadHandler, &Net::DownloadHandler::finished, this, &Feed::handleDownloadFinished);
 
     if (!m_iconPath.exists())
