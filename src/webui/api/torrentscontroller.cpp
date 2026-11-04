@@ -2526,7 +2526,7 @@ void TorrentsController::fetchMetadataAction()
         throw APIError(APIErrorType::BadParams, tr("downloader must be a valid search plugin"));
     }
 
-    const QString source = QUrl::fromPercentEncoding(sourceParam.toLatin1());
+    const QString source = sourceParam;
     const auto sourceTorrentDescr = BitTorrent::TorrentDescriptor::parse(source);
 
     const BitTorrent::InfoHash infoHash = sourceTorrentDescr ? sourceTorrentDescr.value().infoHash() : m_torrentSourceCache.value(source);
@@ -2637,7 +2637,7 @@ void TorrentsController::saveMetadataAction()
         throw APIError(APIErrorType::BadParams, tr("Must specify URI or hash"));
     }
 
-    const QString source = QUrl::fromPercentEncoding(sourceParam.toLatin1());
+    const QString source = sourceParam;
 
     BitTorrent::InfoHash infoHash;
     if (const auto iter = m_torrentSourceCache.constFind(source); iter != m_torrentSourceCache.constEnd())
