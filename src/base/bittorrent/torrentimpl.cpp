@@ -2415,6 +2415,7 @@ void TorrentImpl::handleSaveResumeData(lt::add_torrent_params params)
         Q_ASSERT(m_indexMap.isEmpty());
 
         const auto isSeedMode = static_cast<bool>(m_ltAddTorrentParams.flags & lt::torrent_flags::seed_mode);
+        const bool needApplyContentLayout = m_ltAddTorrentParams.renamed_files.empty();
         m_ltAddTorrentParams = std::move(params);
         if (isSeedMode)
         {
@@ -2430,8 +2431,21 @@ void TorrentImpl::handleSaveResumeData(lt::add_torrent_params params)
         const auto metadata = TorrentInfo(*m_ltAddTorrentParams.ti);
 
         const auto& renamedFiles = m_ltAddTorrentParams.renamed_files;
+        const auto nativeIndexes = metadata.nativeIndexes();
         PathList filePaths = metadata.filePaths();
-        if (renamedFiles.empty() && (m_contentLayout != TorrentContentLayout::Original))
+        m_indexMap.reserve(filePaths.size());
+        for (qsizetype i = 0; i < filePaths.size(); ++i)
+        {
+            const auto nativeIndex = nativeIndexes.at(i);
+            m_indexMap[nativeIndex] = i;
+
+            if (const auto it = renamedFiles.find(nativeIndex); it != renamedFiles.cend())
+            {
+                filePaths[i] = Path(it->second);
+            }
+        }
+
+        if (needApplyContentLayout && (m_contentLayout != TorrentContentLayout::Original))
         {
             const Path originalRootFolder = Path::findRootFolder(filePaths);
             const auto originalContentLayout = (originalRootFolder.isEmpty()
@@ -2447,19 +2461,6 @@ void TorrentImpl::handleSaveResumeData(lt::add_torrent_params params)
                 {
                     Path::addRootFolder(filePaths, filePaths.at(0).removedExtension());
                 }
-            }
-        }
-
-        const auto nativeIndexes = metadata.nativeIndexes();
-        m_indexMap.reserve(filePaths.size());
-        for (qsizetype i = 0; i < filePaths.size(); ++i)
-        {
-            const auto nativeIndex = nativeIndexes.at(i);
-            m_indexMap[nativeIndex] = i;
-
-            if (const auto it = renamedFiles.find(nativeIndex); it != renamedFiles.cend())
-            {
-                filePaths[i] = Path(it->second);
             }
         }
 
@@ -3244,6 +3245,11 @@ QFuture<QList<QUrl>> TorrentImpl::fetchURLSeeds() const
 
 QFuture<QList<int>> TorrentImpl::fetchPieceAvailability() const
 {
+    if (!hasMetadata())
+    {
+        return QtFuture::makeReadyValueFuture(QList<int>());
+    }
+
     return invokeAsync([nativeHandle = m_nativeHandle]() -> QList<int> {
         try
         {
@@ -3261,6 +3267,11 @@ QFuture<QList<int>> TorrentImpl::fetchPieceAvailability() const
 
 QFuture<QBitArray> TorrentImpl::fetchDownloadingPieces() const
 {
+    if (!hasMetadata())
+    {
+        return QtFuture::makeReadyValueFuture(QBitArray());
+    }
+
     return invokeAsync([nativeHandle = m_nativeHandle, torrentInfo = m_torrentInfo]() -> QBitArray {
         try
         {
@@ -3288,6 +3299,11 @@ QFuture<QBitArray> TorrentImpl::fetchDownloadingPieces() const
 
 QFuture<QList<qreal>> TorrentImpl::fetchAvailableFileFractions() const
 {
+    if (!hasMetadata())
+    {
+        return QtFuture::makeReadyValueFuture(QList<qreal>());
+    }
+
     return invokeAsync([nativeHandle = m_nativeHandle, torrentInfo = m_torrentInfo]() -> QList<qreal> {
         if (!torrentInfo.isValid() || (torrentInfo.filesCount() <= 0))
         {
