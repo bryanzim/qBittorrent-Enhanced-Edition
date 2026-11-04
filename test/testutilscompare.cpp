@@ -163,7 +163,9 @@ private slots:
         const Utils::Compare::NaturalCompare<Qt::CaseInsensitive> cmp;
 
         for (const TestData& data : testData)
+        {
             testCompare(data, cmp(data.lhs, data.rhs), data.caseInsensitiveResult);
+        }
     }
 
     void testNaturalCompareCaseSensitive() const
@@ -171,7 +173,9 @@ private slots:
         const Utils::Compare::NaturalCompare<Qt::CaseSensitive> cmp;
 
         for (const TestData& data : testData)
+        {
             testCompare(data, cmp(data.lhs, data.rhs), data.caseSensitiveResult);
+        }
     }
 
     void testNaturalLessThanCaseInsensitive() const
@@ -179,7 +183,9 @@ private slots:
         const Utils::Compare::NaturalLessThan<Qt::CaseInsensitive> cmp{};
 
         for (const TestData& data : testData)
+        {
             testLessThan(data, cmp(data.lhs, data.rhs), data.caseInsensitiveResult);
+        }
     }
 
     void testNaturalLessThanCaseSensitive() const
@@ -187,7 +193,9 @@ private slots:
         const Utils::Compare::NaturalLessThan<Qt::CaseSensitive> cmp{};
 
         for (const TestData& data : testData)
+        {
             testLessThan(data, cmp(data.lhs, data.rhs), data.caseSensitiveResult);
+        }
     }
 };
 

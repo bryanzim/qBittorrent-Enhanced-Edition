@@ -310,7 +310,9 @@ MainWindow::MainWindow(IGUIApplication* app, const WindowState initialState, con
             QAction* widgetAction = m_ui->toolBar->insertWidget(action, line);
             m_ui->toolBar->removeAction(action);
             if (action == m_queueSeparator)
+            {
                 m_queueSeparator = widgetAction;
+            }
         }
     }
 #endif // Q_OS_MACOS
@@ -449,7 +451,9 @@ MainWindow::MainWindow(IGUIApplication* app, const WindowState initialState, con
     connect(app->desktopIntegration(), &DesktopIntegration::activationRequested, this, [this]() {
 #ifdef Q_OS_MACOS
         if (!isVisible())
+        {
             activate();
+        }
 #else
         toggleVisibility();
 #endif
@@ -1529,7 +1533,9 @@ void MainWindow::loadPreferences()
 #ifdef Q_OS_MACOS
     // Clear dock badge immediately if speed display is disabled
     if (!pref->isSpeedInDockEnabled())
+    {
         m_badger->updateSpeed(0, 0);
+    }
     m_statusItem->setVisible(pref->isMacOSMenuBarIconEnabled());
 #endif
 
@@ -1546,9 +1552,13 @@ void MainWindow::loadSessionStats()
     // update global information
 #ifdef Q_OS_MACOS
     if (Preferences::instance()->isSpeedInDockEnabled())
+    {
         m_badger->updateSpeed(status.payloadDownloadRate, status.payloadUploadRate);
+    }
     if (Preferences::instance()->isMacOSMenuBarIconEnabled())
+    {
         m_statusItem->updateSpeed(status.payloadDownloadRate, status.payloadUploadRate);
+    }
 #else
     refreshTrayIconTooltip();
 #endif // Q_OS_MACOS

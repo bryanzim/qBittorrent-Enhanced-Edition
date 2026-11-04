@@ -271,7 +271,9 @@ QIcon DesktopIntegration::getSystrayIcon() const
 #ifdef Q_OS_UNIX
     // Workaround for invisible tray icon in KDE, https://bugreports.qt.io/browse/QTBUG-53550
     if (qEnvironmentVariable("XDG_CURRENT_DESKTOP").compare(u"KDE", Qt::CaseInsensitive) == 0)
+    {
         return icon.pixmap(32);
+    }
 #endif
     return icon;
 }

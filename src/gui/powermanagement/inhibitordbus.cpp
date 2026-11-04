@@ -163,7 +163,9 @@ void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher* call)
         {
             m_state = Idle;
             if (m_intendedState == Busy)
+            {
                 requestBusy();
+            }
         }
     }
     else if (m_state == RequestBusy)
@@ -182,7 +184,9 @@ void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher* call)
                 m_state = Busy;
                 m_fd = reply.value();
                 if (m_intendedState == Idle)
+                {
                     requestIdle();
+                }
             }
         }
         else
@@ -199,7 +203,9 @@ void InhibitorDBus::onAsyncReply(QDBusPendingCallWatcher* call)
                 m_state = Busy;
                 m_cookie = reply.value();
                 if (m_intendedState == Idle)
+                {
                     requestIdle();
+                }
             }
         }
     }

@@ -70,7 +70,7 @@ namespace Net
     class DownloadRequest
     {
     public:
-        DownloadRequest(const QString& url);
+        explicit DownloadRequest(const QString& url);
         DownloadRequest(const DownloadRequest& other) = default;
 
         [[nodiscard]] QString url() const;

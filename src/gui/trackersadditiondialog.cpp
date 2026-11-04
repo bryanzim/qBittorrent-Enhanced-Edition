@@ -97,7 +97,7 @@ void TrackersAdditionDialog::onDownloadButtonClicked()
     m_ui->downloadButton->setEnabled(false);
     setCursor(Qt::WaitCursor);
 
-    Net::DownloadManager::instance()->download(url, Preferences::instance()->useProxyForGeneralPurposes(), this, &TrackersAdditionDialog::onTorrentListDownloadFinished);
+    Net::DownloadManager::instance()->download(Net::DownloadRequest{ url }, Preferences::instance()->useProxyForGeneralPurposes(), this, &TrackersAdditionDialog::onTorrentListDownloadFinished);
 }
 
 void TrackersAdditionDialog::onTorrentListDownloadFinished(const Net::DownloadResult& result)

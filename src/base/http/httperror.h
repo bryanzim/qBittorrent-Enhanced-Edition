@@ -34,7 +34,7 @@
 class HTTPError : public RuntimeError
 {
 public:
-    HTTPError(Http::ResponseStatus responseStatus, const QString& message = {});
+    explicit HTTPError(Http::ResponseStatus responseStatus, const QString& message = {});
 
     [[nodiscard]] const Http::ResponseStatus& status() const;
 

@@ -28,7 +28,7 @@ bool is_bad_peer(const lt::peer_info& info)
     // Anyway, block dt/torrent and Taipei-torrent with specific case first.
     const lt::tcp::endpoint endpoint = peerInfoEndpoint(info);
     QString const country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
-    if (country == QLatin1String("CN") && std::regex_match(info.client, consume_filter))
+    if ((country == QLatin1String("CN")) && std::regex_match(info.client, consume_filter))
     {
         return true;
     }
@@ -41,7 +41,7 @@ bool is_unknown_peer(const lt::peer_info& info)
 {
     const lt::tcp::endpoint endpoint = peerInfoEndpoint(info);
     QString const country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
-    return info.client.find("Unknown") != std::string::npos && country == QLatin1String("CN");
+    return (info.client.find("Unknown") != std::string::npos) && (country == QLatin1String("CN"));
 }
 
 // Offline Downloader filter
@@ -52,17 +52,17 @@ bool is_offline_downloader(const lt::peer_info& info)
     unsigned short const port = endpoint.port();
     QString const country = Net::GeoIPManager::instance()->lookup(QHostAddress(endpoint.data()));
     // 115: Old data, may out of date.
-    bool const fake_transmission = port >= 65000 && country == QLatin1String("CN") && info.client.find("Transmission") != std::string::npos;
+    bool const fake_transmission = (port >= 65000) && (country == QLatin1String("CN")) && (info.client.find("Transmission") != std::string::npos);
     // PikPak: PikPak is renting Worldstream server and announce as LT1220/LT2070, the best way is block the ip range via ip filter(?)
     // Xunlei: it seems Xunlei is using LT2070 too
-    bool const fake_libtorrent = (country == QLatin1String("NL") || country == QLatin1String("CN")) && std::regex_match(info.pid.data(), info.pid.data() + 8, id_filter);
+    bool const fake_libtorrent = ((country == QLatin1String("NL")) || (country == QLatin1String("CN"))) && std::regex_match(info.pid.data(), info.pid.data() + 8, id_filter);
     return fake_transmission || fake_libtorrent;
 }
 
 // BitTorrent Media Player Peer filter
 bool is_bittorrent_media_player(const lt::peer_info& info)
 {
-    if (info.client.find("StellarPlayer") != std::string::npos || info.client.find("Elementum") != std::string::npos)
+    if ((info.client.find("StellarPlayer") != std::string::npos) || (info.client.find("Elementum") != std::string::npos))
     {
         return true;
     }

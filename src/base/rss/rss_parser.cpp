@@ -490,7 +490,7 @@ namespace
                 parts = rxMatch.capturedTexts();
                 offset = parts[2].toInt(&ok[0]) * 3600;
                 const int offsetMin = parts[3].toInt(&ok[1]);
-                if (!ok[0] || !ok[1] || offsetMin > 59)
+                if (!ok[0] || !ok[1] || (offsetMin > 59))
                 {
                     return {};
                 }

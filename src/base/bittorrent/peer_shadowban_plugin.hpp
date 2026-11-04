@@ -15,7 +15,7 @@ using filter_function = std::function<bool(const lt::peer_info&, bool, bool*)>;
 class peer_shadowban_plugin final : public lt::peer_plugin
 {
 public:
-    peer_shadowban_plugin(lt::peer_connection_handle p)
+    explicit peer_shadowban_plugin(lt::peer_connection_handle p)
         : m_peer_connection(p)
     {
     }

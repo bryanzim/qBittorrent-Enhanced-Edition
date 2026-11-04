@@ -38,6 +38,8 @@
 #include <QHostAddress>
 #include <QVariant>
 
+#include <cstring>
+
 namespace
 {
     const qint32 MAX_FILE_SIZE = 64 * 1024 * 1024;
@@ -164,7 +166,7 @@ QString GeoIPDatabase::lookup(const QHostAddress& hostAddr) const
 
             quint32 id = 0U;
             auto* idPtr = reinterpret_cast<uchar*>(&id);
-            memcpy(&idPtr[4 - m_recordBytes], ptr, m_recordBytes);
+            std::memcpy(&idPtr[4 - m_recordBytes], ptr, m_recordBytes);
             fromBigEndian(idPtr, 4);
 
             if (id == m_nodeCount)
@@ -275,7 +277,7 @@ bool GeoIPDatabase::loadDB(QString& error) const
     const int nodeSize = m_recordSize / 4; // in bytes
     const int indexSize = m_nodeCount * nodeSize;
     const int totalSize = indexSize + sizeof(DATA_SECTION_SEPARATOR);
-    if ((m_data.size() < totalSize) || (memcmp((m_data.constData() + indexSize), DATA_SECTION_SEPARATOR, sizeof(DATA_SECTION_SEPARATOR)) != 0))
+    if ((m_data.size() < totalSize) || (std::memcmp((m_data.constData() + indexSize), DATA_SECTION_SEPARATOR, sizeof(DATA_SECTION_SEPARATOR)) != 0))
     {
         error = tr("Database corrupted: no data section found.");
         return false;
@@ -553,11 +555,11 @@ QVariant GeoIPDatabase::readPlainValue(quint32& offset, const quint8 len) const
     auto* const data = reinterpret_cast<const uchar*>(m_data.constData()) + offset;
     const qsizetype availSize = m_data.size() - offset;
 
-    if ((len > 0) && (len <= sizeof(T) && (availSize >= len)))
+    if ((len > 0) && ((len <= sizeof(T)) && (availSize >= len)))
     {
         // copy input data to last 'len' bytes of 'value'
         uchar* dst = reinterpret_cast<uchar*>(&value) + (sizeof(T) - len);
-        memcpy(dst, data, len);
+        std::memcpy(dst, data, len);
         fromBigEndian(reinterpret_cast<uchar*>(&value), sizeof(T));
         offset += len;
     }

@@ -39,7 +39,7 @@ class ClientDataStorage final : public QObject
     Q_DISABLE_COPY_MOVE(ClientDataStorage)
 
 public:
-    ClientDataStorage(QObject* parent = nullptr);
+    explicit ClientDataStorage(QObject* parent = nullptr);
 
     nonstd::expected<void, QString> storeData(const QJsonObject& object);
     [[nodiscard]] QJsonObject loadData() const;

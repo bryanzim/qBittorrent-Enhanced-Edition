@@ -43,7 +43,7 @@ class DownloadedPiecesBar final : public PiecesBar
     Q_DISABLE_COPY_MOVE(DownloadedPiecesBar)
 
 public:
-    DownloadedPiecesBar(QWidget* parent);
+    explicit DownloadedPiecesBar(QWidget* parent);
 
     void setProgress(const QBitArray& pieces, const QBitArray& downloadedPieces);
 

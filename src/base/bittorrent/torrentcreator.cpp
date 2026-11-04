@@ -224,7 +224,9 @@ void TorrentCreator::run()
             }
 #else
             for (const QString& fileName : asConst(fileNames))
+            {
                 files.add_file(fileName.toStdString(), fileSizeMap[fileName]);
+            }
 #endif
         }
 
@@ -363,7 +365,9 @@ int TorrentCreator::calculateTotalPieces(const Path& inputPath, const int pieceS
     lt::file_storage files;
     lt::add_files(files, inputPath.toString().toStdString(), filter);
     if (files.num_files() == 0)
+    {
         return 0;
+    }
 #endif
 
 #ifdef QBT_USES_LIBTORRENT2

@@ -279,11 +279,15 @@ lt::status_t CustomStorage::move_storage(const std::string& savePath, lt::move_f
     const Path newSavePath{ savePath };
 
     if (flags == lt::move_flags_t::dont_replace)
+    {
         handleCompleteFiles(newSavePath);
+    }
 
     const lt::status_t ret = lt::default_storage::move_storage(savePath, flags, ec);
     if ((ret != lt::status_t::fatal_disk_error) && (ret != lt::status_t::file_exist))
+    {
         m_savePath = newSavePath;
+    }
 
     return ret;
 }
@@ -295,11 +299,15 @@ void CustomStorage::handleCompleteFiles(const Path& savePath)
     {
         // ignore files that have priority 0
         if ((m_filePriorities.end_index() > fileIndex) && (m_filePriorities[fileIndex] == lt::dont_download))
+        {
             continue;
+        }
 
         // ignore pad files
         if (fileStorage.pad_file_at(fileIndex))
+        {
             continue;
+        }
 
         const Path filePath{ fileStorage.file_path(fileIndex) };
         if (filePath.hasExtension(QB_EXT))
@@ -309,7 +317,9 @@ void CustomStorage::handleCompleteFiles(const Path& savePath)
             if (completeFilePath.exists())
             {
                 if (Utils::Fs::removeFile(incompleteFilePath))
+                {
                     Utils::Fs::renameFile(completeFilePath, incompleteFilePath);
+                }
             }
         }
     }

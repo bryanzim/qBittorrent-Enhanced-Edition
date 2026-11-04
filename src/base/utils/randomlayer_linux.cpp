@@ -53,7 +53,9 @@ namespace
                     // fallback to `urandom`
                     m_randDev = fopen("/dev/urandom", "rb");
                     if (!m_randDev)
+                    {
                         qFatal("Failed to open /dev/urandom. Reason: \"%s\". Error code: %d.", std::strerror(errno), errno);
+                    }
                 }
                 else
                 {
@@ -65,7 +67,9 @@ namespace
         ~RandomLayer()
         {
             if (m_randDev)
+            {
                 fclose(m_randDev);
+            }
         }
 
         static constexpr result_type min()
@@ -81,7 +85,9 @@ namespace
         result_type operator()() const
         {
             if (!m_randDev)
+            {
                 return getRandomViaAPI();
+            }
             return getRandomViaFile();
         }
 
@@ -95,10 +101,14 @@ namespace
                 result_type buf = 0;
                 const ssize_t result = ::getrandom(&buf, sizeof(buf), 0);
                 if (result == sizeof(buf)) // success
+                {
                     return buf;
+                }
 
                 if (result < 0)
+                {
                     qFatal("getrandom() error. Reason: \"%s\". Error code: %d.", std::strerror(errno), errno);
+                }
             }
 
             qFatal("getrandom() failed. Reason: too many retries.");
@@ -108,7 +118,9 @@ namespace
         {
             result_type buf = 0;
             if (fread(&buf, sizeof(buf), 1, m_randDev) == 1)
+            {
                 return buf;
+            }
 
             qFatal("Read /dev/urandom error. Reason: \"%s\". Error code: %d.", std::strerror(errno), errno);
         }

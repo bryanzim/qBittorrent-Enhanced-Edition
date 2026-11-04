@@ -41,7 +41,7 @@ class FilterParserThread final : public QThread
     Q_DISABLE_COPY_MOVE(FilterParserThread)
 
 public:
-    FilterParserThread(QObject* parent = nullptr);
+    explicit FilterParserThread(QObject* parent = nullptr);
     ~FilterParserThread();
     void processFilterFile(const Path& filePath);
     lt::ip_filter IPfilter();

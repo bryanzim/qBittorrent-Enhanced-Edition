@@ -112,13 +112,17 @@ namespace LuaFunctions
         QStringList args = Utils::String::splitCommand(command);
 
         if (args.isEmpty())
+        {
             return false;
+        }
 
         for (QString& arg : args)
         {
             // strip redundant quotes
             if (arg.startsWith(u'"') && arg.endsWith(u'"'))
+            {
                 arg = arg.mid(1, (arg.size() - 2));
+            }
         }
 
         const QString exe = args.takeFirst();
@@ -128,7 +132,9 @@ namespace LuaFunctions
         proc.setArguments(args);
 
         if (proc.startDetached())
+        {
             return true;
+        }
 #endif
         return false;
     }

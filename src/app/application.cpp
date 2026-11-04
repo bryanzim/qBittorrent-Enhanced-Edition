@@ -157,16 +157,22 @@ namespace
         bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override
         {
             if (eventType != "windows_generic_MSG")
+            {
                 return false;
+            }
 
             const auto* msg = static_cast<const MSG*>(message);
             const bool sessionEnding = (msg->message == WM_QUERYENDSESSION) || ((msg->message == WM_ENDSESSION) && (msg->wParam != FALSE));
             if (!sessionEnding)
+            {
                 return false;
+            }
 
             m_shutdown();
             if ((msg->message == WM_QUERYENDSESSION) && result)
+            {
                 *result = TRUE;
+            }
             return false;
         }
 
@@ -787,7 +793,9 @@ void Application::runExternalProgram(const QString& programTemplate, const BitTo
     QStringList args = Utils::String::splitCommand(programTemplate);
 
     if (args.isEmpty())
+    {
         return;
+    }
 
     for (QString& arg : args)
     {
@@ -979,7 +987,9 @@ void Application::processParams(const QBtCommandLineParameters& params)
     }
 #else
     for (const QString& torrentSource : params.torrentSources)
+    {
         m_addTorrentManager->addTorrent(torrentSource, params.addTorrentParams);
+    }
 #endif
 }
 
@@ -1265,8 +1275,10 @@ bool Application::event(QEvent* ev)
     {
         QString path = static_cast<QFileOpenEvent*>(ev)->file();
         if (path.isEmpty())
+        {
             // Get the url instead
             path = static_cast<QFileOpenEvent*>(ev)->url().toString();
+        }
         qDebug("Received a mac file open event: %s", qUtf8Printable(path));
 
         QBtCommandLineParameters params;
@@ -1274,9 +1286,13 @@ bool Application::event(QEvent* ev)
         // If Application is not allowed to process params immediately
         // (i.e., other components are not ready) store params
         if (m_isProcessingParamsAllowed)
+        {
             processParams(params);
+        }
         else
+        {
             m_paramsQueue.append(params);
+        }
 
         return true;
     }
@@ -1357,7 +1373,9 @@ void Application::applyMemoryWorkingSetLimit() const
     rlimit limit{};
 
     if (::getrlimit(RLIMIT_RSS, &limit) != 0)
+    {
         return;
+    }
 
     const std::size_t newSize = memoryWorkingSetLimit() * MiB;
     if (newSize > limit.rlim_max)
@@ -1536,7 +1554,9 @@ void Application::cleanup()
     // the app to freeze on quit.
     // https://github.com/qbittorrent/qBittorrent/issues/23695
     if (m_window)
+    {
         QAccessible::cleanup();
+    }
 #endif
 
     // AddTorrentManager should be deleted before cleanup MainWindow

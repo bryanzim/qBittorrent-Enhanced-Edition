@@ -44,7 +44,7 @@ class PeersAdditionDialog : public QDialog
     Q_DISABLE_COPY_MOVE(PeersAdditionDialog)
 
 public:
-    PeersAdditionDialog(QWidget* parent);
+    explicit PeersAdditionDialog(QWidget* parent);
     ~PeersAdditionDialog();
 
     static QList<BitTorrent::PeerAddress> askForPeers(QWidget* parent);

@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <csignal>
+#include <cstring>
 
 #ifdef Q_OS_UNIX
 #include <unistd.h>
@@ -73,7 +74,7 @@ namespace
 
     void safePrint(const char* str)
     {
-        const std::size_t strLen = strlen(str);
+        const std::size_t strLen = std::strlen(str);
 #ifdef Q_OS_WIN
         if (_write(_fileno(stderr), str, static_cast<unsigned int>(strLen)) < static_cast<int>(strLen))
         {
@@ -81,7 +82,9 @@ namespace
         }
 #else
         if (write(STDERR_FILENO, str, strLen) < static_cast<ssize_t>(strLen))
+        {
             std::ignore = write(STDOUT_FILENO, str, strLen);
+        }
 #endif
     }
 

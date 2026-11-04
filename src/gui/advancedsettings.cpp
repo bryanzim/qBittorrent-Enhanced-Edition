@@ -432,11 +432,17 @@ void AdvancedSettings::saveAdvancedSettings() const
 void AdvancedSettings::updateCacheSpinSuffix(const int value)
 {
     if (value == 0)
+    {
         m_spinBoxCache.setSuffix(tr(" (disabled)"));
+    }
     else if (value < 0)
+    {
         m_spinBoxCache.setSuffix(tr(" (auto)"));
+    }
     else
+    {
         m_spinBoxCache.setSuffix(tr(" MiB"));
+    }
 }
 #endif
 
@@ -444,11 +450,17 @@ void AdvancedSettings::updateCacheSpinSuffix(const int value)
 void AdvancedSettings::updateNotificationTimeoutSuffix(const int value)
 {
     if (value == 0)
+    {
         m_spinBoxNotificationTimeout.setSuffix(tr(" (infinite)"));
+    }
     else if (value < 0)
+    {
         m_spinBoxNotificationTimeout.setSuffix(tr(" (system default)"));
+    }
     else
+    {
         m_spinBoxNotificationTimeout.setSuffix(tr(" ms", " milliseconds"));
+    }
 }
 #endif
 

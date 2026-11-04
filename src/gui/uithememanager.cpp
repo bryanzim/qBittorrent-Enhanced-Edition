@@ -227,7 +227,9 @@ QIcon UIThemeManager::getIcon(const QString& iconId, [[maybe_unused]] const QStr
     {
         auto icon = QIcon::fromTheme(iconId);
         if (icon.isNull() || icon.availableSizes().isEmpty())
+        {
             icon = QIcon::fromTheme(fallback, QIcon(m_themeSource->getIconPath(iconId, colorMode).data()));
+        }
         return icon;
     }
 #endif

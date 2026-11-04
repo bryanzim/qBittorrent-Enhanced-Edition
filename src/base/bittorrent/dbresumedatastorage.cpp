@@ -803,7 +803,9 @@ LoadResumeDataResult DBResumeDataStorage::parseQueryResultRow(const QSqlQuery& q
 #else
         p.ti = std::make_shared<lt::torrent_info>(torrentInfoRoot, ec);
         if (ec)
+        {
             return nonstd::make_unexpected(tr("Cannot parse torrent info: %1").arg(QString::fromStdString(ec.message())));
+        }
 #endif
     }
 

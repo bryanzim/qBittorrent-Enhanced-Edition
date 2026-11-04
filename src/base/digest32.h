@@ -103,11 +103,15 @@ public:
     explicit Data(const QString& digestString)
     {
         if (digestString.size() != (length() * 2))
+        {
             return;
+        }
 
         const QByteArray raw = QByteArray::fromHex(digestString.toLatin1());
         if (raw.size() != length()) // QByteArray::fromHex() will skip over invalid characters
+        {
             return;
+        }
 
         m_isValid = true;
         m_hashString = digestString;

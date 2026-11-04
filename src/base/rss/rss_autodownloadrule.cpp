@@ -505,7 +505,7 @@ QJsonObject AutoDownloadRule::toJsonObject() const
 {
     BitTorrent::AddTorrentParams addTorrentParams = m_dataPtr->addTorrentParams;
 
-    if (feedURLs().size() == 0 && addTorrentParams.savePath.isEmpty())
+    if ((feedURLs().size() == 0) && addTorrentParams.savePath.isEmpty())
     {
         const auto* session = BitTorrent::Session::instance();
         addTorrentParams.savePath = session->savePath();

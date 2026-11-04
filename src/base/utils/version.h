@@ -54,13 +54,13 @@ namespace Utils
 
         constexpr Version() = default;
 
-        Version(const QStringView string)
+        explicit Version(const QStringView string)
         {
             *this = fromString(string);
         }
 
         template <typename... Ts>
-        constexpr Version(Ts... params)
+        constexpr explicit Version(Ts... params)
             requires std::conjunction_v<std::is_convertible<Ts, int>...>
             : m_components{ { params... } }
         {

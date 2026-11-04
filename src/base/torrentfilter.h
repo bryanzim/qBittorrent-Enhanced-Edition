@@ -76,7 +76,7 @@ public:
 
     TorrentFilter() = default;
     // category & tags: pass empty string for uncategorized / untagged torrents.
-    TorrentFilter(Status status, const std::optional<TorrentIDSet>& idSet = AnyID, const std::optional<QString>& category = AnyCategory, const std::optional<Tag>& tag = AnyTag, const std::optional<bool>& isPrivate = {}, const std::optional<QString>& trackerHost = AnyTrackerHost, const std::optional<BitTorrent::TorrentAnnounceStatus>& announceStatus = AnyAnnounceStatus);
+    explicit TorrentFilter(Status status, const std::optional<TorrentIDSet>& idSet = AnyID, const std::optional<QString>& category = AnyCategory, const std::optional<Tag>& tag = AnyTag, const std::optional<bool>& isPrivate = {}, const std::optional<QString>& trackerHost = AnyTrackerHost, const std::optional<BitTorrent::TorrentAnnounceStatus>& announceStatus = AnyAnnounceStatus);
 
     bool setStatus(Status status);
     bool setTorrentIDSet(const std::optional<TorrentIDSet>& idSet);

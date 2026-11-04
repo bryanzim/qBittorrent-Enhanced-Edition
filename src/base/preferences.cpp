@@ -1630,7 +1630,9 @@ bool Preferences::useSystemIcons() const
 void Preferences::useSystemIcons(const bool enabled)
 {
     if (enabled == useSystemIcons())
+    {
         return;
+    }
 
     setValue(u"Preferences/Advanced/useSystemIconTheme"_s, enabled);
 }
@@ -1752,7 +1754,9 @@ bool Preferences::isSpeedInDockEnabled() const
 void Preferences::setSpeedInDockEnabled(const bool enabled)
 {
     if (enabled == isSpeedInDockEnabled())
+    {
         return;
+    }
 
     setValue(u"Preferences/Desktop/ShowSpeedInDock"_s, enabled);
 }
@@ -1765,7 +1769,9 @@ bool Preferences::isMacOSMenuBarIconEnabled() const
 void Preferences::setMacOSMenuBarIconEnabled(const bool enabled)
 {
     if (enabled == isMacOSMenuBarIconEnabled())
+    {
         return;
+    }
 
     setValue(u"Preferences/Desktop/ShowMacOSMenuBarIcon"_s, enabled);
 }

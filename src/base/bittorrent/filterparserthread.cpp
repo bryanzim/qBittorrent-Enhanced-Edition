@@ -37,6 +37,7 @@
 #include <libtorrent/version.hpp>
 
 #include <cctype>
+#include <cstring>
 
 namespace
 {
@@ -211,7 +212,7 @@ int FilterParserThread::parseDATFilterFile()
                 // read the next chunk from file
                 // but first move(copy) the leftover data to the front of the buffer
                 offset = dataSize - start;
-                memmove(buffer.data(), buffer.data() + start, offset);
+                std::memmove(buffer.data(), buffer.data() + start, offset);
                 break;
             }
 
@@ -309,7 +310,10 @@ int FilterParserThread::parseDATFilterFile()
                            .arg(QString::fromStdString(e.what())));
 #else
                            .arg(nbLine)
-                           .arg(QString::fromLocal8Bit(e.what())));
+                           .arg(QString::fromLocal8Bit(e.what()))
+                    {
+                        );
+                    }
 #endif
             }
         }
@@ -402,7 +406,7 @@ int FilterParserThread::parseP2PFilterFile()
                 // read the next chunk from file
                 // but first move(copy) the leftover data to the front of the buffer
                 offset = dataSize - start;
-                memmove(buffer.data(), buffer.data() + start, offset);
+                std::memmove(buffer.data(), buffer.data() + start, offset);
                 break;
             }
 
@@ -515,7 +519,10 @@ int FilterParserThread::parseP2PFilterFile()
                            .arg(QString::fromStdString(e.what())));
 #else
                            .arg(nbLine)
-                           .arg(QString::fromLocal8Bit(e.what())));
+                           .arg(QString::fromLocal8Bit(e.what()))
+                    {
+                        );
+                    }
 #endif
             }
         }
@@ -581,7 +588,7 @@ int FilterParserThread::parseP2BFilterFile()
     // Read header
     char buf[7];
     unsigned char version;
-    if (!stream.readRawData(buf, sizeof(buf)) || (memcmp(buf, "\xFF\xFF\xFF\xFFP2B", 7) != 0) || !stream.readRawData(reinterpret_cast<char*>(&version), sizeof(version)))
+    if (!stream.readRawData(buf, sizeof(buf)) || (std::memcmp(buf, "\FF\FF\FF\FFP2B", 7) != 0) || !stream.readRawData(reinterpret_cast<char*>(&version), sizeof(version)))
     {
         LogMsg(tr("Parsing Error: The filter file is not a valid PeerGuardian P2B file."), Log::CRITICAL);
         return ruleCount;

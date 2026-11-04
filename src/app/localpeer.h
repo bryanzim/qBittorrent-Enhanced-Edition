@@ -84,7 +84,7 @@ class LocalPeer final : public QObject
     Q_DISABLE_COPY_MOVE(LocalPeer)
 
 public:
-    LocalPeer(const QString& path, QObject* parent = nullptr);
+    explicit LocalPeer(const QString& path, QObject* parent = nullptr);
 
     bool isClient();
     bool sendMessage(const QString& message, std::chrono::milliseconds timeout);

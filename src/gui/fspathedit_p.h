@@ -60,7 +60,7 @@ namespace Private
             CantWrite
         };
 
-        FileSystemPathValidator(QObject* parent = nullptr);
+        explicit FileSystemPathValidator(QObject* parent = nullptr);
 
         bool strictMode() const;
         void setStrictMode(bool value);
@@ -118,7 +118,7 @@ namespace Private
         Q_DISABLE_COPY_MOVE(FileLineEdit)
 
     public:
-        FileLineEdit(QWidget* parent = nullptr);
+        explicit FileLineEdit(QWidget* parent = nullptr);
         ~FileLineEdit();
 
         void completeDirectoriesOnly(bool completeDirsOnly) override;
@@ -153,7 +153,7 @@ namespace Private
         Q_DISABLE_COPY_MOVE(FileComboEdit)
 
     public:
-        FileComboEdit(QWidget* parent = nullptr);
+        explicit FileComboEdit(QWidget* parent = nullptr);
 
         void completeDirectoriesOnly(bool completeDirsOnly) override;
         void setFilenameFilters(const QStringList& filters) override;

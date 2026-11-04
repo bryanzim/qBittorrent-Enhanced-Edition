@@ -137,7 +137,9 @@ private slots:
         QCOMPARE(Path(uR"(/a\\b)"_s).isValid(), true);
 
         for (int i = 0; i <= 31; ++i)
+        {
             QCOMPARE(Path(QChar(i)).isValid(), false);
+        }
 
         QCOMPARE(Path(QChar(127)).isValid(), false);
 

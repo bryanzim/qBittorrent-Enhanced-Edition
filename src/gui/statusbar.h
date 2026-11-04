@@ -44,7 +44,7 @@ class StatusBar final : public QStatusBar
     Q_DISABLE_COPY_MOVE(StatusBar)
 
 public:
-    StatusBar(QWidget* parent = nullptr);
+    explicit StatusBar(QWidget* parent = nullptr);
 
 signals:
     void alternativeSpeedsButtonClicked();

@@ -42,7 +42,7 @@ const int ROW_UNTAGGED = 1;
 class TagModelItem
 {
 public:
-    TagModelItem(const Tag& tag, int torrentsCount = 0)
+    explicit TagModelItem(const Tag& tag, int torrentsCount = 0)
         : m_tag{ tag }, m_torrentsCount{ torrentsCount }
     {
     }
