@@ -38,6 +38,7 @@
 #include "base/global.h"
 #include "base/utils/fs.h"
 #include "base/utils/misc.h"
+#include "dialoggeometry.h"
 #include "ui_torrentcreatordialog.h"
 #include "utils.h"
 
@@ -96,8 +97,15 @@ namespace
     };
 }
 
-TorrentCreatorDialog::TorrentCreatorDialog(QWidget* parent, const Path& defaultPath)
-    : QDialog(parent), m_ui(new Ui::TorrentCreatorDialog), m_threadPool{ new QThreadPool(this) }, m_storeDialogSize(SETTINGS_KEY(u"Size"_s)), m_storePieceSize(SETTINGS_KEY(u"PieceSize"_s)), m_storeIgnoreDotfiles(SETTINGS_KEY(u"IgnoreDotfiles"_s)), m_storePrivateTorrent(SETTINGS_KEY(u"PrivateTorrent"_s)), m_storeStartSeeding(SETTINGS_KEY(u"StartSeeding"_s)), m_storeIgnoreRatio(SETTINGS_KEY(u"IgnoreRatio"_s))
+TorrentCreatorDialog::TorrentCreatorDialog(QWidget *parent, const Path &defaultPath)
+    : QDialog(parent)
+    , m_ui(new Ui::TorrentCreatorDialog)
+    , m_threadPool {new QThreadPool(this)}
+    , m_storePieceSize(SETTINGS_KEY(u"PieceSize"_s))
+    , m_storeIgnoreDotfiles(SETTINGS_KEY(u"IgnoreDotfiles"_s))
+    , m_storePrivateTorrent(SETTINGS_KEY(u"PrivateTorrent"_s))
+    , m_storeStartSeeding(SETTINGS_KEY(u"StartSeeding"_s))
+    , m_storeIgnoreRatio(SETTINGS_KEY(u"IgnoreRatio"_s))
 #ifdef QBT_USES_LIBTORRENT2
       ,
       m_storeTorrentFormat(SETTINGS_KEY(u"TorrentFormat"_s))
@@ -418,7 +426,7 @@ void TorrentCreatorDialog::saveSettings()
     m_storeComments = m_ui->txtComment->toPlainText();
     m_storeSource = m_ui->lineEditSource->text();
 
-    m_storeDialogSize = size();
+    DialogGeometry::save(this, SETTINGS_KEY(u"Geometry"_s));
 }
 
 void TorrentCreatorDialog::loadSettings()
@@ -443,10 +451,7 @@ void TorrentCreatorDialog::loadSettings()
     m_ui->txtComment->setPlainText(m_storeComments);
     m_ui->lineEditSource->setText(m_storeSource);
 
-    if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
-    {
-        resize(dialogSize);
-    }
+    DialogGeometry::restore(this, SETTINGS_KEY(u"Geometry"_s), SETTINGS_KEY(u"Size"_s));
 }
 
 #include "torrentcreatordialog.moc"

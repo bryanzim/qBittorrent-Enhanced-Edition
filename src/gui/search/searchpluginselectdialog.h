@@ -30,7 +30,6 @@
 #pragma once
 
 #include "base/search/searchpluginmanager.h"
-#include "base/settingvalue.h"
 
 #include <QDialog>
 #include <QStringList>
@@ -91,9 +90,8 @@ private:
     void finishAsyncOp();
     void finishPluginUpdate();
 
-    Ui::SearchPluginSelectDialog* m_ui = nullptr;
-    SettingValue<QSize> m_storeDialogSize;
-    SearchPluginManager* m_pluginManager = nullptr;
+    Ui::SearchPluginSelectDialog *m_ui = nullptr;
+    SearchPluginManager *m_pluginManager = nullptr;
     QStringList m_updatedPlugins;
     int m_asyncOps = 0;
     int m_pendingUpdates = 0;

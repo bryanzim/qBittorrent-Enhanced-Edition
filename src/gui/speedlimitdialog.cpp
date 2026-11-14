@@ -28,14 +28,18 @@
 
 #include "speedlimitdialog.h"
 
+#include <algorithm>
+
+#include <QStyle>
+
+#include "base/global.h"
 #include "base/bittorrent/session.h"
+#include "dialoggeometry.h"
 #include "ui_speedlimitdialog.h"
 #include "uithememanager.h"
 #include "utils.h"
 
-#include <QStyle>
 
-#include <algorithm>
 
 #define SETTINGS_KEY(name) u"SpeedLimitDialog/" name
 
@@ -51,8 +55,9 @@ namespace
     }
 }
 
-SpeedLimitDialog::SpeedLimitDialog(QWidget* parent)
-    : QDialog{ parent }, m_ui{ new Ui::SpeedLimitDialog }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }
+SpeedLimitDialog::SpeedLimitDialog(QWidget *parent)
+    : QDialog {parent}
+    , m_ui {new Ui::SpeedLimitDialog}
 {
     m_ui->setupUi(this);
 
@@ -105,15 +110,12 @@ SpeedLimitDialog::SpeedLimitDialog(QWidget* parent)
     connect(m_ui->spinAltUploadLimit, qOverload<int>(&QSpinBox::valueChanged), this, [this](const int value) { updateSliderValue(m_ui->sliderAltUploadLimit, value); });
     connect(m_ui->spinAltDownloadLimit, qOverload<int>(&QSpinBox::valueChanged), this, [this](const int value) { updateSliderValue(m_ui->sliderAltDownloadLimit, value); });
 
-    if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
-    {
-        resize(dialogSize);
-    }
+    DialogGeometry::restore(this, SETTINGS_KEY(u"Geometry"_s), SETTINGS_KEY(u"Size"_s));
 }
 
 SpeedLimitDialog::~SpeedLimitDialog()
 {
-    m_storeDialogSize = size();
+    DialogGeometry::save(this, SETTINGS_KEY(u"Geometry"_s));
     delete m_ui;
 }
 

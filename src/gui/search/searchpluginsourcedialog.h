@@ -28,8 +28,6 @@
 
 #pragma once
 
-#include "base/settingvalue.h"
-
 #include <QDialog>
 
 namespace Ui
@@ -55,6 +53,5 @@ private slots:
     void on_urlButton_clicked();
 
 private:
-    Ui::SearchPluginSourceDialog* m_ui = nullptr;
-    SettingValue<QSize> m_storeDialogSize;
+    Ui::SearchPluginSourceDialog *m_ui = nullptr;
 };

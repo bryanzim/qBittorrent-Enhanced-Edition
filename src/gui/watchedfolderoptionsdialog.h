@@ -28,10 +28,9 @@
 
 #pragma once
 
-#include "base/settingvalue.h"
+#include <QDialog>
 #include "base/torrentfileswatcher.h"
 
-#include <QDialog>
 
 namespace Ui
 {
@@ -58,7 +57,6 @@ private:
     void onTMMChanged(int index);
     void onCategoryChanged(int index);
 
-    Ui::WatchedFolderOptionsDialog* m_ui = nullptr;
-    AddTorrentParamsWidget* m_addTorrentParamsWidget = nullptr;
-    SettingValue<QSize> m_storeDialogSize;
+    Ui::WatchedFolderOptionsDialog *m_ui = nullptr;
+    AddTorrentParamsWidget *m_addTorrentParamsWidget = nullptr;
 };

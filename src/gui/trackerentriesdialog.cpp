@@ -28,19 +28,24 @@
 
 #include "trackerentriesdialog.h"
 
-#include "base/bittorrent/trackerentry.h"
-#include "ui_trackerentriesdialog.h"
-#include "utils.h"
+#include <algorithm>
 
 #include <QHash>
 #include <QList>
 
-#include <algorithm>
+#include "base/global.h"
+#include "base/bittorrent/trackerentry.h"
+#include "dialoggeometry.h"
+#include "ui_trackerentriesdialog.h"
+#include "utils.h"
+
+
 
 #define SETTINGS_KEY(name) u"TrackerEntriesDialog/" name
 
-TrackerEntriesDialog::TrackerEntriesDialog(QWidget* parent)
-    : QDialog(parent), m_ui(new Ui::TrackerEntriesDialog), m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
+TrackerEntriesDialog::TrackerEntriesDialog(QWidget *parent)
+    : QDialog(parent)
+    , m_ui(new Ui::TrackerEntriesDialog)
 {
     m_ui->setupUi(this);
 
@@ -85,13 +90,10 @@ QList<BitTorrent::TrackerEntry> TrackerEntriesDialog::trackers() const
 
 void TrackerEntriesDialog::saveSettings()
 {
-    m_storeDialogSize = size();
+    DialogGeometry::save(this, SETTINGS_KEY(u"Geometry"_s));
 }
 
 void TrackerEntriesDialog::loadSettings()
 {
-    if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
-    {
-        resize(dialogSize);
-    }
+    DialogGeometry::restore(this, SETTINGS_KEY(u"Geometry"_s), SETTINGS_KEY(u"Size"_s));
 }
