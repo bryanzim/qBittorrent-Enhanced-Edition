@@ -386,7 +386,8 @@ void PeerListWidget::banSelectedPeers()
         const QString peerId = m_listModel->item(row, PeerListColumns::PEERID_CLIENT)->text();
 
         QHostAddress const host(ip);
-        const QString country = Net::GeoIPManager::CountryName(Net::GeoIPManager::instance()->lookup(host));
+        const Net::GeoIPManager* const geoIPManager = Net::GeoIPManager::instance();
+        const QString country = geoIPManager ? Net::GeoIPManager::CountryName(geoIPManager->lookup(host)) : QString();
 
         peerData const tmp{ ip, client, peerId, country };
         selectedPeers += tmp;
@@ -432,7 +433,8 @@ void PeerListWidget::shadowbanSelectedPeers()
         const QString peerId = m_listModel->item(row, PeerListColumns::PEERID_CLIENT)->text();
 
         QHostAddress const host(ip);
-        const QString country = Net::GeoIPManager::CountryName(Net::GeoIPManager::instance()->lookup(host));
+        const Net::GeoIPManager* const geoIPManager = Net::GeoIPManager::instance();
+        const QString country = geoIPManager ? Net::GeoIPManager::CountryName(geoIPManager->lookup(host)) : QString();
 
         peerData const tmp{ ip, client, peerId, country };
         selectedPeers += tmp;
