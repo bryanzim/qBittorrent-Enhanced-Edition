@@ -173,6 +173,8 @@ jobs:
 
       - name: Build qBittorrent
         run: |
+          # lupdate exits 0xC0000135 unless it can load the Qt DLLs beside it.
+          $env:Path = "${{ env.Qt_ROOT_DIR }}\bin;" + $env:Path
           $env:CXXFLAGS+="/DQT_FORCE_ASSERTS /WX"
           cmake `
             -B build `
