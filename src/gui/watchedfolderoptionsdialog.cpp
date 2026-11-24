@@ -29,6 +29,7 @@
 #include "watchedfolderoptionsdialog.h"
 
 #include "addtorrentparamswidget.h"
+#include "base/global.h"
 #include "dialoggeometry.h"
 #include "ui_watchedfolderoptionsdialog.h"
 
