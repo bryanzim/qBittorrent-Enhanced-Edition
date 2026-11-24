@@ -19,12 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         libtorrent:
-          - version: "2.1.2"
+          - version: "2.1.3"
             boost_major_version: "1"
             boost_minor_version: "92"
             boost_patch_version: "0"
             libt_build_flags: ""
-          - version: "2.0.15"
+          - version: "2.0.16"
             boost_major_version: "1"
             boost_minor_version: "92"
             boost_patch_version: "0"
@@ -35,7 +35,7 @@ jobs:
             boost_patch_version: "0"
             libt_build_flags: ""
         qbt_gui: ["GUI=ON", "GUI=OFF"]
-        qt_version: ["6.12.0"]
+        qt_version: ["6.12.1"]
 
     env:
       boost_path: "${{ github.workspace }}/../boost"
