@@ -35,8 +35,10 @@
 #include <libtorrent/version.hpp>
 #include <libtorrent/write_resume_data.hpp>
 
+#include <algorithm>
 #include <memory>
 #include <queue>
+#include <vector>
 #if LIBTORRENT_VERSION_NUM >= 20100
 #include <libtorrent/load_torrent.hpp>
 #endif
@@ -57,10 +59,12 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QFile>
+#include <QHash>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QRegularExpression>
 #include <QThread>
+#include <QThreadPool>
 #include <QWaitCondition>
 
 using namespace Qt::Literals::StringLiterals;
@@ -74,6 +78,9 @@ namespace
     public:
         virtual ~Job() = default;
         virtual void perform(const Path& resumeDataDir) = 0;
+
+        // Jobs that share a key must run in queue order. Different keys can run together.
+        [[nodiscard]] virtual QString sequenceKey() const = 0;
     };
 
     class StoreJob final : public Job
@@ -81,6 +88,7 @@ namespace
     public:
         StoreJob(const TorrentID& torrentID, LoadTorrentParams resumeData);
         void perform(const Path& resumeDataDir) override;
+        [[nodiscard]] QString sequenceKey() const override;
 
     private:
         const TorrentID m_torrentID;
@@ -92,6 +100,7 @@ namespace
     public:
         explicit RemoveJob(const TorrentID& torrentID);
         void perform(const Path& resumeDataDir) override;
+        [[nodiscard]] QString sequenceKey() const override;
 
     private:
         const TorrentID m_torrentID;
@@ -102,6 +111,7 @@ namespace
     public:
         explicit StoreQueueJob(const QList<TorrentID>& queue);
         void perform(const Path& resumeDataDir) override;
+        [[nodiscard]] QString sequenceKey() const override;
 
     private:
         const QList<TorrentID> m_queue;
@@ -119,6 +129,7 @@ namespace BitTorrent
 
         void run() override;
         void requestInterruption();
+        void enableParallelFlush();
 
         void store(const TorrentID& id, LoadTorrentParams resumeData);
         void remove(const TorrentID& id);
@@ -128,6 +139,7 @@ namespace BitTorrent
         void addJob(std::unique_ptr<Job> job);
 
         const Path m_resumeDataDir;
+        bool m_parallelFlush{ false };
 
         std::queue<std::unique_ptr<Job>> m_jobs;
         QMutex m_jobsMutex;
@@ -203,6 +215,11 @@ BencodeResumeDataStorage::~BencodeResumeDataStorage()
 {
     m_asyncWorker->requestInterruption();
     m_asyncWorker->wait();
+}
+
+void BitTorrent::BencodeResumeDataStorage::prepareForShutdown()
+{
+    m_asyncWorker->enableParallelFlush();
 }
 
 QList<BitTorrent::TorrentID> BitTorrent::BencodeResumeDataStorage::registeredTorrents() const
@@ -483,6 +500,52 @@ void BitTorrent::BencodeResumeDataStorage::storeQueue(const QList<TorrentID>& qu
     m_asyncWorker->storeQueue(queue);
 }
 
+namespace
+{
+    [[nodiscard]] int resumeWriteThreadCount()
+    {
+        constexpr int minThreads{ 16 };
+        constexpr int maxThreads{ 64 };
+        const int idealThreadCount{ QThread::idealThreadCount() };
+        return std::clamp(idealThreadCount, minThreads, maxThreads);
+    }
+
+    void performParallel(QThreadPool& pool, const Path& resumeDataDir, std::vector<std::unique_ptr<Job>> jobs)
+    {
+        std::vector<std::vector<std::unique_ptr<Job>>> chains;
+        QHash<QString, std::size_t> chainByKey;
+        chains.reserve(jobs.size());
+
+        for (std::unique_ptr<Job>& job : jobs)
+        {
+            const QString key{ job->sequenceKey() };
+            if (const auto it = chainByKey.find(key); it == chainByKey.end())
+            {
+                chainByKey.insert(key, chains.size());
+                chains.emplace_back();
+                chains.back().push_back(std::move(job));
+            }
+            else
+            {
+                chains[it.value()].push_back(std::move(job));
+            }
+        }
+
+        for (std::vector<std::unique_ptr<Job>>& chain : chains)
+        {
+            pool.start([resumeDataDir, chain = std::move(chain)]() mutable
+            {
+                for (const std::unique_ptr<Job>& job : chain)
+                {
+                    job->perform(resumeDataDir);
+                }
+            });
+        }
+
+        pool.waitForDone();
+    }
+}
+
 BitTorrent::BencodeResumeDataStorage::Worker::Worker(const Path& resumeDataDir, QObject* parent)
     : QThread(parent), m_resumeDataDir{ resumeDataDir }
 {
@@ -490,31 +553,66 @@ BitTorrent::BencodeResumeDataStorage::Worker::Worker(const Path& resumeDataDir, 
 
 void BitTorrent::BencodeResumeDataStorage::Worker::run()
 {
+    std::unique_ptr<QThreadPool> pool;
+
     while (true)
     {
         QMutexLocker jobsLocker{ &m_jobsMutex };
 
-        if (m_jobs.empty())
+        while (m_jobs.empty())
         {
             if (isInterruptionRequested())
             {
                 break;
             }
 
+            // Waking with an empty queue is how parallel mode is turned on.
+            // Only an interruption ends the thread.
             m_waitCondition.wait(&m_jobsMutex);
-            if (m_jobs.empty())
-            {
-                Q_ASSERT(isInterruptionRequested());
-                break;
-            }
         }
 
-        std::unique_ptr<Job> job = std::move(m_jobs.front());
-        m_jobs.pop();
+        if (m_jobs.empty())
+        {
+            break;
+        }
+
+        // One queued file stays on this thread. The periodic resume save and shutdown
+        // both queue a file per torrent, and that batch uses the pool.
+        if (!m_parallelFlush && (m_jobs.size() == 1U))
+        {
+            std::unique_ptr<Job> job = std::move(m_jobs.front());
+            m_jobs.pop();
+            jobsLocker.unlock();
+
+            job->perform(m_resumeDataDir);
+            continue;
+        }
+
+        if (!pool)
+        {
+            pool = std::make_unique<QThreadPool>();
+            pool->setMaxThreadCount(resumeWriteThreadCount());
+            pool->setObjectName(u"BencodeResumeDataStorage write pool"_s);
+        }
+
+        std::vector<std::unique_ptr<Job>> batch;
+        batch.reserve(m_jobs.size());
+        while (!m_jobs.empty())
+        {
+            batch.push_back(std::move(m_jobs.front()));
+            m_jobs.pop();
+        }
         jobsLocker.unlock();
 
-        job->perform(m_resumeDataDir);
+        performParallel(*pool, m_resumeDataDir, std::move(batch));
     }
+}
+
+void BitTorrent::BencodeResumeDataStorage::Worker::enableParallelFlush()
+{
+    const QMutexLocker jobsLocker{ &m_jobsMutex };
+    m_parallelFlush = true;
+    m_waitCondition.wakeAll();
 }
 
 void BencodeResumeDataStorage::Worker::requestInterruption()
@@ -553,6 +651,11 @@ namespace
     StoreJob::StoreJob(const TorrentID& torrentID, LoadTorrentParams resumeData)
         : m_torrentID{ torrentID }, m_resumeData{ std::move(resumeData) }
     {
+    }
+
+    QString StoreJob::sequenceKey() const
+    {
+        return m_torrentID.toString();
     }
 
     void StoreJob::perform(const Path& resumeDataDir)
@@ -653,6 +756,11 @@ namespace
     {
     }
 
+    QString RemoveJob::sequenceKey() const
+    {
+        return m_torrentID.toString();
+    }
+
     void RemoveJob::perform(const Path& resumeDataDir)
     {
         const Path resumeFilename{ u"%1.fastresume"_s.arg(m_torrentID.toString()) };
@@ -665,6 +773,11 @@ namespace
     StoreQueueJob::StoreQueueJob(const QList<TorrentID>& queue)
         : m_queue{ queue }
     {
+    }
+
+    QString StoreQueueJob::sequenceKey() const
+    {
+        return u"queue"_s;
     }
 
     void StoreQueueJob::perform(const Path& resumeDataDir)

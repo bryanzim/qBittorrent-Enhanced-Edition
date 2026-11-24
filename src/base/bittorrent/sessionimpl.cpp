@@ -668,6 +668,9 @@ SessionImpl::~SessionImpl()
         m_needSaveTorrentsQueue = true;
     }
 
+    // One file per torrent. Switch to the parallel writer before those files are queued.
+    m_resumeDataStorage->prepareForShutdown();
+
     // Do some bittorrent related saving
     // After this, (ideally) no more important alerts will be generated/handled
     saveResumeData();

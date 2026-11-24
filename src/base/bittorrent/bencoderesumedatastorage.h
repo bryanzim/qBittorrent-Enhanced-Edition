@@ -52,6 +52,7 @@ namespace BitTorrent
         void store(const TorrentID& id, LoadTorrentParams resumeData) const override;
         void remove(const TorrentID& id) const override;
         void storeQueue(const QList<TorrentID>& queue) const override;
+        void prepareForShutdown() override;
 
     private:
         void doLoadAll() const override;
