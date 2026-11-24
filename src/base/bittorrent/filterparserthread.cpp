@@ -310,10 +310,7 @@ int FilterParserThread::parseDATFilterFile()
                            .arg(QString::fromStdString(e.what())));
 #else
                            .arg(nbLine)
-                           .arg(QString::fromLocal8Bit(e.what()))
-                    {
-                        );
-                    }
+                           .arg(QString::fromLocal8Bit(e.what())));
 #endif
             }
         }
@@ -519,10 +516,7 @@ int FilterParserThread::parseP2PFilterFile()
                            .arg(QString::fromStdString(e.what())));
 #else
                            .arg(nbLine)
-                           .arg(QString::fromLocal8Bit(e.what()))
-                    {
-                        );
-                    }
+                           .arg(QString::fromLocal8Bit(e.what())));
 #endif
             }
         }

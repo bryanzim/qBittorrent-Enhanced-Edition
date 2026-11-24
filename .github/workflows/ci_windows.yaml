@@ -19,12 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         libtorrent:
-          - version: "2.1.2"
+          - version: "2.1.3"
             boost_major_version: "1"
             boost_minor_version: "92"
             boost_patch_version: "0"
             libt_build_flags: ""
-          - version: "2.0.15"
+          - version: "2.0.16"
             boost_major_version: "1"
             boost_minor_version: "92"
             boost_patch_version: "0"
@@ -129,7 +129,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.12.0"
+          version: "6.12.1"
           arch: ${{ matrix.config.qt_arch }}
           archives: qtbase qtsvg qttools
           modules: qtimageformats
@@ -173,6 +173,8 @@ jobs:
 
       - name: Build qBittorrent
         run: |
+          # lupdate exits 0xC0000135 unless it can load the Qt DLLs beside it.
+          $env:Path = "${{ env.Qt_ROOT_DIR }}\bin;" + $env:Path
           $env:CXXFLAGS+="/DQT_FORCE_ASSERTS /WX"
           cmake `
             -B build `

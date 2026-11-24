@@ -163,7 +163,7 @@ prepare_buildenv() {
 }
 
 prepare_ssl() {
-  openssl_filename="$(retry curl -ksSL --compressed https://openssl-library.org/source/ \| grep -o "'>openssl-3\(\.[0-9]*\)*tar.gz<'" \| grep -o "'[^>]*.tar.gz'" \| head -1)"
+  openssl_filename="$(retry curl -ksSL --compressed https://openssl-library.org/source/ \| grep -o "'>openssl-4\.1\(\.[0-9]*\)*tar.gz<'" \| grep -o "'[^>]*.tar.gz'" \| head -1)"
   openssl_ver="$(echo "${openssl_filename}" | sed -r 's/openssl-(.+)\.tar\.gz/\1/')"
   echo "openssl version: ${openssl_ver}"
   openssl_latest_url="https://github.com/openssl/openssl/archive/refs/tags/${openssl_filename}"
@@ -260,6 +260,9 @@ prepare_libboost() {
   fi
   mkdir -p "/usr/src/boost-${boost_ver}"
   tar -jxf "${DOWNLOADS_DIR}/boost-${boost_ver}.tar.bz2" --strip-components=1 -C "/usr/src/boost-${boost_ver}"
+  if grep -q 'domain->data' "/usr/src/boost-${boost_ver}/boost/asio/ssl/impl/rfc2818_verification.ipp"; then
+    patch -d "/usr/src/boost-${boost_ver}" -p1 < "${SELF_DIR}/patches/boost-1.86-openssl-4.patch"
+  fi
   cp -rf "/usr/src/boost-${boost_ver}/boost" /usr/local/include/
 }
 
@@ -284,6 +287,10 @@ prepare_libtorrent() {
       "${libtorrent_git_url}" \
       "/usr/src/libtorrent-rasterbar-${LIBTORRENT_BRANCH}/"
     cd "/usr/src/libtorrent-rasterbar-${LIBTORRENT_BRANCH}/"
+  fi
+  # libtorrent 1.2 reads ASN1_STRING fields that OpenSSL 4 made opaque.
+  if grep -q 'domain->data' src/torrent.cpp; then
+    patch -p1 < "${SELF_DIR}/patches/libtorrent-1.2-openssl-4.patch"
   fi
   rm -fr build/CMakeCache.txt
   cmake \
