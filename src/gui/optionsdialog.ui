@@ -1125,10 +1125,10 @@
                <item>
                 <widget class="QCheckBox" name="checkPersistStartTorrent">
                  <property name="toolTip">
-                  <string>Keeps the "Start torrent" checkbox at its last-used value in the add-torrent dialog between dialogs, instead of resetting it from the global default every time</string>
+                  <string>Keeps the &quot;Start torrent&quot; checkbox at its last-used value in the add-torrent dialog between dialogs, instead of resetting it from the global default every time</string>
                  </property>
                  <property name="text">
-                  <string extracomment="Remembers the Start torrent checkbox state between add-torrent dialogs">Remember the "Start torrent" checkbox state between add-torrent dialogs</string>
+                  <string extracomment="Remembers the Start torrent checkbox state between add-torrent dialogs">Remember the &quot;Start torrent&quot; checkbox state between add-torrent dialogs</string>
                  </property>
                 </widget>
                </item>

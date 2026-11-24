@@ -117,7 +117,7 @@ namespace
                     using NautilusVersion = Utils::Version<3>;
                     const QString pathParam = (Utils::Fs::isDir(path) ? path.parentPath() : path).toString();
 
-                    if (NautilusVersion::fromString(nautilusVerStr, { 1, 0, 0 }) > NautilusVersion(3, 28, 0))
+                    if (NautilusVersion::fromString(nautilusVerStr, NautilusVersion{ 1, 0, 0 }) > NautilusVersion(3, 28, 0))
                     {
                         startDetached(u"nautilus"_s, { pathParam });
                     }
