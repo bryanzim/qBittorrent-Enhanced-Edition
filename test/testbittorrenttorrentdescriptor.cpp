@@ -46,7 +46,7 @@ public:
 private slots:
     void testParseMagnetFiltersUnsupportedTrackers() const
     {
-        const QStringList trackerURLs {
+        const QStringList trackerURLs{
             u"http://tracker.example.com/announce"_s,
             u"https://tracker.example.com/announce"_s,
             u"udp://tracker.example.com:1337/announce"_s,
@@ -57,18 +57,18 @@ private slots:
 #endif
         };
 
-        QUrlQuery query {
+        QUrlQuery query{
             { u"xt"_s, u"urn:btih:c58645e2e922428dceb1f98f51ffa424810570f0"_s },
-            { u"tr"_s, u"<!DOCTYPE html><html>"_s },
-            { u"tr"_s, u"ftp://tracker.example.com/announce"_s },
-            { u"tr"_s, u"313131"_s }
+            { u"tr"_s,                             u"<!DOCTYPE html><html>"_s },
+            { u"tr"_s,                u"ftp://tracker.example.com/announce"_s },
+            { u"tr"_s,                                            u"313131"_s }
         };
         for (const QString& url : trackerURLs)
         {
             query.addQueryItem(u"tr"_s, url);
         }
 
-        QUrl magnet { u"magnet:"_s };
+        QUrl magnet{ u"magnet:"_s };
         magnet.setQuery(query);
 
         const auto parseResult = BitTorrent::TorrentDescriptor::parse(magnet.toString(QUrl::FullyEncoded));
@@ -77,7 +77,9 @@ private slots:
         const QList<BitTorrent::TrackerEntry> trackers = parseResult.value().trackers();
         QCOMPARE(trackers.size(), trackerURLs.size());
         for (qsizetype i = 0; i < trackers.size(); ++i)
+        {
             QCOMPARE(trackers.at(i).url, trackerURLs.at(i));
+        }
 
         const lt::add_torrent_params& nativeParams = parseResult.value().ltAddTorrentParams();
         QCOMPARE(nativeParams.trackers.size(), trackerURLs.size());

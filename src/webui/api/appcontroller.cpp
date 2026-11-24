@@ -111,13 +111,13 @@ void AppController::buildInfoAction()
 #endif
 
     const QJsonObject versions = {
-        { u"qt"_s, Utils::Misc::qtVersionString() },
+        {         u"qt"_s,         Utils::Misc::qtVersionString() },
         { u"libtorrent"_s, Utils::Misc::libtorrentVersionString() },
-        { u"boost"_s, Utils::Misc::boostVersionString() },
-        { u"openssl"_s, Utils::Misc::opensslVersionString() },
-        { u"zlib"_s, Utils::Misc::zlibVersionString() },
-        { u"bitness"_s, (QT_POINTER_SIZE * 8) },
-        { u"platform"_s, platformName }
+        {      u"boost"_s,      Utils::Misc::boostVersionString() },
+        {    u"openssl"_s,    Utils::Misc::opensslVersionString() },
+        {       u"zlib"_s,       Utils::Misc::zlibVersionString() },
+        {    u"bitness"_s,                  (QT_POINTER_SIZE * 8) },
+        {   u"platform"_s,                           platformName }
     };
     setResult(versions);
 }

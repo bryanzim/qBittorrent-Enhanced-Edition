@@ -46,8 +46,8 @@ namespace DialogGeometry
     // the upgrade, before a full geometry has been saved.
     //
     // Returns true if a geometry (or the legacy size) was successfully applied.
-    bool restore(QWidget *dlg, const QString &geometryKey, const QString &legacySizeKey = {});
+    bool restore(QWidget* dlg, const QString& geometryKey, const QString& legacySizeKey = {});
 
     // Saves the current geometry (position + size) of the dialog.
-    void save(QWidget *dlg, const QString &geometryKey);
+    void save(QWidget* dlg, const QString& geometryKey);
 }

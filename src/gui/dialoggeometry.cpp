@@ -28,17 +28,17 @@
 
 #include "dialoggeometry.h"
 
+#include "base/settingsstorage.h"
+
 #include <QByteArray>
 #include <QSize>
 #include <QWidget>
-
-#include "base/settingsstorage.h"
 
 namespace DialogGeometry
 {
     namespace
     {
-        SettingsStorage *settings()
+        SettingsStorage* settings()
         {
             return SettingsStorage::instance();
         }
@@ -76,19 +76,19 @@ namespace DialogGeometry
 
         // Kept as hundredths of a ratio so the value survives an INI round-trip
         // without depending on QVariant's double formatting.
-        int scaleOf(QWidget *dlg)
+        int scaleOf(QWidget* dlg)
         {
             return qRound(dlg->devicePixelRatioF() * 100.0);
         }
 
-        QString scaleKey(const QString &geometryKey)
+        QString scaleKey(const QString& geometryKey)
         {
             return geometryKey + QStringLiteral("Ratio");
         }
 
     }
 
-    bool restore(QWidget *dlg, const QString &geometryKey, const QString &legacySizeKey)
+    bool restore(QWidget* dlg, const QString& geometryKey, const QString& legacySizeKey)
     {
         // loadValue<QByteArray>() coalesces any leftover value of a different type
         // under this key (SettingsStorage guards the conversion) into an empty
@@ -110,7 +110,9 @@ namespace DialogGeometry
         if (!geometry.isEmpty() && scaleMatches)
         {
             if (dlg->restoreGeometry(geometry))
+            {
                 return true;
+            }
         }
 
         // Backward compatibility with the previous size-only handling: keep the remembered
@@ -131,7 +133,7 @@ namespace DialogGeometry
         return false;
     }
 
-    void save(QWidget *dlg, const QString &geometryKey)
+    void save(QWidget* dlg, const QString& geometryKey)
     {
         settings()->storeValue(geometryKey, dlg->saveGeometry());
         // Recorded next to the geometry it describes; restore() refuses to

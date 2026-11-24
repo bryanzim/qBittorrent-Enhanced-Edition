@@ -312,7 +312,9 @@ bool GUIAddTorrentManager::processTorrent(const QString& source, const BitTorren
     });
 
     if (!dlg->hasRestoredGeometry())
+    {
         adjustDialogGeometry(dlg, app()->mainWindow());
+    }
     dlg->show();
 
     return true;

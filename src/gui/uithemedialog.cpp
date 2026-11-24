@@ -34,6 +34,7 @@
 #include "base/profile.h"
 #include "base/utils/fs.h"
 #include "base/utils/io.h"
+#include "dialoggeometry.h"
 #include "ui_uithemedialog.h"
 #include "uithemecommon.h"
 #include "utils.h"
@@ -46,8 +47,6 @@
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
-
-#include "dialoggeometry.h"
 
 
 #define SETTINGS_KEY(name) u"GUI/UIThemeDialog/" name
@@ -222,9 +221,8 @@ private:
     Path m_currentPath;
 };
 
-UIThemeDialog::UIThemeDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::UIThemeDialog}
+UIThemeDialog::UIThemeDialog(QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::UIThemeDialog }
 {
     m_ui->setupUi(this);
 

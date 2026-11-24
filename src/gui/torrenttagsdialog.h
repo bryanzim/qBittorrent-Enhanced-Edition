@@ -28,8 +28,9 @@
 
 #pragma once
 
-#include <QDialog>
 #include "base/tagset.h"
+
+#include <QDialog>
 
 
 namespace Ui
@@ -51,5 +52,5 @@ public:
 private:
     void addNewTag();
 
-    Ui::TorrentTagsDialog *m_ui = nullptr;
+    Ui::TorrentTagsDialog* m_ui = nullptr;
 };

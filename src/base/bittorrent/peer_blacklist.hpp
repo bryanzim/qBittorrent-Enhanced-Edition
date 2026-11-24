@@ -7,12 +7,12 @@
 #include <QCoreApplication>
 #include <QHostAddress>
 #include <QStringList>
-
 #include <libtorrent/torrent_info.hpp>
 
 #if !defined(NDEBUG)
 #ifdef Q_OS_WIN
 #include <winsock2.h>
+
 #include <Windows.h>
 #elif defined(Q_OS_UNIX)
 #include <execinfo.h>
@@ -82,8 +82,8 @@ inline QString lookup_peer_country(const lt::peer_info& info)
     {
         reported = true;
         LogMsg(QCoreApplication::translate("peer_blacklist",
-                   "Peer filter ran before the IP geolocation database was "
-                   "initialized; skipping the country check for this peer."),
+                                           "Peer filter ran before the IP geolocation database was "
+                                           "initialized; skipping the country check for this peer."),
                Log::WARNING);
 #if !defined(NDEBUG)
         LogMsg(QCoreApplication::translate("peer_blacklist", "GeoIP guard call stack: %1")

@@ -164,11 +164,11 @@ namespace
 }
 
 // Constructor
-OptionsDialog::OptionsDialog(IGUIApplication *app, QWidget *parent)
+OptionsDialog::OptionsDialog(IGUIApplication* app, QWidget* parent)
     : GUIApplicationComponent(app, parent)
-    , m_ui {new Ui::OptionsDialog}
-    , m_storeHSplitterSize {SETTINGS_KEY(u"HorizontalSplitterSizes"_s)}
-    , m_storeLastViewedPage {SETTINGS_KEY(u"LastViewedPage"_s)}
+    , m_ui{ new Ui::OptionsDialog }
+    , m_storeHSplitterSize{ SETTINGS_KEY(u"HorizontalSplitterSizes"_s) }
+    , m_storeLastViewedPage{ SETTINGS_KEY(u"LastViewedPage"_s) }
 {
     m_ui->setupUi(this);
     m_applyButton = m_ui->buttonBox->button(QDialogButtonBox::Apply);
@@ -722,8 +722,7 @@ void OptionsDialog::loadDownloadsTabOptions()
     connect(m_ui->checkAddToQueueTop, &QAbstractButton::toggled, this, &ThisType::enableApplyButton);
     connect(m_ui->checkAddStopped, &QAbstractButton::toggled, this, &ThisType::enableApplyButton);
     connect(m_ui->checkPersistStartTorrent, &QAbstractButton::toggled, this, &ThisType::enableApplyButton);
-    connect(m_ui->checkAddStopped, &QAbstractButton::toggled, this, [this](const bool checked)
-    {
+    connect(m_ui->checkAddStopped, &QAbstractButton::toggled, this, [this](const bool checked) {
         m_ui->stopConditionLabel->setEnabled(!checked);
         m_ui->stopConditionComboBox->setEnabled(!checked);
     });

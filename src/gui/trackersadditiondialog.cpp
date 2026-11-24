@@ -47,11 +47,8 @@
 
 #define SETTINGS_KEY(name) u"AddTrackersDialog/" name
 
-TrackersAdditionDialog::TrackersAdditionDialog(QWidget *parent, BitTorrent::Torrent *const torrent)
-    : QDialog(parent)
-    , m_ui(new Ui::TrackersAdditionDialog)
-    , m_torrent(torrent)
-    , m_storeTrackersListURL(SETTINGS_KEY(u"TrackersListURL"_s))
+TrackersAdditionDialog::TrackersAdditionDialog(QWidget* parent, BitTorrent::Torrent* const torrent)
+    : QDialog(parent), m_ui(new Ui::TrackersAdditionDialog), m_torrent(torrent), m_storeTrackersListURL(SETTINGS_KEY(u"TrackersListURL"_s))
 {
     m_ui->setupUi(this);
 

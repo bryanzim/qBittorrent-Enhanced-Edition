@@ -97,24 +97,27 @@ namespace
     };
 }
 
-TorrentCreatorDialog::TorrentCreatorDialog(QWidget *parent, const Path &defaultPath)
+TorrentCreatorDialog::TorrentCreatorDialog(QWidget* parent, const Path& defaultPath)
     : QDialog(parent)
     , m_ui(new Ui::TorrentCreatorDialog)
-    , m_threadPool {new QThreadPool(this)}
+    , m_threadPool{ new QThreadPool(this) }
     , m_storePieceSize(SETTINGS_KEY(u"PieceSize"_s))
     , m_storeIgnoreDotfiles(SETTINGS_KEY(u"IgnoreDotfiles"_s))
     , m_storePrivateTorrent(SETTINGS_KEY(u"PrivateTorrent"_s))
     , m_storeStartSeeding(SETTINGS_KEY(u"StartSeeding"_s))
     , m_storeIgnoreRatio(SETTINGS_KEY(u"IgnoreRatio"_s))
 #ifdef QBT_USES_LIBTORRENT2
-      ,
-      m_storeTorrentFormat(SETTINGS_KEY(u"TorrentFormat"_s))
+    , m_storeTorrentFormat(SETTINGS_KEY(u"TorrentFormat"_s))
 #else
-      ,
-      m_storeOptimizeAlignment(SETTINGS_KEY(u"OptimizeAlignment"_s)), m_paddedFileSizeLimit(SETTINGS_KEY(u"PaddedFileSizeLimit"_s))
+    , m_storeOptimizeAlignment(SETTINGS_KEY(u"OptimizeAlignment"_s))
+    , m_paddedFileSizeLimit(SETTINGS_KEY(u"PaddedFileSizeLimit"_s))
 #endif
-      ,
-      m_storeLastAddPath(SETTINGS_KEY(u"LastAddPath"_s)), m_storeTrackerList(SETTINGS_KEY(u"TrackerList"_s)), m_storeWebSeedList(SETTINGS_KEY(u"WebSeedList"_s)), m_storeComments(SETTINGS_KEY(u"Comments"_s)), m_storeLastSavePath(SETTINGS_KEY(u"LastSavePath"_s)), m_storeSource(SETTINGS_KEY(u"Source"_s))
+    , m_storeLastAddPath(SETTINGS_KEY(u"LastAddPath"_s))
+    , m_storeTrackerList(SETTINGS_KEY(u"TrackerList"_s))
+    , m_storeWebSeedList(SETTINGS_KEY(u"WebSeedList"_s))
+    , m_storeComments(SETTINGS_KEY(u"Comments"_s))
+    , m_storeLastSavePath(SETTINGS_KEY(u"LastSavePath"_s))
+    , m_storeSource(SETTINGS_KEY(u"Source"_s))
 {
     m_ui->setupUi(this);
 

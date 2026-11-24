@@ -399,7 +399,7 @@ void KeyValueDataStorage::Worker::run()
 
 void KeyValueDataStorage::Worker::requestInterruption()
 {
-    const QMutexLocker jobsLocker {&m_jobsMutex};
+    const QMutexLocker jobsLocker{ &m_jobsMutex };
     QThread::requestInterruption();
     m_waitCondition.wakeAll();
 }
@@ -454,7 +454,7 @@ bool KeyValueDataStorage::Worker::initDB(QSqlDatabase& db)
 
 void KeyValueDataStorage::Worker::addJob(std::unique_ptr<Job> job)
 {
-    const QMutexLocker jobsLocker {&m_jobsMutex};
+    const QMutexLocker jobsLocker{ &m_jobsMutex };
     m_jobs.push(std::move(job));
     m_waitCondition.wakeAll();
 }

@@ -60,7 +60,7 @@ private:
     bool storeColors();
     bool storeIcons();
 
-    Ui::UIThemeDialog *m_ui = nullptr;
+    Ui::UIThemeDialog* m_ui = nullptr;
 
     DefaultThemeSource m_defaultThemeSource;
     QHash<QString, ColorWidget*> m_lightColorWidgets;

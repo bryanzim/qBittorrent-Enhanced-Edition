@@ -204,7 +204,7 @@ private:
 
     bool schedTimesOk();
 
-    Ui::OptionsDialog *m_ui = nullptr;
+    Ui::OptionsDialog* m_ui = nullptr;
     SettingValue<QStringList> m_storeHSplitterSize;
     SettingValue<int> m_storeLastViewedPage;
 

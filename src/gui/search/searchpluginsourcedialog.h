@@ -53,5 +53,5 @@ private slots:
     void on_urlButton_clicked();
 
 private:
-    Ui::SearchPluginSourceDialog *m_ui = nullptr;
+    Ui::SearchPluginSourceDialog* m_ui = nullptr;
 };

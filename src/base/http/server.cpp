@@ -137,7 +137,7 @@ void Server::incomingConnection(const qintptr socketDescriptor)
         m_connections.insert(connection);
         connect(connection, &Connection::closed, this, [this, connection] { removeConnection(connection); });
     }
-    catch (const std::bad_alloc& exception)
+    catch ([[maybe_unused]] const std::bad_alloc& exception)
     {
         // drop the connection instead of throwing exception and crash
         qWarning("Failed to allocate memory for HTTP connection. Connection closed.");

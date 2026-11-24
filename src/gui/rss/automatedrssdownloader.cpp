@@ -62,14 +62,14 @@
 const QString EXT_JSON = u".json"_s;
 const QString EXT_LEGACY = u".rssrules"_s;
 
-AutomatedRssDownloader::AutomatedRssDownloader(QWidget *parent)
+AutomatedRssDownloader::AutomatedRssDownloader(QWidget* parent)
     : QDialog(parent)
-    , m_formatFilterJSON {u"%1 (*%2)"_s.arg(tr("Rules"), EXT_JSON)}
-    , m_formatFilterLegacy {u"%1 (*%2)"_s.arg(tr("Rules (legacy)"), EXT_LEGACY)}
-    , m_ui {new Ui::AutomatedRssDownloader}
-    , m_addTorrentParamsWidget {new AddTorrentParamsWidget}
-    , m_storeMainSplitterState {u"GUI/Qt6/RSSFeedDownloader/HSplitterSizes"_s}
-    , m_storeRuleDefSplitterState {u"GUI/Qt6/RSSFeedDownloader/RuleDefSplitterState"_s}
+    , m_formatFilterJSON{ u"%1 (*%2)"_s.arg(tr("Rules"), EXT_JSON) }
+    , m_formatFilterLegacy{ u"%1 (*%2)"_s.arg(tr("Rules (legacy)"), EXT_LEGACY) }
+    , m_ui{ new Ui::AutomatedRssDownloader }
+    , m_addTorrentParamsWidget{ new AddTorrentParamsWidget }
+    , m_storeMainSplitterState{ u"GUI/Qt6/RSSFeedDownloader/HSplitterSizes"_s }
+    , m_storeRuleDefSplitterState{ u"GUI/Qt6/RSSFeedDownloader/RuleDefSplitterState"_s }
 {
     m_ui->setupUi(this);
 

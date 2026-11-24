@@ -175,18 +175,18 @@ struct AddNewTorrentDialog::Context
     BitTorrent::AddTorrentParams torrentParams;
 };
 
-AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &torrentDescr
-        , const BitTorrent::AddTorrentParams &inParams, QWidget *parent)
+AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor& torrentDescr
+        , const BitTorrent::AddTorrentParams& inParams, QWidget* parent)
     : QDialog(parent)
-    , m_ui {new Ui::AddNewTorrentDialog}
-    , m_filterLine {new LineEdit(this)}
-    , m_storeDefaultCategory {SETTINGS_KEY(u"DefaultCategory"_s)}
-    , m_storeRememberLastSavePath {SETTINGS_KEY(u"RememberLastSavePath"_s)}
-    , m_storeLastStopCondition {SETTINGS_KEY(u"LastStopCondition"_s)}
-    , m_storeLastStartTorrent {SETTINGS_KEY(u"LastStartTorrentState"_s)}
-    , m_storeTreeHeaderState {u"GUI/Qt6/" SETTINGS_KEY(u"TreeHeaderState"_s)}
-    , m_storeSplitterState {u"GUI/Qt6/" SETTINGS_KEY(u"SplitterState"_s)}
-    , m_storeFilterPatternFormat {u"GUI/" SETTINGS_KEY(u"FilterPatternFormat"_s)}
+    , m_ui{ new Ui::AddNewTorrentDialog }
+    , m_filterLine{ new LineEdit(this) }
+    , m_storeDefaultCategory{ SETTINGS_KEY(u"DefaultCategory"_s) }
+    , m_storeRememberLastSavePath{ SETTINGS_KEY(u"RememberLastSavePath"_s) }
+    , m_storeLastStopCondition{ SETTINGS_KEY(u"LastStopCondition"_s) }
+    , m_storeLastStartTorrent{ SETTINGS_KEY(u"LastStartTorrentState"_s) }
+    , m_storeTreeHeaderState{ u"GUI/Qt6/" SETTINGS_KEY(u"TreeHeaderState"_s) }
+    , m_storeSplitterState{ u"GUI/Qt6/" SETTINGS_KEY(u"SplitterState"_s) }
+    , m_storeFilterPatternFormat{ u"GUI/" SETTINGS_KEY(u"FilterPatternFormat"_s) }
 {
     m_ui->setupUi(this);
 
@@ -230,7 +230,9 @@ AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &to
     // window type keeps the saved position exact (like the About dialog, which never
     // changes its window flags). See GUIAddTorrentManager::processTorrent().
     if (!this->parent())
+    {
         setWindowFlags(Qt::Window);
+    }
 
     loadState();
 
@@ -262,8 +264,7 @@ AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &to
     // the updateMetadata() reset to "None" once metadata arrives). Relying on it (instead of
     // persisting in saveState()) keeps updateMetadata()'s transient reset from clobbering the
     // user's remembered preference with "None" for the next dialog.
-    connect(m_ui->stopConditionComboBox, &QComboBox::activated, this, [this](const int)
-    {
+    connect(m_ui->stopConditionComboBox, &QComboBox::activated, this, [this](const int) {
         m_storeLastStopCondition = static_cast<int>(m_ui->stopConditionComboBox->currentData().value<BitTorrent::Torrent::StopCondition>());
     });
     connect(m_ui->contentLayoutComboBox, &QComboBox::currentIndexChanged, this, &AddNewTorrentDialog::contentLayoutChanged);
@@ -292,7 +293,7 @@ AddNewTorrentDialog::AddNewTorrentDialog(const BitTorrent::TorrentDescriptor &to
     m_ui->splitter->setStretchFactor(0, 0);
     m_ui->splitter->setStretchFactor(1, 1);
 
-    setCurrentContext(std::make_shared<Context>(Context {torrentDescr, inParams}));
+    setCurrentContext(std::make_shared<Context>(Context{ torrentDescr, inParams }));
 }
 
 AddNewTorrentDialog::~AddNewTorrentDialog()
@@ -342,7 +343,7 @@ bool AddNewTorrentDialog::hasRestoredGeometry() const
     return m_geometryRestored;
 }
 
-void AddNewTorrentDialog::showEvent(QShowEvent *event)
+void AddNewTorrentDialog::showEvent(QShowEvent* event)
 {
     QDialog::showEvent(event);
     if (!Preferences::instance()->isAddNewTorrentDialogTopLevel())
@@ -384,11 +385,17 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
     const bool rememberStartTorrent = Preferences::instance()->isAddNewTorrentDialogStartTorrentPersistent();
     bool startTorrentDefault;
     if (addTorrentParams.addStopped.has_value())
+    {
         startTorrentDefault = !(*addTorrentParams.addStopped);
+    }
     else if (rememberStartTorrent)
+    {
         startTorrentDefault = m_storeLastStartTorrent.get(!session->isAddTorrentStopped());
+    }
     else
+    {
         startTorrentDefault = !session->isAddTorrentStopped();
+    }
     m_ui->startTorrentCheckBox->setChecked(startTorrentDefault);
     m_ui->stopConditionLabel->setEnabled(m_ui->startTorrentCheckBox->isChecked());
     m_ui->stopConditionComboBox->setEnabled(m_ui->startTorrentCheckBox->isChecked());
@@ -448,7 +455,7 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
         m_ui->stopConditionComboBox->insertItem(1, tr("Metadata received"), QVariant::fromValue(BitTorrent::Torrent::StopCondition::MetadataReceived));
     }
     const auto stopCondition = addTorrentParams.stopCondition.value_or(
-            static_cast<BitTorrent::Torrent::StopCondition>(m_storeLastStopCondition.get(static_cast<int>(session->torrentStopCondition()))));
+        static_cast<BitTorrent::Torrent::StopCondition>(m_storeLastStopCondition.get(static_cast<int>(session->torrentStopCondition()))));
     if (hasMetadata && (stopCondition == BitTorrent::Torrent::StopCondition::MetadataReceived))
     {
         // Stop condition "Metadata received" is already satisfied once metadata is present,
@@ -456,7 +463,9 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
         // is enabled, leave the checkbox as the user last had it; otherwise force it off so
         // the torrent is added stopped (upstream behavior).
         if (!Preferences::instance()->isAddNewTorrentDialogStartTorrentPersistent())
+        {
             m_ui->startTorrentCheckBox->setChecked(false);
+        }
         m_ui->stopConditionComboBox->setCurrentIndex(m_ui->stopConditionComboBox->findData(QVariant::fromValue(BitTorrent::Torrent::StopCondition::None)));
     }
     else
@@ -465,7 +474,9 @@ void AddNewTorrentDialog::setCurrentContext(const std::shared_ptr<Context> conte
         // have been changed by the special-case above on a previous context). In persistent
         // mode the checkbox was already set from the remembered value / explicit addStopped.
         if (!Preferences::instance()->isAddNewTorrentDialogStartTorrentPersistent())
+        {
             m_ui->startTorrentCheckBox->setChecked(!addTorrentParams.addStopped.value_or(session->isAddTorrentStopped()));
+        }
         m_ui->stopConditionComboBox->setCurrentIndex(m_ui->stopConditionComboBox->findData(QVariant::fromValue(stopCondition)));
     }
 
@@ -893,7 +904,9 @@ void AddNewTorrentDialog::updateMetadata(const BitTorrent::TorrentInfo& metadata
         // Only force "Start torrent" off here when persistence is disabled, so the automated
         // metadata action cannot override the user's kept checkbox state between dialogs.
         if (!Preferences::instance()->isAddNewTorrentDialogStartTorrentPersistent())
+        {
             m_ui->startTorrentCheckBox->setChecked(false);
+        }
 
         const auto index = m_ui->stopConditionComboBox->currentIndex();
         m_ui->stopConditionComboBox->setCurrentIndex(m_ui->stopConditionComboBox->findData(

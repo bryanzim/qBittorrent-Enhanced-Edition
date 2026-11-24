@@ -41,9 +41,8 @@
 
 #define SETTINGS_KEY(name) u"IPSubnetWhitelistOptionsDialog/" name
 
-IPSubnetWhitelistOptionsDialog::IPSubnetWhitelistOptionsDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::IPSubnetWhitelistOptionsDialog)
+IPSubnetWhitelistOptionsDialog::IPSubnetWhitelistOptionsDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::IPSubnetWhitelistOptionsDialog)
 {
     m_ui->setupUi(this);
 

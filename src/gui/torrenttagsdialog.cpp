@@ -31,6 +31,7 @@
 #include "autoexpandabledialog.h"
 #include "base/bittorrent/session.h"
 #include "base/global.h"
+#include "dialoggeometry.h"
 #include "flowlayout.h"
 #include "ui_torrenttagsdialog.h"
 #include "utils.h"
@@ -40,14 +41,11 @@
 #include <QPushButton>
 #include <QSet>
 
-#include "dialoggeometry.h"
-
 
 #define SETTINGS_KEY(name) u"GUI/TorrentTagsDialog/" name
 
-TorrentTagsDialog::TorrentTagsDialog(const TagSet &initialTags, QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::TorrentTagsDialog}
+TorrentTagsDialog::TorrentTagsDialog(const TagSet& initialTags, QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::TorrentTagsDialog }
 {
     m_ui->setupUi(this);
 

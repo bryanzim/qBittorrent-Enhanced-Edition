@@ -30,9 +30,11 @@
 #include "previewselectdialog.h"
 
 #include "base/bittorrent/torrent.h"
+#include "base/global.h"
 #include "base/preferences.h"
 #include "base/utils/fs.h"
 #include "base/utils/misc.h"
+#include "dialoggeometry.h"
 #include "previewlistdelegate.h"
 #include "ui_previewselectdialog.h"
 #include "utils.h"
@@ -45,9 +47,6 @@
 #include <QPushButton>
 #include <QShowEvent>
 #include <QStandardItemModel>
-
-#include "base/global.h"
-#include "dialoggeometry.h"
 #define SETTINGS_KEY(name) u"PreviewSelectDialog/" name
 
 enum Roles
@@ -55,11 +54,8 @@ enum Roles
     SortRole = Qt::UserRole
 };
 
-PreviewSelectDialog::PreviewSelectDialog(QWidget *parent, const BitTorrent::Torrent *torrent)
-    : QDialog(parent)
-    , m_ui {new Ui::PreviewSelectDialog}
-    , m_torrent {torrent}
-    , m_storeTreeHeaderState {u"GUI/Qt6/" SETTINGS_KEY(u"HeaderState"_s)}
+PreviewSelectDialog::PreviewSelectDialog(QWidget* parent, const BitTorrent::Torrent* torrent)
+    : QDialog(parent), m_ui{ new Ui::PreviewSelectDialog }, m_torrent{ torrent }, m_storeTreeHeaderState{ u"GUI/Qt6/" SETTINGS_KEY(u"HeaderState"_s) }
 {
     m_ui->setupUi(this);
 

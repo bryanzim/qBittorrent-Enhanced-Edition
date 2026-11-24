@@ -40,7 +40,7 @@
 
 #define SETTINGS_KEY(name) u"CookiesDialog/" name
 
-CookiesDialog::CookiesDialog(QWidget *parent)
+CookiesDialog::CookiesDialog(QWidget* parent)
     : QDialog(parent)
     , m_ui(new Ui::CookiesDialog)
     , m_cookiesModel(new CookiesModel(Net::DownloadManager::instance()->allCookies(), this))

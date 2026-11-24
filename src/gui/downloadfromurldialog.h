@@ -53,5 +53,5 @@ private slots:
 private:
     void keyPressEvent(QKeyEvent* event) override;
 
-    Ui::DownloadFromURLDialog *m_ui = nullptr;
+    Ui::DownloadFromURLDialog* m_ui = nullptr;
 };

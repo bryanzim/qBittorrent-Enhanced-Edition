@@ -61,10 +61,8 @@ enum PluginColumns
     PLUGIN_ID
 };
 
-SearchPluginSelectDialog::SearchPluginSelectDialog(SearchPluginManager *pluginManager, QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::SearchPluginSelectDialog}
-    , m_pluginManager {pluginManager}
+SearchPluginSelectDialog::SearchPluginSelectDialog(SearchPluginManager* pluginManager, QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::SearchPluginSelectDialog }, m_pluginManager{ pluginManager }
 {
     m_ui->setupUi(this);
 

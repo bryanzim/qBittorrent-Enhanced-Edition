@@ -28,24 +28,23 @@
 
 #include "trackerentriesdialog.h"
 
-#include <algorithm>
+#include "base/bittorrent/trackerentry.h"
+#include "base/global.h"
+#include "dialoggeometry.h"
+#include "ui_trackerentriesdialog.h"
+#include "utils.h"
 
 #include <QHash>
 #include <QList>
 
-#include "base/global.h"
-#include "base/bittorrent/trackerentry.h"
-#include "dialoggeometry.h"
-#include "ui_trackerentriesdialog.h"
-#include "utils.h"
+#include <algorithm>
 
 
 
 #define SETTINGS_KEY(name) u"TrackerEntriesDialog/" name
 
-TrackerEntriesDialog::TrackerEntriesDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::TrackerEntriesDialog)
+TrackerEntriesDialog::TrackerEntriesDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::TrackerEntriesDialog)
 {
     m_ui->setupUi(this);
 

@@ -54,7 +54,7 @@ private slots:
     void on_txtIPSubnet_textChanged(const QString& subnetStr);
 
 private:
-    Ui::IPSubnetWhitelistOptionsDialog *m_ui = nullptr;
+    Ui::IPSubnetWhitelistOptionsDialog* m_ui = nullptr;
 
     QStringListModel* m_model = nullptr;
     QSortFilterProxyModel* m_sortFilter = nullptr;

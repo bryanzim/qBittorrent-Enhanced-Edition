@@ -28,16 +28,16 @@
 
 #include "speedlimitdialog.h"
 
-#include <algorithm>
-
-#include <QStyle>
-
-#include "base/global.h"
 #include "base/bittorrent/session.h"
+#include "base/global.h"
 #include "dialoggeometry.h"
 #include "ui_speedlimitdialog.h"
 #include "uithememanager.h"
 #include "utils.h"
+
+#include <QStyle>
+
+#include <algorithm>
 
 
 
@@ -55,9 +55,8 @@ namespace
     }
 }
 
-SpeedLimitDialog::SpeedLimitDialog(QWidget *parent)
-    : QDialog {parent}
-    , m_ui {new Ui::SpeedLimitDialog}
+SpeedLimitDialog::SpeedLimitDialog(QWidget* parent)
+    : QDialog{ parent }, m_ui{ new Ui::SpeedLimitDialog }
 {
     m_ui->setupUi(this);
 

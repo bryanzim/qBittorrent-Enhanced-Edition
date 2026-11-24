@@ -28,15 +28,15 @@
 
 #include "transferlistsortmodel.h"
 
-#include <type_traits>
-
-#include <QtVersionChecks>
-#include <QDateTime>
-
-#include "base/global.h"
 #include "base/bittorrent/infohash.h"
 #include "base/bittorrent/torrent.h"
+#include "base/global.h"
 #include "transferlistmodel.h"
+
+#include <QDateTime>
+#include <QtVersionChecks>
+
+#include <type_traits>
 
 
 

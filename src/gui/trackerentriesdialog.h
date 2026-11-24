@@ -59,5 +59,5 @@ private:
     void saveSettings();
     void loadSettings();
 
-    Ui::TrackerEntriesDialog *m_ui = nullptr;
+    Ui::TrackerEntriesDialog* m_ui = nullptr;
 };

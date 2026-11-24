@@ -26,25 +26,24 @@
  * exception statement from your version.
  */
 
-#include <algorithm>
-#include <cstring>
-#include <string>
-
-#include <QBitArray>
-#include <QHostAddress>
-#include <QTest>
-
 #include "base/bittorrent/peer_blacklist.hpp"
 #include "base/bittorrent/peerinfo.h"
 #include "base/logger.h"
 #include "base/net/geoipmanager.h"
 
+#include <QBitArray>
+#include <QHostAddress>
+#include <QTest>
+
+#include <algorithm>
+#include <cstring>
+#include <string>
+
 using namespace Qt::Literals::StringLiterals;
 
 namespace
 {
-    lt::peer_info makePeer(const QString &ip = u"1.2.3.4"_s, const int port = 6881
-            , const std::string &client = {}, const std::string &peerId = {})
+    lt::peer_info makePeer(const QString& ip = u"1.2.3.4"_s, const int port = 6881, const std::string& client = {}, const std::string& peerId = {})
     {
         lt::peer_info info;
         const lt::tcp::endpoint endpoint{ lt::make_address(ip.toStdString()), static_cast<unsigned short>(port) };

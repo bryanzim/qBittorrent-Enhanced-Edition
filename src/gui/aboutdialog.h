@@ -47,5 +47,5 @@ public:
 private:
     void copyVersionsToClipboard() const;
 
-    Ui::AboutDialog *m_ui = nullptr;
+    Ui::AboutDialog* m_ui = nullptr;
 };

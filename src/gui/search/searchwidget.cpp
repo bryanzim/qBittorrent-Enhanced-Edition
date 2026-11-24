@@ -836,7 +836,9 @@ void SearchWidget::restoreSession()
 
         m_isSessionRestored = true;
         if (m_isSessionChanged)
+        {
             saveSession();
+        }
     });
 
     QMetaObject::invokeMethod(m_dataStorage, [this] { m_dataStorage->loadSession(m_storeOpenedTabsResults); });

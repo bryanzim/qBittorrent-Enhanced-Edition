@@ -54,8 +54,8 @@ private slots:
     void on_txtIP_textChanged(const QString& ip);
 
 private:
-    Ui::BanListOptionsDialog *m_ui = nullptr;
-    QStringListModel *m_model = nullptr;
-    QSortFilterProxyModel *m_sortFilter = nullptr;
+    Ui::BanListOptionsDialog* m_ui = nullptr;
+    QStringListModel* m_model = nullptr;
+    QSortFilterProxyModel* m_sortFilter = nullptr;
     bool m_modified = false;
 };

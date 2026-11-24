@@ -48,7 +48,7 @@ public slots:
     void accept() override;
 
 private:
-    Ui::SpeedLimitDialog *m_ui = nullptr;
+    Ui::SpeedLimitDialog* m_ui = nullptr;
     struct
     {
         int uploadSpeedLimit;

@@ -36,10 +36,10 @@
 #define SETTINGS_KEY(name) u"WatchedFolderOptionsDialog/" name
 
 WatchedFolderOptionsDialog::WatchedFolderOptionsDialog(
-        const TorrentFilesWatcher::WatchedFolderOptions &watchedFolderOptions, QWidget *parent)
-    : QDialog {parent}
-    , m_ui {new Ui::WatchedFolderOptionsDialog}
-    , m_addTorrentParamsWidget {new AddTorrentParamsWidget(watchedFolderOptions.addTorrentParams)}
+        const TorrentFilesWatcher::WatchedFolderOptions& watchedFolderOptions, QWidget* parent)
+    : QDialog{ parent }
+    , m_ui{ new Ui::WatchedFolderOptionsDialog }
+    , m_addTorrentParamsWidget{ new AddTorrentParamsWidget(watchedFolderOptions.addTorrentParams) }
 {
     m_ui->setupUi(this);
     m_ui->groupBoxParameters->layout()->addWidget(m_addTorrentParamsWidget);

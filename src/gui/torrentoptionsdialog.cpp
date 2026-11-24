@@ -34,9 +34,9 @@
 #include "base/bittorrent/infohash.h"
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/torrent.h"
-#include "dialoggeometry.h"
 #include "base/global.h"
 #include "base/unicodestrings.h"
+#include "dialoggeometry.h"
 #include "ui_torrentoptionsdialog.h"
 #include "utils.h"
 
@@ -60,10 +60,8 @@ namespace
     }
 }
 
-TorrentOptionsDialog::TorrentOptionsDialog(QWidget *parent, const QList<BitTorrent::Torrent *> &torrents)
-    : QDialog {parent}
-    , m_ui {new Ui::TorrentOptionsDialog}
-    , m_currentCategoriesString {u"--%1--"_s.arg(tr("Currently used categories"))}
+TorrentOptionsDialog::TorrentOptionsDialog(QWidget* parent, const QList<BitTorrent::Torrent*>& torrents)
+    : QDialog{ parent }, m_ui{ new Ui::TorrentOptionsDialog }, m_currentCategoriesString{ u"--%1--"_s.arg(tr("Currently used categories")) }
 {
     Q_ASSERT(!torrents.empty());
 

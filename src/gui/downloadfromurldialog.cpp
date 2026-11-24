@@ -28,7 +28,9 @@
 
 #include "downloadfromurldialog.h"
 
+#include "base/global.h"
 #include "base/net/downloadmanager.h"
+#include "dialoggeometry.h"
 #include "ui_downloadfromurldialog.h"
 #include "utils.h"
 
@@ -41,9 +43,6 @@
 #include <QString>
 #include <QStringList>
 #include <QStringView>
-
-#include "base/global.h"
-#include "dialoggeometry.h"
 #define SETTINGS_KEY(name) u"DownloadFromURLDialog/" name
 
 namespace
@@ -59,9 +58,8 @@ namespace
     }
 }
 
-DownloadFromURLDialog::DownloadFromURLDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::DownloadFromURLDialog)
+DownloadFromURLDialog::DownloadFromURLDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::DownloadFromURLDialog)
 {
     m_ui->setupUi(this);
 

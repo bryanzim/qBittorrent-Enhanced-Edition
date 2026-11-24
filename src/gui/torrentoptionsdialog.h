@@ -34,10 +34,7 @@
 #include "base/bittorrent/sharelimits.h"
 #include "base/path.h"
 
-
 #include <QDialog>
-
-
 
 #include <optional>
 class QAbstractButton;
@@ -77,7 +74,7 @@ private slots:
 
 private:
     QList<BitTorrent::TorrentID> m_torrentIDs;
-    Ui::TorrentOptionsDialog *m_ui = nullptr;
+    Ui::TorrentOptionsDialog* m_ui = nullptr;
     QStringList m_categories;
     QString m_currentCategoriesString;
     bool m_allSameCategory = true;

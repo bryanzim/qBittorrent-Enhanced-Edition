@@ -34,8 +34,8 @@
 #include "base/utils/io.h"
 #include "base/utils/misc.h"
 #include "base/version.h"
-#include "ui_aboutdialog.h"
 #include "dialoggeometry.h"
+#include "ui_aboutdialog.h"
 #include "uithememanager.h"
 #include "utils.h"
 
@@ -49,9 +49,8 @@ using namespace Qt::Literals::StringLiterals;
 
 #define SETTINGS_KEY(name) u"AboutDialog/" name
 
-AboutDialog::AboutDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui {new Ui::AboutDialog}
+AboutDialog::AboutDialog(QWidget* parent)
+    : QDialog(parent), m_ui{ new Ui::AboutDialog }
 {
     m_ui->setupUi(this);
 

@@ -48,5 +48,5 @@ private slots:
     void update();
 
 private:
-    Ui::StatsDialog *m_ui = nullptr;
+    Ui::StatsDialog* m_ui = nullptr;
 };

@@ -28,25 +28,23 @@
 
 #include "banlistoptionsdialog.h"
 
-#include <QHostAddress>
-#include <QMessageBox>
-#include <QSortFilterProxyModel>
-#include <QStringListModel>
-
-#include "base/global.h"
 #include "base/bittorrent/session.h"
+#include "base/global.h"
 #include "base/utils/net.h"
 #include "dialoggeometry.h"
 #include "ui_banlistoptionsdialog.h"
 #include "utils.h"
 
+#include <QHostAddress>
+#include <QMessageBox>
+#include <QSortFilterProxyModel>
+#include <QStringListModel>
+
 
 #define SETTINGS_KEY(name) u"BanListOptionsDialog/" name
 
-BanListOptionsDialog::BanListOptionsDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::BanListOptionsDialog)
-    , m_model(new QStringListModel(BitTorrent::Session::instance()->bannedIPs(), this))
+BanListOptionsDialog::BanListOptionsDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::BanListOptionsDialog), m_model(new QStringListModel(BitTorrent::Session::instance()->bannedIPs(), this))
 {
     m_ui->setupUi(this);
 

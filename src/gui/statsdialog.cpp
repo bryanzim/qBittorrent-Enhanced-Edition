@@ -43,9 +43,8 @@
 
 #define SETTINGS_KEY(name) u"StatisticsDialog/" name
 
-StatsDialog::StatsDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui(new Ui::StatsDialog)
+StatsDialog::StatsDialog(QWidget* parent)
+    : QDialog(parent), m_ui(new Ui::StatsDialog)
 {
     m_ui->setupUi(this);
 

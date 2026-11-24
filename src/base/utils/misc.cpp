@@ -536,7 +536,7 @@ QString Utils::Misc::opensslVersionString()
 QString Utils::Misc::qtVersionString()
 {
     // static initialization for usage in signal handler
-    static const auto version {QString::fromLatin1(qVersion())};
+    static const auto version{ QString::fromLatin1(qVersion()) };
     return version;
 }
 

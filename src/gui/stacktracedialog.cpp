@@ -51,28 +51,28 @@ void StacktraceDialog::setText(const QString& signalName, const QString& stacktr
     // try not to call signal-unsafe functions
 
     const QString htmlStr = QStringLiteral(
-        "<p align=center><b><font size=7 color=red>"
-        "qBittorrent has crashed"
-        "</font></b></p>"
-        "<font size=4><p>"
-        "Please file a bug report at "
-        "<a href=\"https://bugs.qbittorrent.org\">https://bugs.qbittorrent.org</a> "
-        "and provide the following information:"
-        "</p></font>"
-        "<br/><hr><br/>"
-        "<p align=center><font size=4>"
-        "qBittorrent version: " QBT_VERSION " (%1-bit)<br/>"
-        "Libtorrent version: %2<br/>"
-        "Qt version: %3<br/>"
-        "Boost version: %4<br/>"
-        "OpenSSL version: %5<br/>"
-        "zlib version: %6<br/>"
-        "OS version: %7<br/><br/>"
-        "Caught signal: %8"
-        "</font></p>"
-        "<pre><code>```\n%9\n```</code></pre>"
-        "<br/><hr><br/><br/>")
-            .arg(QString::number(QT_POINTER_SIZE * 8), Utils::Misc::libtorrentVersionString(), Utils::Misc::qtVersionString(), Utils::Misc::boostVersionString(), Utils::Misc::opensslVersionString(), Utils::Misc::zlibVersionString(), Utils::Misc::osName(), signalName, stacktrace);
+                                "<p align=center><b><font size=7 color=red>"
+                                "qBittorrent has crashed"
+                                "</font></b></p>"
+                                "<font size=4><p>"
+                                "Please file a bug report at "
+                                "<a href=\"https://bugs.qbittorrent.org\">https://bugs.qbittorrent.org</a> "
+                                "and provide the following information:"
+                                "</p></font>"
+                                "<br/><hr><br/>"
+                                "<p align=center><font size=4>"
+                                "qBittorrent version: " QBT_VERSION " (%1-bit)<br/>"
+                                "Libtorrent version: %2<br/>"
+                                "Qt version: %3<br/>"
+                                "Boost version: %4<br/>"
+                                "OpenSSL version: %5<br/>"
+                                "zlib version: %6<br/>"
+                                "OS version: %7<br/><br/>"
+                                "Caught signal: %8"
+                                "</font></p>"
+                                "<pre><code>```\n%9\n```</code></pre>"
+                                "<br/><hr><br/><br/>")
+                                .arg(QString::number(QT_POINTER_SIZE * 8), Utils::Misc::libtorrentVersionString(), Utils::Misc::qtVersionString(), Utils::Misc::boostVersionString(), Utils::Misc::opensslVersionString(), Utils::Misc::zlibVersionString(), Utils::Misc::osName(), signalName, stacktrace);
 
     m_ui->errorText->setHtml(htmlStr);
 }
