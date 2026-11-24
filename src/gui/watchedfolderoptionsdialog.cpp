@@ -30,13 +30,16 @@
 
 #include "addtorrentparamswidget.h"
 #include "base/global.h"
+#include "dialoggeometry.h"
 #include "ui_watchedfolderoptionsdialog.h"
 
 #define SETTINGS_KEY(name) u"WatchedFolderOptionsDialog/" name
 
 WatchedFolderOptionsDialog::WatchedFolderOptionsDialog(
-    const TorrentFilesWatcher::WatchedFolderOptions& watchedFolderOptions, QWidget* parent)
-    : QDialog{ parent }, m_ui{ new Ui::WatchedFolderOptionsDialog }, m_addTorrentParamsWidget{ new AddTorrentParamsWidget(watchedFolderOptions.addTorrentParams) }, m_storeDialogSize{ SETTINGS_KEY(u"DialogSize"_s) }
+        const TorrentFilesWatcher::WatchedFolderOptions& watchedFolderOptions, QWidget* parent)
+    : QDialog{ parent }
+    , m_ui{ new Ui::WatchedFolderOptionsDialog }
+    , m_addTorrentParamsWidget{ new AddTorrentParamsWidget(watchedFolderOptions.addTorrentParams) }
 {
     m_ui->setupUi(this);
     m_ui->groupBoxParameters->layout()->addWidget(m_addTorrentParamsWidget);
@@ -64,13 +67,10 @@ TorrentFilesWatcher::WatchedFolderOptions WatchedFolderOptionsDialog::watchedFol
 
 void WatchedFolderOptionsDialog::loadState()
 {
-    if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
-    {
-        resize(dialogSize);
-    }
+    DialogGeometry::restore(this, SETTINGS_KEY(u"Geometry"_s), SETTINGS_KEY(u"DialogSize"_s));
 }
 
 void WatchedFolderOptionsDialog::saveState()
 {
-    m_storeDialogSize = size();
+    DialogGeometry::save(this, SETTINGS_KEY(u"Geometry"_s));
 }

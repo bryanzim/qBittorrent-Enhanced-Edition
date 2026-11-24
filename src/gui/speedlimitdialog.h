@@ -28,8 +28,6 @@
 
 #pragma once
 
-#include "base/settingvalue.h"
-
 #include <QDialog>
 
 namespace Ui
@@ -51,7 +49,6 @@ public slots:
 
 private:
     Ui::SpeedLimitDialog* m_ui = nullptr;
-    SettingValue<QSize> m_storeDialogSize;
     struct
     {
         int uploadSpeedLimit;

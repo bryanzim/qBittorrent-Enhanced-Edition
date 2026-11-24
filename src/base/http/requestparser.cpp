@@ -380,9 +380,9 @@ bool RequestParser::parseFormData(const QByteArrayView data)
                     continue;
                 }
 
-                const QString name = QString::fromLatin1(directive.first(idx).trimmed()).toLower();
-                const QString value = QString::fromLatin1(unquote(directive.sliced(idx + 1).trimmed()));
-                headersMap[name] = value;
+                const QString directiveName = QString::fromLatin1(directive.first(idx).trimmed()).toLower();
+                const QString directiveValue = QString::fromLatin1(unquote(directive.sliced(idx + 1).trimmed()));
+                headersMap[directiveName] = directiveValue;
             }
         }
         else

@@ -36,6 +36,7 @@
 #include "base/bittorrent/torrent.h"
 #include "base/global.h"
 #include "base/unicodestrings.h"
+#include "dialoggeometry.h"
 #include "ui_torrentoptionsdialog.h"
 #include "utils.h"
 
@@ -60,7 +61,7 @@ namespace
 }
 
 TorrentOptionsDialog::TorrentOptionsDialog(QWidget* parent, const QList<BitTorrent::Torrent*>& torrents)
-    : QDialog{ parent }, m_ui{ new Ui::TorrentOptionsDialog }, m_storeDialogSize{ SETTINGS_KEY(u"Size"_s) }, m_currentCategoriesString{ u"--%1--"_s.arg(tr("Currently used categories")) }
+    : QDialog{ parent }, m_ui{ new Ui::TorrentOptionsDialog }, m_currentCategoriesString{ u"--%1--"_s.arg(tr("Currently used categories")) }
 {
     Q_ASSERT(!torrents.empty());
 
@@ -459,11 +460,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget* parent, const QList<BitTorre
 
     m_ui->scrollArea->widget()->adjustSize();
 
-    if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
-    {
-        resize(dialogSize);
-    }
-    else
+    if (!DialogGeometry::restore(this, SETTINGS_KEY(u"Geometry"_s), SETTINGS_KEY(u"Size"_s)))
     {
         adjustSize();
     }
@@ -471,7 +468,7 @@ TorrentOptionsDialog::TorrentOptionsDialog(QWidget* parent, const QList<BitTorre
 
 TorrentOptionsDialog::~TorrentOptionsDialog()
 {
-    m_storeDialogSize = size();
+    DialogGeometry::save(this, SETTINGS_KEY(u"Geometry"_s));
     delete m_ui;
 }
 

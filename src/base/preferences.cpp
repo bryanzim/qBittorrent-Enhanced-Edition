@@ -2599,6 +2599,21 @@ bool Preferences::getMigrateStatus() const
     return value(u"Preferences/General/MigrateStatus"_s, false);
 }
 
+bool Preferences::isAddNewTorrentDialogStartTorrentPersistent() const
+{
+    return value(u"AddNewTorrentDialog/RememberStartTorrentState"_s, false);
+}
+
+void Preferences::setAddNewTorrentDialogStartTorrentPersistent(const bool persistent)
+{
+    if (persistent == isAddNewTorrentDialogStartTorrentPersistent())
+    {
+        return;
+    }
+
+    setValue(u"AddNewTorrentDialog/RememberStartTorrentState"_s, persistent);
+}
+
 void Preferences::apply()
 {
     if (SettingsStorage::instance()->save())

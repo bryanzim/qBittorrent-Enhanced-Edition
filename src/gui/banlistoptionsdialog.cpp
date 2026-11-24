@@ -29,7 +29,9 @@
 #include "banlistoptionsdialog.h"
 
 #include "base/bittorrent/session.h"
+#include "base/global.h"
 #include "base/utils/net.h"
+#include "dialoggeometry.h"
 #include "ui_banlistoptionsdialog.h"
 #include "utils.h"
 
@@ -38,10 +40,11 @@
 #include <QSortFilterProxyModel>
 #include <QStringListModel>
 
+
 #define SETTINGS_KEY(name) u"BanListOptionsDialog/" name
 
 BanListOptionsDialog::BanListOptionsDialog(QWidget* parent)
-    : QDialog(parent), m_ui(new Ui::BanListOptionsDialog), m_storeDialogSize(SETTINGS_KEY(u"Size"_s)), m_model(new QStringListModel(BitTorrent::Session::instance()->bannedIPs(), this))
+    : QDialog(parent), m_ui(new Ui::BanListOptionsDialog), m_model(new QStringListModel(BitTorrent::Session::instance()->bannedIPs(), this))
 {
     m_ui->setupUi(this);
 
@@ -55,15 +58,12 @@ BanListOptionsDialog::BanListOptionsDialog(QWidget* parent)
     m_ui->bannedIPList->sortByColumn(0, Qt::AscendingOrder);
     m_ui->buttonBanIP->setEnabled(false);
 
-    if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
-    {
-        resize(dialogSize);
-    }
+    DialogGeometry::restore(this, SETTINGS_KEY(u"Geometry"_s), SETTINGS_KEY(u"Size"_s));
 }
 
 BanListOptionsDialog::~BanListOptionsDialog()
 {
-    m_storeDialogSize = size();
+    DialogGeometry::save(this, SETTINGS_KEY(u"Geometry"_s));
     delete m_ui;
 }
 

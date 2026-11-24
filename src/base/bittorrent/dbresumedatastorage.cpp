@@ -855,13 +855,18 @@ void BitTorrent::DBResumeDataStorage::Worker::run()
                     transactedJobsCount = 0;
                 }
 
-                if (isInterruptionRequested())
+                // QWaitCondition can wake with an empty queue. Only an interruption ends the thread.
+                while (m_jobs.empty())
                 {
-                    break;
+                    if (isInterruptionRequested())
+                    {
+                        break;
+                    }
+
+                    m_waitCondition.wait(&m_jobsMutex);
                 }
 
-                m_waitCondition.wait(&m_jobsMutex);
-                if (isInterruptionRequested())
+                if (m_jobs.empty())
                 {
                     break;
                 }
@@ -891,6 +896,7 @@ void BitTorrent::DBResumeDataStorage::Worker::run()
 
 void DBResumeDataStorage::Worker::requestInterruption()
 {
+    const QMutexLocker jobsLocker{ &m_jobsMutex };
     QThread::requestInterruption();
     m_waitCondition.wakeAll();
 }
@@ -912,10 +918,8 @@ void BitTorrent::DBResumeDataStorage::Worker::storeQueue(const QList<TorrentID>&
 
 void BitTorrent::DBResumeDataStorage::Worker::addJob(std::unique_ptr<Job> job)
 {
-    m_jobsMutex.lock();
+    const QMutexLocker jobsLocker{ &m_jobsMutex };
     m_jobs.push(std::move(job));
-    m_jobsMutex.unlock();
-
     m_waitCondition.wakeAll();
 }
 

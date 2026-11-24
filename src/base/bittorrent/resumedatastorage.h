@@ -64,6 +64,9 @@ namespace BitTorrent
         virtual void remove(const TorrentID& id) const = 0;
         virtual void storeQueue(const QList<TorrentID>& queue) const = 0;
 
+        // Legacy resume data is one file per torrent. Shutdown can write those files concurrently.
+        virtual void prepareForShutdown();
+
         void loadAll() const;
         QList<LoadedResumeData> fetchLoadedResumeData() const;
 

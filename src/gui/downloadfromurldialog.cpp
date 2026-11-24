@@ -28,7 +28,9 @@
 
 #include "downloadfromurldialog.h"
 
+#include "base/global.h"
 #include "base/net/downloadmanager.h"
+#include "dialoggeometry.h"
 #include "ui_downloadfromurldialog.h"
 #include "utils.h"
 
@@ -41,7 +43,6 @@
 #include <QString>
 #include <QStringList>
 #include <QStringView>
-
 #define SETTINGS_KEY(name) u"DownloadFromURLDialog/" name
 
 namespace
@@ -58,7 +59,7 @@ namespace
 }
 
 DownloadFromURLDialog::DownloadFromURLDialog(QWidget* parent)
-    : QDialog(parent), m_ui(new Ui::DownloadFromURLDialog), m_storeDialogSize(SETTINGS_KEY(u"Size"_s))
+    : QDialog(parent), m_ui(new Ui::DownloadFromURLDialog)
 {
     m_ui->setupUi(this);
 
@@ -98,15 +99,12 @@ DownloadFromURLDialog::DownloadFromURLDialog(QWidget* parent)
         m_ui->buttonBox->setFocus();
     }
 
-    if (const QSize dialogSize = m_storeDialogSize; dialogSize.isValid())
-    {
-        resize(dialogSize);
-    }
+    DialogGeometry::restore(this, SETTINGS_KEY(u"Geometry"_s), SETTINGS_KEY(u"Size"_s));
 }
 
 DownloadFromURLDialog::~DownloadFromURLDialog()
 {
-    m_storeDialogSize = size();
+    DialogGeometry::save(this, SETTINGS_KEY(u"Geometry"_s));
     delete m_ui;
 }
 

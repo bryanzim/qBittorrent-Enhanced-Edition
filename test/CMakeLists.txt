@@ -16,6 +16,7 @@ set(testFiles
     testhttprequestparser.cpp
     testorderedset.cpp
     testpath.cpp
+    testpeerfilter.cpp
     testutilsbytearray.cpp
     testutilscompare.cpp
     testutilsdatetime.cpp

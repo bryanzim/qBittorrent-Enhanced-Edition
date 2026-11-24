@@ -28,8 +28,6 @@
 
 #pragma once
 
-#include "base/settingvalue.h"
-
 #include <QDialog>
 
 namespace Ui
@@ -50,5 +48,4 @@ private:
     void copyVersionsToClipboard() const;
 
     Ui::AboutDialog* m_ui = nullptr;
-    SettingValue<QSize> m_storeDialogSize;
 };

@@ -30,12 +30,15 @@
 
 #include "base/bittorrent/infohash.h"
 #include "base/bittorrent/torrent.h"
+#include "base/global.h"
 #include "transferlistmodel.h"
 
 #include <QDateTime>
 #include <QtVersionChecks>
 
 #include <type_traits>
+
+
 
 namespace
 {

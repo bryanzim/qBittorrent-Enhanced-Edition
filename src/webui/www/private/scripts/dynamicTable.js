@@ -3544,8 +3544,6 @@ window.qBittorrent.DynamicTable ??= (() => {
 
             this.filteredLength = filteredRows.length;
 
-            this.filteredLength = filteredRows.length;
-
             return filteredRows;
         }
     }

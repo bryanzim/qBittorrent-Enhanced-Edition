@@ -61,7 +61,6 @@ private:
     bool storeIcons();
 
     Ui::UIThemeDialog* m_ui = nullptr;
-    SettingValue<QSize> m_storeDialogSize;
 
     DefaultThemeSource m_defaultThemeSource;
     QHash<QString, ColorWidget*> m_lightColorWidgets;

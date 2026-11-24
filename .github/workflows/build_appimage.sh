@@ -50,12 +50,16 @@ prepare_baseenv() {
   rm -f /etc/apt/sources.list.d/*.list*
   # Ubuntu mirror for local building
   if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
+    REPO_FILE=/etc/apt/sources.list
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+      REPO_FILE=/etc/apt/sources.list.d/ubuntu.sources
+    fi
     sed -i \
-      -e 's|http://archive.ubuntu.com/ubuntu/|http://repo.huaweicloud.com/ubuntu/|g' \
-      -e 's|http://security.ubuntu.com/ubuntu/|http://repo.huaweicloud.com/ubuntu/|g' \
-      -e 's|http://ports.ubuntu.com/ubuntu-ports/|http://repo.huaweicloud.com/ubuntu-ports/|g' \
-      /etc/apt/sources.list
-    export PIP_INDEX_URL="https://repo.huaweicloud.com/repository/pypi/simple"
+      -e 's|http://archive.ubuntu.com/ubuntu/|http://mirrors.nju.edu.cn/ubuntu/|g' \
+      -e 's|http://security.ubuntu.com/ubuntu/|http://mirrors.nju.edu.cn/ubuntu/|g' \
+      -e 's|http://ports.ubuntu.com/ubuntu-ports/|http://mirrors.nju.edu.cn/ubuntu-ports/|g' \
+      "${REPO_FILE}"
+    export PIP_INDEX_URL="https://mirrors.nju.edu.cn/pypi/web/simple"
   fi
 
   # keep debs in container for store cache in docker volume
@@ -110,6 +114,7 @@ prepare_baseenv() {
     libxrender-dev \
     libzstd-dev \
     pkg-config \
+    bzip2 \
     unzip \
     xz-utils \
     zlib1g-dev \
@@ -128,7 +133,7 @@ prepare_buildenv() {
     cmake_latest_ver="$(retry curl -ksSL --compressed https://cmake.org/download/ \| grep "'Latest Release'" \| sed -r "'s/.*Latest Release\s*\((.+)\).*/\1/'" \| head -1)"
     cmake_binary_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-linux-${ARCH}.tar.gz"
     if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-      cmake_binary_url="https://gh-proxy.com/${cmake_binary_url}"
+      cmake_binary_url="https://gh-proxy.org/${cmake_binary_url}"
     fi
     if [ ! -f "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-${ARCH}.tar.gz" ]; then
       retry curl -kLo "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-${ARCH}.tar.gz.part" "${cmake_binary_url}"
@@ -146,7 +151,7 @@ prepare_buildenv() {
     ninja_local_name="ninja-${ninja_ver}-linux${ninja_arch_suffix}"
     ninja_binary_url="https://github.com/ninja-build/ninja/releases/download/${ninja_ver}/ninja-linux${ninja_arch_suffix}.zip"
     if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-      ninja_binary_url="https://gh-proxy.com/${ninja_binary_url}"
+      ninja_binary_url="https://gh-proxy.org/${ninja_binary_url}"
     fi
     if [ ! -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux${ninja_arch_suffix}.zip" ]; then
       retry curl -kLC- -o "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux${ninja_arch_suffix}.zip.part" "${ninja_binary_url}"
@@ -158,12 +163,12 @@ prepare_buildenv() {
 }
 
 prepare_ssl() {
-  openssl_filename="$(retry curl -ksSL --compressed https://openssl-library.org/source/ \| grep -o "'>openssl-4\.0\(\.[0-9]*\)*tar.gz<'" \| grep -o "'[^>]*.tar.gz'" \| head -1)"
+  openssl_filename="$(retry curl -ksSL --compressed https://openssl-library.org/source/ \| grep -o "'>openssl-3\(\.[0-9]*\)*tar.gz<'" \| grep -o "'[^>]*.tar.gz'" \| head -1)"
   openssl_ver="$(echo "${openssl_filename}" | sed -r 's/openssl-(.+)\.tar\.gz/\1/')"
   echo "openssl version: ${openssl_ver}"
   openssl_latest_url="https://github.com/openssl/openssl/archive/refs/tags/${openssl_filename}"
   if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-    openssl_latest_url="https://gh-proxy.com/${openssl_latest_url}"
+    openssl_latest_url="https://gh-proxy.org/${openssl_latest_url}"
   fi
   if [ ! -f "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz" ]; then
     retry curl -kSL "${openssl_latest_url}" -o "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz.part"
@@ -172,17 +177,35 @@ prepare_ssl() {
   mkdir -p "/usr/src/openssl-${openssl_ver}/"
   tar zxf "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz" -C "/usr/src/openssl-${openssl_ver}/" --strip-components 1
   cd "/usr/src/openssl-${openssl_ver}"
-  ./Configure no-tests --openssldir=/etc/ssl
+  ./Configure no-apps no-tests --openssldir=/etc/ssl
   make -j$(nproc)
   make install_sw
   ldconfig
+}
+
+prepare_qt_submodule() {
+  # Usage: prepare_qt_submodule <submodule_name>
+  submodule="${1}"
+  if [ ! -f "${DOWNLOADS_DIR}/${submodule}-everywhere-src-${qt_ver}.tar.xz" ]; then
+    submodule_url="${QT_DOWNLOAD_URL_BASE}/official_releases/qt/${qt_major_ver}/${qt_ver}/submodules/${submodule}-everywhere-src-${qt_ver}.tar.xz"
+    retry curl -kSL --compressed "${submodule_url}" -o "${DOWNLOADS_DIR}/${submodule}-everywhere-src-${qt_ver}.tar.xz.part"
+    mv -fv "${DOWNLOADS_DIR}/${submodule}-everywhere-src-${qt_ver}.tar.xz.part" "${DOWNLOADS_DIR}/${submodule}-everywhere-src-${qt_ver}.tar.xz"
+  fi
+  mkdir -p "/usr/src/${submodule}-${qt_ver}"
+  tar Jxf "${DOWNLOADS_DIR}/${submodule}-everywhere-src-${qt_ver}.tar.xz" -C "/usr/src/${submodule}-${qt_ver}" --strip-components 1
+  cd "/usr/src/${submodule}-${qt_ver}"
+  rm -fr CMakeCache.txt
+  "${QT_BASE_DIR}/bin/qt-configure-module" .
+  cat config.summary
+  cmake --build . --parallel
+  cmake --install .
 }
 
 prepare_qt() {
   # install qt
   QT_DOWNLOAD_URL_BASE="https://download.qt.io"
   if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-      QT_DOWNLOAD_URL_BASE="https://mirrors.sjtug.sjtu.edu.cn/qt"
+    QT_DOWNLOAD_URL_BASE="https://mirrors.nju.edu.cn/qt"
   fi
   qt_major_ver="$(retry curl -ksSL --compressed "https://download.qt.io/official_releases/qt/" \| sed -nr "'s@.*href=\"([0-9]+(\.[0-9]+)*)/\".*@\1@p'" \| grep \"^${QT_VER_PREFIX}\" \| head -1)"
   qt_ver="$(retry curl -ksSL --compressed "https://download.qt.io/official_releases/qt/${qt_major_ver}/" \| sed -nr "'s@.*href=\"([0-9]+(\.[0-9]+)*)/\".*@\1@p'" \| grep \"^${QT_VER_PREFIX}\" \| head -1)"
@@ -218,46 +241,11 @@ prepare_qt() {
   export QT_BASE_DIR="$(ls -rd /usr/local/Qt-* | head -1)"
   export LD_LIBRARY_PATH="${QT_BASE_DIR}/lib:${LD_LIBRARY_PATH}"
   export PATH="${QT_BASE_DIR}/bin:${PATH}"
-  if [ ! -f "${DOWNLOADS_DIR}/qtsvg-everywhere-src-${qt_ver}.tar.xz" ]; then
-    qtsvg_url="${QT_DOWNLOAD_URL_BASE}/official_releases/qt/${qt_major_ver}/${qt_ver}/submodules/qtsvg-everywhere-src-${qt_ver}.tar.xz"
-    retry curl -kSL --compressed "${qtsvg_url}" -o "${DOWNLOADS_DIR}/qtsvg-everywhere-src-${qt_ver}.tar.xz.part"
-    mv -fv "${DOWNLOADS_DIR}/qtsvg-everywhere-src-${qt_ver}.tar.xz.part" "${DOWNLOADS_DIR}/qtsvg-everywhere-src-${qt_ver}.tar.xz"
-  fi
-  mkdir -p "/usr/src/qtsvg-${qt_ver}"
-  tar Jxf "${DOWNLOADS_DIR}/qtsvg-everywhere-src-${qt_ver}.tar.xz" -C "/usr/src/qtsvg-${qt_ver}" --strip-components 1
-  cd "/usr/src/qtsvg-${qt_ver}"
-  rm -fr CMakeCache.txt
-  "${QT_BASE_DIR}/bin/qt-configure-module" .
-  cmake --build . --parallel
-  cmake --install .
-  if [ ! -f "${DOWNLOADS_DIR}/qttools-everywhere-src-${qt_ver}.tar.xz" ]; then
-    qttools_url="${QT_DOWNLOAD_URL_BASE}/official_releases/qt/${qt_major_ver}/${qt_ver}/submodules/qttools-everywhere-src-${qt_ver}.tar.xz"
-    retry curl -kSL --compressed "${qttools_url}" -o "${DOWNLOADS_DIR}/qttools-everywhere-src-${qt_ver}.tar.xz.part"
-    mv -fv "${DOWNLOADS_DIR}/qttools-everywhere-src-${qt_ver}.tar.xz.part" "${DOWNLOADS_DIR}/qttools-everywhere-src-${qt_ver}.tar.xz"
-  fi
-  mkdir -p "/usr/src/qttools-${qt_ver}"
-  tar Jxf "${DOWNLOADS_DIR}/qttools-everywhere-src-${qt_ver}.tar.xz" -C "/usr/src/qttools-${qt_ver}" --strip-components 1
-  cd "/usr/src/qttools-${qt_ver}"
-  rm -fr CMakeCache.txt
-  "${QT_BASE_DIR}/bin/qt-configure-module" .
-  cat config.summary
-  cmake --build . --parallel
-  cmake --install .
 
-  # qt-wayland
-  if [ ! -f "${DOWNLOADS_DIR}/qtwayland-everywhere-src-${qt_ver}.tar.xz" ]; then
-    qtwayland_url="${QT_DOWNLOAD_URL_BASE}/official_releases/qt/${qt_major_ver}/${qt_ver}/submodules/qtwayland-everywhere-src-${qt_ver}.tar.xz"
-    retry curl -kSL --compressed "${qtwayland_url}" -o "${DOWNLOADS_DIR}/qtwayland-everywhere-src-${qt_ver}.tar.xz.part"
-    mv -fv "${DOWNLOADS_DIR}/qtwayland-everywhere-src-${qt_ver}.tar.xz.part" "${DOWNLOADS_DIR}/qtwayland-everywhere-src-${qt_ver}.tar.xz"
-  fi
-  mkdir -p "/usr/src/qtwayland-${qt_ver}"
-  tar Jxf "${DOWNLOADS_DIR}/qtwayland-everywhere-src-${qt_ver}.tar.xz" -C "/usr/src/qtwayland-${qt_ver}" --strip-components 1
-  cd "/usr/src/qtwayland-${qt_ver}"
-  rm -fr CMakeCache.txt
-  "${QT_BASE_DIR}/bin/qt-configure-module" .
-  cat config.summary
-  cmake --build . --parallel
-  cmake --install .
+  prepare_qt_submodule qtsvg
+  prepare_qt_submodule qttools
+  prepare_qt_submodule qttranslations
+  prepare_qt_submodule qtwayland
 }
 
 prepare_libboost() {
@@ -272,9 +260,6 @@ prepare_libboost() {
   fi
   mkdir -p "/usr/src/boost-${boost_ver}"
   tar -jxf "${DOWNLOADS_DIR}/boost-${boost_ver}.tar.bz2" --strip-components=1 -C "/usr/src/boost-${boost_ver}"
-  if grep -q 'domain->data' "/usr/src/boost-${boost_ver}/boost/asio/ssl/impl/rfc2818_verification.ipp"; then
-    patch -d "/usr/src/boost-${boost_ver}" -p1 < "${SELF_DIR}/patches/boost-1.86-openssl-4.patch"
-  fi
   cp -rf "/usr/src/boost-${boost_ver}/boost" /usr/local/include/
 }
 
@@ -283,7 +268,7 @@ prepare_libtorrent() {
   echo "libtorrent-rasterbar branch: ${LIBTORRENT_BRANCH}"
   libtorrent_git_url="https://github.com/arvidn/libtorrent.git"
   if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-    libtorrent_git_url="https://gh-proxy.com/${libtorrent_git_url}"
+    libtorrent_git_url="https://gh-proxy.org/${libtorrent_git_url}"
   fi
   if [ ! -d "/usr/src/libtorrent-rasterbar-${LIBTORRENT_BRANCH}/" ]; then
     retry git clone --depth 1 --recursive --shallow-submodules --branch "${LIBTORRENT_BRANCH}" \
@@ -299,10 +284,6 @@ prepare_libtorrent() {
       "${libtorrent_git_url}" \
       "/usr/src/libtorrent-rasterbar-${LIBTORRENT_BRANCH}/"
     cd "/usr/src/libtorrent-rasterbar-${LIBTORRENT_BRANCH}/"
-  fi
-  # libtorrent 1.2 reads ASN1_STRING fields that OpenSSL 4 made opaque.
-  if grep -q 'domain->data' src/torrent.cpp; then
-    patch -p1 < "${SELF_DIR}/patches/libtorrent-1.2-openssl-4.patch"
   fi
   rm -fr build/CMakeCache.txt
   cmake \
@@ -332,15 +313,25 @@ build_qbee() {
 
 build_appimage() {
   # build AppImage
-  linuxdeploy_qt_download_url="https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-${ARCH}.AppImage"
-  if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-    linuxdeploy_qt_download_url="https://gh-proxy.com/${linuxdeploy_qt_download_url}"
-  fi
-  [ -x "${DOWNLOADS_DIR}/linuxdeployqt-continuous-${ARCH}.AppImage" ] || retry curl -kSLC- -o "${DOWNLOADS_DIR}/linuxdeployqt-continuous-${ARCH}.AppImage.part" "${linuxdeploy_qt_download_url}"
-  if [ ! -x "${DOWNLOADS_DIR}/linuxdeployqt-continuous-${ARCH}.AppImage" ]; then
-    mv -fv "${DOWNLOADS_DIR}/linuxdeployqt-continuous-${ARCH}.AppImage.part" "${DOWNLOADS_DIR}/linuxdeployqt-continuous-${ARCH}.AppImage"
-  fi
-  chmod -v +x "${DOWNLOADS_DIR}/linuxdeployqt-continuous-${ARCH}.AppImage"
+  linuxdeploy_tool_urls=(
+    "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${ARCH}.AppImage"
+    "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${ARCH}.AppImage"
+    "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-${ARCH}.AppImage"
+    # fetched into memory by the appimagetool bundled in linuxdeploy-plugin-appimage on every run;
+    # passed to it via LDAI_RUNTIME_FILE below to skip the download
+    "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-${ARCH}"
+  )
+  for tool_url in "${linuxdeploy_tool_urls[@]}"; do
+    if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
+      tool_url="https://gh-proxy.org/${tool_url}"
+    fi
+    tool_file="${DOWNLOADS_DIR}/$(basename "${tool_url}")"
+    if [ ! -s "${tool_file}" ]; then
+      retry curl -kSLC- -o "${tool_file}.part" "${tool_url}"
+      mv -fv "${tool_file}.part" "${tool_file}"
+    fi
+    chmod -v +x "${tool_file}"
+  done
   cd "/tmp/qbee"
   ln -svf usr/share/icons/hicolor/scalable/apps/qbittorrent.svg /tmp/qbee/AppDir/
   ln -svf qbittorrent.svg /tmp/qbee/AppDir/.DirIcon
@@ -382,127 +373,45 @@ exec "\${this_dir}/usr/bin/qbittorrent" "\$@"
 EOF
   chmod 755 -v /tmp/qbee/AppDir/AppRun
 
-  extra_plugins=(
-    iconengines
-    imageformats
-    platforminputcontexts
-    platforms
-    platformthemes
-    sqldrivers
-    styles
-    tls
-    wayland-decoration-client
-    wayland-graphics-integration-client
-    wayland-shell-integration
-  )
   exclude_libs=(
-    libatk-1.0.so.0
-    libatk-bridge-2.0.so.0
-    libatspi.so.0
-    libblkid.so.1
-    libboost_filesystem.so.1.58.0
-    libboost_system.so.1.58.0
-    libboost_system.so.1.65.1
-    libbsd.so.0
-    libcairo-gobject.so.2
-    libcairo.so.2
-    libcap.so.2
-    libcapnp-0.5.3.so
-    libcapnp-0.6.1.so
-    libdatrie.so.1
-    libdbus-1.so.3
-    libepoxy.so.0
-    libffi.so.6
-    libgcrypt.so.20
-    libgdk-3.so.0
-    libgdk_pixbuf-2.0.so.0
-    libgdk-x11-2.0.so.0
-    libgio-2.0.so.0
-    libglib-2.0.so.0
-    libgmodule-2.0.so.0
-    libgobject-2.0.so.0
-    libgraphite2.so.3
-    libgtk-3.so.0
-    libgtk-x11-2.0.so.0
-    libkj-0.5.3.so
-    libkj-0.6.1.so
-    liblz4.so.1
-    liblzma.so.5
-    libmirclient.so.9
-    libmircommon.so.7
-    libmircore.so.1
-    libmirprotobuf.so.3
-    libmd.so.0
-    libmount.so.1
-    libpango-1.0.so.0
-    libpangocairo-1.0.so.0
-    libpangoft2-1.0.so.0
-    libpcre2-8.so.0
-    libpcre.so.3
-    libpixman-1.so.0
-    libprotobuf-lite.so.9
-    libselinux.so.1
-    libsystemd.so.0
-    libthai.so.0
-    libwayland-client.so.0
-    libwayland-cursor.so.0
-    libwayland-egl.so.1
-    libwayland-server.so.0
-    libX11-xcb.so.1
-    libXau.so.6
-    libxcb-cursor.so.0
-    libxcb-glx.so.0
-    libxcb-icccm.so.4
-    libxcb-image.so.0
-    libxcb-keysyms.so.1
-    libxcb-randr.so.0
-    libxcb-render.so.0
-    libxcb-render-util.so.0
-    libxcb-shape.so.0
-    libxcb-shm.so.0
-    libxcb-sync.so.1
-    libxcb-util.so.1
-    libxcb-xfixes.so.0
-    libxcb-xkb.so.1
-    libXcomposite.so.1
-    libXcursor.so.1
-    libXdamage.so.1
-    libXdmcp.so.6
-    libXext.so.6
-    libXfixes.so.3
-    libXinerama.so.1
-    libXi.so.6
-    libxkbcommon.so.0
-    libxkbcommon-x11.so.0
-    libXrandr.so.2
-    libXrender.so.1
+    # host desktop/system stacks: never bundle, resolve from the system at runtime.
+    # entries are basename globs (fnmatch) applied by linuxdeploy util::isInExcludelist,
+    # also honored for missing-dependency errors during ldd closure scanning.
+    # quoted: array is defined while cwd=/tmp/qbee, bare globs would pathname-expand
+    'libatk-*.so*' 'libatspi.so*'
+    'libgtk*.so*' 'libgdk*.so*'
+    'libpango*.so*' 'libcairo*.so*' 'libpixman-1.so.*' 'libgraphite2.so.*' 'libdatrie.so.*' 'libthai.so.*'
+    'libglib*.so*' 'libgio*.so*' 'libgobject*.so*' 'libgmodule*.so*'
+    'libX*.so*' 'libxcb*.so*' 'libxkbcommon*.so*'
+    'libwayland-*.so*'
+    'libdbus-1.so.*' 'libepoxy.so.*'
+    'libbsd.so.*' 'libmd.so.*' 'libffi.so.*' 'libcap.so.*'
+    'libblkid.so.*' 'libmount.so.*' 'libselinux.so.*'
+    'libsystemd.so.*' 'libgcrypt.so.*' 'liblz4.so.*' 'liblzma.so.*'
+    'libpcre.so.*' 'libpcre2-8.so.*'
+    # fossils from old build hosts (ubuntu 16.04 boost / mir / capnp), kept as safety net
+    'libboost_*.so*' 'libmir*.so*' 'libcapnp-*.so*' 'libkj-*.so*' 'libprotobuf-lite.so.*'
   )
 
   # fix AppImage output file name, maybe not needed anymore since appimagetool lets you set output file name?
   sed -i 's/Name=qBittorrent.*/Name=qBittorrent-Enhanced-Edition/;/SingleMainWindow/d' /tmp/qbee/AppDir/usr/share/applications/*.desktop
 
   export APPIMAGE_EXTRACT_AND_RUN=1
-  "${DOWNLOADS_DIR}/linuxdeployqt-continuous-${ARCH}.AppImage" \
-    /tmp/qbee/AppDir/usr/share/applications/*.desktop \
-    -always-overwrite \
-    -bundle-non-qt-libs \
-    -no-copy-copyright-files \
-    -extra-plugins="$(join_by ',' "${extra_plugins[@]}")" \
-    -exclude-libs="$(join_by ',' "${exclude_libs[@]}")"
 
-  # Workaround to use the static runtime with the appimage
-  appimagetool_download_url="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${ARCH}.AppImage"
-  if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-    appimagetool_download_url="https://gh-proxy.com/${appimagetool_download_url}"
-  fi
-  if [ ! -x "${DOWNLOADS_DIR}/appimagetool-${ARCH}.AppImage" ]; then
-    retry curl -kSLC- -o "${DOWNLOADS_DIR}/appimagetool-${ARCH}.AppImage.part" "${appimagetool_download_url}"
-    mv -fv "${DOWNLOADS_DIR}/appimagetool-${ARCH}.AppImage.part" "${DOWNLOADS_DIR}/appimagetool-${ARCH}.AppImage"
-  fi
-  chmod -v +x "${DOWNLOADS_DIR}/appimagetool-${ARCH}.AppImage"
-  "${DOWNLOADS_DIR}/appimagetool-${ARCH}.AppImage" --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
-    -u "zsync|https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/qBittorrent-Enhanced-Edition-${ARCH}.AppImage.zsync" \
-    /tmp/qbee/AppDir /tmp/qbee/qBittorrent-Enhanced-Edition-"${ARCH}".AppImage
+  # package as AppImage, embed update information and generate the .zsync file
+  LDAI_UPDATE_INFORMATION="zsync|https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/qBittorrent-Enhanced-Edition-${ARCH}.AppImage.zsync" \
+    LDAI_RUNTIME_FILE="${DOWNLOADS_DIR}/runtime-${ARCH}" \
+    LDAI_OUTPUT="/tmp/qbee/qBittorrent-Enhanced-Edition-${ARCH}.AppImage" \
+    LDAI_NO_APPSTREAM=1 \
+    LINUXDEPLOY_EXCLUDED_LIBRARIES="$(join_by ';' "${exclude_libs[@]}")" \
+    EXTRA_QT_MODULES="svg;waylandcompositor" \
+    DEPLOY_PLATFORM_THEMES=1 \
+    EXTRA_PLATFORM_PLUGINS="libqwayland.so" \
+    DISABLE_COPYRIGHT_FILES_DEPLOYMENT=1 \
+    "${DOWNLOADS_DIR}/linuxdeploy-${ARCH}.AppImage" \
+    --appdir=/tmp/qbee/AppDir \
+    --plugin qt \
+    --output appimage
 }
 
 move_artifacts() {

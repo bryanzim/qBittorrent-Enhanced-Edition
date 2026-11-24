@@ -37,7 +37,7 @@
 
 void BitTorrent::TorrentContentHandler::renameFile(const Path& oldPath, const Path& newPath)
 {
-    if (!oldPath.isValid())
+    if (oldPath.isEmpty())
     {
         throw RuntimeError(tr("The old path is invalid: '%1'.").arg(oldPath.toString()));
     }
@@ -75,7 +75,7 @@ void BitTorrent::TorrentContentHandler::renameFile(const Path& oldPath, const Pa
 
 void BitTorrent::TorrentContentHandler::renameFolder(const Path& oldFolderPath, const Path& newFolderPath)
 {
-    if (!oldFolderPath.isValid())
+    if (oldFolderPath.isEmpty())
     {
         throw RuntimeError(tr("The old path is invalid: '%1'.").arg(oldFolderPath.toString()));
     }

@@ -28,10 +28,10 @@
 
 #pragma once
 
-#include "base/settingvalue.h"
 #include "base/tagset.h"
 
 #include <QDialog>
+
 
 namespace Ui
 {
@@ -53,5 +53,4 @@ private:
     void addNewTag();
 
     Ui::TorrentTagsDialog* m_ui = nullptr;
-    SettingValue<QSize> m_storeDialogSize;
 };

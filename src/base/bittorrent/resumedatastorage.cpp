@@ -47,6 +47,10 @@ Path BitTorrent::ResumeDataStorage::path() const
     return m_path;
 }
 
+void BitTorrent::ResumeDataStorage::prepareForShutdown()
+{
+}
+
 void BitTorrent::ResumeDataStorage::loadAll() const
 {
     m_loadedResumeData.reserve(1024);
