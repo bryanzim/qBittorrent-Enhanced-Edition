@@ -43,6 +43,7 @@
 #include <QStringView>
 #include <QSysInfo>
 #include <QtAssert>
+#include <QtVersion>
 #include <boost/version.hpp>
 #include <libtorrent/version.hpp>
 #include <openssl/crypto.h>
@@ -529,6 +530,13 @@ QString Utils::Misc::opensslVersionString()
     // static initialization for usage in signal handler
     static const auto version{ QString::fromLatin1(::OpenSSL_version(OPENSSL_VERSION))
                                    .section(u' ', 1, 1) };
+    return version;
+}
+
+QString Utils::Misc::qtVersionString()
+{
+    // static initialization for usage in signal handler
+    static const auto version {QString::fromLatin1(qVersion())};
     return version;
 }
 

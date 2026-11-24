@@ -1,6 +1,6 @@
 /*
  * Bittorrent Client using Qt and libtorrent.
- * Copyright (C) 2015-2022  Vladimir Golovnev <glassez@yandex.ru>
+ * Copyright (C) 2015-2026  Vladimir Golovnev <glassez@yandex.ru>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,12 +28,12 @@
 
 #pragma once
 
-#include "base/pathfwd.h"
-#include "base/utils/thread.h"
-#include "resumedatastorage.h"
-
 #include <QDir>
 #include <QList>
+
+#include "base/pathfwd.h"
+
+#include "resumedatastorage.h"
 
 class QByteArray;
 
@@ -45,23 +45,23 @@ namespace BitTorrent
         Q_DISABLE_COPY_MOVE(BencodeResumeDataStorage)
 
     public:
-        explicit BencodeResumeDataStorage(const Path& path, QObject* parent = nullptr);
+        explicit BencodeResumeDataStorage(const Path &path, QObject *parent = nullptr);
+        ~BencodeResumeDataStorage() override;
 
         QList<TorrentID> registeredTorrents() const override;
-        LoadResumeDataResult load(const TorrentID& id) const override;
-        void store(const TorrentID& id, LoadTorrentParams resumeData) const override;
-        void remove(const TorrentID& id) const override;
-        void storeQueue(const QList<TorrentID>& queue) const override;
+        LoadResumeDataResult load(const TorrentID &id) const override;
+        void store(const TorrentID &id, LoadTorrentParams resumeData) const override;
+        void remove(const TorrentID &id) const override;
+        void storeQueue(const QList<TorrentID> &queue) const override;
 
     private:
         void doLoadAll() const override;
-        void loadQueue(const Path& queueFilename);
-        LoadResumeDataResult loadTorrentResumeData(const QByteArray& data, const QByteArray& metadata) const;
+        void loadQueue(const Path &queueFilename);
+        LoadResumeDataResult loadTorrentResumeData(const QByteArray &data, const QByteArray &metadata) const;
 
         QList<TorrentID> m_registeredTorrents;
-        Utils::Thread::UniquePtr m_ioThread;
 
         class Worker;
-        Worker* m_asyncWorker = nullptr;
+        Worker *m_asyncWorker = nullptr;
     };
 }

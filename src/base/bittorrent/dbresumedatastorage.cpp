@@ -861,8 +861,9 @@ void BitTorrent::DBResumeDataStorage::Worker::run()
                 }
 
                 m_waitCondition.wait(&m_jobsMutex);
-                if (isInterruptionRequested())
+                if (m_jobs.empty())
                 {
+                    Q_ASSERT(isInterruptionRequested());
                     break;
                 }
 
@@ -891,6 +892,7 @@ void BitTorrent::DBResumeDataStorage::Worker::run()
 
 void DBResumeDataStorage::Worker::requestInterruption()
 {
+    const QMutexLocker jobsLocker {&m_jobsMutex};
     QThread::requestInterruption();
     m_waitCondition.wakeAll();
 }
@@ -912,10 +914,8 @@ void BitTorrent::DBResumeDataStorage::Worker::storeQueue(const QList<TorrentID>&
 
 void BitTorrent::DBResumeDataStorage::Worker::addJob(std::unique_ptr<Job> job)
 {
-    m_jobsMutex.lock();
+    const QMutexLocker jobsLocker {&m_jobsMutex};
     m_jobs.push(std::move(job));
-    m_jobsMutex.unlock();
-
     m_waitCondition.wakeAll();
 }
 
@@ -924,7 +924,8 @@ namespace
     using namespace BitTorrent;
 
     StoreJob::StoreJob(const TorrentID& torrentID, LoadTorrentParams resumeData)
-        : m_torrentID{ torrentID }, m_resumeData{ std::move(resumeData) }
+        : m_torrentID { torrentID }
+        , m_resumeData { std::move(resumeData) }
     {
     }
 
